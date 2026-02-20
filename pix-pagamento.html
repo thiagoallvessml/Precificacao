@@ -170,13 +170,12 @@
 
                 <!-- Pix Copia e Cola -->
                 <div class="w-full space-y-2">
-                    <label class="text-[10px] text-white/40 ml-1 font-bold uppercase tracking-widest">Link de
-                        Pagamento</label>
+                    <label class="text-[10px] text-white/40 ml-1 font-bold uppercase tracking-widest">Código Pix
+                        Copia e Cola</label>
                     <div class="flex gap-2">
                         <div id="pixCode"
                             class="flex-grow bg-background-dark/60 border border-white/10 rounded-lg px-4 py-3 text-xs text-white/70 truncate font-mono">
-                            00020101021226830014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540539.905802BR5925GELADINHOS
-                            GOURMET LTDA6009SAO PAULO62070503***6304A1B2
+                            Gerando código Pix...
                         </div>
                         <button id="copyPixBtn" onclick="copiarCodigoPix()"
                             class="bg-primary text-background-dark px-4 py-3 rounded-lg font-bold flex items-center justify-center hover:brightness-110 active:scale-95 transition-all">
@@ -261,7 +260,7 @@
         const valorDesconto = parseFloat(params.get('valor_desconto') || '0');
 
         // Estado
-        let chargeId = null;
+        let pixChargeId = null;
         let pollingInterval = null;
         let timerInterval = null;
         let timeLeft = 15 * 60; // 15 min
@@ -275,7 +274,7 @@
         }
 
         // ========================
-        // CRIAR COBRANÇA NA ABACATEPAY
+        // CRIAR QR CODE PIX NA ABACATEPAY
         // ========================
 
         async function criarCobrancaPix() {
@@ -289,15 +288,14 @@
             const amountCentavos = Math.round(total * 100); // AbacatePay usa centavos
 
             try {
-                // ---- PASSO 1: Criar customer na AbacatePay ----
+                // ---- Obter dados do cliente logado ----
                 let customerData = {
-                    name: 'Cliente',
-                    email: 'cliente@app.com',
+                    name: 'Cliente PrecificaX',
+                    email: 'cliente@precificax.com',
                     cellphone: '11999999999',
                     taxId: '52998224725',
                 };
 
-                // Tentar pegar dados reais do usuário logado
                 if (supabase) {
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
@@ -313,55 +311,23 @@
                     } catch (e) { /* usa dados padrão */ }
                 }
 
-                console.log('🔍 Criando customer:', JSON.stringify(customerData));
-
-                const customerRes = await fetch(`${ABACATEPAY_API_URL}/customer/create`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
-                    },
-                    body: JSON.stringify(customerData),
-                });
-
-                const customerResult = await customerRes.json();
-                console.log('🔍 Customer response:', JSON.stringify(customerResult));
-
-                // Extrair o ID do customer
-                const customerId = customerResult.data?.id || customerResult.data?._id || customerResult.id;
-
-                if (!customerId) {
-                    console.error('❌ Falha ao criar customer:', customerResult.error || customerResult);
-                    usarFallback();
-                    return;
-                }
-
-                console.log('✅ Customer criado:', customerId);
-
-                // ---- PASSO 2: Criar billing ----
-                const billingPayload = {
-                    frequency: 'ONE_TIME',
-                    methods: ['PIX'],
-                    returnUrl: `${window.location.origin}/checkout.html`,
-                    completionUrl: `${window.location.origin}/index.html`,
+                // ---- Criar QR Code Pix diretamente (endpoint /v1/pixQrCode/create) ----
+                const pixPayload = {
+                    amount: amountCentavos,
+                    expiresIn: 900, // 15 minutos em segundos
+                    description: cupom ? `Premium - ${cupom}` : 'Plano Premium',
                     customer: customerData,
-                    products: [{
-                        externalId: `plano-premium-${Date.now()}`,
-                        name: cupom ? `Plano Premium - ${cupom}` : 'Plano Premium',
-                        quantity: 1,
-                        price: amountCentavos,
-                    }],
                 };
 
-                console.log('🔍 Billing payload:', JSON.stringify(billingPayload));
+                console.log('🔍 Pix QR Code payload:', JSON.stringify(pixPayload));
 
-                const response = await fetch(`${ABACATEPAY_API_URL}/billing/create`, {
+                const response = await fetch(`${ABACATEPAY_API_URL}/pixQrCode/create`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
                     },
-                    body: JSON.stringify(billingPayload),
+                    body: JSON.stringify(pixPayload),
                 });
 
                 const result = await response.json();
@@ -372,22 +338,50 @@
                     return;
                 }
 
-                console.log('✅ Billing response:', JSON.stringify(result));
+                console.log('✅ Pix QR Code response:', JSON.stringify(result));
 
-                const billing = result.data;
-                chargeId = billing.id || billing._id;
+                const pixData = result.data;
+                pixChargeId = pixData.id;
 
-                // Mostrar QR Code real
+                // ---- Mostrar QR Code real (base64 da AbacatePay) ----
                 const qrImage = document.getElementById('qrImage');
                 const qrLoading = document.getElementById('qrLoading');
 
-                // AbacatePay retorna uma URL de pagamento, gerar QR Code real dela
-                const paymentUrl = billing.url;
-                console.log('🔍 Payment URL:', paymentUrl);
+                const brCodeBase64 = pixData.brCodeBase64;
+                const brCode = pixData.brCode;
 
-                if (paymentUrl) {
-                    // Gerar QR Code real usando API pública
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(paymentUrl)}`;
+                console.log('🔍 brCode:', brCode);
+                console.log('🔍 brCodeBase64 presente:', !!brCodeBase64);
+
+                if (brCodeBase64) {
+                    // Usar a imagem base64 retornada pela AbacatePay
+                    qrImage.src = brCodeBase64;
+                    qrImage.onload = () => {
+                        qrLoading.classList.add('hidden');
+                        qrImage.classList.remove('hidden');
+                    };
+                    qrImage.onerror = () => {
+                        console.warn('⚠️ Erro ao carregar QR base64, tentando gerar via API externa...');
+                        // Fallback: gerar QR via API pública com o brCode
+                        if (brCode) {
+                            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(brCode)}`;
+                            qrImage.src = qrApiUrl;
+                            qrImage.onload = () => {
+                                qrLoading.classList.add('hidden');
+                                qrImage.classList.remove('hidden');
+                            };
+                            qrImage.onerror = () => {
+                                qrLoading.classList.add('hidden');
+                                gerarQRCodeCanvas();
+                            };
+                        } else {
+                            qrLoading.classList.add('hidden');
+                            gerarQRCodeCanvas();
+                        }
+                    };
+                } else if (brCode) {
+                    // Se não tem base64, gerar QR via API pública com o brCode
+                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(brCode)}`;
                     qrImage.src = qrApiUrl;
                     qrImage.onload = () => {
                         qrLoading.classList.add('hidden');
@@ -397,17 +391,22 @@
                         qrLoading.classList.add('hidden');
                         gerarQRCodeCanvas();
                     };
-
-                    // Mostrar a URL de pagamento como código para copiar
-                    document.getElementById('pixCode').textContent = paymentUrl;
                 } else {
                     qrLoading.classList.add('hidden');
                     gerarQRCodeCanvas();
                 }
 
-                // Usar a expiração da AbacatePay
-                if (billing.expiresIn) {
-                    timeLeft = billing.expiresIn;
+                // Mostrar o código Pix copia-e-cola (brCode real)
+                if (brCode) {
+                    document.getElementById('pixCode').textContent = brCode;
+                }
+
+                // Calcular tempo restante a partir da expiração
+                if (pixData.expiresAt) {
+                    const expiresAt = new Date(pixData.expiresAt).getTime();
+                    const now = Date.now();
+                    const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
+                    timeLeft = remaining > 0 ? remaining : 900;
                 }
 
                 // Iniciar timer
@@ -416,10 +415,10 @@
                 // Iniciar polling automático de status
                 iniciarPolling();
 
-                console.log('✅ Cobrança Pix criada via AbacatePay:', chargeId);
+                console.log('✅ QR Code Pix criado via AbacatePay:', pixChargeId);
 
             } catch (err) {
-                console.error('❌ Erro ao criar cobrança:', err);
+                console.error('❌ Erro ao criar QR Code Pix:', err);
                 usarFallback();
             }
         }
@@ -429,12 +428,12 @@
         // ========================
 
         function usarFallback() {
-            console.warn('⚠️ Usando modo simulado (Edge Functions não disponíveis)');
+            console.warn('⚠️ Usando modo simulado (AbacatePay não disponível)');
 
             // Mostrar código Pix simulado
             const valorPix = total.toFixed(2);
             document.getElementById('pixCode').textContent =
-                `00020101021226830014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef12345678905204000053039865404${valorPix}5802BR5925GELADINHOS GOURMET LTDA6009SAO PAULO62070503***6304A1B2`;
+                `00020101021226830014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef12345678905204000053039865404${valorPix}5802BR5925PRECIFICAX LTDA6009SAO PAULO62070503***6304A1B2`;
 
             // Mostrar QR Code canvas
             document.getElementById('qrLoading').classList.add('hidden');
@@ -445,16 +444,16 @@
         }
 
         // ========================
-        // POLLING DE STATUS
+        // POLLING DE STATUS (usa /v1/pixQrCode/check)
         // ========================
 
         function iniciarPolling() {
-            if (!chargeId) return;
+            if (!pixChargeId) return;
 
             // Verificar a cada 5 segundos
             pollingInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(`${ABACATEPAY_API_URL}/billing/get?id=${chargeId}`, {
+                    const response = await fetch(`${ABACATEPAY_API_URL}/pixQrCode/check?id=${pixChargeId}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
@@ -462,9 +461,11 @@
                     });
 
                     const result = await response.json();
-                    const status = result.data?.status || result.data?.billing?.status;
+                    console.log('🔄 Polling status:', JSON.stringify(result));
 
-                    if (status === 'PAID' || status === 'paid') {
+                    const status = result.data?.status;
+
+                    if (status === 'PAID' || status === 'paid' || status === 'RECEIVED') {
                         // PAGAMENTO CONFIRMADO!
                         clearInterval(pollingInterval);
                         await pagamentoConfirmado();
@@ -707,10 +708,10 @@
                 </div>
             `;
 
-            // Se tem chargeId, verificar status real na AbacatePay
-            if (chargeId) {
+            // Se tem pixChargeId, verificar status real na AbacatePay
+            if (pixChargeId) {
                 try {
-                    const response = await fetch(`${ABACATEPAY_API_URL}/billing/get?id=${chargeId}`, {
+                    const response = await fetch(`${ABACATEPAY_API_URL}/pixQrCode/check?id=${pixChargeId}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
@@ -718,9 +719,9 @@
                     });
 
                     const result = await response.json();
-                    const billingStatus = result.data?.status || result.data?.billing?.status;
+                    const pixStatus = result.data?.status;
 
-                    if (billingStatus === 'PAID' || billingStatus === 'paid') {
+                    if (pixStatus === 'PAID' || pixStatus === 'paid' || pixStatus === 'RECEIVED') {
                         await pagamentoConfirmado();
                         return;
                     } else {

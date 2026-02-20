@@ -11,8 +11,11 @@ let supabase = null;
 export function initSupabase() {
     if (!supabase) {
         // Verifica se as credenciais foram configuradas
-        if (SUPABASE_URL === 'SUA_URL_AQUI' || SUPABASE_ANON_KEY === 'SUA_CHAVE_ANON_AQUI') {
-            console.error('⚠️ Por favor, configure suas credenciais do Supabase no arquivo supabase-config.js');
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL === 'SUA_URL_AQUI' || SUPABASE_ANON_KEY === 'SUA_CHAVE_ANON_AQUI') {
+            console.error('⚠️ Credenciais do Supabase não configuradas!');
+            console.error('   Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY');
+            console.error('   - Local: crie um arquivo .env.local na raiz do projeto');
+            console.error('   - Vercel: Settings > Environment Variables');
             return null;
         }
 

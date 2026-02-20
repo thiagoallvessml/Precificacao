@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Precificação por Marketplace</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "accent-cyan": "#13ecec",
+                        "accent-orange": "#f59e0b",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Work Sans", sans-serif;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .custom-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white min-h-screen pb-24">
+    <!-- Top Navigation Bar -->
+    <div class="sticky top-0 z-50 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center p-4 pb-2 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='index.html'"
+                class="text-white flex size-12 shrink-0 items-center justify-start hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined cursor-pointer">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold flex-1 text-center">Precificação por Marketplace</h2>
+            <div class="flex w-12"></div>
+        </div>
+        <!-- Channel Selector -->
+        <div id="marketplacesList" class="flex gap-3 p-4 overflow-x-auto custom-scrollbar max-w-7xl mx-auto">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- Active Fee Summary -->
+        <div id="taxaSummary" class="p-4">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+
+        <!-- Section Header -->
+        <div class="flex items-center justify-between px-4 pt-4 pb-2">
+            <h3 class="text-white text-xl font-bold">Produtos</h3>
+            <span id="totalProdutos" class="text-primary text-sm font-medium">0 itens</span>
+        </div>
+
+        <!-- Product List -->
+        <div id="produtosList" class="flex flex-col gap-4 p-4">
+            <!-- Cards serão inseridos aqui -->
+        </div>
+
+        <!-- Botão Salvar -->
+        <div class="p-4 pb-8">
+            <button onclick="salvarPrecos()"
+                class="w-full mx-auto flex items-center justify-center gap-2 bg-primary text-background-dark font-bold text-base h-14 rounded-2xl shadow-[0_8px_30px_rgb(11,239,239,0.3)] active:scale-95 transition-transform hover:bg-primary/90">
+                <span class="material-symbols-outlined">save</span>
+                Salvar Alterações
+            </button>
+        </div>
+    </main>
+
+    <script type="module">
+        import { getAllRecords, insertRecord, updateRecord } from './supabase-utils.js';
+
+        let produtos = [];
+        let marketplaces = []; // Categorias do tipo marketplace
+        let precosMarketplace = [];
+        let marketplaceSelecionado = null;
+        let precosPorProduto = {}; // { produto_id: preco_digitado }
+
+        // Carregar dados
+        async function loadDados() {
+            try {
+                // Carregar produtos
+                const { data: prodData, error: prodError } = await getAllRecords('produtos');
+                if (prodError) throw prodError;
+                produtos = (prodData || []).filter(p => p.disponivel);
+
+                // Carregar categorias de marketplace
+                const { data: catData, error: catError } = await getAllRecords('categorias');
+                if (catError) throw catError;
+
+                // Filtrar apenas categorias ativas do tipo marketplace
+                marketplaces = (catData || []).filter(cat => cat.tipo === 'marketplace' && cat.ativo);
+
+                console.log('✅ Marketplaces carregados:', marketplaces);
+
+                // Carregar preços existentes
+                const { data: precoData, error: precoError } = await getAllRecords('precos_marketplace');
+                if (precoError) throw precoError;
+                precosMarketplace = precoData || [];
+
+                // Selecionar primeiro marketplace por padrão
+                if (marketplaces.length > 0 && !marketplaceSelecionado) {
+                    marketplaceSelecionado = marketplaces[0].id;
+                }
+
+                renderMarketplaces();
+                renderTaxaSummary();
+                renderProdutos();
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados: ' + error.message);
+            }
+        }
+
+        // Renderizar marketplaces
+        function renderMarketplaces() {
+            const container = document.getElementById('marketplacesList');
+
+            if (marketplaces.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-sm">Nenhum marketplace cadastrado</p>`;
+                return;
+            }
+
+            container.innerHTML = marketplaces.map(mkt => {
+                const isActive = mkt.id === marketplaceSelecionado;
+                const icone = mkt.icone || 'storefront';
+
+                return `
+                    <div onclick="selecionarMarketplace(${mkt.id})"
+                        class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 border cursor-pointer transition-all ${isActive
+                        ? 'bg-primary border-primary text-background-dark font-bold'
+                        : 'bg-card-dark border-white/10 text-white font-medium opacity-70 hover:opacity-100'
+                    }">
+                        <span class="material-symbols-outlined text-[20px]">${icone}</span>
+                        <p class="text-sm">${mkt.nome}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Selecionar marketplace
+        window.selecionarMarketplace = function (id) {
+            marketplaceSelecionado = id;
+            renderMarketplaces();
+            renderTaxaSummary();
+            renderProdutos();
+        };
+
+        // Renderizar taxa do marketplace selecionado
+        function renderTaxaSummary() {
+            const container = document.getElementById('taxaSummary');
+            const mkt = marketplaces.find(m => m.id === marketplaceSelecionado);
+
+            if (!mkt) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const taxa = parseFloat(mkt.taxa_operacional || 0);
+
+            container.innerHTML = `
+                <div class="flex flex-row items-center justify-between gap-4 rounded-xl border border-accent-orange/30 bg-accent-orange/10 p-4">
+                    <div class="flex flex-col gap-0.5">
+                        <p class="text-accent-orange text-xs font-bold uppercase tracking-wider">Canal Selecionado</p>
+                        <p class="text-white text-lg font-bold">Taxa ${mkt.nome}: ${taxa.toFixed(2)}%</p>
+                    </div>
+                    <span class="material-symbols-outlined text-accent-orange text-3xl">store</span>
+                </div>
+            `;
+        }
+
+        // Calcular preço sugerido
+        function calcularPrecoSugerido(precoBase, taxa) {
+            // Preço sugerido = precoBase / (1 - taxa/100)
+            // Exemplo: R$5,00 com 27% taxa = 5 / 0.73 = R$6,85
+            const taxaDecimal = taxa / 100;
+            return precoBase / (1 - taxaDecimal);
+        }
+
+        // Renderizar produtos
+        function renderProdutos() {
+            const container = document.getElementById('produtosList');
+            const mkt = marketplaces.find(m => m.id === marketplaceSelecionado);
+
+            if (!mkt) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-12">Selecione um marketplace</p>`;
+                return;
+            }
+
+            if (produtos.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-12">Nenhum produto disponível</p>`;
+                return;
+            }
+
+            const taxa = parseFloat(mkt.taxa_operacional || 0);
+
+            document.getElementById('totalProdutos').textContent = `${produtos.length} itens`;
+
+            container.innerHTML = produtos.map(prod => {
+                const precoBase = parseFloat(prod.preco_base || 0);
+                const precoSugerido = calcularPrecoSugerido(precoBase, taxa);
+
+                // Buscar preço salvo para este produto/marketplace
+                const precoSalvo = precosMarketplace.find(p => p.produto_id === prod.id && p.categoria_marketplace_id === marketplaceSelecionado);
+                const precoAtual = precosPorProduto[prod.id] || (precoSalvo ? parseFloat(precoSalvo.preco) : precoSugerido);
+
+                // Calcular lucro e margem
+                const custoComTaxa = precoAtual * (taxa / 100);
+                const lucro = precoAtual - precoBase - custoComTaxa;
+                const margem = precoBase > 0 ? (lucro / precoAtual) * 100 : 0;
+
+                return `
+                    <div class="flex flex-col gap-4 rounded-2xl bg-card-dark p-4 border border-white/5 shadow-xl">
+                        <div class="flex gap-4">
+                            ${prod.imagem_url
+                        ? `<div class="size-24 bg-center bg-no-repeat bg-cover rounded-xl shrink-0" style="background-image: url('${prod.imagem_url}');"></div>`
+                        : `<div class="size-24 bg-white/5 rounded-xl shrink-0 flex items-center justify-center">
+                                     <span class="material-symbols-outlined text-4xl text-slate-600">icecream</span>
+                                   </div>`
+                    }
+                            <div class="flex flex-col justify-between flex-1">
+                                <div class="flex flex-col gap-0.5">
+                                    <h4 class="text-white text-lg font-bold">${prod.nome}</h4>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-white/50 text-xs font-medium uppercase">Preço Base</span>
+                                        <span class="text-white/80 text-sm font-bold">R$ ${precoBase.toFixed(2)}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-accent-cyan/50 text-xs font-medium uppercase">Sugestão Canal</span>
+                                        <span class="text-accent-cyan text-sm font-bold">R$ ${precoSugerido.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-px bg-white/10 w-full"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-white/50 text-[10px] font-bold uppercase ml-1">Preço de Venda</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 font-bold text-sm">R$</span>
+                                    <input onchange="atualizarPreco(${prod.id}, this.value)"
+                                        value="${precoAtual.toFixed(2)}"
+                                        class="w-full bg-background-dark border border-white/10 rounded-lg py-2 pl-9 pr-3 text-white font-bold text-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                        type="number" step="0.01" />
+                                </div>
+                            </div>
+                            <div class="flex flex-col justify-end gap-1">
+                                <div class="flex items-center justify-between px-1">
+                                    <span class="text-white/50 text-[10px] font-bold uppercase">Lucro</span>
+                                    <span class="text-accent-cyan text-sm font-bold">R$ ${lucro.toFixed(2)}</span>
+                                </div>
+                                <div class="flex items-center justify-between px-1">
+                                    <span class="text-white/50 text-[10px] font-bold uppercase">Margem</span>
+                                    <span class="bg-accent-cyan/20 text-accent-cyan px-2 py-0.5 rounded text-[11px] font-bold">${margem.toFixed(1)}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Atualizar preço no objeto temporário
+        window.atualizarPreco = function (produtoId, valor) {
+            precosPorProduto[produtoId] = parseFloat(valor) || 0;
+            renderProdutos();
+        };
+
+        // Salvar preços
+        window.salvarPrecos = async function () {
+            if (!marketplaceSelecionado) {
+                alert('❌ Selecione um marketplace');
+                return;
+            }
+
+            if (Object.keys(precosPorProduto).length === 0) {
+                alert('⚠️ Nenhuma alteração para salvar');
+                return;
+            }
+
+            try {
+                for (const produtoId of Object.keys(precosPorProduto)) {
+                    const preco = precosPorProduto[produtoId];
+
+                    // Verificar se já existe
+                    const precoExistente = precosMarketplace.find(p => p.produto_id == produtoId && p.categoria_marketplace_id == marketplaceSelecionado);
+
+                    if (precoExistente) {
+                        // Atualizar
+                        const { error } = await updateRecord('precos_marketplace', precoExistente.id, { preco });
+                        if (error) throw error;
+                    } else {
+                        // Inserir
+                        const { error } = await insertRecord('precos_marketplace', {
+                            produto_id: parseInt(produtoId),
+                            categoria_marketplace_id: marketplaceSelecionado,
+                            preco,
+                            ativo: true
+                        });
+                        if (error) throw error;
+                    }
+                }
+
+                alert('✅ Preços salvos com sucesso!');
+                precosPorProduto = {};
+                await loadDados(); // Recarregar
+            } catch (error) {
+                console.error('❌ Erro ao salvar:', error);
+                alert('❌ Erro: ' + error.message);
+            }
+        };
+
+        // Iniciar
+        loadDados();
+    </script>
+</body>
+
+</html>

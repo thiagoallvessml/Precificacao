@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestão de Categorias</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "input-dark": "#1c1c27",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .icon-btn {
+            min-height: 44px;
+            position: relative;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white min-h-screen">
+
+    <!-- Header -->
+    <header class="glass-header sticky top-0 z-50 px-4 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="window.history.back()" class="text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold">Categorias</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="sticky top-16 z-40 bg-background-dark border-b border-white/5">
+        <div class="max-w-7xl mx-auto overflow-x-auto scrollbar-hide">
+            <div class="flex gap-1 px-4">
+                <button onclick="switchTab('produtos')" data-tab="produtos"
+                    class="tab-btn border-b-2 border-primary text-primary px-4 py-3 whitespace-nowrap">
+                    <p class="font-bold text-sm">Produtos</p>
+                </button>
+                <button onclick="switchTab('marketplace')" data-tab="marketplace"
+                    class="tab-btn border-b-2 border-transparent text-slate-400 px-4 py-3 whitespace-nowrap hover:text-white transition-colors">
+                    <p class="font-semibold text-sm">Marketplace</p>
+                </button>
+                <button onclick="switchTab('insumos')" data-tab="insumos"
+                    class="tab-btn border-b-2 border-transparent text-slate-400 px-4 py-3 whitespace-nowrap hover:text-white transition-colors">
+                    <p class="font-semibold text-sm">Insumos</p>
+                </button>
+                <button onclick="switchTab('despesas')" data-tab="despesas"
+                    class="tab-btn border-b-2 border-transparent text-slate-400 px-4 py-3 whitespace-nowrap hover:text-white transition-colors">
+                    <p class="font-semibold text-sm">Despesas</p>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 pb-32">
+        <!-- Banner de limites do plano -->
+        <div id="planLimitBannerCat" class="mb-4"></div>
+
+        <!-- List Container -->
+        <div id="categoriasList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <!-- Cards serão inseridos aqui dinamicamente -->
+        </div>
+
+        <!-- Form para Adicionar -->
+        <div class="bg-card-dark p-6 rounded-2xl border border-white/5">
+            <h3 class="text-lg font-bold mb-4">Adicionar Nova Categoria</h3>
+            <form id="formAddCategoria" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome</label>
+                    <input id="inputNome" type="text" required
+                        class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Ex: Geladinhos" />
+                </div>
+
+                <!-- Seletor de Ícones -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Escolha um Ícone</label>
+                    <input id="inputIcone" type="hidden" value="category" />
+                    <div id="iconGrid"
+                        class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 p-3 rounded-xl border border-slate-700 bg-slate-800/30">
+                        <!-- Grid será preenchido dinamicamente -->
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Descrição (opcional)</label>
+                    <input id="inputDescricao" type="text"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Breve descrição" />
+                </div>
+
+                <!-- Campo de Taxa (apenas para marketplace) -->
+                <div id="campoTaxa" class="hidden">
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Taxa Operacional (%)</label>
+                    <input id="inputTaxa" type="number" step="0.01" min="0" max="100"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Ex: 27.00 para 27%" />
+                    <p class="text-xs text-slate-500 mt-1">Taxa percentual cobrada pelo canal de venda</p>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl hover:bg-primary/90 transition-all">
+                    Adicionar Categoria
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Modal de Edição -->
+    <div id="modalEdit"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-card-dark rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Editar Categoria</h2>
+                <button onclick="fecharModalEdit()" class="text-slate-400 hover:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="formEditCategoria" class="space-y-4">
+                <input id="editId" type="hidden" />
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Nome</label>
+                    <input id="editNome" type="text" required
+                        class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Ícone</label>
+                    <input id="editIcone" type="text"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Descrição</label>
+                    <input id="editDescricao" type="text"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent" />
+                </div>
+
+                <!-- Campo de Taxa (apenas para marketplace) -->
+                <div id="editCampoTaxa" class="hidden">
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Taxa Operacional (%)</label>
+                    <input id="editTaxa" type="number" step="0.01" min="0" max="100"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Ex: 27.00 para 27%" />
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="fecharModalEdit()"
+                        class="flex-1 border-2 border-slate-700 text-slate-300 font-semibold py-3 rounded-xl hover:bg-slate-800">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="flex-1 bg-primary text-background-dark font-bold py-3 rounded-xl hover:bg-primary/90">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getAllRecords, insertRecord, updateRecord, deleteRecord } from './supabase-utils.js';
+
+        let currentTab = 'produtos';
+        let categorias = [];
+        let selectedIcon = 'category';
+
+        // Ícones disponíveis por tipo
+        const iconsByType = {
+            produtos: ['cake', 'icecream', 'cookie', 'bakery_dining', 'local_cafe', 'lunch_dining', 'fastfood', 'ramen_dining', 'restaurant', 'celebration', 'liquor', 'wine_bar', 'local_pizza', 'emoji_food_beverage', 'coffee', 'breakfast_dining'],
+            marketplace: ['storefront', 'store', 'shopping_cart', 'local_mall', 'shopping_bag', 'payments', 'point_of_sale', 'qr_code_scanner', 'phone_iphone', 'chat', 'message', 'forum', 'mail', 'public', 'language', 'delivery_dining'],
+            insumos: ['inventory_2', 'package_2', 'kitchen', 'restaurant_menu', 'blender', 'microwave', 'oven', 'propane_tank', 'flatware', 'scale', 'science', 'local_drink', 'water_drop', 'eco', 'grass', 'agriculture'],
+            despesas: ['receipt_long', 'payments', 'credit_card', 'account_balance', 'trending_up', 'trending_down', 'attach_money', 'euro', 'currency_exchange', 'campaign', 'ads_click', 'bolt', 'local_shipping', 'person', 'groups', 'home']
+        };
+
+        // Renderizar grid de ícones
+        function renderIconGrid() {
+            const grid = document.getElementById('iconGrid');
+            const icons = iconsByType[currentTab] || iconsByType.produtos;
+
+            grid.innerHTML = icons.map(icon => `
+                <button type="button" onclick="selectIcon('${icon}')" 
+                    class="icon-btn aspect-square flex items-center justify-center rounded-lg transition-all
+                           ${selectedIcon === icon
+                    ? 'bg-primary text-background-dark shadow-lg shadow-primary/20'
+                    : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'}"
+                    title="${icon}">
+                    <span class="material-symbols-outlined text-xl">${icon}</span>
+                </button>
+            `).join('');
+        }
+
+        // Selecionar ícone
+        window.selectIcon = function (icon) {
+            selectedIcon = icon;
+            document.getElementById('inputIcone').value = icon;
+            renderIconGrid();
+        };
+
+        // Carregar categorias
+        async function loadCategorias() {
+            try {
+                const { data, error } = await getAllRecords('categorias');
+                if (error) throw error;
+
+                categorias = data || [];
+                renderCategorias();
+            } catch (error) {
+                console.error('❌ Erro ao carregar categorias:', error);
+            }
+        }
+
+        // Renderizar categorias
+        function renderCategorias() {
+            const container = document.getElementById('categoriasList');
+            const filtered = categorias.filter(c => c.tipo === currentTab && c.ativo);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-6xl mb-4 opacity-30">category</span>
+                        <p class="text-lg">Nenhuma categoria cadastrada</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(cat => `
+                <div class="bg-card-dark p-4 rounded-xl border border-white/5 shadow-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-12">
+                            <span class="material-symbols-outlined text-2xl">${cat.icone || 'category'}</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-white text-base font-bold">${cat.nome}</p>
+                            ${cat.descricao ? `<p class="text-slate-400 text-xs">${cat.descricao}</p>` : ''}
+                            ${cat.tipo === 'marketplace' && cat.taxa_operacional ? `<p class="text-primary text-xs font-semibold mt-1">Taxa: ${parseFloat(cat.taxa_operacional).toFixed(2)}%</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="abrirModalEdit(${cat.id})"
+                            class="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white font-medium py-2 rounded-lg transition-all text-sm">
+                            <span class="material-symbols-outlined text-base">edit</span>
+                        </button>
+                        <button onclick="deletarCategoria(${cat.id})"
+                            class="flex-1 bg-white/5 hover:bg-red-500/10 text-red-400/60 hover:text-red-400 font-medium py-2 rounded-lg transition-all text-sm">
+                            <span class="material-symbols-outlined text-base">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        let currentLimitInfo = { atingiu: false };
+
+        // Switch de tabs
+        window.switchTab = function (tab) {
+            currentTab = tab;
+
+            // Update UI
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const isActive = btn.dataset.tab === tab;
+                btn.className = `tab-btn border-b-2 px-4 py-3 whitespace-nowrap transition-colors ${isActive
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-slate-400 hover:text-white'
+                    }`;
+                btn.querySelector('p').className = `text-sm ${isActive ? 'font-bold' : 'font-semibold'}`;
+            });
+
+            // Reset ícone selecionado para o primeiro da lista
+            const icons = iconsByType[tab] || iconsByType.produtos;
+            selectedIcon = icons[0];
+            document.getElementById('inputIcone').value = selectedIcon;
+
+            // Mostrar/ocultar campo de taxa
+            const campoTaxa = document.getElementById('campoTaxa');
+            if (tab === 'marketplace') {
+                campoTaxa.classList.remove('hidden');
+            } else {
+                campoTaxa.classList.add('hidden');
+                document.getElementById('inputTaxa').value = '';
+            }
+
+            renderCategorias();
+            renderIconGrid();
+
+            // Checar limite de categorias para o tab atual
+            checkCategoryLimit(tab);
+        };
+
+        async function checkCategoryLimit(tab) {
+            const bannerContainer = document.getElementById('planLimitBannerCat');
+            bannerContainer.innerHTML = '';
+            currentLimitInfo = { atingiu: false };
+
+            try {
+                if (tab === 'marketplace') {
+                    const { checkLimiteMarketplaces } = await import('./plan-limits.js');
+                    currentLimitInfo = await checkLimiteMarketplaces(bannerContainer);
+                } else {
+                    // produtos, insumos, despesas
+                    const { checkLimiteCategorias } = await import('./plan-limits.js');
+                    currentLimitInfo = await checkLimiteCategorias(tab, bannerContainer);
+                }
+            } catch (e) {
+                console.warn('Erro ao checar limite:', e);
+            }
+        }
+
+        // Adicionar categoria
+        document.getElementById('formAddCategoria').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Checar limite de categorias
+            if (currentLimitInfo.atingiu) {
+                const nomes = {
+                    produtos: 'categorias de produtos',
+                    marketplace: 'marketplace',
+                    insumos: 'categorias de insumos',
+                    despesas: 'categorias de despesas'
+                };
+                const limites = {
+                    produtos: 2,
+                    marketplace: 1,
+                    insumos: 2,
+                    despesas: 3
+                };
+                const nomeTipo = nomes[currentTab] || 'categorias';
+                const limiteNum = limites[currentTab] || '?';
+                if (confirm(`⭐ Limite de ${nomeTipo} atingido!\n\nNo plano Free você pode ter até ${limiteNum} ${nomeTipo}.\nDeseja fazer upgrade para Premium?`)) {
+                    window.location.href = 'planos.html';
+                }
+                return;
+            }
+
+            try {
+                const novaCategoria = {
+                    nome: document.getElementById('inputNome').value,
+                    tipo: currentTab,
+                    icone: document.getElementById('inputIcone').value || null,
+                    descricao: document.getElementById('inputDescricao').value || null,
+                    ativo: true
+                };
+
+                // Adicionar taxa se for marketplace
+                if (currentTab === 'marketplace') {
+                    const taxa = document.getElementById('inputTaxa').value;
+                    novaCategoria.taxa_operacional = taxa ? parseFloat(taxa) : 0;
+                }
+
+                const { error } = await insertRecord('categorias', novaCategoria);
+                if (error) throw error;
+
+                alert('✅ Categoria adicionada com sucesso!');
+                e.target.reset();
+                document.getElementById('inputTaxa').value = '';
+                await loadCategorias();
+                // Re-checar limite
+                checkCategoryLimit(currentTab);
+            } catch (error) {
+                console.error('❌ Erro ao adicionar categoria:', error);
+                alert('❌ Erro: ' + error.message);
+            }
+        });
+
+        // Abrir modal de edição
+        window.abrirModalEdit = function (id) {
+            const cat = categorias.find(c => c.id === id);
+            if (!cat) return;
+
+            document.getElementById('editId').value = cat.id;
+            document.getElementById('editNome').value = cat.nome;
+            document.getElementById('editIcone').value = cat.icone || '';
+            document.getElementById('editDescricao').value = cat.descricao || '';
+
+            // Mostrar/preencher taxa se for marketplace
+            const editCampoTaxa = document.getElementById('editCampoTaxa');
+            if (cat.tipo === 'marketplace') {
+                editCampoTaxa.classList.remove('hidden');
+                document.getElementById('editTaxa').value = cat.taxa_operacional || '';
+            } else {
+                editCampoTaxa.classList.add('hidden');
+                document.getElementById('editTaxa').value = '';
+            }
+
+            document.getElementById('modalEdit').classList.remove('hidden');
+        };
+
+        // Fechar modal
+        window.fecharModalEdit = function () {
+            document.getElementById('modalEdit').classList.add('hidden');
+        };
+
+        // Editar categoria
+        document.getElementById('formEditCategoria').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const id = parseInt(document.getElementById('editId').value);
+                const categoria = categorias.find(c => c.id === id);
+
+                const updates = {
+                    nome: document.getElementById('editNome').value,
+                    icone: document.getElementById('editIcone').value || null,
+                    descricao: document.getElementById('editDescricao').value || null
+                };
+
+                // Atualizar taxa se for marketplace
+                if (categoria && categoria.tipo === 'marketplace') {
+                    const taxa = document.getElementById('editTaxa').value;
+                    updates.taxa_operacional = taxa ? parseFloat(taxa) : 0;
+                }
+
+                const { error } = await updateRecord('categorias', id, updates);
+                if (error) throw error;
+
+                alert('✅ Categoria atualizada!');
+                fecharModalEdit();
+                await loadCategorias();
+            } catch (error) {
+                console.error('❌ Erro ao atualizar:', error);
+                alert('❌ Erro: ' + error.message);
+            }
+        });
+
+        // Deletar categoria
+        window.deletarCategoria = async function (id) {
+            const cat = categorias.find(c => c.id === id);
+            if (!confirm(`Tem certeza que deseja excluir "${cat.nome}"?`)) return;
+
+            try {
+                const { error } = await deleteRecord('categorias', id);
+                if (error) throw error;
+
+                alert('✅ Categoria excluída!');
+                await loadCategorias();
+            } catch (error) {
+                console.error('❌ Erro ao deletar:', error);
+                alert('❌ Erro: ' + error.message);
+            }
+        };
+
+        // Iniciar
+        loadCategorias();
+        renderIconGrid();
+        checkCategoryLimit(currentTab); // Checar limite ao carregar
+    </script>
+</body>
+
+</html>

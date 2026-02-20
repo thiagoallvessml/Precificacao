@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Gestão de Repasse para Afiliados</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "accent-orange": "#fb923c",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1a2f2f 25%, #243d3d 50%, #1a2f2f 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.35s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-anim {
+            animation: slideUp 0.3s ease-out, fadeOutToast 0.3s ease-in 2.7s;
+        }
+
+        @keyframes fadeOutToast {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 font-display min-h-screen pb-12">
+
+    <!-- Header Glassmorphic -->
+    <header class="sticky top-0 z-50 glass-header px-4 py-4 flex items-center justify-between">
+        <a href="admin-dashboard.html" class="text-primary p-2 -ml-2">
+            <span class="material-symbols-outlined">arrow_back_ios</span>
+        </a>
+        <h1 class="text-lg font-bold tracking-tight">Repasses Financeiros</h1>
+        <div class="p-2 -mr-2 opacity-0 pointer-events-none">
+            <span class="material-symbols-outlined">history_edu</span>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-4 space-y-6">
+
+        <!-- KPI Indicators -->
+        <section class="flex gap-4 overflow-x-auto pb-2 hide-scrollbar lg:grid lg:grid-cols-3">
+            <div class="flex-none w-44 lg:w-auto p-4 rounded-xl bg-card-dark border border-accent-orange/20">
+                <p class="text-xs text-slate-400 font-medium mb-1">Total Pendente</p>
+                <p id="kpiPendente" class="text-xl font-bold text-accent-orange">
+                    <span class="skeleton inline-block h-7 w-24 rounded"></span>
+                </p>
+                <div class="mt-2 flex items-center text-[10px] text-accent-orange/70">
+                    <span class="material-symbols-outlined text-xs mr-1">pending_actions</span>
+                    <span id="kpiPendenteQtd">—</span>
+                </div>
+            </div>
+            <div class="flex-none w-44 lg:w-auto p-4 rounded-xl bg-card-dark border border-primary/20">
+                <p class="text-xs text-slate-400 font-medium mb-1">Total Pago (Mês)</p>
+                <p id="kpiPago" class="text-xl font-bold text-primary">
+                    <span class="skeleton inline-block h-7 w-24 rounded"></span>
+                </p>
+                <div class="mt-2 flex items-center text-[10px] text-primary/70">
+                    <span class="material-symbols-outlined text-xs mr-1">check_circle</span>
+                    <span id="kpiPagoQtd">—</span>
+                </div>
+            </div>
+            <div class="flex-none w-44 lg:w-auto p-4 rounded-xl bg-card-dark border border-slate-700">
+                <p class="text-xs text-slate-400 font-medium mb-1">Comissão Média</p>
+                <p id="kpiMedia" class="text-xl font-bold text-slate-100">
+                    <span class="skeleton inline-block h-7 w-20 rounded"></span>
+                </p>
+                <div class="mt-2 flex items-center text-[10px] text-slate-500">
+                    <span class="material-symbols-outlined text-xs mr-1">analytics</span>
+                    <span id="kpiMediaLabel">por afiliado</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Segmented Control (Tabs) -->
+        <div class="bg-card-dark p-1 rounded-lg flex items-center">
+            <button id="tabAguardando"
+                class="tab-btn flex-1 py-2 text-sm font-semibold rounded-md bg-primary text-background-dark"
+                data-tab="pendentes">
+                Aguardando
+            </button>
+            <button id="tabHistorico" class="tab-btn flex-1 py-2 text-sm font-semibold text-slate-400 rounded-md"
+                data-tab="historico">
+                Histórico
+            </button>
+        </div>
+
+        <!-- Repasses Pendentes -->
+        <section id="secaoPendentes" class="space-y-4">
+            <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500 px-1">Pendentes de Liberação</h2>
+            <div id="listaPendentes" class="space-y-4">
+                <div class="skeleton h-44 rounded-xl"></div>
+                <div class="skeleton h-44 rounded-xl"></div>
+            </div>
+        </section>
+
+        <!-- Histórico de Repasses -->
+        <section id="secaoHistorico" class="space-y-4 hidden">
+            <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500 px-1">Repasses Realizados</h2>
+            <div id="listaHistorico" class="space-y-3">
+                <div class="skeleton h-20 rounded-xl"></div>
+                <div class="skeleton h-20 rounded-xl"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-none"></div>
+
+    <!-- Modal Confirmar Repasse -->
+    <div id="modalRepasse"
+        class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        style="display:none;">
+        <div class="bg-card-dark rounded-2xl max-w-sm w-full p-6 border border-white/10 space-y-5">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white">Confirmar Repasse</h3>
+                <button onclick="fecharModal()" class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-gray-500">close</span>
+                </button>
+            </div>
+            <div class="bg-background-dark/50 rounded-xl p-4 border border-white/5 space-y-2">
+                <p class="text-xs text-slate-400">Afiliado</p>
+                <p id="modalNome" class="text-base font-bold text-white">—</p>
+                <p class="text-xs text-slate-400 mt-2">Valor do Repasse</p>
+                <p id="modalValor" class="text-2xl font-bold text-primary">R$ 0,00</p>
+                <p class="text-xs text-slate-400 mt-2">Chave Pix</p>
+                <p id="modalPix" class="text-sm font-mono text-slate-300">—</p>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                Ao confirmar, todas as comissões pendentes deste afiliado serão marcadas como <strong
+                    class="text-primary">pagas</strong>.
+                Certifique-se de que o Pix foi realizado antes de confirmar.
+            </p>
+            <div class="flex gap-3">
+                <button onclick="fecharModal()"
+                    class="flex-1 bg-white/5 border border-white/10 text-white font-bold py-3 rounded-xl text-sm hover:bg-white/10 transition-colors">
+                    Cancelar
+                </button>
+                <button id="btnConfirmarRepasse" onclick="executarRepasse()"
+                    class="flex-1 bg-primary hover:bg-cyan-400 text-background-dark font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                    <span id="btnRepasseText">Confirmar</span>
+                    <span id="btnRepasseLoader" class="hidden">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        import { protectPage } from './auth-guard.js';
+
+        const supabase = getSupabase();
+        let repasseAtual = null; // { cupomId, nome, valor, pix, indicacaoIds }
+
+        // ========================
+        // TABS
+        // ========================
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-background-dark');
+                    b.classList.add('text-slate-400');
+                });
+                btn.classList.add('bg-primary', 'text-background-dark');
+                btn.classList.remove('text-slate-400');
+
+                const tab = btn.dataset.tab;
+                document.getElementById('secaoPendentes').classList.toggle('hidden', tab !== 'pendentes');
+                document.getElementById('secaoHistorico').classList.toggle('hidden', tab !== 'historico');
+            });
+        });
+
+        // ========================
+        // UTILS
+        // ========================
+
+        function formatBRL(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value || 0);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const bg = type === 'success'
+                ? 'bg-emerald-500/90 border-emerald-400/30'
+                : type === 'error'
+                    ? 'bg-red-500/90 border-red-400/30'
+                    : 'bg-primary/90 border-primary/30';
+
+            const toast = document.createElement('div');
+            toast.className = `toast-anim ${bg} text-white text-sm font-semibold px-6 py-3 rounded-xl border shadow-lg pointer-events-auto`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function copiarTexto(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                showToast('Chave Pix copiada!', 'info');
+            }).catch(() => {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = texto;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('Chave Pix copiada!', 'info');
+            });
+        }
+        window.copiarTexto = copiarTexto;
+
+        function getInitials(nome) {
+            if (!nome) return '??';
+            return nome.split(/\s+/).map(p => p[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        // ========================
+        // LOAD DATA
+        // ========================
+
+        async function carregarDados() {
+            if (!supabase) {
+                mostrarVazioPendentes();
+                mostrarVazioHistorico();
+                atualizarKPIs(0, 0, 0, 0);
+                return;
+            }
+
+            try {
+                // 1. Buscar cupons ativos
+                const { data: cupons, error: cuponsError } = await supabase
+                    .from('cupons_afiliado')
+                    .select('*')
+                    .eq('ativo', true);
+
+                if (cuponsError) throw cuponsError;
+
+                if (!cupons || cupons.length === 0) {
+                    mostrarVazioPendentes();
+                    mostrarVazioHistorico();
+                    atualizarKPIs(0, 0, 0, 0);
+                    return;
+                }
+
+                const cupomIds = cupons.map(c => c.id);
+
+                // 2. Buscar TODAS indicações ativas (para pendentes e histórico)
+                const { data: indicacoes, error: indError } = await supabase
+                    .from('indicacoes')
+                    .select('*')
+                    .in('cupom_id', cupomIds)
+                    .eq('status', 'ativo')
+                    .order('data_indicacao', { ascending: false });
+
+                if (indError) throw indError;
+
+                // 3. Buscar repasses já realizados (este mês)
+                const agora = new Date();
+                const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
+                const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+                const { data: repasses, error: repError } = await supabase
+                    .from('repasses_afiliado')
+                    .select('*')
+                    .gte('data_repasse', inicioMes)
+                    .lte('data_repasse', fimMes)
+                    .order('data_repasse', { ascending: false });
+
+                // (repasses pode dar erro se a tabela não existir ainda — tratar graciosamente)
+                const repassesData = (!repError && repasses) ? repasses : [];
+
+                // 4. Buscar nomes dos afiliados
+                let nomesPorCupom = {};
+                let pixPorCupom = {};
+
+                // Tentar via user_id
+                const userIds = cupons.filter(c => c.user_id).map(c => c.user_id);
+                if (userIds.length > 0) {
+                    try {
+                        const { data: perfis } = await supabase
+                            .from('perfis_usuarios')
+                            .select('id, nome, email, telefone, chave_pix')
+                            .in('id', userIds);
+
+                        if (perfis) {
+                            perfis.forEach(p => {
+                                const cupom = cupons.find(c => c.user_id === p.id);
+                                if (cupom) {
+                                    nomesPorCupom[cupom.id] = p.nome || p.email || cupom.codigo;
+                                    pixPorCupom[cupom.id] = p.chave_pix || p.email || p.telefone || '';
+                                }
+                            });
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+
+                // Fallback: nome da config
+                try {
+                    const { data: configNome } = await supabase
+                        .from('configuracoes')
+                        .select('valor')
+                        .eq('chave', 'nome_afiliado')
+                        .single();
+
+                    if (configNome && configNome.valor && cupons.length > 0) {
+                        if (!nomesPorCupom[cupons[0].id]) {
+                            nomesPorCupom[cupons[0].id] = configNome.valor;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+
+                // Preencher faltantes com código
+                cupons.forEach(c => {
+                    if (!nomesPorCupom[c.id]) nomesPorCupom[c.id] = c.codigo;
+                    if (!pixPorCupom[c.id]) pixPorCupom[c.id] = '';
+                });
+
+                // =====================
+                // PROCESSAR PENDENTES
+                // =====================
+
+                const indAll = indicacoes || [];
+                const pendentes = indAll.filter(i => !i.comissao_paga);
+                const pagosMes = indAll.filter(i => i.comissao_paga && i.data_pagamento_comissao &&
+                    i.data_pagamento_comissao >= inicioMes && i.data_pagamento_comissao <= fimMes);
+
+                // Agrupar pendentes por cupom
+                const pendentesPorCupom = {};
+                pendentes.forEach(ind => {
+                    if (!pendentesPorCupom[ind.cupom_id]) {
+                        pendentesPorCupom[ind.cupom_id] = {
+                            cupomId: ind.cupom_id,
+                            nome: nomesPorCupom[ind.cupom_id],
+                            pix: pixPorCupom[ind.cupom_id],
+                            vendas: 0,
+                            total: 0,
+                            ids: []
+                        };
+                    }
+                    pendentesPorCupom[ind.cupom_id].vendas++;
+                    pendentesPorCupom[ind.cupom_id].total += parseFloat(ind.valor_comissao || 0);
+                    pendentesPorCupom[ind.cupom_id].ids.push(ind.id);
+                });
+
+                const listaPendentes = Object.values(pendentesPorCupom).sort((a, b) => b.total - a.total);
+
+                // KPIs
+                const totalPendente = listaPendentes.reduce((s, a) => s + a.total, 0);
+                const totalPagoMes = pagosMes.reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0)
+                    + repassesData.reduce((s, r) => s + parseFloat(r.valor || 0), 0);
+                const qtdAfiliadosPendentes = listaPendentes.length;
+                const mediaComissao = qtdAfiliadosPendentes > 0 ? totalPendente / qtdAfiliadosPendentes : 0;
+
+                atualizarKPIs(totalPendente, totalPagoMes, qtdAfiliadosPendentes, mediaComissao);
+
+                // Render
+                renderPendentes(listaPendentes);
+                renderHistorico(repassesData, nomesPorCupom);
+
+            } catch (err) {
+                console.error('❌ Erro ao carregar repasses:', err);
+                mostrarVazioPendentes();
+                mostrarVazioHistorico();
+                atualizarKPIs(0, 0, 0, 0);
+            }
+        }
+
+        // ========================
+        // KPIs
+        // ========================
+
+        function atualizarKPIs(pendente, pago, qtdAfiliados, media) {
+            document.getElementById('kpiPendente').textContent = formatBRL(pendente);
+            document.getElementById('kpiPendenteQtd').textContent = `${qtdAfiliados} afiliado${qtdAfiliados !== 1 ? 's' : ''}`;
+            document.getElementById('kpiPago').textContent = formatBRL(pago);
+            document.getElementById('kpiPagoQtd').textContent = pago > 0 ? 'neste mês' : 'nenhum pagamento';
+            document.getElementById('kpiMedia').textContent = formatBRL(media);
+        }
+
+        // ========================
+        // RENDER PENDENTES
+        // ========================
+
+        function renderPendentes(lista) {
+            const container = document.getElementById('listaPendentes');
+
+            if (lista.length === 0) {
+                mostrarVazioPendentes();
+                return;
+            }
+
+            container.innerHTML = lista.map((af, i) => {
+                const initials = getInitials(af.nome);
+                const pixDisplay = af.pix || 'Não informada';
+                const pixTruncated = af.pix && af.pix.length > 30 ? af.pix.substring(0, 30) + '…' : pixDisplay;
+
+                return `
+                    <div class="bg-card-dark rounded-xl p-5 border border-white/5 shadow-xl fade-in-up" style="animation-delay: ${i * 80}ms">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+                                ${initials}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="font-bold text-slate-100 truncate">${af.nome}</h3>
+                                <p class="text-xs text-slate-400">${af.vendas} indicaç${af.vendas !== 1 ? 'ões' : 'ão'} ativa${af.vendas !== 1 ? 's' : ''}</p>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <p class="text-xs text-slate-400 font-medium">Acumulado</p>
+                                <p class="text-lg font-bold text-primary">${formatBRL(af.total)}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="bg-background-dark/50 rounded-lg p-3 flex items-center justify-between border border-white/5">
+                                <div class="overflow-hidden flex-1">
+                                    <p class="text-[10px] uppercase text-slate-500 font-bold mb-0.5">Chave Pix</p>
+                                    <p class="text-sm font-mono text-slate-300 truncate">${pixTruncated}</p>
+                                </div>
+                                ${af.pix ? `
+                                    <button onclick="copiarTexto('${af.pix.replace(/'/g, "\\'")}')"
+                                        class="text-primary p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0">
+                                        <span class="material-symbols-outlined text-xl">content_copy</span>
+                                    </button>
+                                ` : ''}
+                            </div>
+                            <button onclick="abrirModalRepasse(${af.cupomId}, '${af.nome.replace(/'/g, "\\'")}', ${af.total}, '${(af.pix || '').replace(/'/g, "\\'")}', '${JSON.stringify(af.ids)}')"
+                                class="w-full bg-primary hover:bg-cyan-400 text-background-dark font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                                <span class="material-symbols-outlined">payments</span>
+                                Confirmar Repasse
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function mostrarVazioPendentes() {
+            document.getElementById('listaPendentes').innerHTML = `
+                <div class="text-center py-10 bg-card-dark rounded-xl border border-white/5">
+                    <span class="material-symbols-outlined text-5xl text-emerald-500/40 mb-3 block">check_circle</span>
+                    <p class="text-slate-400 text-sm font-medium">Nenhum repasse pendente</p>
+                    <p class="text-slate-600 text-xs mt-1">Todos os afiliados estão em dia!</p>
+                </div>
+            `;
+        }
+
+        // ========================
+        // RENDER HISTÓRICO
+        // ========================
+
+        function renderHistorico(repasses, nomes) {
+            const container = document.getElementById('listaHistorico');
+
+            if (!repasses || repasses.length === 0) {
+                mostrarVazioHistorico();
+                return;
+            }
+
+            container.innerHTML = repasses.map((r, i) => {
+                const data = new Date(r.data_repasse);
+                const dataStr = data.toLocaleDateString('pt-BR', {
+                    day: '2-digit', month: 'short', year: 'numeric'
+                });
+                const horaStr = data.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit', minute: '2-digit'
+                });
+                const nome = nomes[r.cupom_id] || r.nome_afiliado || 'Afiliado';
+
+                return `
+                    <div class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3 fade-in-up" style="animation-delay: ${i * 60}ms">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-emerald-400">check_circle</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-white truncate">${nome}</p>
+                            <p class="text-[10px] text-slate-500">${dataStr} às ${horaStr}</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-sm font-bold text-emerald-400">${formatBRL(r.valor)}</p>
+                            <p class="text-[10px] text-slate-500">${r.qtd_indicacoes || 0} indic.</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function mostrarVazioHistorico() {
+            document.getElementById('listaHistorico').innerHTML = `
+                <div class="text-center py-10 bg-card-dark rounded-xl border border-white/5">
+                    <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">history</span>
+                    <p class="text-slate-400 text-sm font-medium">Nenhum repasse realizado este mês</p>
+                    <p class="text-slate-600 text-xs mt-1">O histórico aparecerá aqui após confirmar repasses</p>
+                </div>
+            `;
+        }
+
+        // ========================
+        // MODAL REPASSE
+        // ========================
+
+        window.abrirModalRepasse = function (cupomId, nome, valor, pix, idsJson) {
+            repasseAtual = {
+                cupomId,
+                nome,
+                valor,
+                pix,
+                indicacaoIds: JSON.parse(idsJson)
+            };
+
+            document.getElementById('modalNome').textContent = nome;
+            document.getElementById('modalValor').textContent = formatBRL(valor);
+            document.getElementById('modalPix').textContent = pix || 'Não informada';
+
+            const modal = document.getElementById('modalRepasse');
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+        };
+
+        window.fecharModal = function () {
+            const modal = document.getElementById('modalRepasse');
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+            repasseAtual = null;
+        };
+
+        window.executarRepasse = async function () {
+            if (!repasseAtual || !supabase) return;
+
+            const btn = document.getElementById('btnConfirmarRepasse');
+            const btnText = document.getElementById('btnRepasseText');
+            const btnLoader = document.getElementById('btnRepasseLoader');
+
+            btn.disabled = true;
+            btnText.textContent = 'Processando...';
+            btnLoader.classList.remove('hidden');
+
+            try {
+                // 1. Marcar todas as indicações como comissão paga
+                const agora = new Date().toISOString();
+                const { error: updateError } = await supabase
+                    .from('indicacoes')
+                    .update({
+                        comissao_paga: true,
+                        data_pagamento_comissao: agora,
+                        updated_at: agora
+                    })
+                    .in('id', repasseAtual.indicacaoIds);
+
+                if (updateError) throw updateError;
+
+                // 2. Registrar o repasse na tabela de histórico
+                try {
+                    await supabase
+                        .from('repasses_afiliado')
+                        .insert([{
+                            cupom_id: repasseAtual.cupomId,
+                            nome_afiliado: repasseAtual.nome,
+                            valor: repasseAtual.valor,
+                            chave_pix: repasseAtual.pix,
+                            qtd_indicacoes: repasseAtual.indicacaoIds.length,
+                            data_repasse: agora
+                        }]);
+                } catch (e) {
+                    // Se a tabela não existir, continuar mesmo assim
+                    console.warn('Tabela repasses_afiliado não existe ainda:', e);
+                }
+
+                showToast(`✅ Repasse de ${formatBRL(repasseAtual.valor)} confirmado!`, 'success');
+                fecharModal();
+
+                // Recarregar dados
+                await carregarDados();
+
+            } catch (err) {
+                console.error('❌ Erro ao confirmar repasse:', err);
+                showToast('❌ Erro ao confirmar. Tente novamente.', 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Confirmar';
+                btnLoader.classList.add('hidden');
+            }
+        };
+
+        // ========================
+        // INIT
+        // ========================
+
+        async function init() {
+            const perfil = await protectPage(['admin']);
+            if (!perfil) return;
+
+            await carregarDados();
+            console.log('✅ Repasses Financeiros carregado');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

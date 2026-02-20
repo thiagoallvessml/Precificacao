@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Pagamento em Dinheiro - Geladinho Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "cta": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#1A1A1A",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .numpad-button {
+            transition: all 0.15s ease;
+        }
+
+        .numpad-button:active {
+            transform: scale(0.95);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .cash-card {
+            background: linear-gradient(135deg, rgba(124, 175, 94, 0.1) 0%, rgba(124, 175, 94, 0.05) 100%);
+            border: 1px solid rgba(124, 175, 94, 0.2);
+        }
+
+        .change-card {
+            background: linear-gradient(135deg, rgba(11, 239, 239, 0.15) 0%, rgba(11, 239, 239, 0.08) 100%);
+            border: 1px solid rgba(11, 239, 239, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .animate-pulse-once {
+            animation: pulse 0.3s ease-out;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .quick-value-btn {
+            transition: all 0.2s ease;
+        }
+
+        .quick-value-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display antialiased">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='pagamento.html'"
+                class="text-white flex size-10 items-center justify-start cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Pagamento em
+                Dinheiro</h2>
+            <div class="flex w-10 items-center justify-end"></div>
+        </div>
+    </header>
+
+    <main class="pb-8 px-4 max-w-6xl mx-auto">
+        <!-- Grid Container for Desktop -->
+        <div
+            class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start md:items-center min-h-[calc(100vh-200px)]">
+
+            <!-- Left Column: Payment Cards -->
+            <div class="space-y-4 animate-fade-in">
+                <!-- Total Card -->
+                <div class="cash-card rounded-2xl p-5 text-center">
+                    <p class="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Total da Venda</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-white/60 text-xl font-light">R$</span>
+                        <span id="totalAmount" class="text-[#7CAF5E] text-4xl font-bold tracking-tight">35,00</span>
+                    </div>
+                </div>
+
+                <!-- Amount Paid Card -->
+                <div class="rounded-2xl p-5 bg-surface-dark border border-white/10 text-center">
+                    <p class="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Valor Pago pelo Cliente
+                    </p>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-white/60 text-2xl font-light">R$</span>
+                        <input id="paidAmount" type="text" value="0,00" readonly
+                            class="text-white text-5xl font-bold tracking-tight bg-transparent border-none focus:outline-none focus:ring-0 w-auto text-center p-0"
+                            style="width: fit-content; min-width: 120px;" />
+                    </div>
+                </div>
+
+                <!-- Quick Values -->
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="setQuickValue(35)"
+                        class="quick-value-btn h-10 rounded-lg bg-surface-dark border border-white/10 text-white text-sm font-semibold hover:bg-white/5 hover:border-primary/50">
+                        R$ 35
+                    </button>
+                    <button onclick="setQuickValue(50)"
+                        class="quick-value-btn h-10 rounded-lg bg-surface-dark border border-white/10 text-white text-sm font-semibold hover:bg-white/5 hover:border-primary/50">
+                        R$ 50
+                    </button>
+                    <button onclick="setQuickValue(100)"
+                        class="quick-value-btn h-10 rounded-lg bg-surface-dark border border-white/10 text-white text-sm font-semibold hover:bg-white/5 hover:border-primary/50">
+                        R$ 100
+                    </button>
+                    <button onclick="setQuickValue(200)"
+                        class="quick-value-btn h-10 rounded-lg bg-surface-dark border border-white/10 text-white text-sm font-semibold hover:bg-white/5 hover:border-primary/50">
+                        R$ 200
+                    </button>
+                </div>
+
+                <!-- Change Card -->
+                <div id="changeCard" class="change-card rounded-2xl p-5 text-center" style="display: none;">
+                    <div class="flex items-center justify-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-primary text-lg">payments</span>
+                        <p class="text-primary text-sm font-bold uppercase tracking-wider">Troco</p>
+                    </div>
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-primary/60 text-xl font-light">R$</span>
+                        <span id="changeAmount" class="text-primary text-4xl font-bold tracking-tight">0,00</span>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button id="confirmButton" onclick="confirmPayment()"
+                    class="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white h-14 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-green-500/30 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Confirmar Pagamento
+                </button>
+
+                <!-- Additional Information -->
+                <div class="p-4 bg-surface-dark/50 border border-white/5 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-[#7CAF5E] text-xl">info</span>
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Dica</p>
+                            <p class="text-white/50 text-xs mt-1">Use os botões de valores rápidos para agilizar o
+                                processo. O
+                                troco será calculado automaticamente.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Numpad -->
+            <div class="animate-fade-in">
+                <!-- Custom Numpad -->
+                <div class="grid grid-cols-3 gap-4 max-w-sm mx-auto md:mx-0">
+                    <!-- Row 1 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('1')">1</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('2')">2</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('3')">3</button>
+
+                    <!-- Row 2 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('4')">4</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('5')">5</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('6')">6</button>
+
+                    <!-- Row 3 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('7')">7</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('8')">8</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('9')">9</button>
+
+                    <!-- Row 4 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-xl font-semibold hover:bg-white/5"
+                        onclick="clearAll()">
+                        C
+                    </button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('0')">0</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white hover:bg-white/5 flex items-center justify-center"
+                        onclick="deleteDigit()">
+                        <span class="material-symbols-outlined text-3xl">backspace</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentValue = '0,00';
+        const paidInput = document.getElementById('paidAmount');
+        const changeCard = document.getElementById('changeCard');
+        const changeAmountDisplay = document.getElementById('changeAmount');
+        const totalAmountText = document.getElementById('totalAmount').textContent;
+        const totalAmount = parseFloat(totalAmountText.replace(',', '.'));
+
+        function formatCurrency(value) {
+            // Remove all non-digits
+            const digits = value.replace(/\D/g, '');
+
+            if (digits === '' || digits === '0') {
+                return '0,00';
+            }
+
+            // Convert to cents
+            const cents = parseInt(digits);
+
+            // Format as currency
+            const reais = Math.floor(cents / 100);
+            const centavos = (cents % 100).toString().padStart(2, '0');
+
+            // Add thousand separators
+            const formattedReais = reais.toLocaleString('pt-BR');
+
+            return `${formattedReais},${centavos}`;
+        }
+
+        function calculateChange() {
+            const paidValue = parseFloat(currentValue.replace(/\./g, '').replace(',', '.'));
+
+            if (paidValue >= totalAmount) {
+                const change = paidValue - totalAmount;
+                const changeFormatted = change.toFixed(2).replace('.', ',');
+                changeAmountDisplay.textContent = changeFormatted;
+
+                if (change > 0) {
+                    changeCard.style.display = 'block';
+                    changeCard.classList.add('animate-pulse-once');
+                    setTimeout(() => changeCard.classList.remove('animate-pulse-once'), 300);
+                } else {
+                    changeCard.style.display = 'none';
+                }
+            } else {
+                changeCard.style.display = 'none';
+            }
+
+            updateButtonState();
+        }
+
+        function addDigit(digit) {
+            // Remove formatting and add new digit
+            const digits = currentValue.replace(/\D/g, '') + digit;
+            currentValue = formatCurrency(digits);
+            paidInput.value = currentValue;
+            calculateChange();
+        }
+
+        function deleteDigit() {
+            // Remove last digit
+            const digits = currentValue.replace(/\D/g, '');
+            if (digits.length > 0) {
+                const newDigits = digits.slice(0, -1);
+                currentValue = formatCurrency(newDigits);
+                paidInput.value = currentValue;
+                calculateChange();
+            }
+        }
+
+        function clearAll() {
+            currentValue = '0,00';
+            paidInput.value = currentValue;
+            changeCard.style.display = 'none';
+            updateButtonState();
+        }
+
+        function setQuickValue(value) {
+            // Convert value to cents and format
+            const cents = value * 100;
+            currentValue = formatCurrency(cents.toString());
+            paidInput.value = currentValue;
+            calculateChange();
+        }
+
+        function updateButtonState() {
+            const confirmButton = document.getElementById('confirmButton');
+            const paidValue = parseFloat(currentValue.replace(/\./g, '').replace(',', '.'));
+
+            if (paidValue >= totalAmount) {
+                confirmButton.disabled = false;
+            } else {
+                confirmButton.disabled = true;
+            }
+        }
+
+        function confirmPayment() {
+            const paidValue = parseFloat(currentValue.replace(/\./g, '').replace(',', '.'));
+            const change = paidValue - totalAmount;
+
+            console.log('Pagamento em Dinheiro confirmado');
+            console.log('Total:', totalAmount);
+            console.log('Pago:', paidValue);
+            console.log('Troco:', change);
+
+            // Show confirmation
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processando...';
+
+            setTimeout(() => {
+                if (change > 0) {
+                    alert(`Pagamento confirmado!\nTroco a devolver: R$ ${change.toFixed(2).replace('.', ',')}`);
+                } else {
+                    alert('Pagamento confirmado!\nValor exato recebido.');
+                }
+                // Navigate back or to confirmation page
+                // window.location.href = 'confirmacao-venda.html?metodo=dinheiro&total=' + totalAmount + '&pago=' + paidValue + '&troco=' + change;
+                window.location.href = 'vendas.html';
+            }, 1000);
+        }
+
+        // Initialize button state
+        updateButtonState();
+
+        // Allow keyboard input for desktop
+        document.addEventListener('keydown', function (event) {
+            if (event.key >= '0' && event.key <= '9') {
+                addDigit(event.key);
+            } else if (event.key === 'Backspace') {
+                event.preventDefault();
+                deleteDigit();
+            } else if (event.key === 'Enter') {
+                const confirmButton = document.getElementById('confirmButton');
+                if (!confirmButton.disabled) {
+                    confirmPayment();
+                }
+            } else if (event.key === 'Escape' || event.key.toLowerCase() === 'c') {
+                clearAll();
+            }
+        });
+    </script>
+</body>
+
+</html>

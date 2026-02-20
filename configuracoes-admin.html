@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Configurações de Afiliados</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0eecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1c1c27",
+                        "surface-dark": "#16161f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: contain;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ios-toggle:checked+.ios-toggle-label {
+            background-color: #0eecec;
+        }
+
+        .ios-toggle:checked+.ios-toggle-label::after {
+            transform: translateX(20px);
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .toast {
+            animation: slideUp 0.3s ease-out, fadeOut 0.3s ease-in 2.7s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1c1c27 25%, #2a2a3a 50%, #1c1c27 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-32">
+
+    <!-- Header Glassmorphic -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-header px-4 pt-12 pb-4">
+        <div class="flex items-center justify-between max-w-5xl mx-auto">
+            <a href="admin-dashboard.html" class="p-2 -ml-2 text-primary">
+                <span class="material-icons">arrow_back_ios</span>
+            </a>
+            <h1 class="text-lg font-semibold tracking-tight">Configurações de Afiliados</h1>
+            <button class="p-2 -mr-2 text-primary opacity-0 pointer-events-none">
+                <span class="material-icons">more_horiz</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 pt-32">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Seção 1: Comissão Padrão -->
+            <section class="space-y-3">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Comissão Padrão</label>
+                <div
+                    class="bg-card-dark rounded-xl p-8 flex flex-col items-center justify-center border border-white/5">
+                    <div class="relative flex items-baseline">
+                        <input id="inputComissaoPadrao"
+                            class="bg-transparent text-6xl font-bold text-primary text-center focus:outline-none w-32 border-none focus:ring-0 p-0"
+                            type="number" value="10" min="0" max="100" />
+                        <span class="text-4xl font-bold text-primary/60 ml-1">%</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2 font-medium">Porcentagem geral de comissão</p>
+                </div>
+            </section>
+
+            <!-- Seção 2: Regras de Ganho -->
+            <section class="space-y-3">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Regras de Ganho</label>
+                <div class="bg-card-dark rounded-xl divide-y divide-white/5 border border-white/5">
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex flex-col">
+                            <span class="font-medium">Comissão Recorrente</span>
+                            <span class="text-xs text-slate-500">Receber todo mês do indicado</span>
+                        </div>
+                        <div class="relative">
+                            <input checked class="sr-only ios-toggle" id="toggleRecorrente" type="checkbox" />
+                            <label
+                                class="ios-toggle-label block w-12 h-7 bg-white/10 rounded-full transition-colors cursor-pointer after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
+                                for="toggleRecorrente"></label>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex flex-col">
+                            <span class="font-medium">Somente Primeira Venda</span>
+                            <span class="text-xs text-slate-500">Ignorar renovações</span>
+                        </div>
+                        <div class="relative">
+                            <input class="sr-only ios-toggle" id="togglePrimeiraVenda" type="checkbox" />
+                            <label
+                                class="ios-toggle-label block w-12 h-7 bg-white/10 rounded-full transition-colors cursor-pointer after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
+                                for="togglePrimeiraVenda"></label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção 3: Níveis de Afiliados -->
+            <section class="space-y-3">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Níveis de
+                    Afiliados</label>
+                <div class="bg-card-dark rounded-xl border border-white/5 overflow-hidden">
+                    <!-- Bronze -->
+                    <div class="flex items-center justify-between p-4 border-b border-white/5">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-orange-900/30 flex items-center justify-center text-orange-500">
+                                <span class="material-icons text-xl">emoji_events</span>
+                            </div>
+                            <span class="font-medium">Bronze</span>
+                        </div>
+                        <div class="flex items-center bg-white/5 rounded-lg px-3 py-1 border border-white/5">
+                            <input id="inputNivelBronze"
+                                class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-primary"
+                                type="number" value="10" min="0" max="100" />
+                            <span class="text-slate-500 ml-1 text-sm">%</span>
+                        </div>
+                    </div>
+                    <!-- Prata -->
+                    <div class="flex items-center justify-between p-4 border-b border-white/5">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-slate-400/20 flex items-center justify-center text-slate-400">
+                                <span class="material-icons text-xl">emoji_events</span>
+                            </div>
+                            <span class="font-medium">Prata</span>
+                        </div>
+                        <div class="flex items-center bg-white/5 rounded-lg px-3 py-1 border border-white/5">
+                            <input id="inputNivelPrata"
+                                class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-primary"
+                                type="number" value="12" min="0" max="100" />
+                            <span class="text-slate-500 ml-1 text-sm">%</span>
+                        </div>
+                    </div>
+                    <!-- Ouro -->
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500">
+                                <span class="material-icons text-xl">emoji_events</span>
+                            </div>
+                            <span class="font-medium">Ouro</span>
+                        </div>
+                        <div class="flex items-center bg-white/5 rounded-lg px-3 py-1 border border-white/5">
+                            <input id="inputNivelOuro"
+                                class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-primary"
+                                type="number" value="15" min="0" max="100" />
+                            <span class="text-slate-500 ml-1 text-sm">%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção 4: Valores Mínimos -->
+            <section class="space-y-3">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Valores Mínimos</label>
+                <div class="bg-card-dark rounded-xl p-4 border border-white/5">
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium">Saque Mínimo</span>
+                        <div class="flex items-center bg-white/5 rounded-lg px-4 py-2 border border-white/5">
+                            <span class="text-slate-500 mr-2 text-sm">R$</span>
+                            <input id="inputSaqueMinimo"
+                                class="bg-transparent text-right w-20 focus:outline-none border-none focus:ring-0 p-0 font-bold text-primary"
+                                type="text" value="50,00" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-28 left-0 right-0 flex justify-center z-50 pointer-events-none"></div>
+
+    <!-- Footer Action -->
+    <footer
+        class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-dark via-background-dark to-transparent">
+        <div class="max-w-5xl mx-auto">
+            <button id="btnSalvar" onclick="salvarConfiguracoes()"
+                class="w-full lg:w-auto lg:min-w-[280px] lg:float-right bg-primary hover:bg-primary/90 text-background-dark font-bold py-4 px-8 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                <span id="btnSalvarText">Salvar Alterações</span>
+                <span id="btnSalvarLoader" class="hidden">
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+                        </path>
+                    </svg>
+                </span>
+            </button>
+            <div class="h-4 clear-both"></div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        import { protectPage } from './auth-guard.js';
+
+        const supabase = getSupabase();
+
+        // Chaves de configuração para afiliados
+        const CONFIG_KEYS = {
+            COMISSAO_PADRAO: 'afiliado_comissao_padrao',
+            COMISSAO_RECORRENTE: 'afiliado_comissao_recorrente',
+            SOMENTE_PRIMEIRA_VENDA: 'afiliado_somente_primeira_venda',
+            NIVEL_BRONZE: 'afiliado_nivel_bronze',
+            NIVEL_PRATA: 'afiliado_nivel_prata',
+            NIVEL_OURO: 'afiliado_nivel_ouro',
+            SAQUE_MINIMO: 'afiliado_saque_minimo'
+        };
+
+        // Valores padrão
+        const DEFAULTS = {
+            [CONFIG_KEYS.COMISSAO_PADRAO]: '10',
+            [CONFIG_KEYS.COMISSAO_RECORRENTE]: 'true',
+            [CONFIG_KEYS.SOMENTE_PRIMEIRA_VENDA]: 'false',
+            [CONFIG_KEYS.NIVEL_BRONZE]: '10',
+            [CONFIG_KEYS.NIVEL_PRATA]: '12',
+            [CONFIG_KEYS.NIVEL_OURO]: '15',
+            [CONFIG_KEYS.SAQUE_MINIMO]: '50.00'
+        };
+
+        // Elementos do DOM
+        const els = {
+            comissaoPadrao: document.getElementById('inputComissaoPadrao'),
+            recorrente: document.getElementById('toggleRecorrente'),
+            primeiraVenda: document.getElementById('togglePrimeiraVenda'),
+            nivelBronze: document.getElementById('inputNivelBronze'),
+            nivelPrata: document.getElementById('inputNivelPrata'),
+            nivelOuro: document.getElementById('inputNivelOuro'),
+            saqueMinimo: document.getElementById('inputSaqueMinimo'),
+            btnSalvar: document.getElementById('btnSalvar'),
+            btnText: document.getElementById('btnSalvarText'),
+            btnLoader: document.getElementById('btnSalvarLoader')
+        };
+
+        /**
+         * Busca uma config do Supabase
+         */
+        async function getConfig(chave) {
+            if (!supabase) return null;
+            try {
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', chave)
+                    .single();
+                if (error && error.code !== 'PGRST116') {
+                    console.warn(`Config ${chave}:`, error.message);
+                }
+                return data?.valor || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        /**
+         * Salva ou atualiza uma config no Supabase
+         */
+        async function saveConfig(chave, valor, descricao = '') {
+            if (!supabase) return;
+
+            const { data: existing } = await supabase
+                .from('configuracoes')
+                .select('id')
+                .eq('chave', chave)
+                .single();
+
+            if (existing) {
+                await supabase
+                    .from('configuracoes')
+                    .update({ valor: String(valor), updated_at: new Date().toISOString() })
+                    .eq('chave', chave);
+            } else {
+                await supabase
+                    .from('configuracoes')
+                    .insert([{
+                        chave,
+                        valor: String(valor),
+                        tipo: typeof valor === 'boolean' ? 'boolean' : 'number',
+                        descricao,
+                        categoria: 'afiliados'
+                    }]);
+            }
+        }
+
+        /**
+         * Carrega todas as configs do Supabase
+         */
+        async function carregarConfiguracoes() {
+            if (!supabase) {
+                console.warn('⚠️ Supabase não configurado, usando valores padrão');
+                return;
+            }
+
+            try {
+                // Buscar todas as configs de afiliados de uma vez
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .select('chave, valor')
+                    .like('chave', 'afiliado_%');
+
+                if (error) {
+                    console.warn('Erro ao carregar configs:', error.message);
+                    return;
+                }
+
+                // Criar mapa chave -> valor
+                const configMap = {};
+                if (data) {
+                    data.forEach(c => { configMap[c.chave] = c.valor; });
+                }
+
+                // Aplicar valores nos campos
+                const val = (key) => configMap[key] || DEFAULTS[key];
+
+                els.comissaoPadrao.value = val(CONFIG_KEYS.COMISSAO_PADRAO);
+                els.recorrente.checked = val(CONFIG_KEYS.COMISSAO_RECORRENTE) === 'true';
+                els.primeiraVenda.checked = val(CONFIG_KEYS.SOMENTE_PRIMEIRA_VENDA) === 'true';
+                els.nivelBronze.value = val(CONFIG_KEYS.NIVEL_BRONZE);
+                els.nivelPrata.value = val(CONFIG_KEYS.NIVEL_PRATA);
+                els.nivelOuro.value = val(CONFIG_KEYS.NIVEL_OURO);
+
+                // Formatar saque mínimo
+                const saqueVal = parseFloat(val(CONFIG_KEYS.SAQUE_MINIMO));
+                els.saqueMinimo.value = saqueVal.toFixed(2).replace('.', ',');
+
+                console.log('✅ Configurações de afiliados carregadas');
+            } catch (err) {
+                console.error('Erro ao carregar configurações:', err);
+            }
+        }
+
+        /**
+         * Salva todas as configurações
+         */
+        window.salvarConfiguracoes = async function () {
+            setLoading(true);
+
+            try {
+                // Converter saque mínimo de "50,00" para "50.00"
+                const saqueStr = els.saqueMinimo.value.replace(',', '.');
+                const saqueNum = parseFloat(saqueStr) || 50;
+
+                await Promise.all([
+                    saveConfig(CONFIG_KEYS.COMISSAO_PADRAO, els.comissaoPadrao.value, 'Comissão padrão para afiliados (%)'),
+                    saveConfig(CONFIG_KEYS.COMISSAO_RECORRENTE, els.recorrente.checked, 'Se afiliado recebe comissão recorrente'),
+                    saveConfig(CONFIG_KEYS.SOMENTE_PRIMEIRA_VENDA, els.primeiraVenda.checked, 'Se comissão é somente na primeira venda'),
+                    saveConfig(CONFIG_KEYS.NIVEL_BRONZE, els.nivelBronze.value, 'Comissão nível Bronze (%)'),
+                    saveConfig(CONFIG_KEYS.NIVEL_PRATA, els.nivelPrata.value, 'Comissão nível Prata (%)'),
+                    saveConfig(CONFIG_KEYS.NIVEL_OURO, els.nivelOuro.value, 'Comissão nível Ouro (%)'),
+                    saveConfig(CONFIG_KEYS.SAQUE_MINIMO, saqueNum.toFixed(2), 'Valor mínimo para saque (R$)')
+                ]);
+
+                showToast('✅ Configurações salvas com sucesso!', 'success');
+                console.log('✅ Configurações de afiliados salvas');
+            } catch (err) {
+                console.error('Erro ao salvar:', err);
+                showToast('❌ Erro ao salvar. Tente novamente.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        /**
+         * Loading state do botão
+         */
+        function setLoading(loading) {
+            els.btnSalvar.disabled = loading;
+            els.btnText.textContent = loading ? 'Salvando...' : 'Salvar Alterações';
+            els.btnLoader.classList.toggle('hidden', !loading);
+        }
+
+        /**
+         * Mostra toast notification
+         */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const bg = type === 'success'
+                ? 'bg-green-500/90 border-green-400/30'
+                : 'bg-red-500/90 border-red-400/30';
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${bg} text-white text-sm font-semibold px-6 py-3 rounded-xl border shadow-lg pointer-events-auto`;
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ========== INIT ==========
+        async function init() {
+            // Proteger página — somente admin
+            const perfil = await protectPage(['admin']);
+            if (!perfil) return;
+
+            await carregarConfiguracoes();
+        }
+
+        init();
+    </script>
+
+</body>
+
+</html>

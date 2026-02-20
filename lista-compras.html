@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Lista de Compras Consolidada</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #13ecec;
+            border-radius: 6px;
+            background-color: transparent;
+            display: inline-grid;
+            place-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-image: none !important;
+            /* Remove o checkmark padrão do Tailwind */
+        }
+
+        .custom-checkbox:checked {
+            background-color: #13ecec;
+            background-image: none !important;
+            /* Remove o checkmark padrão do Tailwind */
+        }
+
+        .custom-checkbox:checked::before {
+            content: "\e5ca";
+            font-family: 'Material Symbols Outlined';
+            font-size: 18px;
+            color: #0F0F0F;
+            font-weight: bold;
+        }
+
+        .safe-area-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-50 bg-background-dark/90 backdrop-blur-md px-4 pt-8 pb-4 border-b border-white/5">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="window.location.href='index.html'"
+                    class="hover:bg-white/10 rounded-full p-1 transition-colors">
+                    <span class="material-symbols-outlined text-primary">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold tracking-tight">Minha Lista de Compras</h1>
+            </div>
+            <button class="text-primary text-sm font-semibold active:opacity-60 transition-opacity">
+                Limpar Concluídos
+            </button>
+        </div>
+    </header>
+    <!-- Main Content: Shopping List -->
+    <main class="flex flex-col gap-3 p-4 pb-40">
+        <!-- Item Card 1 -->
+        <div class="bg-card-dark rounded-lg p-4 shadow-lg border border-white/5">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <div class="flex items-start gap-3 flex-1">
+                    <input class="custom-checkbox mt-1" type="checkbox" />
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span class="text-base font-semibold">Leite Moça</span>
+                        <span
+                            class="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit">
+                            Estoque: 2 un
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-primary font-bold text-lg">R$ 72,00</p>
+                    <p class="text-[10px] text-gray-400 uppercase">Total</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-3 pl-10">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs text-gray-400 uppercase tracking-wide">Modo de Custo</label>
+                    <select
+                        class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="unitario">Unitário</option>
+                        <option value="pacote">Pacote</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Quantidade</label>
+                        <input type="number" value="12" min="1" id="qty-1" data-item="1"
+                            class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Un</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="6.00" step="0.01" min="0" id="cost-un-1" data-item="1"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Pacote</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="68.00" step="0.01" min="0" id="cost-pack-1" data-item="1"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Card 2 -->
+        <div class="bg-card-dark rounded-lg p-4 shadow-lg border border-white/5">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <div class="flex items-start gap-3 flex-1">
+                    <input class="custom-checkbox mt-1" type="checkbox" />
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span class="text-base font-semibold">Liga Neutra</span>
+                        <span
+                            class="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit">
+                            Estoque: 100g
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-primary font-bold text-lg">R$ 15,50</p>
+                    <p class="text-[10px] text-gray-400 uppercase">Total</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-3 pl-10">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs text-gray-400 uppercase tracking-wide">Modo de Custo</label>
+                    <select
+                        class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="unitario">Unitário</option>
+                        <option value="pacote">Pacote</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Quantidade (kg)</label>
+                        <input type="number" value="1" step="0.1" min="0.1" id="qty-2" data-item="2"
+                            class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Un</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="15.50" step="0.01" min="0" id="cost-un-2" data-item="2"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Pacote</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="14.80" step="0.01" min="0" id="cost-pack-2" data-item="2"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Card 3 -->
+        <div class="bg-card-dark rounded-lg p-4 shadow-lg border border-white/5">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <div class="flex items-start gap-3 flex-1">
+                    <input class="custom-checkbox mt-1" type="checkbox" />
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span class="text-base font-semibold">Embalagem P</span>
+                        <span
+                            class="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit">
+                            Estoque: 50 un
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-primary font-bold text-lg">R$ 22,00</p>
+                    <p class="text-[10px] text-gray-400 uppercase">Total</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-3 pl-10">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs text-gray-400 uppercase tracking-wide">Modo de Custo</label>
+                    <select
+                        class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="unitario">Unitário</option>
+                        <option value="pacote" selected>Pacote</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Quantidade</label>
+                        <input type="number" value="500" min="1" id="qty-3" data-item="3"
+                            class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Un</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="0.044" step="0.001" min="0" id="cost-un-3" data-item="3"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Pacote</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="22.00" step="0.01" min="0" id="cost-pack-3" data-item="3"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Card 4 -->
+        <div class="bg-card-dark rounded-lg p-4 shadow-lg border border-white/5">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <div class="flex items-start gap-3 flex-1">
+                    <input class="custom-checkbox mt-1" type="checkbox" />
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span class="text-base font-semibold">Açúcar Cristal</span>
+                        <span
+                            class="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit">
+                            Estoque: 1 kg
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-primary font-bold text-lg">R$ 18,90</p>
+                    <p class="text-[10px] text-gray-400 uppercase">Total</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-3 pl-10">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs text-gray-400 uppercase tracking-wide">Modo de Custo</label>
+                    <select
+                        class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        <option value="unitario">Unitário</option>
+                        <option value="pacote">Pacote</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Quantidade (kg)</label>
+                        <input type="number" value="5" step="0.5" min="0.5" id="qty-4" data-item="4"
+                            class="bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Un</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="3.78" step="0.01" min="0" id="cost-un-4" data-item="4"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-400 uppercase tracking-wide">Custo Pacote</label>
+                        <div
+                            class="flex items-center bg-background-dark/50 border border-primary/30 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary/50">
+                            <span class="text-sm text-gray-400 mr-1">R$</span>
+                            <input type="number" value="18.90" step="0.01" min="0" id="cost-pack-4" data-item="4"
+                                class="bg-transparent text-sm font-medium text-white focus:outline-none w-full" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Card 5 (Checked) -->
+        <div class="bg-card-dark rounded-lg p-4 shadow-lg border border-white/5 opacity-60">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <div class="flex items-start gap-3 flex-1">
+                    <input checked="" class="custom-checkbox mt-1" type="checkbox" />
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span class="text-base font-semibold line-through decoration-primary/50 text-gray-400">Coco
+                            Ralado</span>
+                        <span
+                            class="bg-primary/5 text-primary/50 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full inline-block w-fit">
+                            Estoque: 0 un
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right shrink-0">
+                    <p class="text-gray-500 font-bold text-lg">R$ 45,00</p>
+                    <p class="text-[10px] text-gray-600 uppercase">Concluído</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 gap-3 pl-10">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs text-gray-500 uppercase tracking-wide">Modo de Custo</label>
+                    <select disabled
+                        class="bg-background-dark/30 border border-gray-700 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 cursor-not-allowed">
+                        <option value="unitario">Unitário</option>
+                        <option value="pacote">Pacote</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Quantidade</label>
+                        <input type="number" value="10" min="1" disabled
+                            class="bg-background-dark/30 border border-gray-700 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 cursor-not-allowed" />
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Custo Un</label>
+                        <div
+                            class="flex items-center bg-background-dark/30 border border-gray-700 rounded-lg px-3 py-2">
+                            <span class="text-sm text-gray-500 mr-1">R$</span>
+                            <input type="number" value="4.50" step="0.01" min="0" disabled
+                                class="bg-transparent text-sm font-medium text-gray-500 cursor-not-allowed w-full" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs text-gray-500 uppercase tracking-wide">Custo Pacote</label>
+                        <div
+                            class="flex items-center bg-background-dark/30 border border-gray-700 rounded-lg px-3 py-2">
+                            <span class="text-sm text-gray-500 mr-1">R$</span>
+                            <input type="number" value="45.00" step="0.01" min="0" disabled
+                                class="bg-transparent text-sm font-medium text-gray-500 cursor-not-allowed w-full" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Footer Bar -->
+    <footer
+        class="fixed bottom-0 left-0 right-0 bg-background-dark/95 border-t border-white/10 backdrop-blur-xl px-4 py-3 safe-area-bottom">
+        <div class="max-w-md mx-auto flex items-center gap-3">
+            <div class="flex flex-col min-w-0">
+                <span class="text-gray-400 text-[9px] font-medium uppercase tracking-wider">Total Estimado</span>
+                <span class="text-lg font-bold text-primary">R$ 173,40</span>
+            </div>
+            <button
+                class="flex-1 bg-primary text-background-dark font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(19,236,236,0.3)]">
+                <span class="material-symbols-outlined font-bold text-lg">inventory_2</span>
+                Finalizar Compra
+            </button>
+        </div>
+    </footer>
+    <!-- Abstract Decorative Gradient for UI Context -->
+    <div class="fixed top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -z-10 pointer-events-none"></div>
+    <div class="fixed bottom-0 left-0 w-80 h-80 bg-primary/5 blur-[120px] -z-10 pointer-events-none"></div>
+    <script>
+        // Função para sincronizar Custo Un e Custo Pacote
+        function setupCostSync() {
+            // Número de itens na lista (excluindo o item desabilitado)
+            const itemIds = ['1', '2', '3', '4'];
+
+            itemIds.forEach(id => {
+                const qtyInput = document.getElementById(`qty-${id}`);
+                const costUnInput = document.getElementById(`cost-un-${id}`);
+                const costPackInput = document.getElementById(`cost-pack-${id}`);
+
+                // Quando Custo Un mudar, atualiza Custo Pacote
+                costUnInput.addEventListener('input', function () {
+                    const qty = parseFloat(qtyInput.value) || 0;
+                    const costUn = parseFloat(this.value) || 0;
+                    const costPack = qty * costUn;
+                    costPackInput.value = costPack.toFixed(2);
+                });
+
+                // Quando Custo Pacote mudar, atualiza Custo Un
+                costPackInput.addEventListener('input', function () {
+                    const qty = parseFloat(qtyInput.value) || 0;
+                    const costPack = parseFloat(this.value) || 0;
+                    if (qty > 0) {
+                        const costUn = costPack / qty;
+                        costUnInput.value = costUn.toFixed(3);
+                    }
+                });
+
+                // Quando Quantidade mudar, recalcula Custo Pacote baseado no Custo Un
+                qtyInput.addEventListener('input', function () {
+                    const qty = parseFloat(this.value) || 0;
+                    const costUn = parseFloat(costUnInput.value) || 0;
+                    const costPack = qty * costUn;
+                    costPackInput.value = costPack.toFixed(2);
+                });
+            });
+        }
+
+        // Inicializa quando a página carregar
+        document.addEventListener('DOMContentLoaded', setupCostSync);
+    </script>
+</body>
+
+</html>

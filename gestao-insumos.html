@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestão de Insumos - Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "alert": "#ef4444",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "input-bg": "#1e1e1e",
+                        "border-dark": "#2d4444",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1.25rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .glass-header {
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(45, 45, 45, 0.5);
+        }
+        .ios-bottom-nav {
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .progress-bar-bg {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark font-display text-white min-h-screen pb-32">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-header">
+        <div class="px-4 pt-4 pb-2">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <button onclick="window.location.href='index.html'"
+                        class="text-primary hover:bg-white/10 rounded-full p-1 transition-colors -ml-1">
+                        <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                    </button>
+                    <h1 class="text-lg font-bold tracking-tight">Gestão de Insumos</h1>
+                </div>
+                <span class="material-symbols-outlined text-white/70">notifications</span>
+            </div>
+            <div class="relative mb-2">
+                <span
+                    class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-xl">search</span>
+                <input id="searchInput"
+                    class="w-full bg-input-bg border-none rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary/50 placeholder:text-white/30 text-white"
+                    placeholder="Buscar ingredientes..." type="text" />
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-36 px-4 space-y-4">
+        <!-- Cards de Resumo -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+            <!-- Total de Insumos -->
+            <div class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border border-border-dark">
+                <div class="flex items-center gap-2 text-white/50">
+                    <span class="material-symbols-outlined text-base">category</span>
+                    <p class="text-[10px] font-semibold uppercase tracking-wider">Insumos</p>
+                </div>
+                <p id="totalInsumos" class="text-2xl font-bold text-white">0</p>
+            </div>
+
+            <!-- Quantidade Total -->
+            <div class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border border-border-dark">
+                <div class="flex items-center gap-2 text-white/50">
+                    <span class="material-symbols-outlined text-base">inventory_2</span>
+                    <p class="text-[10px] font-semibold uppercase tracking-wider">Qtd Total</p>
+                </div>
+                <p id="qtdTotal" class="text-2xl font-bold text-white">0 <span
+                        class="text-sm font-normal text-white/50">un</span>
+                </p>
+            </div>
+
+            <!-- Valor Total Investido -->
+            <div
+                class="col-span-2 lg:col-span-1 flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border border-primary/30 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-2 opacity-10">
+                    <span class="material-symbols-outlined text-5xl text-primary">payments</span>
+                </div>
+                <div class="flex items-center gap-2 text-primary/80">
+                    <span class="material-symbols-outlined text-base">account_balance_wallet</span>
+                    <p class="text-[10px] font-semibold uppercase tracking-wider">Valor Total</p>
+                </div>
+                <p id="valorTotal" class="text-2xl font-bold text-primary">R$ 0</p>
+            </div>
+
+            <!-- Insumos Críticos -->
+            <div class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border-l-4 border-alert">
+                <div class="flex items-center gap-2 text-alert/80">
+                    <span class="material-symbols-outlined text-base">warning</span>
+                    <p class="text-[10px] font-semibold uppercase tracking-wider">Críticos</p>
+                </div>
+                <p id="totalCriticos" class="text-2xl font-bold text-alert">0</p>
+            </div>
+
+            <!-- Custo Médio por Produção -->
+            <div class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border border-border-dark">
+                <div class="flex items-center gap-2 text-white/50">
+                    <span class="material-symbols-outlined text-base">calculate</span>
+                    <p class="text-[10px] font-semibold uppercase tracking-wider">Custo Médio</p>
+                </div>
+                <p id="custoMedio" class="text-2xl font-bold text-white">R$ 0</p>
+            </div>
+        </div>
+
+        <!-- Status Message -->
+        <div id="statusMessage" class="hidden mb-4"></div>
+
+        <!-- Lista de Insumos -->
+        <div class="flex items-end justify-between px-1 mb-2">
+            <h2 class="text-lg font-bold">Estoque Atual</h2>
+            <span id="countInsumos" class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">0
+                ITENS</span>
+        </div>
+
+        <!-- Container de Insumos -->
+        <div id="insumosContainer" class="space-y-4 lg:grid lg:grid-cols-4 lg:gap-4 lg:space-y-0">
+            <!-- Loading -->
+            <div class="flex items-center justify-center py-12 lg:col-span-full">
+                <div class="text-center">
+                    <span class="material-symbols-outlined text-4xl text-primary animate-spin">refresh</span>
+                    <p class="text-slate-400 mt-2">Carregando insumos...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button onclick="window.location.href='gerenciar-insumos.html'"
+        class="fixed bottom-6 right-6 w-14 h-14 bg-primary rounded-full shadow-[0_8px_30px_rgba(19,236,236,0.3)] flex items-center justify-center active:scale-95 z-40">
+        <span class="material-symbols-outlined text-background-dark text-3xl font-bold">add</span>
+    </button>
+
+
+
+    <script type="module">
+        import { getAllRecords, deleteRecord } from './supabase-utils.js';
+
+        let insumos = [];
+        let filteredInsumos = [];
+
+        // Truncar para 5 casas decimais SEM arredondamento
+        function truncar5(valor) {
+            return (Math.floor(valor * 100000) / 100000).toFixed(5);
+        }
+
+        // Carregar insumos
+        async function loadInsumos() {
+            try {
+                const { data, error } = await getAllRecords('insumos');
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                // Filtrar apenas insumos (excluir equipamentos)
+                insumos = (data || []).filter(item =>
+                    item.tipo === 'ingrediente' || item.tipo === 'embalagem'
+                );
+                filteredInsumos = insumos;
+                renderInsumos();
+                updateStats();
+
+            } catch (error) {
+                console.error('Erro ao carregar insumos:', error);
+                showStatus('❌ Erro ao carregar insumos: ' + error.message, 'error');
+
+                document.getElementById('insumosContainer').innerHTML = `
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center lg:col-span-full">
+                        <span class="material-symbols-outlined text-red-400 text-4xl mb-2">error</span>
+                        <p class="text-red-300 font-semibold mb-1">Erro ao carregar insumos</p>
+                        <p class="text-sm text-red-400">${error.message}</p>
+                        <button onclick="location.reload()" 
+                            class="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            Tentar Novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderizar insumos
+        function renderInsumos() {
+            const container = document.getElementById('insumosContainer');
+            document.getElementById('countInsumos').textContent = `${filteredInsumos.length} ITENS`;
+
+            if (filteredInsumos.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-card-dark border border-card-border rounded-xl p-8 text-center lg:col-span-full">
+                        <span class="material-symbols-outlined text-white/30 text-5xl mb-3">inventory_2</span>
+                        <p class="text-slate-400 mb-2">Nenhum insumo encontrado</p>
+                        <p class="text-sm text-slate-500 mb-4">Adicione seu primeiro insumo</p>
+                        <button onclick="window.location.href='gerenciar-insumos.html'"
+                            class="bg-primary text-background-dark px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-all">
+                            Adicionar Insumo
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Ordenar alfabeticamente pelo nome
+            const sorted = [...filteredInsumos].sort((a, b) =>
+                a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
+            );
+
+            // Agrupar por letra inicial
+            const grouped = {};
+            sorted.forEach(insumo => {
+                const letter = insumo.nome.charAt(0).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                if (!grouped[letter]) grouped[letter] = [];
+                grouped[letter].push(insumo);
+            });
+
+            // Renderizar com separadores de letra
+            let html = '';
+            const letters = Object.keys(grouped).sort();
+
+            letters.forEach(letter => {
+                // Separador de letra
+                html += `
+                    <div class="lg:col-span-full flex items-center gap-3 pt-4 pb-1 first:pt-0">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                            <span class="text-primary font-bold text-lg">${letter}</span>
+                        </div>
+                        <div class="flex-1 h-px bg-gradient-to-r from-primary/30 to-transparent"></div>
+                        <span class="text-[10px] text-white/30 font-semibold uppercase tracking-wider">${grouped[letter].length} ${grouped[letter].length === 1 ? 'item' : 'itens'}</span>
+                    </div>
+                `;
+
+                // Itens dessa letra
+                grouped[letter].forEach(insumo => {
+                    let percentual;
+
+                    if (insumo.estoque_maximo && insumo.estoque_maximo > 0) {
+                        percentual = (insumo.estoque_atual / insumo.estoque_maximo * 100);
+                    } else {
+                        const referencia = (insumo.estoque_minimo || 1) * 2;
+                        percentual = (insumo.estoque_atual / referencia * 100);
+                    }
+
+                    percentual = Math.max(0, Math.min(100, percentual)).toFixed(0);
+
+                    const isCritico = insumo.estoque_atual <= insumo.estoque_minimo;
+
+                    let corBarra, corTexto, statusTexto;
+                    if (isCritico) {
+                        corBarra = 'red-500';
+                        corTexto = 'alert';
+                        statusTexto = 'Estoque Crítico';
+                    } else if (percentual >= 70) {
+                        corBarra = 'primary';
+                        corTexto = 'primary';
+                        statusTexto = 'Saudável';
+                    } else {
+                        corBarra = 'amber-500';
+                        corTexto = 'amber-400';
+                        statusTexto = 'Atenção';
+                    }
+
+                    const custoTotal = (insumo.estoque_atual * insumo.custo_unitario).toFixed(2);
+
+                    html += `
+                        <div onclick="window.location.href='detalhes-insumo.html?id=${insumo.id}'"
+                            class="bg-card-dark border border-border-dark rounded-xl p-3 flex flex-col gap-3 cursor-pointer transition-all hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]">
+                            <div class="flex gap-3">
+                                <div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800 flex items-center justify-center">
+                                    ${insumo.imagem_url
+                            ? `<img alt="${insumo.nome}" class="w-full h-full object-cover" src="${insumo.imagem_url}" />`
+                            : `<span class="material-symbols-outlined text-3xl text-slate-600">category</span>`
+                        }
+                                </div>
+                                <div class="flex-1 flex flex-col justify-between min-w-0">
+                                    <div class="flex justify-between items-start">
+                                        <div class="truncate">
+                                            <h3 class="font-bold text-sm lg:text-base truncate">${insumo.nome}</h3>
+                                            <div class="flex items-center gap-1 mt-0.5">
+                                                ${isCritico
+                            ? '<span class="material-symbols-outlined text-alert text-[14px]">warning</span><span class="text-alert text-[10px] lg:text-[12px] font-medium">Estoque Crítico</span>'
+                            : percentual >= 70
+                                ? '<span class="text-primary text-[10px] lg:text-[12px] font-medium">Saudável</span>'
+                                : '<span class="text-amber-400 text-[10px] lg:text-[12px] font-medium">Atenção</span>'
+                        }
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] lg:text-[12px] text-white/40 font-medium">${insumo.unidade_medida}</span>
+                                    </div>
+                                    <div class="flex justify-between items-end mt-1">
+                                        <span class="text-[11px] lg:text-[13px] font-bold">${insumo.estoque_atual} / ${insumo.estoque_maximo || insumo.estoque_minimo} <span
+                                                class="text-white/50 font-medium uppercase ml-0.5">${insumo.unidade_medida}</span></span>
+                                        <span class="text-${corTexto} text-[11px] lg:text-[13px] font-bold">${percentual}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-full h-1.5 progress-bar-bg rounded-full overflow-hidden">
+                                <div class="h-full bg-${corBarra} rounded-full" style="width: ${Math.min(percentual, 100)}%"></div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 pt-1">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] lg:text-[11px] text-white/50 uppercase font-medium">Estoque</span>
+                                    <span class="text-xs lg:text-sm font-bold text-white leading-tight">${insumo.estoque_atual} ${insumo.unidade_medida}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] lg:text-[11px] text-white/50 uppercase font-medium">Custo Médio</span>
+                                    <span class="text-xs lg:text-sm font-bold text-primary leading-tight">R$ ${truncar5(parseFloat(insumo.custo_unitario))}</span>
+                                </div>
+                                <div class="flex flex-col text-right">
+                                    <span class="text-[9px] lg:text-[11px] text-white/50 uppercase font-medium">Custo Total</span>
+                                    <span class="text-xs lg:text-sm font-bold text-primary leading-tight">R$ ${custoTotal}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Atualizar estatísticas
+        function updateStats() {
+            const total = insumos.length;
+            const qtdTotal = insumos.reduce((sum, i) => sum + parseFloat(i.estoque_atual || 0), 0);
+            const valorTotal = insumos.reduce((sum, i) => sum + (parseFloat(i.estoque_atual || 0) * parseFloat(i.custo_unitario || 0)), 0);
+            const criticos = insumos.filter(i => parseFloat(i.estoque_atual) <= parseFloat(i.estoque_minimo)).length;
+            const custoMedio = total > 0 ? valorTotal / total : 0;
+
+            document.getElementById('totalInsumos').textContent = total;
+            document.getElementById('qtdTotal').innerHTML = `${qtdTotal.toFixed(1)} <span class="text-sm font-normal text-white/50">un</span>`;
+            document.getElementById('valorTotal').textContent = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalCriticos').textContent = criticos;
+            document.getElementById('custoMedio').textContent = `R$ ${truncar5(custoMedio).replace('.', ',')}`;
+        }
+
+        // Busca
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            filteredInsumos = insumos.filter(i =>
+                i.nome.toLowerCase().includes(query) ||
+                i.fornecedor?.toLowerCase().includes(query) ||
+                i.unidade_medida?.toLowerCase().includes(query)
+            );
+            renderInsumos();
+        });
+
+        // Status message
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `p-4 rounded-xl mb-4 ${type === 'success'
+                ? 'bg-green-500/20 border border-green-500/50 text-green-300'
+                : 'bg-red-500/20 border border-red-500/50 text-red-300'}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 4000);
+        }
+
+        // Carregar ao iniciar
+        loadInsumos();
+
+        // Recarregar quando a página voltar ao foco
+        window.addEventListener('focus', loadInsumos);
+    </script>
+</body>
+
+</html>

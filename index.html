@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Menu Principal - Gestão Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "card-border": "#2d4444"
+                    },
+                    fontFamily: {
+                        display: ["Work Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card-glow {
+            box-shadow: 0 0 15px rgba(19, 236, 236, 0.05);
+        }
+
+        .card-active:active {
+            transform: scale(0.95);
+            background-color: #233838;
+        }
+
+        .card-active:hover {
+            background-color: #1f3434;
+            box-shadow: 0 0 20px rgba(19, 236, 236, 0.15);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden"
+    style="opacity: 0; transition: opacity 0.2s ease;">
+    <!-- Header -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 pt-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-primary text-3xl">ac_unit</span>
+                    <h1 class="text-xl font-bold tracking-tight hidden sm:block">Geladinhos</h1>
+                </div>
+                <div class="flex-1 relative">
+                    <span
+                        class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                    <input
+                        class="w-full bg-slate-100 dark:bg-slate-800/50 border-none rounded-full py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-400"
+                        placeholder="Pesquise por funcionalidades..." type="text" />
+                </div>
+                <button onclick="window.location.href='guia-configuracao.html'"
+                    class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                    title="Guia de Configuração">
+                    <span class="material-icons-round text-2xl text-primary">help</span>
+                </button>
+                <button class="relative p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                    <span class="material-icons-round text-2xl">notifications</span>
+                    <span
+                        class="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-background-light dark:border-background-dark">3</span>
+                </button>
+                <button onclick="fazerLogout()" class="p-2 hover:bg-red-500/10 rounded-full transition-colors group"
+                    title="Sair">
+                    <span class="material-icons-round text-2xl text-slate-400 group-hover:text-red-500">logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 pb-24 max-w-7xl mx-auto">
+        <!-- Welcome Section -->
+        <div class="mt-8 mb-6">
+            <h2 class="text-2xl font-bold mb-1">Bem-vindo de volta! 👋</h2>
+            <p class="text-slate-600 dark:text-slate-400 text-sm">Gerencie seu negócio de geladinhos de forma simples e
+                eficiente</p>
+        </div>
+
+        <!-- Dashboard Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
+            <!-- Vendas Hoje -->
+            <div
+                class="bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border rounded-2xl p-4 card-glow">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-icons-round text-green-500 text-xl">trending_up</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">Vendas Hoje</span>
+                </div>
+                <p id="vendasHoje" class="text-2xl font-bold text-slate-900 dark:text-white">R$ 0,00</p>
+            </div>
+
+            <!-- Em Estoque -->
+            <div
+                class="bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border rounded-2xl p-4 card-glow">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-icons-round text-blue-500 text-xl">inventory</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">Em Estoque</span>
+                </div>
+                <div id="emEstoque" class="flex flex-wrap gap-x-3 gap-y-1">
+                    <p class="text-sm text-slate-500">Carregando...</p>
+                </div>
+            </div>
+
+            <!-- Estoque Baixo -->
+            <div
+                class="bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border rounded-2xl p-4 card-glow">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-icons-round text-amber-500 text-xl">warning</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400 font-medium">Estoque Baixo</span>
+                </div>
+                <p id="estoqueBaixo" class="text-2xl font-bold text-slate-900 dark:text-white">0 itens</p>
+            </div>
+        </div>
+
+        <!-- Grid de Cards -->
+        <div class="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+            <!-- Insumos -->
+            <button onclick="window.location.href='gestao-insumos.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">kitchen</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Insumos</span>
+            </button>
+
+            <!-- Gerenciar Insumos -->
+            <button onclick="window.location.href='gerenciar-insumos.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">add_box</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Cadastrar</span>
+            </button>
+
+            <!-- Lista de Compras -->
+            <button onclick="window.location.href='lista-compras.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">shopping_cart</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Lista
+                    Compras</span>
+            </button>
+
+            <!-- Categorias -->
+            <button onclick="window.location.href='categorias.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">category</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Categorias</span>
+            </button>
+
+            <!-- Produção -->
+            <button onclick="window.location.href='producao.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span
+                    class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">precision_manufacturing</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Produção</span>
+            </button>
+
+            <!-- Estoque -->
+            <button onclick="window.location.href='estoque.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">inventory_2</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Estoque</span>
+            </button>
+
+            <!-- Vendas -->
+            <button onclick="window.location.href='vendas.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">shopping_cart</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Vendas</span>
+            </button>
+
+            <!-- Precificação -->
+            <button onclick="window.location.href='precificacao.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">sell</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Precificação</span>
+            </button>
+
+            <!-- Meus Pedidos -->
+            <button onclick="window.location.href='pedidos.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">receipt_long</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Pedidos</span>
+            </button>
+
+            <!-- Financeiro -->
+            <button onclick="window.location.href='faturamento.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">payments</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Financeiro</span>
+            </button>
+
+            <!-- Despesas -->
+            <button onclick="window.location.href='despesas.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">credit_card</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Despesas</span>
+            </button>
+
+            <!-- DRE Detalhado (Premium) -->
+            <button id="btnDRE" onclick="window.location.href='planos.html'"
+                class="relative flex flex-col items-center justify-center aspect-square rounded-3xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 transition-all opacity-60 hover:opacity-80 cursor-pointer">
+                <span id="btnDREBadge"
+                    class="absolute top-1.5 right-1.5 bg-amber-500 text-[7px] font-black text-black px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                    <span class="material-icons-round" style="font-size:9px">star</span>PRO
+                </span>
+                <span id="btnDREIcon"
+                    class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-slate-400 dark:text-slate-600">analytics</span>
+                <span id="btnDRELabel"
+                    class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1 text-slate-400 dark:text-slate-600">DRE</span>
+            </button>
+
+
+            <!-- Equipamentos -->
+            <button onclick="window.location.href='equipamentos.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">construction</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Equipamentos</span>
+            </button>
+
+            <!-- Receitas -->
+            <button onclick="window.location.href='receitas.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">menu_book</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Receitas</span>
+            </button>
+
+            <!-- Configurações -->
+            <button onclick="window.location.href='configuracoes.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">settings</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Configurações</span>
+            </button>
+            <!-- Produtos -->
+            <button onclick="window.location.href='gestao-produtos.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">icecream</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Produtos</span>
+            </button>
+
+
+            <!-- Indique e Ganhe -->
+            <button onclick="window.location.href='indique-ganhe.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">loyalty</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Indique e Ganhe</span>
+            </button>
+
+            <!-- Planos -->
+            <button onclick="window.location.href='planos.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span
+                    class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">workspace_premium</span>
+                <span class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Planos</span>
+            </button>
+
+            <!-- Meu Perfil -->
+            <button id="btnPerfil" onclick="window.location.href='perfil.html'"
+                class="card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all">
+                <span class="material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary">person</span>
+                <span id="btnPerfilLabel"
+                    class="text-[10px] md:text-sm font-semibold text-center leading-tight px-1">Meu Perfil</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- iOS-style Home Indicator -->
+    <div
+        class="fixed bottom-0 left-0 right-0 h-8 bg-background-light dark:bg-background-dark flex justify-center items-center pointer-events-none">
+        <div class="w-32 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full opacity-50"></div>
+    </div>
+
+
+
+    <script type="module">
+        import { getAllRecords } from './supabase-utils.js';
+        import { getSupabase } from './supabase-client.js';
+        import { getUserPlan } from './plan-limits.js';
+
+        // Força dark mode como padrão
+        document.documentElement.classList.add('dark');
+
+        // ========== VERIFICAR LOGIN ==========
+        async function checkAuth() {
+            const sb = getSupabase();
+            if (!sb) return true; // sem supabase, prossegue
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) {
+                    window.location.replace('login.html');
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                console.warn('Erro ao verificar sessão:', e);
+                window.location.replace('login.html');
+                return false;
+            }
+        }
+
+        const isAuthenticated = await checkAuth();
+        if (!isAuthenticated) {
+            // Não continuar — redirecionando para login
+        } else {
+
+            // Auth OK — mostrar página
+            document.body.style.opacity = '1';
+
+            // ========== VERIFICAR PLANO PARA DRE ==========
+            try {
+                const plano = await getUserPlan();
+                const btnDRE = document.getElementById('btnDRE');
+                const btnDREBadge = document.getElementById('btnDREBadge');
+                const btnDREIcon = document.getElementById('btnDREIcon');
+                const btnDRELabel = document.getElementById('btnDRELabel');
+
+                if (plano === 'premium') {
+                    // Habilitar DRE para premium
+                    btnDRE.setAttribute('onclick', "window.location.href='dre.html'");
+                    btnDRE.className = 'card-active flex flex-col items-center justify-center aspect-square rounded-3xl bg-white dark:bg-card-dark border border-slate-200 dark:border-card-border card-glow transition-all';
+                    btnDREBadge.style.display = 'none';
+                    btnDREIcon.className = 'material-icons-round text-2xl md:text-4xl mb-1 md:mb-2 text-primary';
+                    btnDRELabel.className = 'text-[10px] md:text-sm font-semibold text-center leading-tight px-1';
+                }
+            } catch (e) {
+                console.warn('Erro ao verificar plano para DRE:', e);
+            }
+
+            // Ajustar botão de perfil com base no role do usuário
+            const userRole = localStorage.getItem('userRole');
+            const btnPerfil = document.getElementById('btnPerfil');
+            const btnPerfilLabel = document.getElementById('btnPerfilLabel');
+
+            if (userRole === 'afiliado') {
+                btnPerfil.setAttribute('onclick', "window.location.href='perfil-afiliado.html'");
+                btnPerfilLabel.textContent = 'Perfil Afiliado';
+            } else {
+                btnPerfil.setAttribute('onclick', "window.location.href='perfil.html'");
+                btnPerfilLabel.textContent = 'Meu Perfil';
+            }
+
+            // Carregar dados do dashboard
+            async function loadDashboardData() {
+                try {
+                    // 1. Vendas de Hoje
+                    const hoje = new Date();
+                    hoje.setHours(0, 0, 0, 0);
+                    const { data: pedidos, error: pedidosError } = await getAllRecords('pedidos');
+
+                    if (!pedidosError && pedidos) {
+                        const vendasHoje = pedidos
+                            .filter(p => {
+                                const dataPedido = new Date(p.data_pedido);
+                                dataPedido.setHours(0, 0, 0, 0);
+                                return dataPedido.getTime() === hoje.getTime() && p.status !== 'cancelado';
+                            })
+                            .reduce((sum, p) => sum + parseFloat(p.valor_total || 0), 0);
+
+                        document.getElementById('vendasHoje').textContent =
+                            `R$ ${vendasHoje.toFixed(2).replace('.', ',')}`;
+                    }
+
+                    // 2. Total em Estoque (agrupado por unidade de medida)
+                    const { data: insumos, error: insumosError } = await getAllRecords('insumos');
+
+                    if (!insumosError && insumos) {
+                        // Filtrar apenas ingredientes e embalagens
+                        const insumosValidos = insumos.filter(i =>
+                            i.tipo === 'ingrediente' || i.tipo === 'embalagem'
+                        );
+
+                        // Agrupar por unidade de medida
+                        const estoquePorUnidade = {};
+
+                        insumosValidos.forEach(insumo => {
+                            const unidade = (insumo.unidade_medida || 'un').toLowerCase();
+                            const quantidade = parseFloat(insumo.estoque_atual || 0);
+
+                            if (!estoquePorUnidade[unidade]) {
+                                estoquePorUnidade[unidade] = 0;
+                            }
+                            estoquePorUnidade[unidade] += quantidade;
+                        });
+
+                        // Ordenar unidades (un, kg, g, l, ml, outros)
+                        const ordemUnidades = ['un', 'kg', 'g', 'l', 'ml'];
+                        const unidadesOrdenadas = Object.keys(estoquePorUnidade).sort((a, b) => {
+                            const indexA = ordemUnidades.indexOf(a);
+                            const indexB = ordemUnidades.indexOf(b);
+
+                            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                            if (indexA !== -1) return -1;
+                            if (indexB !== -1) return 1;
+                            return a.localeCompare(b);
+                        });
+
+                        // Renderizar cada unidade
+                        const estoqueContainer = document.getElementById('emEstoque');
+
+                        if (unidadesOrdenadas.length === 0) {
+                            estoqueContainer.innerHTML = '<p class="text-lg font-bold text-slate-400">0 itens</p>';
+                        } else {
+                            estoqueContainer.innerHTML = unidadesOrdenadas.map((unidade, index) => {
+                                const valor = estoquePorUnidade[unidade];
+                                const valorFormatado = valor % 1 === 0 ? valor.toFixed(0) : valor.toFixed(1);
+
+                                const separador = index < unidadesOrdenadas.length - 1
+                                    ? '<span class="text-slate-300 dark:text-slate-600">•</span>'
+                                    : '';
+
+                                return `<p class="text-lg font-bold text-slate-900 dark:text-white whitespace-nowrap">${valorFormatado} <span class="text-sm font-normal text-slate-500 dark:text-slate-400">${unidade}</span></p>${separador}`;
+                            }).join('');
+                        }
+
+                        // 3. Estoque Baixo (itens com estoque <= mínimo)
+                        const estoqueBaixo = insumosValidos.filter(
+                            i => parseFloat(i.estoque_atual) <= parseFloat(i.estoque_minimo)
+                        ).length;
+
+                        document.getElementById('estoqueBaixo').textContent =
+                            `${estoqueBaixo} ${estoqueBaixo === 1 ? 'item' : 'itens'}`;
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao carregar dados do dashboard:', error);
+                }
+            }
+
+            // Carregar ao iniciar
+            loadDashboardData();
+
+            // Recarregar quando a janela volta ao foco
+            window.addEventListener('focus', loadDashboardData);
+
+            // Logout
+            window.fazerLogout = async function () {
+                if (!confirm('Tem certeza que deseja sair?')) return;
+                try {
+                    if (supabase) {
+                        await supabase.auth.signOut({ scope: 'global' });
+                    }
+                } catch (e) {
+                    console.warn('Erro no signOut:', e);
+                }
+                window.location.replace('login.html?logout=1');
+            };
+
+            // Limpar role no logout
+            window.addEventListener('beforeunload', () => {
+                if (window.location.href.includes('logout')) {
+                    localStorage.removeItem('userRole');
+                }
+            });
+        } // fecha else do isAuthenticated
+    </script>
+</body>
+
+</html>

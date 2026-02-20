@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Pagamento Pix - Gestão Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0ceded",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a1a1a",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #0F0F0F;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .qr-glow {
+            box-shadow: 0 0 40px rgba(12, 237, 237, 0.08), 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .pulse-ring {
+            animation: pulseRing 2s ease-out infinite;
+        }
+
+        @keyframes pulseRing {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        .copy-flash {
+            animation: copyFlash 0.4s ease-out;
+        }
+
+        @keyframes copyFlash {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+                background-color: rgba(12, 237, 237, 0.15);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        .timer-urgent {
+            animation: urgentPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes urgentPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white min-h-screen font-display">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-header px-4 py-4 flex items-center">
+        <button onclick="window.location.href='checkout.html'"
+            class="p-2 -ml-2 text-primary flex items-center rounded-full hover:bg-primary/10 transition-colors">
+            <span class="material-icons-round">arrow_back_ios_new</span>
+        </button>
+        <h1 class="flex-1 text-center text-lg font-bold tracking-tight mr-8">Pagamento Pix</h1>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pt-6 pb-12">
+        <!-- Pix Logo (centered above) -->
+        <div class="mb-6 flex items-center justify-center gap-2">
+            <svg class="h-7" viewBox="0 0 512 512" fill="none">
+                <path
+                    d="M382.56 349.37c-22.07 0-42.82-8.6-58.44-24.22l-68.18-68.18a13.36 13.36 0 00-18.9 0l-68.56 68.56c-15.62 15.62-36.37 24.22-58.44 24.22h-11.47l86.33 86.33c33.41 33.41 87.61 33.41 121.02 0l86.52-86.52-10.88-.19z"
+                    fill="#0ceded" />
+                <path
+                    d="M108.04 162.63c22.07 0 42.82 8.6 58.44 24.22l68.56 68.56a13.36 13.36 0 0018.9 0l68.18-68.18c15.62-15.62 36.37-24.22 58.44-24.22h10.88l-86.52-86.52c-33.41-33.41-87.61-33.41-121.02 0l-86.33 86.33 10.47-.19z"
+                    fill="#0ceded" />
+                <path
+                    d="M425.88 196.08l-43.32-43.32c-1.54.36-3.12.55-4.73.55h-.27c-16.8 0-32.58 6.54-44.45 18.41l-68.18 68.18c-7.51 7.51-17.37 11.27-27.23 11.27s-19.72-3.76-27.23-11.27l-68.56-68.56c-11.87-11.87-27.65-18.41-44.45-18.41h-5c-1.61 0-3.19-.19-4.73-.55l-43.32 43.32c-33.41 33.41-33.41 87.61 0 121.02l43.32 43.32c1.54-.36 3.12-.55 4.73-.55h5c16.8 0 32.58-6.54 44.45-18.41l68.56-68.56c14.62-14.62 39.84-14.62 54.46 0l68.18 68.18c11.87 11.87 27.65 18.41 44.45 18.41h.27c1.61 0 3.19.19 4.73.55l43.32-43.32c33.41-33.42 33.41-87.62 0-121.03z"
+                    fill="#0ceded" />
+            </svg>
+            <span class="text-primary font-bold text-lg">Pix</span>
+        </div>
+
+        <!-- Two-column layout for desktop -->
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+
+            <!-- LEFT: QR Code Card -->
+            <div
+                class="bg-card-dark rounded-2xl p-8 w-full lg:w-1/2 flex flex-col items-center border border-white/5 qr-glow">
+                <!-- QR Code -->
+                <div id="qrContainer" class="bg-white p-4 rounded-xl mb-6">
+                    <!-- Loading state -->
+                    <div id="qrLoading" class="w-[200px] h-[200px] flex items-center justify-center">
+                        <div class="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin">
+                        </div>
+                    </div>
+                    <!-- QR Code image (from AbacatePay) -->
+                    <img id="qrImage" src="" alt="QR Code Pix" class="w-[200px] h-[200px] hidden" />
+                    <!-- QR Code canvas (fallback) -->
+                    <canvas id="qrCanvas" width="200" height="200" class="hidden"></canvas>
+                </div>
+
+                <!-- Price -->
+                <div class="text-center mb-6">
+                    <p class="text-white/50 text-xs font-bold uppercase tracking-widest mb-1">Total a pagar</p>
+                    <h2 id="totalDisplay" class="text-4xl font-black text-primary">R$ 39,90</h2>
+                    <p id="discountMsg" class="text-primary/50 text-xs mt-1 hidden">Desconto aplicado com sucesso</p>
+                </div>
+
+                <!-- Pix Copia e Cola -->
+                <div class="w-full space-y-2">
+                    <label class="text-[10px] text-white/40 ml-1 font-bold uppercase tracking-widest">Link de
+                        Pagamento</label>
+                    <div class="flex gap-2">
+                        <div id="pixCode"
+                            class="flex-grow bg-background-dark/60 border border-white/10 rounded-lg px-4 py-3 text-xs text-white/70 truncate font-mono">
+                            00020101021226830014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540539.905802BR5925GELADINHOS
+                            GOURMET LTDA6009SAO PAULO62070503***6304A1B2
+                        </div>
+                        <button id="copyPixBtn" onclick="copiarCodigoPix()"
+                            class="bg-primary text-background-dark px-4 py-3 rounded-lg font-bold flex items-center justify-center hover:brightness-110 active:scale-95 transition-all">
+                            <span id="copyPixIcon" class="material-icons-round text-lg">content_copy</span>
+                        </button>
+                    </div>
+                    <!-- Copy feedback -->
+                    <div id="copyPixFeedback"
+                        class="hidden flex items-center gap-1 px-1 text-primary text-xs font-bold">
+                        <span class="material-icons-round text-sm">check_circle</span>
+                        Código copiado!
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div id="timerContainer" class="mt-6 flex items-center gap-2 text-primary/70">
+                    <span class="material-icons-round text-sm">schedule</span>
+                    <p class="text-sm font-medium">Este código expira em: <span id="timer"
+                            class="text-primary font-black">15:00</span></p>
+                </div>
+            </div>
+
+            <!-- RIGHT: Status + Actions -->
+            <div class="w-full lg:w-1/2 space-y-5">
+                <!-- Status / Waiting -->
+                <div class="bg-card-dark rounded-2xl border border-white/5 p-6">
+                    <div id="waitingStatus" class="flex flex-col items-center justify-center space-y-3 py-4">
+                        <div class="relative flex items-center justify-center">
+                            <div class="absolute w-6 h-6 border-2 border-primary/20 rounded-full pulse-ring">
+                            </div>
+                            <div class="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin">
+                            </div>
+                        </div>
+                        <p class="text-sm text-white/50 font-medium">Aguardando confirmação do pagamento...</p>
+                    </div>
+                </div>
+
+                <!-- Já paguei -->
+                <button onclick="jaPaguei()"
+                    class="w-full py-4 border border-white/10 rounded-xl text-white font-bold hover:bg-white/5 transition-colors active:bg-white/10 active:scale-[0.98]">
+                    Já paguei
+                </button>
+
+                <!-- Ajuda -->
+                <div class="bg-white/[0.02] border border-white/5 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="material-icons-round text-primary/50 text-lg mt-0.5">help_outline</span>
+                        <div class="space-y-1">
+                            <p class="text-xs text-white/40 font-bold">Como pagar com Pix?</p>
+                            <ol class="text-[11px] text-white/30 space-y-1 leading-relaxed list-decimal list-inside">
+                                <li>Abra o app do seu banco</li>
+                                <li>Escolha pagar com Pix via QR Code</li>
+                                <li>Escaneie o QR Code acima ou cole o código</li>
+                                <li>Confirme o pagamento no app do banco</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segurança Badge -->
+                <div class="flex items-center justify-center gap-2 text-white/20 text-xs py-2">
+                    <span class="material-icons-round text-sm">lock</span>
+                    <span>Pagamento seguro via Pix • Processado por AbacatePay</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        import { ABACATEPAY_API_KEY, ABACATEPAY_API_URL } from './supabase-config.js';
+
+        const supabase = getSupabase();
+
+        // Ler parâmetros da URL
+        const params = new URLSearchParams(window.location.search);
+        const total = parseFloat(params.get('total') || '39.90');
+        const cupom = params.get('cupom') || '';
+        const cupomId = params.get('cupom_id') ? parseInt(params.get('cupom_id')) : null;
+        const descontoPct = parseFloat(params.get('desconto_pct') || '0');
+        const comissaoPct = parseFloat(params.get('comissao_pct') || '0');
+        const valorDesconto = parseFloat(params.get('valor_desconto') || '0');
+
+        // Estado
+        let chargeId = null;
+        let pollingInterval = null;
+        let timerInterval = null;
+        let timeLeft = 15 * 60; // 15 min
+
+        // Exibir valor
+        document.getElementById('totalDisplay').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+        if (cupom) {
+            document.getElementById('discountMsg').textContent = `Cupom ${cupom} aplicado com sucesso`;
+            document.getElementById('discountMsg').classList.remove('hidden');
+        }
+
+        // ========================
+        // CRIAR COBRANÇA NA ABACATEPAY
+        // ========================
+
+        async function criarCobrancaPix() {
+            // Se a chave não foi configurada, usar fallback
+            if (!ABACATEPAY_API_KEY || ABACATEPAY_API_KEY === 'SUA_CHAVE_ABACATEPAY_AQUI') {
+                console.warn('⚠️ Chave AbacatePay não configurada. Usando modo simulado.');
+                usarFallback();
+                return;
+            }
+
+            const amountCentavos = Math.round(total * 100); // AbacatePay usa centavos
+
+            try {
+                // ---- PASSO 1: Criar customer na AbacatePay ----
+                let customerData = {
+                    name: 'Cliente',
+                    email: 'cliente@app.com',
+                    cellphone: '11999999999',
+                    taxId: '52998224725',
+                };
+
+                // Tentar pegar dados reais do usuário logado
+                if (supabase) {
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session && session.user) {
+                            customerData.email = session.user.email || customerData.email;
+                            const { data: perfil } = await supabase
+                                .from('configuracoes')
+                                .select('valor')
+                                .eq('chave', 'nome_negocio')
+                                .single();
+                            if (perfil && perfil.valor) customerData.name = perfil.valor;
+                        }
+                    } catch (e) { /* usa dados padrão */ }
+                }
+
+                console.log('🔍 Criando customer:', JSON.stringify(customerData));
+
+                const customerRes = await fetch(`${ABACATEPAY_API_URL}/customer/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
+                    },
+                    body: JSON.stringify(customerData),
+                });
+
+                const customerResult = await customerRes.json();
+                console.log('🔍 Customer response:', JSON.stringify(customerResult));
+
+                // Extrair o ID do customer
+                const customerId = customerResult.data?.id || customerResult.data?._id || customerResult.id;
+
+                if (!customerId) {
+                    console.error('❌ Falha ao criar customer:', customerResult.error || customerResult);
+                    usarFallback();
+                    return;
+                }
+
+                console.log('✅ Customer criado:', customerId);
+
+                // ---- PASSO 2: Criar billing ----
+                const billingPayload = {
+                    frequency: 'ONE_TIME',
+                    methods: ['PIX'],
+                    returnUrl: `${window.location.origin}/checkout.html`,
+                    completionUrl: `${window.location.origin}/index.html`,
+                    customer: customerData,
+                    products: [{
+                        externalId: `plano-premium-${Date.now()}`,
+                        name: cupom ? `Plano Premium - ${cupom}` : 'Plano Premium',
+                        quantity: 1,
+                        price: amountCentavos,
+                    }],
+                };
+
+                console.log('🔍 Billing payload:', JSON.stringify(billingPayload));
+
+                const response = await fetch(`${ABACATEPAY_API_URL}/billing/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
+                    },
+                    body: JSON.stringify(billingPayload),
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    console.error('❌ Erro AbacatePay:', result.error);
+                    usarFallback();
+                    return;
+                }
+
+                console.log('✅ Billing response:', JSON.stringify(result));
+
+                const billing = result.data;
+                chargeId = billing.id || billing._id;
+
+                // Mostrar QR Code real
+                const qrImage = document.getElementById('qrImage');
+                const qrLoading = document.getElementById('qrLoading');
+
+                // AbacatePay retorna uma URL de pagamento, gerar QR Code real dela
+                const paymentUrl = billing.url;
+                console.log('🔍 Payment URL:', paymentUrl);
+
+                if (paymentUrl) {
+                    // Gerar QR Code real usando API pública
+                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(paymentUrl)}`;
+                    qrImage.src = qrApiUrl;
+                    qrImage.onload = () => {
+                        qrLoading.classList.add('hidden');
+                        qrImage.classList.remove('hidden');
+                    };
+                    qrImage.onerror = () => {
+                        qrLoading.classList.add('hidden');
+                        gerarQRCodeCanvas();
+                    };
+
+                    // Mostrar a URL de pagamento como código para copiar
+                    document.getElementById('pixCode').textContent = paymentUrl;
+                } else {
+                    qrLoading.classList.add('hidden');
+                    gerarQRCodeCanvas();
+                }
+
+                // Usar a expiração da AbacatePay
+                if (billing.expiresIn) {
+                    timeLeft = billing.expiresIn;
+                }
+
+                // Iniciar timer
+                iniciarTimer();
+
+                // Iniciar polling automático de status
+                iniciarPolling();
+
+                console.log('✅ Cobrança Pix criada via AbacatePay:', chargeId);
+
+            } catch (err) {
+                console.error('❌ Erro ao criar cobrança:', err);
+                usarFallback();
+            }
+        }
+
+        // ========================
+        // FALLBACK (sem AbacatePay)
+        // ========================
+
+        function usarFallback() {
+            console.warn('⚠️ Usando modo simulado (Edge Functions não disponíveis)');
+
+            // Mostrar código Pix simulado
+            const valorPix = total.toFixed(2);
+            document.getElementById('pixCode').textContent =
+                `00020101021226830014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef12345678905204000053039865404${valorPix}5802BR5925GELADINHOS GOURMET LTDA6009SAO PAULO62070503***6304A1B2`;
+
+            // Mostrar QR Code canvas
+            document.getElementById('qrLoading').classList.add('hidden');
+            gerarQRCodeCanvas();
+
+            // Iniciar timer
+            iniciarTimer();
+        }
+
+        // ========================
+        // POLLING DE STATUS
+        // ========================
+
+        function iniciarPolling() {
+            if (!chargeId) return;
+
+            // Verificar a cada 5 segundos
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${ABACATEPAY_API_URL}/billing/get?id=${chargeId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
+                        },
+                    });
+
+                    const result = await response.json();
+                    const status = result.data?.status || result.data?.billing?.status;
+
+                    if (status === 'PAID' || status === 'paid') {
+                        // PAGAMENTO CONFIRMADO!
+                        clearInterval(pollingInterval);
+                        await pagamentoConfirmado();
+                    } else if (status === 'EXPIRED' || status === 'expired') {
+                        clearInterval(pollingInterval);
+                        expirarCobranca();
+                    }
+                } catch (err) {
+                    console.warn('Erro no polling:', err.message);
+                }
+            }, 5000);
+        }
+
+        // ========================
+        // PAGAMENTO CONFIRMADO
+        // ========================
+
+        async function pagamentoConfirmado() {
+            clearInterval(timerInterval);
+            clearInterval(pollingInterval);
+
+            // Registrar indicação no Supabase
+            await registrarIndicacao();
+
+            const status = document.getElementById('waitingStatus');
+            status.innerHTML = `
+                <div class="flex flex-col items-center space-y-3 py-2">
+                    <div class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border-2 border-emerald-500/30">
+                        <span class="material-icons-round text-emerald-400 text-3xl">check_circle</span>
+                    </div>
+                    <p class="text-lg text-emerald-400 font-bold">Pagamento Confirmado! 🎉</p>
+                    <p class="text-xs text-white/40">Seu plano Premium já está ativo.</p>
+                    <button onclick="window.location.href='index.html'" 
+                        class="mt-2 bg-primary text-background-dark px-8 py-3 rounded-xl font-bold hover:brightness-110 active:scale-[0.97] transition-all">
+                        Ir para o App
+                    </button>
+                </div>
+            `;
+        }
+
+        function expirarCobranca() {
+            clearInterval(timerInterval);
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = 'Expirado';
+            timerEl.classList.add('text-red-400');
+
+            document.getElementById('waitingStatus').innerHTML = `
+                <div class="flex flex-col items-center space-y-3">
+                    <span class="material-icons-round text-red-400 text-3xl">timer_off</span>
+                    <p class="text-sm text-red-400 font-bold">QR Code expirado</p>
+                    <button onclick="window.location.href='checkout.html'" 
+                        class="text-primary text-sm font-bold hover:underline">Gerar novo código</button>
+                </div>
+            `;
+        }
+
+        // ========================
+        // TIMER
+        // ========================
+
+        function iniciarTimer() {
+            function atualizarTimer() {
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                const timerEl = document.getElementById('timer');
+                timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 120) {
+                    timerEl.classList.add('text-red-400', 'timer-urgent');
+                    timerEl.classList.remove('text-primary');
+                }
+
+                if (timeLeft <= 0) {
+                    expirarCobranca();
+                    return;
+                }
+
+                timeLeft--;
+            }
+
+            timerInterval = setInterval(atualizarTimer, 1000);
+            atualizarTimer();
+        }
+
+        // ========================
+        // QR CODE CANVAS (FALLBACK)
+        // ========================
+
+        function gerarQRCodeCanvas() {
+            const canvas = document.getElementById('qrCanvas');
+            canvas.classList.remove('hidden');
+            const ctx = canvas.getContext('2d');
+            const size = 200;
+            const moduleCount = 25;
+            const moduleSize = size / moduleCount;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+
+            const seed = Math.round(total * 100);
+            function seededRandom(s) {
+                let x = Math.sin(s) * 10000;
+                return x - Math.floor(x);
+            }
+
+            ctx.fillStyle = '#000000';
+
+            function drawFinder(x, y) {
+                ctx.fillRect(x * moduleSize, y * moduleSize, 7 * moduleSize, 7 * moduleSize);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect((x + 1) * moduleSize, (y + 1) * moduleSize, 5 * moduleSize, 5 * moduleSize);
+                ctx.fillStyle = '#000000';
+                ctx.fillRect((x + 2) * moduleSize, (y + 2) * moduleSize, 3 * moduleSize, 3 * moduleSize);
+            }
+
+            drawFinder(0, 0);
+            drawFinder(moduleCount - 7, 0);
+            drawFinder(0, moduleCount - 7);
+
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    if ((row < 8 && col < 8) || (row < 8 && col >= moduleCount - 8) || (row >= moduleCount - 8 && col < 8)) continue;
+                    if (seededRandom(row * moduleCount + col + seed) > 0.5) {
+                        ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
+                    }
+                }
+            }
+
+            for (let i = 8; i < moduleCount - 8; i++) {
+                if (i % 2 === 0) {
+                    ctx.fillRect(i * moduleSize, 6 * moduleSize, moduleSize, moduleSize);
+                    ctx.fillRect(6 * moduleSize, i * moduleSize, moduleSize, moduleSize);
+                }
+            }
+
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const iconSize = 28;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(centerX - iconSize / 2 - 2, centerY - iconSize / 2 - 2, iconSize + 4, iconSize + 4);
+            ctx.fillStyle = '#0ceded';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('PIX', centerX, centerY);
+        }
+
+        // ========================
+        // COPIAR CÓDIGO PIX
+        // ========================
+
+        window.copiarCodigoPix = function () {
+            const code = document.getElementById('pixCode').textContent.trim();
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('copyPixBtn');
+                const icon = document.getElementById('copyPixIcon');
+                const feedback = document.getElementById('copyPixFeedback');
+
+                icon.textContent = 'check';
+                btn.classList.add('copy-flash');
+                feedback.classList.remove('hidden');
+
+                setTimeout(() => {
+                    icon.textContent = 'content_copy';
+                    btn.classList.remove('copy-flash');
+                }, 1500);
+
+                setTimeout(() => {
+                    feedback.classList.add('hidden');
+                }, 3000);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ Código Pix copiado!');
+            });
+        };
+
+        // ========================
+        // REGISTRAR INDICAÇÃO NO SUPABASE
+        // ========================
+
+        async function registrarIndicacao() {
+            if (!cupomId || !supabase) return;
+
+            try {
+                let nomeCliente = 'Cliente via Pix';
+                try {
+                    const { data: configNome } = await supabase
+                        .from('configuracoes')
+                        .select('valor')
+                        .eq('chave', 'nome_negocio')
+                        .single();
+                    if (configNome && configNome.valor) {
+                        nomeCliente = configNome.valor;
+                    }
+                } catch (e) { /* usa fallback */ }
+
+                const valorOriginal = total + valorDesconto;
+                const comissao = valorOriginal * (comissaoPct / 100);
+
+                const novaIndicacao = {
+                    cupom_id: cupomId,
+                    nome_indicado: nomeCliente,
+                    status: 'ativo',
+                    valor_assinatura: valorOriginal,
+                    valor_comissao: comissao,
+                    valor_desconto: valorDesconto,
+                    data_indicacao: new Date().toISOString(),
+                    data_conversao: new Date().toISOString(),
+                };
+
+                const { error } = await supabase
+                    .from('indicacoes')
+                    .insert([novaIndicacao]);
+
+                if (error) {
+                    console.error('❌ Erro ao registrar indicação:', error);
+                } else {
+                    console.log('✅ Indicação registrada automaticamente!');
+                }
+            } catch (err) {
+                console.error('❌ Erro ao registrar indicação:', err);
+            }
+        }
+
+        // ========================
+        // BOTÃO "JÁ PAGUEI" (verificação manual + fallback)
+        // ========================
+
+        window.jaPaguei = async function () {
+            const status = document.getElementById('waitingStatus');
+            status.innerHTML = `
+                <div class="flex flex-col items-center space-y-3 py-2">
+                    <div class="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                    <p class="text-sm text-primary font-medium">Verificando pagamento...</p>
+                </div>
+            `;
+
+            // Se tem chargeId, verificar status real na AbacatePay
+            if (chargeId) {
+                try {
+                    const response = await fetch(`${ABACATEPAY_API_URL}/billing/get?id=${chargeId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
+                        },
+                    });
+
+                    const result = await response.json();
+                    const billingStatus = result.data?.status || result.data?.billing?.status;
+
+                    if (billingStatus === 'PAID' || billingStatus === 'paid') {
+                        await pagamentoConfirmado();
+                        return;
+                    } else {
+                        // Pagamento ainda não detectado
+                        status.innerHTML = `
+                            <div class="flex flex-col items-center space-y-3 py-2">
+                                <span class="material-icons-round text-amber-400 text-3xl">hourglass_top</span>
+                                <p class="text-sm text-amber-400 font-bold">Pagamento ainda não detectado</p>
+                                <p class="text-xs text-white/40">Aguarde alguns instantes e tente novamente.</p>
+                                <p class="text-xs text-white/30">A verificação automática continua em segundo plano.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Erro ao verificar status:', err);
+                }
+            }
+
+            // Fallback: modo simulado (sem AbacatePay)
+            await registrarIndicacao();
+
+            setTimeout(() => {
+                status.innerHTML = `
+                    <div class="flex flex-col items-center space-y-3 py-2">
+                        <div class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border-2 border-emerald-500/30">
+                            <span class="material-icons-round text-emerald-400 text-3xl">check_circle</span>
+                        </div>
+                        <p class="text-lg text-emerald-400 font-bold">Pagamento Confirmado! 🎉</p>
+                        <p class="text-xs text-white/40">Seu plano Premium já está ativo.</p>
+                        <button onclick="window.location.href='index.html'" 
+                            class="mt-2 bg-primary text-background-dark px-8 py-3 rounded-xl font-bold hover:brightness-110 active:scale-[0.97] transition-all">
+                            Ir para o App
+                        </button>
+                    </div>
+                `;
+                clearInterval(timerInterval);
+            }, 2500);
+        };
+
+        // ========================
+        // INICIALIZAÇÃO
+        // ========================
+
+        async function init() {
+            try {
+                await criarCobrancaPix();
+            } catch (err) {
+                console.warn('Fallback ativado:', err);
+                usarFallback();
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

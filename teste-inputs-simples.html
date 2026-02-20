@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <title>🔧 Teste Rápido - Inputs Editáveis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: "class" }
+    </script>
+    <style>
+        body {
+            font-family: system-ui;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-blue-400">🔧 Teste de Inputs - Configurações</h1>
+
+        <div class="bg-gray-800 p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-semibold mb-4">✍️ Teste de Edição</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm mb-2">Peso do Gás (kg)</label>
+                    <input id="peso_gas" type="number" step="0.01" placeholder="13" value="13"
+                        class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white">
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-2">Preço do Gás (R$)</label>
+                    <input id="preco_gas" type="number" step="0.01" placeholder="110.00" value="110.00"
+                        class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white">
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-2">Custo kWh (R$)</label>
+                    <input id="custo_kwh" type="number" step="0.01" placeholder="0.85" value="0.85"
+                        class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white">
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-2">Custo Mão de Obra (R$/hora)</label>
+                    <input id="custo_mao_obra" type="number" step="0.01" placeholder="25.00" value="25.00"
+                        class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white">
+                </div>
+            </div>
+
+            <button id="testButton"
+                class="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg">
+                👁️ Mostrar Valores Atuais
+            </button>
+        </div>
+
+        <div id="result" class="bg-gray-800 p-6 rounded-xl hidden">
+            <h2 class="text-xl font-semibold mb-4">📊 Valores Capturados</h2>
+            <pre id="values" class="bg-black p-4 rounded text-sm overflow-x-auto"></pre>
+        </div>
+
+        <div class="mt-6 space-y-3">
+            <div class="bg-yellow-900/30 border border-yellow-600 p-4 rounded-lg">
+                <h3 class="font-semibold mb-2">⚠️ Instruções de Teste:</h3>
+                <ol class="text-sm space-y-1 ml-4 list-decimal">
+                    <li>Tente editar cada campo acima</li>
+                    <li>Clique no botão "Mostrar Valores Atuais"</li>
+                    <li>Verifique se os valores são capturados corretamente</li>
+                    <li>Se funcionar aqui, o problema está na página principal</li>
+                </ol>
+            </div>
+
+            <a href="configuracoes.html" class="block text-center bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg">
+                ← Voltar para Configurações
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.documentElement.classList.add('dark');
+
+        const testButton = document.getElementById('testButton');
+        const resultDiv = document.getElementById('result');
+        const valuesDiv = document.getElementById('values');
+
+        testButton.addEventListener('click', () => {
+            const valores = {
+                peso_gas: document.getElementById('peso_gas').value,
+                preco_gas: document.getElementById('preco_gas').value,
+                custo_kwh: document.getElementById('custo_kwh').value,
+                custo_mao_obra: document.getElementById('custo_mao_obra').value
+            };
+
+            valuesDiv.textContent = JSON.stringify(valores, null, 2);
+            resultDiv.classList.remove('hidden');
+
+            console.log('✅ Valores capturados:', valores);
+
+            // Verifica se todos têm valor
+            const allFilled = Object.values(valores).every(v => v && parseFloat(v) > 0);
+
+            if (allFilled) {
+                testButton.className = 'w-full mt-6 bg-green-500 text-white font-bold py-3 rounded-lg';
+                testButton.textContent = '✅ Todos os campos OK!';
+            } else {
+                testButton.className = 'w-full mt-6 bg-red-500 text-white font-bold py-3 rounded-lg';
+                testButton.textContent = '❌ Alguns campos vazios!';
+            }
+
+            setTimeout(() => {
+                testButton.className = 'w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg';
+                testButton.textContent = '👁️ Mostrar Valores Atuais';
+            }, 2000);
+        });
+
+        // Log de inicialização
+        console.log('🔍 Elementos encontrados:', {
+            peso_gas: !!document.getElementById('peso_gas'),
+            preco_gas: !!document.getElementById('preco_gas'),
+            custo_kwh: !!document.getElementById('custo_kwh'),
+            custo_mao_obra: !!document.getElementById('custo_mao_obra'),
+            testButton: !!testButton
+        });
+    </script>
+</body>
+
+</html>

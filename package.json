@@ -1,0 +1,25 @@
+{
+    "name": "geladinhos-precificacao",
+    "version": "1.0.0",
+    "description": "Aplicativo para Cálculo de Custos de Receitas de Geladinho",
+    "type": "module",
+    "scripts": {
+        "dev": "vite --host",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "keywords": [
+        "geladinhos",
+        "precificacao",
+        "custo",
+        "receitas"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "vite": "^5.0.0"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.95.3"
+    }
+}

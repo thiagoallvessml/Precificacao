@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Conectar Mercado Pago - Geladinho Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "cta": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#1A1A1A",
+                        "mercadopago": "#00A0E3",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        .step-active {
+            border-color: rgba(0, 160, 227, 0.5);
+            background: rgba(0, 160, 227, 0.1);
+        }
+
+        .step-completed {
+            border-color: rgba(0, 160, 227, 0.8);
+            background: rgba(0, 160, 227, 0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display antialiased">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='mercado-pago.html'"
+                class="text-white flex size-10 items-center justify-start cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Conectar
+                Mercado Pago
+            </h2>
+            <div class="flex w-10 items-center justify-end"></div>
+        </div>
+    </header>
+
+    <main class="pb-8 px-4 max-w-3xl mx-auto">
+        <!-- Loading State -->
+        <div id="loading-state"
+            class="flex flex-col items-center justify-center text-center min-h-[calc(100vh-200px)] animate-fade-in">
+            <div
+                class="w-24 h-24 rounded-full bg-mercadopago/20 border-2 border-mercadopago flex items-center justify-center mx-auto mb-6 animate-pulse">
+                <span class="material-symbols-outlined text-mercadopago animate-spin"
+                    style="font-size: 48px;">sync</span>
+            </div>
+
+            <h3 class="text-white text-2xl font-bold mb-3">Processando autenticação...</h3>
+            <p class="text-white/60 text-sm leading-relaxed max-w-md">
+                Aguarde enquanto configuramos sua conexão com o Mercado Pago.
+            </p>
+        </div>
+
+        <!-- Success State (Hidden by default) -->
+        <div id="success-state"
+            class="hidden flex flex-col items-center justify-center text-center min-h-[calc(100vh-200px)] animate-fade-in">
+            <div
+                class="w-24 h-24 rounded-full bg-green-500/20 border-2 border-green-500 flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-green-500" style="font-size: 48px;">check_circle</span>
+            </div>
+
+            <h3 class="text-white text-2xl font-bold mb-3">Conexão realizada com sucesso!</h3>
+            <p class="text-white/60 text-sm leading-relaxed max-w-md mb-8">
+                Sua conta do Mercado Pago foi conectada com sucesso. Agora você pode começar a receber pagamentos.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 w-full max-w-2xl">
+                <div class="p-4 bg-surface-dark/50 border border-white/5 rounded-lg">
+                    <div class="text-mercadopago font-bold text-2xl mb-1">✓</div>
+                    <div class="text-white/80 text-xs">Autenticação concluída</div>
+                </div>
+                <div class="p-4 bg-surface-dark/50 border border-white/5 rounded-lg">
+                    <div class="text-mercadopago font-bold text-2xl mb-1">✓</div>
+                    <div class="text-white/80 text-xs">Credenciais salvas</div>
+                </div>
+                <div class="p-4 bg-surface-dark/50 border border-white/5 rounded-lg">
+                    <div class="text-mercadopago font-bold text-2xl mb-1">✓</div>
+                    <div class="text-white/80 text-xs">Pronto para usar</div>
+                </div>
+            </div>
+
+            <!-- Connection Details -->
+            <div class="w-full max-w-md mb-8">
+                <div class="bg-surface-dark/50 border border-white/5 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-mercadopago text-xl">account_circle</span>
+                        <div class="text-left flex-1">
+                            <p class="text-white/80 text-xs mb-1">Conta conectada</p>
+                            <p id="user-email" class="text-white text-sm font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3 w-full max-w-md">
+                <button onclick="window.location.href='pagamento.html'"
+                    class="flex-1 bg-surface-dark border border-white/10 text-white h-12 rounded-xl font-semibold text-sm hover:bg-white/5 transition-colors">
+                    Ver Configurações
+                </button>
+                <button onclick="window.location.href='index.html'"
+                    class="flex-1 bg-mercadopago hover:bg-mercadopago/90 text-white h-12 rounded-xl font-bold text-sm transition-colors">
+                    Ir para Início
+                </button>
+            </div>
+        </div>
+
+        <!-- Error State (Hidden by default) -->
+        <div id="error-state"
+            class="hidden flex flex-col items-center justify-center text-center min-h-[calc(100vh-200px)] animate-fade-in">
+            <div
+                class="w-24 h-24 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-red-500" style="font-size: 48px;">error</span>
+            </div>
+
+            <h3 class="text-white text-2xl font-bold mb-3">Erro na autenticação</h3>
+            <p id="error-message" class="text-white/60 text-sm leading-relaxed max-w-md mb-8">
+                Ocorreu um erro ao conectar sua conta do Mercado Pago. Por favor, tente novamente.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3 w-full max-w-md">
+                <button onclick="window.location.href='mercado-pago.html'"
+                    class="flex-1 bg-mercadopago hover:bg-mercadopago/90 text-white h-12 rounded-xl font-bold text-sm transition-colors">
+                    Tentar Novamente
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Função para obter parâmetros da URL
+        function getURLParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Função para processar o código de autorização
+        async function processAuthorizationCode(code) {
+            try {
+                // Em produção, você enviaria o código para seu backend
+                // que faria a troca pelo access_token
+                // Exemplo:
+                // const response = await fetch('/api/mercadopago/callback', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ code })
+                // });
+                // const data = await response.json();
+
+                // Por enquanto, simulamos o sucesso e salvamos o código
+                console.log('Authorization code received:', code);
+
+                // Salvar informações de conexão
+                localStorage.setItem('mp_connected', 'true');
+                localStorage.setItem('mp_auth_code', code);
+                localStorage.setItem('mp_connection_date', new Date().toISOString());
+
+                // Simular dados do usuário (em produção viriam do backend)
+                const userEmail = 'usuario@exemplo.com';
+                localStorage.setItem('mp_user_email', userEmail);
+
+                // Mostrar estado de sucesso
+                showSuccessState(userEmail);
+
+            } catch (error) {
+                console.error('Error processing authorization:', error);
+                showErrorState('Não foi possível processar a autorização. Tente novamente.');
+            }
+        }
+
+        // Função para mostrar estado de sucesso
+        function showSuccessState(email) {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+            document.getElementById('success-state').classList.remove('hidden');
+            if (email) {
+                document.getElementById('user-email').textContent = email;
+            }
+        }
+
+        // Função para mostrar estado de erro
+        function showErrorState(message) {
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('success-state').classList.add('hidden');
+            document.getElementById('error-state').classList.remove('hidden');
+            document.getElementById('error-message').textContent = message;
+        }
+
+        // Processar callback ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            const code = getURLParameter('code');
+            const error = getURLParameter('error');
+
+            if (error) {
+                // Usuário cancelou ou houve erro
+                const errorDescription = getURLParameter('error_description') || 'Autorização cancelada ou recusada.';
+                showErrorState(errorDescription);
+            } else if (code) {
+                // Código de autorização recebido
+                processAuthorizationCode(code);
+            } else {
+                // Nenhum parâmetro encontrado
+                showErrorState('Não foi possível identificar os parâmetros de autenticação. Por favor, inicie o processo novamente.');
+            }
+        });
+    </script>
+</body>
+
+</html>

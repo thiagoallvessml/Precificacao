@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Meu Perfil - Gestão Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "danger": "#ff4d4d"
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #0F0F0F;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .menu-card {
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .menu-card:active {
+            transform: scale(0.98);
+            background-color: rgba(19, 236, 236, 0.03);
+        }
+
+        .avatar-ring {
+            background: conic-gradient(#13ecec 0deg, #13ecec 270deg, transparent 270deg, transparent 360deg);
+            padding: 3px;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen font-display pb-28">
+    <!-- Top Status Bar Spacer (iOS Style) -->
+    <div class="h-12 w-full bg-background-dark sticky top-0 z-50"></div>
+
+    <!-- Desktop wrapper -->
+    <div class="max-w-5xl mx-auto px-5">
+        <div class="flex flex-col lg:flex-row gap-8 lg:gap-10">
+
+            <!-- LEFT: Profile Header Section -->
+            <header
+                class="flex flex-col items-center lg:items-center lg:w-72 lg:sticky lg:top-16 lg:self-start lg:pt-4">
+                <div class="relative mb-4">
+                    <div class="avatar-ring rounded-full">
+                        <div
+                            class="w-24 h-24 rounded-full bg-card-dark flex items-center justify-center text-4xl border-2 border-background-dark overflow-hidden">
+                            <span class="text-4xl">🍦</span>
+                        </div>
+                    </div>
+                    <div
+                        class="absolute -bottom-1 -right-1 bg-primary text-background-dark p-1.5 rounded-full flex items-center justify-center shadow-lg shadow-primary/30">
+                        <span class="material-symbols-outlined text-sm font-bold"
+                            style="font-variation-settings: 'FILL' 1;">verified</span>
+                    </div>
+                </div>
+
+                <h1 id="userName" class="text-2xl font-bold mb-1">Carregando...</h1>
+
+                <div
+                    class="bg-primary/15 text-primary border border-primary/20 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+                    Afiliado Premium
+                </div>
+
+                <!-- Quick Achievement Stats -->
+                <div class="flex items-center gap-4 text-slate-500 text-sm mb-6 lg:mb-0">
+                    <div class="flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">calendar_today</span>
+                        <span>Jan 2024</span>
+                    </div>
+                    <div class="w-1 h-1 bg-slate-700 rounded-full"></div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base text-primary">workspace_premium</span>
+                        <span>Nível 2</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- RIGHT: Menu Cards -->
+            <main class="flex-1 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 lg:pt-4">
+                <!-- Dados da Conta -->
+                <div onclick="document.getElementById('editModal').classList.remove('hidden')"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">person</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Dados da Conta</h3>
+                        <p class="text-xs text-slate-500">Nome, E-mail, Telefone</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Configurações de Pagamento -->
+                <div onclick="document.getElementById('pixModal').classList.remove('hidden')"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Configurações de Pagamento</h3>
+                        <p class="text-xs text-slate-500">Chave Pix para recebimento</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Meu Cupom Personalizado -->
+                <div onclick="window.location.href='indique-ganhe.html'"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">confirmation_number</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Meu Cupom Personalizado</h3>
+                        <p class="text-xs text-primary font-mono font-bold" id="cupomPerfilLabel">Carregando...</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Comissões -->
+                <div onclick="window.location.href='comissoes.html'"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">payments</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Comissões</h3>
+                        <p class="text-xs text-slate-500">Histórico e valores</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Faturamento -->
+                <div onclick="window.location.href='faturamento.html'"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">bar_chart</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Faturamento</h3>
+                        <p class="text-xs text-slate-500">Relatório geral de vendas</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Extrato de Vendas -->
+                <div onclick="window.location.href='extrato-afiliado.html'"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">receipt_long</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Extrato de Vendas</h3>
+                        <p class="text-xs text-slate-500">Atividades e comissões detalhadas</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Meu Plano -->
+                <div onclick="window.location.href='planos.html'"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">workspace_premium</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Meu Plano</h3>
+                        <p class="text-xs text-slate-500">Premium Mensal • Ativo</p>
+                    </div>
+                    <span
+                        class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Ativo</span>
+                </div>
+
+                <!-- Termos do Programa -->
+                <div class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">description</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Termos do Programa</h3>
+                        <p class="text-xs text-slate-500">Regras e comissionamento</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Configurações -->
+                <div onclick="window.location.href='configuracoes.html'"
+                    class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">settings</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Configurações</h3>
+                        <p class="text-xs text-slate-500">App, notificações, energia</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Ajuda e Suporte -->
+                <div class="menu-card bg-card-dark rounded-xl p-4 border border-primary/10 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">help_center</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-white">Ajuda e Suporte</h3>
+                        <p class="text-xs text-slate-500">Dúvidas e chamados</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-600 text-lg">chevron_right</span>
+                </div>
+
+                <!-- Logout Button -->
+                <div class="lg:col-span-2 pt-2 pb-4">
+                    <button onclick="confirmarLogout()"
+                        class="w-full py-4 rounded-xl border-2 border-danger/30 text-danger font-bold text-sm flex items-center justify-center gap-2 active:bg-danger/10 transition-colors active:scale-[0.97]">
+                        <span class="material-symbols-outlined">logout</span>
+                        Sair da Conta
+                    </button>
+                </div>
+
+                <!-- App version -->
+                <p class="lg:col-span-2 text-center text-[10px] text-slate-700 pb-4">Versão 2.1.0 • Geladinhos Gourmet
+                </p>
+            </main>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Editar Perfil</h3>
+                <button onclick="document.getElementById('editModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Nome</label>
+                    <input id="inputName" type="text" value=""
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">E-mail</label>
+                    <input id="inputEmail" type="email" value="" placeholder="seu@email.com"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Telefone</label>
+                    <input type="tel" value="(11) 99999-0000"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+            </div>
+
+            <button onclick="salvarPerfil()"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Salvar Alterações
+            </button>
+        </div>
+    </div>
+
+    <!-- Pix Key Modal -->
+    <div id="pixModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Chave Pix</h3>
+                <button onclick="document.getElementById('pixModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <p class="text-sm text-slate-400 leading-relaxed">
+                Configure sua chave Pix para receber comissões do programa de indicação.
+            </p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Tipo da
+                        Chave</label>
+                    <select
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option>CPF</option>
+                        <option>E-mail</option>
+                        <option>Telefone</option>
+                        <option>Chave Aleatória</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Chave
+                        Pix</label>
+                    <input type="text" placeholder="Digite sua chave Pix"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('pixModal').classList.add('hidden')"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Salvar Chave Pix
+            </button>
+        </div>
+    </div>
+
+
+
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+        // Carregar nome do afiliado do Supabase ao abrir a página
+        async function carregarNomeAfiliado() {
+            if (!supabase) {
+                document.getElementById('userName').textContent = 'Afiliado';
+                return;
+            }
+
+            // Buscar e-mail da sessão
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user && session.user.email) {
+                    document.getElementById('inputEmail').value = session.user.email;
+                }
+
+                // Tentar buscar nome do perfis_usuarios primeiro
+                if (session && session.user) {
+                    try {
+                        const { data: perfil } = await supabase
+                            .from('perfis_usuarios')
+                            .select('nome, email')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (perfil && perfil.nome) {
+                            document.getElementById('userName').textContent = perfil.nome;
+                            document.getElementById('inputName').value = perfil.nome;
+                        }
+                        if (perfil && perfil.email) {
+                            document.getElementById('inputEmail').value = perfil.email;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+            } catch (e) { /* ignore */ }
+
+            // Fallback: Buscar nome salvo na configuracoes
+            try {
+                const { data } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'nome_afiliado')
+                    .single();
+
+                if (data && data.valor) {
+                    // Só setar se ainda estiver como "Carregando..."
+                    const currentName = document.getElementById('userName').textContent;
+                    if (currentName === 'Carregando...' || !currentName) {
+                        document.getElementById('userName').textContent = data.valor;
+                        document.getElementById('inputName').value = data.valor;
+                    }
+                }
+            } catch (err) {
+                console.warn('Nome do afiliado não encontrado no Supabase.');
+            }
+
+            // Se ainda não carregou nome, mostrar genérico
+            if (document.getElementById('userName').textContent === 'Carregando...') {
+                document.getElementById('userName').textContent = 'Afiliado';
+            }
+
+            // Carregar cupom ativo do USUÁRIO LOGADO
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    const { data: cupomUser } = await supabase
+                        .from('cupons_afiliado')
+                        .select('codigo')
+                        .eq('user_id', session.user.id)
+                        .eq('ativo', true)
+                        .limit(1);
+
+                    if (cupomUser && cupomUser.length > 0) {
+                        document.getElementById('cupomPerfilLabel').textContent = cupomUser[0].codigo;
+                    } else {
+                        document.getElementById('cupomPerfilLabel').textContent = '—';
+                    }
+                } else {
+                    document.getElementById('cupomPerfilLabel').textContent = '—';
+                }
+            } catch (err) {
+                document.getElementById('cupomPerfilLabel').textContent = '—';
+            }
+        }
+
+        // Salvar perfil: atualiza o nome na tela e no Supabase
+        window.salvarPerfil = async function () {
+            const name = document.getElementById('inputName').value.trim();
+            if (!name) return;
+
+            document.getElementById('userName').textContent = name;
+            document.getElementById('editModal').classList.add('hidden');
+
+            if (!supabase) return;
+
+            try {
+                // Verificar se já existe a chave nome_afiliado
+                const { data: existing } = await supabase
+                    .from('configuracoes')
+                    .select('id')
+                    .eq('chave', 'nome_afiliado')
+                    .single();
+
+                if (existing) {
+                    // Atualizar
+                    await supabase
+                        .from('configuracoes')
+                        .update({ valor: name, updated_at: new Date().toISOString() })
+                        .eq('chave', 'nome_afiliado');
+                } else {
+                    // Inserir
+                    await supabase
+                        .from('configuracoes')
+                        .insert([{
+                            chave: 'nome_afiliado',
+                            valor: name,
+                            tipo: 'string',
+                            descricao: 'Nome do afiliado para gerar código de indicação',
+                            categoria: 'geral'
+                        }]);
+                }
+
+                // Verificar se já existe um cupom do USUÁRIO LOGADO — se existir, NÃO sobrescrever
+                // O código do cupom só deve ser alterado manualmente via indique-ganhe.html
+                const { data: { session: currentSession } } = await supabase.auth.getSession();
+                const currentUserId = currentSession?.user?.id;
+
+                const { data: cupomExistente } = await supabase
+                    .from('cupons_afiliado')
+                    .select('id, codigo')
+                    .eq('user_id', currentUserId)
+                    .eq('ativo', true)
+                    .limit(1);
+
+                if (cupomExistente && cupomExistente.length > 0) {
+                    // Cupom já existe — manter o código atual, apenas atualizar o label
+                    document.getElementById('cupomPerfilLabel').textContent = cupomExistente[0].codigo;
+                    console.log('✅ Perfil atualizado. Cupom mantido:', cupomExistente[0].codigo);
+                } else {
+                    // Nenhum cupom existe — criar um novo com código gerado do nome
+                    const primeiroNome = name.trim().split(/\s+/)[0];
+                    const codigoNovo = primeiroNome
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .replace(/[^A-Za-z0-9]/g, '')
+                        .toUpperCase() + '10';
+
+                    await supabase
+                        .from('cupons_afiliado')
+                        .insert([{
+                            codigo: codigoNovo,
+                            desconto_percentual: 10,
+                            comissao_percentual: 10,
+                            user_id: currentUserId
+                        }]);
+
+                    document.getElementById('cupomPerfilLabel').textContent = codigoNovo;
+                    console.log('✅ Perfil e cupom criados:', name, '→', codigoNovo);
+                }
+            } catch (err) {
+                console.error('❌ Erro ao salvar nome no Supabase:', err);
+            }
+        };
+
+        window.confirmarLogout = function () {
+            if (confirm('Tem certeza que deseja sair da conta?')) {
+                alert('Você foi desconectado.\nRedirecionando para a tela de login...');
+                window.location.href = 'index.html';
+            }
+        };
+
+        // Inicializar
+        carregarNomeAfiliado();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Criar Tabelas - Supabase</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "card-border": "#2d4444"
+                    },
+                    fontFamily: {
+                        display: ["Work Sans", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .code-block {
+            background: #1e293b;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+
+        .code-block code {
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .table-card {
+            transition: all 0.3s ease;
+        }
+
+        .table-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(19, 236, 236, 0.15);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(19, 236, 236, 0.2);
+            display: flex;
+            align-items: center;
+            justify-center;
+            font-weight: bold;
+            color: #13ecec;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 antialiased">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md px-4 pt-6 pb-4 border-b border-slate-800">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='supabase-setup.html'"
+                    class="p-2 hover:bg-slate-800 rounded-full transition-colors">
+                    <span class="material-icons-round text-2xl">arrow_back</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-primary text-3xl">storage</span>
+                    <h1 class="text-xl font-bold tracking-tight">Criar Tabelas do Banco de Dados</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-8 max-w-6xl mx-auto">
+        <!-- Alerta Importante -->
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+            <div class="flex items-start gap-3">
+                <span class="material-icons-round text-amber-500 text-2xl">warning</span>
+                <div>
+                    <h3 class="font-semibold text-amber-400 mb-1">⚠️ Importante</h3>
+                    <p class="text-sm text-slate-300">
+                        Esta página irá criar <strong>15 tabelas</strong> no seu banco de dados Supabase.
+                        Certifique-se de que você está conectado ao projeto correto!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Opções de Criação -->
+        <div class="grid md:grid-cols-2 gap-4 mb-8">
+            <!-- Opção 1: Copiar SQL -->
+            <div class="bg-card-dark border border-card-border rounded-xl p-6 table-card">
+                <div class="flex items-start gap-3 mb-4">
+                    <div class="step-number">1</div>
+                    <div>
+                        <h3 class="text-lg font-semibold">Copiar SQL Manualmente</h3>
+                        <p class="text-sm text-slate-400 mt-1">
+                            Copie o SQL e execute no Supabase SQL Editor
+                        </p>
+                    </div>
+                </div>
+                <button id="copySqlBtn"
+                    class="w-full bg-primary text-background-dark font-semibold py-3 rounded-lg hover:bg-primary/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <span class="material-icons-round">content_copy</span>
+                    Copiar SQL Completo
+                </button>
+            </div>
+
+            <!-- Opção 2: Download SQL -->
+            <div class="bg-card-dark border border-card-border rounded-xl p-6 table-card">
+                <div class="flex items-start gap-3 mb-4">
+                    <div class="step-number">2</div>
+                    <div>
+                        <h3 class="text-lg font-semibold">Baixar Arquivo SQL</h3>
+                        <p class="text-sm text-slate-400 mt-1">
+                            Baixe o arquivo para executar localmente
+                        </p>
+                    </div>
+                </div>
+                <button onclick="window.open('database-schema.sql', '_blank')"
+                    class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <span class="material-icons-round">download</span>
+                    Baixar database-schema.sql
+                </button>
+            </div>
+        </div>
+
+        <!-- Preview das Tabelas -->
+        <div class="bg-card-dark border border-card-border rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span class="material-icons-round text-primary">table_view</span>
+                Tabelas que serão criadas
+            </h3>
+
+            <div class="grid md:grid-cols-3 gap-3">
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">1. categorias</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Categorização de dados</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">2. marketplaces</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Canais de venda</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">3. insumos</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Estoque de insumos</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">4. produtos</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Produtos para venda</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">5. receitas</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Receitas de produção</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">6. receita_insumos</span>
+                    </div>
+                    <p class="text-xs text-slate-400">N:N Receitas ↔ Insumos</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">7. precos_marketplace</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Preços por canal</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">8. pedidos</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Pedidos de clientes</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">9. pedido_itens</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Itens dos pedidos</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">10. producao</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Lotes de produção</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">11. movimentacoes_estoque</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Histórico de estoque</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">12. despesas</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Despesas operacionais</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">13. equipamentos</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Equipamentos de produção</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">14. chaves_pix</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Chaves PIX cadastradas</p>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-icons-round text-green-400 text-sm">check_circle</span>
+                        <span class="font-semibold text-sm">15. configuracoes</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Configurações do sistema</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instruções Passo a Passo -->
+        <div class="bg-card-dark border border-card-border rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span class="material-icons-round text-primary">list_alt</span>
+                Como executar o SQL no Supabase
+            </h3>
+
+            <div class="space-y-4">
+                <div class="flex gap-3">
+                    <div class="step-number flex-shrink-0">1</div>
+                    <div>
+                        <p class="font-medium">Acesse o Supabase Dashboard</p>
+                        <p class="text-sm text-slate-400 mt-1">Vá para <code
+                                class="bg-slate-700 px-2 py-0.5 rounded">https://app.supabase.com/</code> e
+                            selecione seu projeto</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="step-number flex-shrink-0">2</div>
+                    <div>
+                        <p class="font-medium">Abra o SQL Editor</p>
+                        <p class="text-sm text-slate-400 mt-1">No menu lateral, clique em <strong>SQL Editor</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="step-number flex-shrink-0">3</div>
+                    <div>
+                        <p class="font-medium">Crie uma nova query</p>
+                        <p class="text-sm text-slate-400 mt-1">Clique em <strong>New Query</strong></p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="step-number flex-shrink-0">4</div>
+                    <div>
+                        <p class="font-medium">Cole o SQL</p>
+                        <p class="text-sm text-slate-400 mt-1">Cole todo o conteúdo do arquivo <code
+                                class="bg-slate-700 px-2 py-0.5 rounded">database-schema.sql</code></p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="step-number flex-shrink-0">5</div>
+                    <div>
+                        <p class="font-medium">Execute</p>
+                        <p class="text-sm text-slate-400 mt-1">Clique em <strong>Run</strong> ou pressione
+                            <kbd>Ctrl/Cmd + Enter</kbd>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="step-number flex-shrink-0">6</div>
+                    <div>
+                        <p class="font-medium">Verifique</p>
+                        <p class="text-sm text-slate-400 mt-1">Vá em <strong>Table Editor</strong> para ver as tabelas
+                            criadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recursos Adicionais -->
+        <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-gradient-to-br from-primary/10 to-blue-500/10 border border-primary/30 rounded-xl p-5">
+                <h4 class="font-semibold mb-2 flex items-center gap-2">
+                    <span class="material-icons-round text-primary text-sm">description</span>
+                    Documentação do Schema
+                </h4>
+                <p class="text-sm text-slate-300 mb-3">
+                    O arquivo <code class="bg-slate-700 px-2 py-0.5 rounded">database-schema.sql</code> contém todas as
+                    definições, relacionamentos e dados iniciais.
+                </p>
+                <a href="database-schema.sql" target="_blank"
+                    class="inline-flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium">
+                    Ver arquivo SQL
+                    <span class="material-icons-round text-sm">open_in_new</span>
+                </a>
+            </div>
+
+            <div
+                class="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-5">
+                <h4 class="font-semibold mb-2 flex items-center gap-2">
+                    <span class="material-icons-round text-green-400 text-sm">security</span>
+                    Row Level Security (RLS)
+                </h4>
+                <p class="text-sm text-slate-300 mb-3">
+                    Todas as tabelas já vêm com RLS habilitado e políticas de segurança configuradas para usuários
+                    autenticados.
+                </p>
+                <p class="text-xs text-slate-400">
+                    ✅ Seus dados estarão protegidos automaticamente
+                </p>
+            </div>
+        </div>
+
+        <!-- Status Message -->
+        <div id="statusMessage" class="hidden mt-6"></div>
+    </main>
+
+    <script>
+        // Função para copiar SQL
+        document.getElementById('copySqlBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('database-schema.sql');
+                const sql = await response.text();
+
+                await navigator.clipboard.writeText(sql);
+
+                showStatus('✅ SQL copiado para a área de transferência!', 'success');
+            } catch (error) {
+                showStatus('❌ Erro ao copiar SQL: ' + error.message, 'error');
+            }
+        });
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `p-4 rounded-xl ${type === 'success' ? 'bg-green-500/20 border border-green-500/50 text-green-300' : 'bg-red-500/20 border border-red-500/50 text-red-300'}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 4000);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Minhas Comissões</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "accent-orange": "#fb923c",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1a2f2f 25%, #243d3d 50%, #1a2f2f 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.35s ease-out forwards;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 15px rgba(19, 236, 236, 0.15);
+            }
+
+            50% {
+                box-shadow: 0 0 25px rgba(19, 236, 236, 0.3);
+            }
+        }
+
+        .glow-pulse {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        .toast-anim {
+            animation: fadeInUp 0.3s ease-out;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 font-display min-h-screen pb-12">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-header px-4 py-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <a href="index.html"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+                <span class="material-symbols-outlined">arrow_back_ios_new</span>
+            </a>
+            <h1 class="text-lg font-bold tracking-tight">Minhas Comissões</h1>
+            <button onclick="document.getElementById('infoModal').style.display='flex'"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+                <span class="material-symbols-outlined">help</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-6 py-6">
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+
+            <!-- LEFT COLUMN: Summary -->
+            <div class="lg:w-[420px] lg:flex-shrink-0 space-y-6 lg:sticky lg:top-20 lg:self-start">
+
+                <!-- Hero Earnings Card -->
+                <section
+                    class="bg-primary/10 border border-primary/20 p-6 rounded-xl relative overflow-hidden glow-pulse">
+                    <div class="relative z-10">
+                        <p class="text-sm font-medium text-primary/80 uppercase tracking-widest mb-1">Seu Ganho Total
+                        </p>
+                        <div id="heroGanhoTotal" class="text-4xl font-bold text-primary flex items-baseline gap-1">
+                            <span class="skeleton inline-block h-10 w-40 rounded-lg"></span>
+                        </div>
+                        <div class="mt-6 flex justify-between items-end">
+                            <div>
+                                <p class="text-xs text-slate-400 mb-1">Comissões Pendentes</p>
+                                <p id="heroPendentes" class="text-lg font-semibold">
+                                    <span class="skeleton inline-block h-6 w-24 rounded"></span>
+                                </p>
+                            </div>
+                            <div id="heroNivel"
+                                class="bg-primary/20 px-3 py-1 rounded-full text-[10px] font-bold text-primary border border-primary/30 uppercase">
+                                Carregando...
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Abstract BG -->
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
+                </section>
+
+                <!-- Promo Banner -->
+                <div class="flex items-center gap-3 bg-card-dark p-4 rounded-lg border border-white/5">
+                    <div
+                        class="bg-primary text-background-dark w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined">campaign</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 id="promoTitle" class="font-bold text-primary text-sm">Indique e Ganhe 10%</h2>
+                        <p class="text-sm text-slate-400">Sobre cada venda referenciada pelo seu código.</p>
+                    </div>
+                </div>
+
+                <!-- Affiliate Code/Link -->
+                <section class="space-y-3">
+                    <label class="text-sm font-semibold text-slate-300">Seu Código de Afiliado</label>
+                    <div class="flex gap-2">
+                        <div
+                            class="flex-1 bg-card-dark border border-white/10 rounded-lg px-4 flex items-center overflow-hidden">
+                            <span id="codigoAfiliado"
+                                class="text-sm text-slate-300 truncate font-mono">Carregando...</span>
+                        </div>
+                        <button onclick="copiarCodigo()"
+                            class="bg-primary text-background-dark px-4 py-3 rounded-lg font-bold flex items-center gap-2 active:scale-95 transition-transform flex-shrink-0">
+                            <span class="material-symbols-outlined text-xl">content_copy</span>
+                            <span>Copiar</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Indicators Grid -->
+                <section class="grid grid-cols-3 gap-3">
+                    <div class="bg-card-dark p-4 rounded-lg border border-white/5 text-center">
+                        <span class="material-symbols-outlined text-primary mb-2 block">group</span>
+                        <p id="statIndicados" class="text-xl font-bold">
+                            <span class="skeleton inline-block h-6 w-8 rounded"></span>
+                        </p>
+                        <p class="text-[10px] text-slate-400 uppercase font-medium mt-1">Indicados</p>
+                    </div>
+                    <div class="bg-card-dark p-4 rounded-lg border border-white/5 text-center">
+                        <span class="material-symbols-outlined text-primary mb-2 block">check_circle</span>
+                        <p id="statConvertidos" class="text-xl font-bold">
+                            <span class="skeleton inline-block h-6 w-8 rounded"></span>
+                        </p>
+                        <p class="text-[10px] text-slate-400 uppercase font-medium mt-1">Convertidos</p>
+                    </div>
+                    <div class="bg-card-dark p-4 rounded-lg border border-white/5 text-center">
+                        <span class="material-symbols-outlined text-emerald-400 mb-2 block">payments</span>
+                        <p id="statVendas" class="text-xl font-bold">
+                            <span class="skeleton inline-block h-6 w-8 rounded"></span>
+                        </p>
+                        <p class="text-[10px] text-slate-400 uppercase font-medium mt-1">Vendas</p>
+                    </div>
+                </section>
+
+                <!-- Sacar Comissões -->
+                <section class="space-y-4">
+                    <button id="btnSacar" onclick="solicitarSaque()" disabled
+                        class="w-full bg-primary text-background-dark py-4 rounded-xl font-bold text-lg shadow-[0_0_20px_rgba(19,236,236,0.2)] active:scale-[0.97] transition-transform disabled:opacity-40 disabled:cursor-not-allowed">
+                        Solicitar Saque
+                    </button>
+                    <p class="text-center text-xs text-slate-600">
+                        O saque será processado via Pix em até 48h úteis.
+                    </p>
+                </section>
+            </div>
+
+            <!-- RIGHT COLUMN: History -->
+            <div class="flex-1 space-y-4">
+                <!-- Commission History -->
+                <section class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-lg">Histórico de Comissões</h3>
+                        <span id="histCount" class="text-primary text-sm font-medium">—</span>
+                    </div>
+                    <div id="listaComissoes" class="space-y-2">
+                        <div class="skeleton h-16 rounded-lg"></div>
+                        <div class="skeleton h-16 rounded-lg"></div>
+                        <div class="skeleton h-16 rounded-lg"></div>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Info/Help Modal -->
+    <div id="infoModal"
+        class="fixed inset-0 z-[100] items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        style="display: none;" onclick="if(event.target===this) this.style.display='none'">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-4 m-0 sm:m-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Sobre as Comissões</h3>
+                <button onclick="document.getElementById('infoModal').style.display='none'"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm text-gray-300 leading-relaxed">
+                <p>Cada pessoa que assinar usando seu código, você recebe automaticamente
+                    <span class="text-primary font-bold">comissão</span> sobre o valor da assinatura.
+                </p>
+                <p>As comissões ficam com status <span class="text-yellow-400 font-bold">Pendente</span> até serem
+                    confirmadas e pagas pelo administrador.</p>
+                <p>Após o pagamento, o status muda para <span class="text-emerald-400 font-bold">Pago</span>.</p>
+                <p class="text-gray-500 text-xs mt-2">Dúvidas? Entre em contato pelo suporte.</p>
+            </div>
+            <button onclick="document.getElementById('infoModal').style.display='none'"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Entendi!
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toastContainer" class="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none"></div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+        // ========================
+        // UTILS
+        // ========================
+
+        function formatBRL(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const colors = {
+                success: 'bg-emerald-500/90 border-emerald-400/30',
+                error: 'bg-red-500/90 border-red-400/30',
+                info: 'bg-primary/90 border-primary/30 text-background-dark'
+            };
+            const el = document.createElement('div');
+            el.className = `toast-anim ${colors[type] || colors.info} text-sm font-semibold px-6 py-3 rounded-xl border shadow-lg pointer-events-auto`;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+        }
+
+        function getInitials(nome) {
+            if (!nome) return '??';
+            return nome.split(/\s+/).map(p => p[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function getNivel(totalGanho) {
+            if (totalGanho >= 1000) return { label: 'Nível Ouro', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
+            if (totalGanho >= 300) return { label: 'Nível Prata', color: 'bg-slate-400/20 text-slate-300 border-slate-400/30' };
+            return { label: 'Nível Bronze', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' };
+        }
+
+        // ========================
+        // COPIAR CÓDIGO
+        // ========================
+
+        window.copiarCodigo = function () {
+            const code = document.getElementById('codigoAfiliado').textContent;
+            if (!code || code === 'Carregando...') return;
+
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('✅ Código copiado!', 'success');
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = code;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('✅ Código copiado!', 'success');
+            });
+        };
+
+        // ========================
+        // SOLICITAR SAQUE
+        // ========================
+
+        window.solicitarSaque = function () {
+            showToast('Solicitação de saque enviada ao administrador!', 'success');
+            document.getElementById('btnSacar').disabled = true;
+            document.getElementById('btnSacar').textContent = 'Saque Solicitado ✓';
+        };
+
+        // ========================
+        // CARREGAR DADOS
+        // ========================
+
+        async function carregarDados() {
+            if (!supabase) {
+                mostrarVazio();
+                return;
+            }
+
+            try {
+                // 1. Buscar sessão do usuário
+                const { data: { session } } = await supabase.auth.getSession();
+
+                // 2. Buscar cupom do usuário logado (pelo user_id) ou o primeiro cupom ativo
+                let cupom = null;
+
+                if (session) {
+                    // Tentar buscar cupom vinculado ao user_id
+                    const { data: cupomUser } = await supabase
+                        .from('cupons_afiliado')
+                        .select('*')
+                        .eq('user_id', session.user.id)
+                        .eq('ativo', true)
+                        .limit(1)
+                        .single();
+
+                    if (cupomUser) cupom = cupomUser;
+                }
+
+                // Fallback: buscar primeiro cupom ativo
+                if (!cupom) {
+                    const { data: cupomFallback } = await supabase
+                        .from('cupons_afiliado')
+                        .select('*')
+                        .eq('ativo', true)
+                        .order('created_at', { ascending: true })
+                        .limit(1);
+
+                    if (cupomFallback && cupomFallback.length > 0) {
+                        cupom = cupomFallback[0];
+                    }
+                }
+
+                if (!cupom) {
+                    mostrarVazio();
+                    return;
+                }
+
+                // Exibir código
+                document.getElementById('codigoAfiliado').textContent = cupom.codigo;
+
+                // Atualizar texto do promo
+                document.getElementById('promoTitle').textContent =
+                    `Indique e Ganhe ${cupom.comissao_percentual || 10}%`;
+
+                // 3. Buscar todas as indicações desse cupom
+                const { data: indicacoes, error: indError } = await supabase
+                    .from('indicacoes')
+                    .select('*')
+                    .eq('cupom_id', cupom.id)
+                    .order('data_indicacao', { ascending: false });
+
+                if (indError) throw indError;
+
+                const inds = indicacoes || [];
+
+                // Calcular métricas
+                const ativas = inds.filter(i => i.status === 'ativo');
+                const pendentes = inds.filter(i => i.status === 'pendente');
+                const totalGanho = ativas.reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+                const comissoesPagas = ativas.filter(i => i.comissao_paga)
+                    .reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+                const comissoesPendentes = ativas.filter(i => !i.comissao_paga)
+                    .reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0)
+                    + pendentes.reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+
+                // =====================
+                // HERO
+                // =====================
+
+                document.getElementById('heroGanhoTotal').innerHTML =
+                    `<span class="text-2xl">R$</span> ${(comissoesPagas).toFixed(2).replace('.', ',')}`;
+
+                document.getElementById('heroPendentes').textContent = formatBRL(comissoesPendentes);
+
+                const nivel = getNivel(comissoesPagas);
+                const nivelEl = document.getElementById('heroNivel');
+                nivelEl.textContent = nivel.label;
+                nivelEl.className = `${nivel.color} px-3 py-1 rounded-full text-[10px] font-bold border uppercase`;
+
+                // =====================
+                // STATS
+                // =====================
+
+                document.getElementById('statIndicados').textContent = inds.length;
+                document.getElementById('statConvertidos').textContent = ativas.length;
+                document.getElementById('statVendas').textContent = ativas.length;
+
+                // =====================
+                // HISTORY
+                // =====================
+
+                document.getElementById('histCount').textContent =
+                    `${inds.length} registro${inds.length !== 1 ? 's' : ''}`;
+
+                renderHistorico(inds);
+
+                // Habilitar saque se houver pendentes
+                if (comissoesPendentes > 0) {
+                    const btn = document.getElementById('btnSacar');
+                    btn.disabled = false;
+                    btn.textContent = `Solicitar Saque (${formatBRL(comissoesPendentes)})`;
+                }
+
+            } catch (err) {
+                console.error('❌ Erro ao carregar comissões:', err);
+                mostrarVazio();
+            }
+        }
+
+        // ========================
+        // RENDER HISTORY
+        // ========================
+
+        function renderHistorico(indicacoes) {
+            const container = document.getElementById('listaComissoes');
+
+            if (!indicacoes || indicacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-card-dark rounded-xl border border-white/5">
+                        <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">receipt_long</span>
+                        <p class="text-slate-400 text-sm font-medium">Nenhuma comissão ainda</p>
+                        <p class="text-slate-600 text-xs mt-1">Compartilhe seu código e comece a ganhar!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = indicacoes.map((ind, i) => {
+                const data = new Date(ind.data_indicacao || ind.created_at);
+                const dataStr = data.toLocaleDateString('pt-BR', {
+                    day: '2-digit', month: 'short', year: 'numeric'
+                });
+                const comissao = parseFloat(ind.valor_comissao || 0);
+                const initials = getInitials(ind.nome_indicado);
+
+                let statusBadge = '';
+                if (ind.status === 'ativo' && ind.comissao_paga) {
+                    statusBadge = `<span class="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium uppercase">Pago</span>`;
+                } else if (ind.status === 'ativo' && !ind.comissao_paga) {
+                    statusBadge = `<span class="text-[10px] bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded-full border border-yellow-500/20 font-medium uppercase">Processando</span>`;
+                } else if (ind.status === 'pendente') {
+                    statusBadge = `<span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full border border-amber-500/20 font-medium uppercase">Pendente</span>`;
+                } else if (ind.status === 'cancelado') {
+                    statusBadge = `<span class="text-[10px] bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full border border-red-500/20 font-medium uppercase">Cancelado</span>`;
+                } else {
+                    statusBadge = `<span class="text-[10px] bg-slate-500/10 text-slate-500 px-2 py-0.5 rounded-full border border-slate-500/20 font-medium uppercase">${ind.status}</span>`;
+                }
+
+                const comissaoColor = ind.status === 'cancelado' ? 'text-slate-500 line-through' : 'text-primary';
+
+                return `
+                    <div class="bg-card-dark p-4 rounded-lg border border-white/5 flex items-center justify-between fade-in-up" style="animation-delay: ${i * 50}ms">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0 border border-white/10">
+                                ${initials}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold truncate">${ind.nome_indicado || 'Indicado'}</p>
+                                <p class="text-xs text-slate-500">${dataStr}</p>
+                            </div>
+                        </div>
+                        <div class="text-right flex-shrink-0 ml-3">
+                            <p class="text-sm font-bold ${comissaoColor}">+ ${formatBRL(comissao)}</p>
+                            ${statusBadge}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========================
+        // EMPTY STATE
+        // ========================
+
+        function mostrarVazio() {
+            document.getElementById('heroGanhoTotal').innerHTML =
+                '<span class="text-2xl">R$</span> 0,00';
+            document.getElementById('heroPendentes').textContent = 'R$ 0,00';
+
+            const nivelEl = document.getElementById('heroNivel');
+            nivelEl.textContent = 'Nível Bronze';
+            nivelEl.className = 'bg-orange-500/20 text-orange-400 border-orange-500/30 px-3 py-1 rounded-full text-[10px] font-bold border uppercase';
+
+            document.getElementById('codigoAfiliado').textContent = '—';
+            document.getElementById('statIndicados').textContent = '0';
+            document.getElementById('statConvertidos').textContent = '0';
+            document.getElementById('statVendas').textContent = '0';
+            document.getElementById('histCount').textContent = '0 registros';
+
+            document.getElementById('listaComissoes').innerHTML = `
+                <div class="text-center py-10 bg-card-dark rounded-xl border border-white/5">
+                    <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">receipt_long</span>
+                    <p class="text-slate-400 text-sm font-medium">Nenhuma comissão ainda</p>
+                    <p class="text-slate-600 text-xs mt-1">Acesse "Indique e Ganhe" para gerar seu código!</p>
+                </div>
+            `;
+        }
+
+        // ========================
+        // INIT
+        // ========================
+
+        async function init() {
+            await carregarDados();
+            console.log('✅ Comissões carregado');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

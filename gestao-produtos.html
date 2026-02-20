@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestão de Produtos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            min-height: max(884px, 100dvh);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .custom-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen font-display">
+    <!-- Top Navigation Bar -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center p-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='index.html'"
+                class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined">arrow_back_ios_new</span>
+            </button>
+            <h2
+                class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+                Gestão de Produtos</h2>
+            <div class="flex w-10 items-center justify-end">
+                <button
+                    class="flex cursor-pointer items-center justify-center rounded-full size-10 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto pb-24">
+        <!-- Search Bar Section -->
+        <div class="px-4 py-4">
+            <label class="flex flex-col w-full">
+                <div
+                    class="flex w-full items-stretch rounded-xl h-12 bg-white dark:bg-[#1c2727] border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+                    <div class="text-slate-400 dark:text-slate-500 flex items-center justify-center pl-4">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <input id="searchInput"
+                        class="w-full bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3 text-base font-normal"
+                        placeholder="Procurar produto..." value="" />
+                </div>
+            </label>
+        </div>
+
+        <!-- Filter Chips Section -->
+        <div id="categoriesFilter" class="flex gap-3 px-4 pb-4 overflow-x-auto custom-scrollbar">
+            <div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-5 text-background-dark font-semibold text-sm transition-colors cursor-pointer shadow-md shadow-primary/20"
+                data-category-id="all">
+                <p>Todos</p>
+            </div>
+            <!-- Categorias carregadas dinamicamente -->
+        </div>
+
+        <!-- Product List Section -->
+        <div id="productsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+            <!-- Loading state -->
+            <div class="col-span-full flex items-center justify-center py-12">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p class="text-slate-400">Carregando produtos...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-8 right-6">
+        <button onclick="window.location.href='adicionar-produto.html'"
+            class="size-14 rounded-full bg-primary text-background-dark shadow-xl shadow-primary/30 flex items-center justify-center active:scale-90 transition-transform cursor-pointer">
+            <span class="material-symbols-outlined text-3xl font-bold">add</span>
+        </button>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        import { checkLimiteProdutos } from './plan-limits.js';
+
+        document.documentElement.classList.add('dark');
+
+        const supabase = getSupabase();
+        const productsList = document.getElementById('productsList');
+        const categoriesFilter = document.getElementById('categoriesFilter');
+        const searchInput = document.getElementById('searchInput');
+
+        let allProducts = [];
+        let allCategories = [];
+        let selectedCategoryId = 'all';
+        let limitInfo = { atingiu: false };
+
+        /**
+         * Carrega categorias de produtos do Supabase
+         */
+        async function loadCategories() {
+            try {
+                const { data, error } = await supabase
+                    .from('categorias')
+                    .select('*')
+                    .eq('tipo', 'produtos')
+                    .eq('ativo', true)
+                    .order('nome');
+
+                if (error) throw error;
+
+                allCategories = data || [];
+                renderCategories();
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+
+        /**
+         * Renderiza os filtros de categoria
+         */
+        function renderCategories() {
+            const allButton = categoriesFilter.querySelector('[data-category-id="all"]');
+
+            // Remove categorias antigas, mantém o botão "Todos"
+            categoriesFilter.innerHTML = '';
+            categoriesFilter.appendChild(allButton);
+
+            allCategories.forEach(category => {
+                const button = document.createElement('div');
+                button.className = 'flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-[#283939] px-5 text-slate-700 dark:text-slate-200 font-medium text-sm hover:bg-slate-300 dark:hover:bg-[#344a4a] transition-colors cursor-pointer';
+                button.setAttribute('data-category-id', category.id);
+                button.innerHTML = `<p>${category.nome}</p>`;
+                button.addEventListener('click', () => selectCategory(category.id));
+                categoriesFilter.appendChild(button);
+            });
+        }
+
+        /**
+         * Seleciona uma categoria para filtrar
+         */
+        function selectCategory(categoryId) {
+            selectedCategoryId = categoryId;
+
+            // Atualiza visual dos botões
+            const buttons = categoriesFilter.querySelectorAll('[data-category-id]');
+            buttons.forEach(btn => {
+                const btnCategoryId = btn.getAttribute('data-category-id');
+                if (btnCategoryId === categoryId) {
+                    btn.className = 'flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-5 text-background-dark font-semibold text-sm transition-colors cursor-pointer shadow-md shadow-primary/20';
+                } else {
+                    btn.className = 'flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-[#283939] px-5 text-slate-700 dark:text-slate-200 font-medium text-sm hover:bg-slate-300 dark:hover:bg-[#344a4a] transition-colors cursor-pointer';
+                }
+            });
+
+            renderProducts();
+        }
+
+        /**
+         * Carrega produtos do Supabase com relacionamentos
+         */
+        async function loadProducts() {
+            try {
+                const { data, error } = await supabase
+                    .from('produtos')
+                    .select(`
+                        *,
+                        categoria:categorias(id, nome, icone),
+                        receita:receitas(id, nome)
+                    `)
+                    .order('nome');
+
+                if (error) throw error;
+
+                allProducts = data || [];
+                renderProducts();
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                productsList.innerHTML = `
+                    <div class="col-span-full flex items-center justify-center py-12">
+                        <div class="text-center">
+                            <span class="material-symbols-outlined text-6xl text-red-400 mb-4">error</span>
+                            <p class="text-slate-400">Erro ao carregar produtos</p>
+                            <p class="text-sm text-slate-500">${error.message}</p>
+                            <button onclick="location.reload()" class="mt-4 bg-primary text-background-dark px-6 py-2 rounded-lg font-semibold">
+                                Tentar Novamente
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Renderiza os produtos filtrados
+         */
+        function renderProducts() {
+            const searchTerm = searchInput.value.toLowerCase();
+
+            let filteredProducts = allProducts;
+
+            // Filtro por categoria
+            if (selectedCategoryId !== 'all') {
+                filteredProducts = filteredProducts.filter(p => p.categoria_id == selectedCategoryId);
+            }
+
+            // Filtro por busca
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(p =>
+                    p.nome.toLowerCase().includes(searchTerm) ||
+                    p.descricao?.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filteredProducts.length === 0) {
+                productsList.innerHTML = `
+                    <div class="col-span-full flex items-center justify-center py-12">
+                        <div class="text-center">
+                            <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">inventory_2</span>
+                            <p class="text-slate-400 text-lg font-semibold">Nenhum produto encontrado</p>
+                            <p class="text-sm text-slate-500 mt-2">Tente ajustar os filtros ou adicione um novo produto</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            productsList.innerHTML = filteredProducts.map(product => createProductCard(product)).join('');
+        }
+
+        /**
+         * Cria um card de produto
+         */
+        function createProductCard(product) {
+            const isAvailable = product.disponivel !== false;
+            const categoryName = product.categoria?.nome || 'Sem categoria';
+            const recipeName = product.receita?.nome || 'Sem receita';
+            const imageUrl = product.imagem_url || getDefaultImage(categoryName);
+            const price = parseFloat(product.preco_base || 0).toFixed(2);
+
+            return `
+                <div class="flex flex-col gap-0 rounded-xl bg-white dark:bg-[#1c2727] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden ${!isAvailable ? 'opacity-75' : ''}">
+                    <div class="flex p-4 gap-4">
+                        <div class="size-20 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0 bg-center bg-cover border border-slate-100 dark:border-slate-700 ${!isAvailable ? 'grayscale' : ''}"
+                            style="background-image: url('${imageUrl}');">
+                        </div>
+                        <div class="flex flex-col justify-between flex-1">
+                            <div>
+                                <div class="flex justify-between items-start gap-2">
+                                    <p class="text-slate-900 dark:text-white text-base font-bold leading-tight">${product.nome}</p>
+                                    <p class="text-primary font-bold text-base leading-none whitespace-nowrap">R$ ${price}</p>
+                                </div>
+                                ${product.descricao ? `
+                                    <p class="text-slate-500 dark:text-slate-400 text-xs font-normal mt-1">${product.descricao}</p>
+                                ` : ''}
+                                <p class="text-slate-500 dark:text-slate-400 text-xs font-normal mt-1 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">description</span>
+                                    ${recipeName}
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-between mt-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-4 ${isAvailable ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'} rounded-full relative flex items-center px-0.5">
+                                        <div class="size-3 bg-white rounded-full ${isAvailable ? 'ml-auto' : 'ml-0'}"></div>
+                                    </div>
+                                    <span class="${isAvailable ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-500'} text-xs font-medium">
+                                        ${isAvailable ? 'Disponível' : 'Indisponível'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-black/10">
+                        <button onclick="editProduct(${product.id})"
+                            class="flex-1 py-2.5 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium border-r border-slate-100 dark:border-slate-800">
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                            Editar
+                        </button>
+                        <button onclick="deleteProduct(${product.id}, '${product.nome}')"
+                            class="flex-1 py-2.5 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-red-500 transition-colors text-sm font-medium">
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * Retorna imagem padrão baseada na categoria
+         */
+        function getDefaultImage(categoryName) {
+            const defaultImages = {
+                'Cremoso': 'https://lh3.googleusercontent.com/aida-public/AB6AXuB5dNFTcgvZ4lq9wCvFfi_MCUAm5bV-iMYjtfTFp5BhtTYr6zfBjAejyEG90svgEkeYL5U9MJIpjl2GawTGgkmOLNf-6DgtSiqeOtF-G5YytTuxOZo9Q-TPZXzfP-xeZusZ-rhngo6gmoeb2u-j9zq57GaQgcWgxJ5CUOJ-aldEiNoUbQ9vwLh-F64lR3wOIeAYQXosV_I6cou2PFfkQaR9cxkNHHONLiMoNLM3yC6kBzkwH4d8KROdlwPU38bCqv1tL9cOg03JMKs',
+                'Frutas': 'https://lh3.googleusercontent.com/aida-public/AB6AXuCruVS_nYo-E-xv4mbXhMqDk49Q0goRCJWydnwEp0avSReN3h9L_B7SqgGIOu8VY3ple3sYKQSTjhj-v62zFWfTo7FGwSBWSRsBVPxXK71Ab9TKd2PTqPSS5r4so0UP3850QoAzzphTDdSmi8V9eRUvQOJGobUsNalPTg8QRCK6BQ3LAMGPn1eUpogsfZMDalVj3qU8rIBSgX0pGH13Q2IOIvU_KFc2hMAto0HGyvEvELI_PUliC-23l01Hv-b2Qnsw5TGoasxx1Sc',
+                'Chocolate': 'https://lh3.googleusercontent.com/aida-public/AB6AXuDbyxSMeD0BNB47L4hLPjKjfyAERfL6itmCH4xm0ryzzx-AYkhBsCFSN0nzRwCS2Kd7b2_sawd2qrYdIMetzPsS7fQ0c_qPPX-v8QiN0UMm9CCkP-Wf-SRYhnyAcr8Xsb_2TkOeHM0nY2pw7wR_qYDnQ8l4Zhx_lDCqwDp7nQlwltY2GOuCUpRsRpk-D7fWJlq3JP_IhLnteANPCCS0JFlnmRqSYHFJ_5YAGB9kc2-yXQSkJzWPgkEALmlRx9muMW4sC1uO56imW7U'
+            };
+            return defaultImages[categoryName] || defaultImages['Cremoso'];
+        }
+
+        /**
+         * Edita um produto
+         */
+        window.editProduct = function (productId) {
+            window.location.href = `adicionar-produto.html?id=${productId}`;
+        };
+
+        /**
+         * Deleta um produto
+         */
+        window.deleteProduct = async function (productId, productName) {
+            if (!confirm(`Tem certeza que deseja excluir o produto "${productName}"?\n\nEsta ação não pode ser desfeita.`)) {
+                return;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('produtos')
+                    .delete()
+                    .eq('id', productId);
+
+                if (error) throw error;
+
+                // Remove da lista local e re-renderiza
+                allProducts = allProducts.filter(p => p.id !== productId);
+                renderProducts();
+
+                // Mostra notificação
+                showNotification('Produto excluído com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao excluir produto:', error);
+                showNotification('Erro ao excluir produto: ' + error.message, 'error');
+            }
+        };
+
+        /**
+         * Mostra notificação toast
+         */
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg backdrop-blur-md transition-all transform ${type === 'success' ? 'bg-green-500/90' :
+                type === 'error' ? 'bg-red-500/90' :
+                    'bg-primary/90'
+                } text-white`;
+
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">
+                        ${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}
+                    </span>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', renderProducts);
+
+        // Configura botão "Todos"
+        categoriesFilter.querySelector('[data-category-id="all"]').addEventListener('click', () => selectCategory('all'));
+
+        // Inicializa
+        if (supabase) {
+            loadCategories();
+            loadProducts();
+
+            // Verificar limites do plano
+            const bannerContainer = document.createElement('div');
+            bannerContainer.id = 'planLimitBanner';
+            bannerContainer.className = 'px-4 pb-2';
+            document.querySelector('main').prepend(bannerContainer);
+
+            checkLimiteProdutos(bannerContainer).then(info => {
+                limitInfo = info;
+                if (info.atingiu) {
+                    // Desabilitar FAB
+                    const fab = document.querySelector('.fixed.bottom-8 button');
+                    if (fab) {
+                        fab.onclick = function (e) {
+                            e.preventDefault();
+                            if (confirm('⭐ Limite de produtos atingido!\n\nNo plano Free você pode cadastrar até 7 produtos.\nDeseja fazer upgrade para Premium?')) {
+                                window.location.href = 'planos.html';
+                            }
+                        };
+                        fab.classList.remove('bg-primary', 'shadow-primary/30');
+                        fab.classList.add('bg-slate-700', 'shadow-none');
+                    }
+                }
+            });
+        } else {
+            productsList.innerHTML = `
+                <div class="col-span-full flex items-center justify-center py-12">
+                    <div class="text-center">
+                        <span class="material-symbols-outlined text-6xl text-red-400 mb-4">sync_problem</span>
+                        <p class="text-slate-400 text-lg font-semibold">Supabase não configurado</p>
+                        <p class="text-sm text-slate-500 mt-2">Configure o Supabase em supabase-config.js</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>

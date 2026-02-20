@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Controle de MOQ e Compras - Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1A1A1A",
+                        "danger": "#fa5c38",
+                        "alert": "#fa5c38"
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen pb-24">
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center p-4 pb-2 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='gestao-insumos.html'"
+                class="flex size-12 shrink-0 items-center justify-start text-primary hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-white">chevron_left</span>
+            </button>
+            <h1 class="text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center">Planejamento de
+                Compras</h1>
+            <div class="flex w-12 items-center justify-end">
+                <button
+                    class="flex items-center justify-center rounded-xl h-12 w-12 bg-transparent text-white hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto">
+        <!-- KPI Section -->
+        <section class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- KPI: Below MOQ (Urgent) -->
+            <div class="flex flex-col gap-2 rounded-xl p-5 bg-card-dark border border-danger/20">
+                <div class="flex justify-between items-start">
+                    <p class="text-white/70 text-sm font-medium">Itens abaixo do MOQ</p>
+                    <span class="material-symbols-outlined text-danger text-sm">warning</span>
+                </div>
+                <p class="text-danger tracking-light text-3xl font-bold">12 itens</p>
+                <p class="text-danger/80 text-xs font-medium">+2% em relação a ontem</p>
+            </div>
+
+            <!-- KPI: Replenishment Cost -->
+            <div class="flex flex-col gap-2 rounded-xl p-5 bg-card-dark border border-primary/20">
+                <div class="flex justify-between items-start">
+                    <p class="text-white/70 text-sm font-medium">Custo de Reposição</p>
+                    <span class="material-symbols-outlined text-primary text-sm">payments</span>
+                </div>
+                <p class="text-primary tracking-light text-3xl font-bold">R$ 1.450</p>
+                <p class="text-primary/80 text-xs font-medium">Est. para estoque ideal</p>
+            </div>
+
+            <!-- KPI: Suggested Orders -->
+            <div class="flex flex-col gap-2 rounded-xl p-5 bg-card-dark">
+                <div class="flex justify-between items-start">
+                    <p class="text-white/70 text-sm font-medium">Pedidos Sugeridos</p>
+                    <span class="material-symbols-outlined text-white/50 text-sm">shopping_cart_checkout</span>
+                </div>
+                <p class="text-white tracking-light text-3xl font-bold">8 ordens</p>
+                <p class="text-white/50 text-xs font-medium">Aguardando aprovação</p>
+            </div>
+        </section>
+
+        <!-- Section Title -->
+        <div class="px-4 pt-4 pb-2">
+            <h3 class="text-white text-lg font-bold leading-tight tracking-tight">Insumos Críticos</h3>
+            <p class="text-white/50 text-sm">Itens que atingiram o ponto de pedido</p>
+        </div>
+
+        <!-- Inventory Cards List -->
+        <main class="p-4 space-y-4">
+            <!-- Card 1: Milk -->
+            <div class="flex flex-col rounded-xl bg-card-dark overflow-hidden border border-white/5 shadow-xl">
+                <div class="flex items-start gap-4 p-4">
+                    <div class="w-20 h-20 rounded-lg bg-cover bg-center shrink-0 border border-white/10"
+                        data-alt="Close up of fresh milk in a glass bottle"
+                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCGihHR7S3itoRQUcQhOwfmfkBx70zHsVhdVvhJfpkYHCbPVUfZRVeETCnhgc1FRzxr394uq13b86FsLkVxJPe7zgJBR4qjzauVvvWsj8RsHmOl1hrKLvZwEpN6x7mWSlnRRyvx0OaiH2-9ZwYB_A5X75j-sf_hOO7Kl7vm3KL9jk51BV3PPqTT3oA2Agj6EkBzrHFM-uW7VQWnwZdHe4_HPEpzd7Fnisf9wMYc9FbVPp9wr-hTm3bWBQZBgQnEvACBmuSoJkWSfmk');">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <span
+                                class="bg-danger text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Comprar
+                                Agora</span>
+                            <span class="text-white/40 text-xs font-medium">SKU: MK-02</span>
+                        </div>
+                        <h4 class="text-white text-base font-bold">Leite Integral (Fazenda)</h4>
+                        <p class="text-white/60 text-xs">Estoque atual: 12L / MOQ: 40L</p>
+                    </div>
+                </div>
+                <div class="px-4 pb-4">
+                    <!-- Progress Bar -->
+                    <div class="flex flex-col gap-2 mb-4">
+                        <div class="flex justify-between items-end">
+                            <p class="text-primary text-xs font-medium">Sugerido: 28 un</p>
+                            <p class="text-white/80 text-xs font-medium">30% do MOQ</p>
+                        </div>
+                        <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-full bg-danger rounded-full" style="width: 30%;"></div>
+                        </div>
+                        <p class="text-white/40 text-[11px]">Custo Estimado: R$ 168,00</p>
+                    </div>
+                    <button
+                        class="w-full flex items-center justify-center gap-2 rounded-lg h-10 bg-primary text-background-dark font-bold text-sm hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined text-lg">add_shopping_cart</span>
+                        Adicionar à Lista
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: Condensed Milk -->
+            <div class="flex flex-col rounded-xl bg-card-dark overflow-hidden border border-white/5 shadow-xl">
+                <div class="flex items-start gap-4 p-4">
+                    <div class="w-20 h-20 rounded-lg bg-cover bg-center shrink-0 border border-white/10"
+                        data-alt="Tin of condensed milk on a kitchen table"
+                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA4Q_401DQpbKC4TveTccPxILvjEzGEH-elYcW64Cg3GNBX42buwd0vB7X4XlzOvzouxdLqT-1RfUJ0wjKuATwP2siii2ZVjFoFEtxmo94kYDG15nSsteMVOd3C9dDe0bxCXa1WX4ytnLJo6ATITrRz-VAUwtZ4--Npj9pxCzC_EsxLNHcjZQEkJS31CvK_ZNuQiO5F2UINkeGZPxg429Z0r_gC0CpyXmyxRol1pQsGpzK9ROX_DV-28sVYsnkgTfwzN1ITawUsexg');">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <span
+                                class="bg-danger text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Comprar
+                                Agora</span>
+                            <span class="text-white/40 text-xs font-medium">SKU: CM-88</span>
+                        </div>
+                        <h4 class="text-white text-base font-bold">Leite Condensado (Moça)</h4>
+                        <p class="text-white/60 text-xs">Estoque atual: 8 un / MOQ: 60 un</p>
+                    </div>
+                </div>
+                <div class="px-4 pb-4">
+                    <!-- Progress Bar -->
+                    <div class="flex flex-col gap-2 mb-4">
+                        <div class="flex justify-between items-end">
+                            <p class="text-primary text-xs font-medium">Sugerido: 52 un</p>
+                            <p class="text-white/80 text-xs font-medium">13% do MOQ</p>
+                        </div>
+                        <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-full bg-danger rounded-full" style="width: 13%;"></div>
+                        </div>
+                        <p class="text-white/40 text-[11px]">Custo Estimado: R$ 416,00</p>
+                    </div>
+                    <button
+                        class="w-full flex items-center justify-center gap-2 rounded-lg h-10 bg-primary text-background-dark font-bold text-sm hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined text-lg">add_shopping_cart</span>
+                        Adicionar à Lista
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: Cocoa Powder (Neutral State) -->
+            <div
+                class="flex flex-col rounded-xl bg-card-dark overflow-hidden border border-white/5 shadow-xl opacity-80">
+                <div class="flex items-start gap-4 p-4">
+                    <div class="w-20 h-20 rounded-lg bg-cover bg-center shrink-0 border border-white/10"
+                        data-alt="Pile of high quality cocoa powder"
+                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAep2E9jmpswuLP7xkS4Y3CLLzTxFyHPxUMr_a1W-6MIdYVJneXAnRLoVJlQMSS99ne8kbXqPzmM8MXFHEZ8X7geeXRIritGOpGVfpDZy6VDF3-2pQm6uBYVCkRyNPyleVj_UT75VqAfNWTzeB6EzZwA8WNHi5BUZeFyOX7-Je6YfshbsSaPC8bnSOfDmGdubuvPQ7GXW2xkGbFGqaFCVZIFtdDicz1QBWjmqYWKvZHeyxIBtSYB-6hbYubBobwk5e_HO8oMbGQGVc');">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start mb-1">
+                            <span
+                                class="bg-white/20 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Alerta
+                                Próximo</span>
+                            <span class="text-white/40 text-xs font-medium">SKU: CC-05</span>
+                        </div>
+                        <h4 class="text-white text-base font-bold">Cacau em Pó 50%</h4>
+                        <p class="text-white/60 text-xs">Estoque atual: 5kg / MOQ: 6kg</p>
+                    </div>
+                </div>
+                <div class="px-4 pb-4">
+                    <div class="flex flex-col gap-2 mb-4">
+                        <div class="flex justify-between items-end">
+                            <p class="text-primary text-xs font-medium">Sugerido: 10kg</p>
+                            <p class="text-white/80 text-xs font-medium">83% do MOQ</p>
+                        </div>
+                        <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full" style="width: 83%;"></div>
+                        </div>
+                        <p class="text-white/40 text-[11px]">Custo Estimado: R$ 150,00</p>
+                    </div>
+                    <button
+                        class="w-full flex items-center justify-center gap-2 rounded-lg h-10 border border-primary text-primary font-bold text-sm hover:bg-primary/10 transition-colors">
+                        <span class="material-symbols-outlined text-lg">add_shopping_cart</span>
+                        Adicionar à Lista
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button
+        class="fixed bottom-24 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-background-dark shadow-lg shadow-primary/20 hover:scale-105 transition-transform z-50">
+        <span class="material-symbols-outlined text-3xl font-bold">tune</span>
+    </button>
+
+    <!-- iOS Bottom Tab Bar -->
+    <nav
+        class="fixed bottom-0 left-0 right-0 h-20 bg-background-dark border-t border-white/5 flex items-center justify-around px-6 z-40 max-w-7xl mx-auto">
+        <button onclick="window.location.href='index.html'"
+            class="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[10px]">Início</span>
+        </button>
+        <button onclick="window.location.href='moq.html'" class="flex flex-col items-center gap-1 text-primary">
+            <span class="material-symbols-outlined">analytics</span>
+            <span class="text-[10px]">MOQ</span>
+        </button>
+        <button onclick="window.location.href='pedidos.html'"
+            class="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span class="text-[10px]">Pedidos</span>
+        </button>
+        <button onclick="window.location.href='gestao-insumos.html'"
+            class="flex flex-col items-center gap-1 text-white/50 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="text-[10px]">Estoque</span>
+        </button>
+    </nav>
+</body>
+
+</html>

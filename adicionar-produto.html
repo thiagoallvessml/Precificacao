@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Adicionar Produto</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecce",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0F0F0F",
+                        "charcoal-dark": "#1c1c27",
+                        "silver-text": "#9d9db9",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            min-height: max(884px, 100dvh);
+        }
+
+        .form-input:focus {
+            border-color: #13ecce !important;
+            box-shadow: 0 0 0 1px #13ecce;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b3b54;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-white min-h-screen flex flex-col font-display">
+    <!-- TopAppBar -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-[#3b3b54]/30">
+        <div class="flex items-center p-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.history.back()"
+                class="text-white flex size-10 items-center justify-center rounded-full hover:bg-white/10 cursor-pointer">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <h2 id="pageTitle" class="text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center">
+                Adicionar Produto
+            </h2>
+            <div class="flex w-10 items-center justify-end">
+                <button onclick="window.history.back()"
+                    class="text-gray-400 text-sm font-semibold hover:text-white transition-colors cursor-pointer">Cancelar</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full pb-32">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
+            <!-- Left Column: Identificação -->
+            <div>
+                <section class="mt-4">
+                    <div class="px-4 py-2">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-widest">Identificação</h3>
+                    </div>
+
+                    <!-- Receita -->
+                    <div class="px-4 py-3">
+                        <label class="flex flex-col w-full">
+                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Receita</p>
+                            <div class="relative">
+                                <select id="receitaSelect"
+                                    class="appearance-none form-input flex w-full rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b3b54] bg-charcoal-dark h-14 px-4 text-base font-normal leading-normal cursor-pointer">
+                                    <option disabled selected value="">Carregando receitas...</option>
+                                </select>
+                                <span
+                                    class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">unfold_more</span>
+                            </div>
+                            <p class="text-gray-400 text-xs mt-2 ml-1">Selecione a receita base deste produto</p>
+                        </label>
+                    </div>
+
+                    <!-- Categoria -->
+                    <div class="px-4 py-3">
+                        <label class="flex flex-col w-full">
+                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Categoria</p>
+                            <div class="relative">
+                                <select id="categoriaSelect"
+                                    class="appearance-none form-input flex w-full rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b3b54] bg-charcoal-dark h-14 px-4 text-base font-normal leading-normal cursor-pointer">
+                                    <option disabled selected value="">Carregando categorias...</option>
+                                </select>
+                                <span
+                                    class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">unfold_more</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Nome de Exibição -->
+                    <div class="px-4 py-3">
+                        <label class="flex flex-col w-full">
+                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Nome do Produto</p>
+                            <input id="nomeInput"
+                                class="form-input w-full rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b3b54] bg-charcoal-dark h-14 px-4 text-base font-normal leading-normal placeholder:text-gray-500"
+                                placeholder="Ex: Ninho com Nutella" type="text" />
+                        </label>
+                    </div>
+
+                    <!-- Descrição -->
+                    <div class="px-4 py-3">
+                        <label class="flex flex-col w-full">
+                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Descrição (Opcional)</p>
+                            <textarea id="descricaoInput"
+                                class="form-input w-full rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b3b54] bg-charcoal-dark min-h-[120px] p-4 text-base font-normal leading-normal placeholder:text-gray-500 resize-none custom-scrollbar"
+                                placeholder="Ex: Geladinho gourmet cremoso feito com leite ninho original e recheio generoso de avelã."></textarea>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Mídia & Precificação -->
+            <div class="space-y-6">
+                <section class="mt-6">
+                    <div class="px-4 py-2">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-widest">Mídia</h3>
+                    </div>
+                    <div class="px-4 py-3">
+                        <div class="flex gap-4 items-start">
+                            <div id="imagePreview"
+                                class="relative size-20 bg-charcoal-dark rounded-xl border border-[#3b3b54] border-dashed flex flex-col items-center justify-center shrink-0 group hover:border-primary transition-colors cursor-pointer overflow-hidden">
+                                <span
+                                    class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">add_a_photo</span>
+                                <span class="text-[10px] text-gray-400 mt-1">Preview</span>
+                            </div>
+                            <label class="flex flex-col flex-1">
+                                <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">URL da Imagem
+                                    (Opcional)</p>
+                                <input id="imagemUrlInput"
+                                    class="form-input w-full rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b3b54] bg-charcoal-dark h-14 px-4 text-base font-normal leading-normal placeholder:text-gray-500"
+                                    placeholder="https://exemplo.com/foto.jpg" type="url" />
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pricing Section -->
+                <section class="mt-6">
+                    <div class="px-4 py-2">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-widest">Precificação</h3>
+                    </div>
+
+                    <!-- Preço -->
+                    <div class="px-4 py-3">
+                        <label class="flex flex-col w-full">
+                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Preço Base</p>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
+                                <input id="precoInput"
+                                    class="form-input w-full rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b3b54] bg-charcoal-dark h-14 pl-12 pr-4 text-base font-normal leading-normal placeholder:text-gray-500"
+                                    placeholder="0,00" type="number" step="0.01" min="0" />
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Status Toggle Section -->
+                <section class="mt-6 px-4">
+                    <div
+                        class="bg-charcoal-dark/50 border border-[#3b3b54]/50 rounded-2xl p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 bg-primary/20 rounded-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary">campaign</span>
+                            </div>
+                            <div>
+                                <p class="text-white font-bold text-base leading-none">Ativo para Vendas</p>
+                                <p class="text-gray-400 text-xs mt-1">Visível no catálogo do cliente</p>
+                            </div>
+                        </div>
+                        <!-- iOS Style Toggle -->
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="disponivelToggle" checked class="sr-only peer" type="checkbox" />
+                            <div
+                                class="w-11 h-6 bg-[#3b3b54] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary">
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Destaque Toggle -->
+                    <div
+                        class="bg-charcoal-dark/50 border border-[#3b3b54]/50 rounded-2xl p-4 flex items-center justify-between mt-4">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-yellow-400">star</span>
+                            </div>
+                            <div>
+                                <p class="text-white font-bold text-base leading-none">Produto em Destaque</p>
+                                <p class="text-gray-400 text-xs mt-1">Aparece no topo do catálogo</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="destaqueToggle" class="sr-only peer" type="checkbox" />
+                            <div
+                                class="w-11 h-6 bg-[#3b3b54] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500">
+                            </div>
+                        </label>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Fixed Action Button at Bottom -->
+    <div
+        class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background-dark via-background-dark/95 to-transparent">
+        <div class="max-w-7xl mx-auto">
+            <button id="saveButton"
+                class="w-full bg-primary hover:bg-primary/90 text-[#0F0F0F] font-bold py-4 px-6 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">save</span>
+                Salvar Produto
+            </button>
+            <div class="h-4"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        document.documentElement.classList.add('dark');
+
+        const supabase = getSupabase();
+
+        // Referências dos elementos
+        const receitaSelect = document.getElementById('receitaSelect');
+        const categoriaSelect = document.getElementById('categoriaSelect');
+        const nomeInput = document.getElementById('nomeInput');
+        const descricaoInput = document.getElementById('descricaoInput');
+        const imagemUrlInput = document.getElementById('imagemUrlInput');
+        const precoInput = document.getElementById('precoInput');
+        const disponivelToggle = document.getElementById('disponivelToggle');
+        const destaqueToggle = document.getElementById('destaqueToggle');
+        const saveButton = document.getElementById('saveButton');
+        const pageTitle = document.getElementById('pageTitle');
+        const imagePreview = document.getElementById('imagePreview');
+
+        let isEditMode = false;
+        let productId = null;
+
+        /**
+         * Carrega receitas do Supabase
+         */
+        async function loadReceitas() {
+            try {
+                const { data, error } = await supabase
+                    .from('receitas')
+                    .select('id, nome')
+                    .eq('ativo', true)
+                    .order('nome');
+
+                if (error) throw error;
+
+                receitaSelect.innerHTML = '<option disabled selected value="">Selecione uma receita</option>';
+
+                if (!data || data.length === 0) {
+                    receitaSelect.innerHTML += '<option disabled>Nenhuma receita cadastrada</option>';
+                    return;
+                }
+
+                data.forEach(receita => {
+                    const option = document.createElement('option');
+                    option.value = receita.id;
+                    option.textContent = receita.nome;
+                    receitaSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar receitas:', error);
+                receitaSelect.innerHTML = '<option disabled>Erro ao carregar receitas</option>';
+            }
+        }
+
+        /**
+         * Carrega categorias de produtos do Supabase
+         */
+        async function loadCategorias() {
+            try {
+                const { data, error } = await supabase
+                    .from('categorias')
+                    .select('id, nome, icone')
+                    .eq('tipo', 'produtos')
+                    .eq('ativo', true)
+                    .order('nome');
+
+                if (error) throw error;
+
+                categoriaSelect.innerHTML = '<option disabled selected value="">Selecione uma categoria</option>';
+
+                if (!data || data.length === 0) {
+                    categoriaSelect.innerHTML += '<option disabled>Nenhuma categoria cadastrada</option>';
+                    return;
+                }
+
+                data.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.id;
+                    option.textContent = `${categoria.icone || ''} ${categoria.nome}`.trim();
+                    categoriaSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                categoriaSelect.innerHTML = '<option disabled>Erro ao carregar categorias</option>';
+            }
+        }
+
+        /**
+         * Carrega dados do produto para edição
+         */
+        async function loadProduct(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('produtos')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                // Preenche os campos
+                receitaSelect.value = data.receita_id || '';
+                categoriaSelect.value = data.categoria_id || '';
+                nomeInput.value = data.nome || '';
+                descricaoInput.value = data.descricao || '';
+                imagemUrlInput.value = data.imagem_url || '';
+                precoInput.value = data.preco_base || '';
+                disponivelToggle.checked = data.disponivel !== false;
+                destaqueToggle.checked = data.destaque === true;
+
+                // Atualiza preview da imagem
+                if (data.imagem_url) {
+                    updateImagePreview(data.imagem_url);
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar produto:', error);
+                showNotification('Erro ao carregar produto: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Atualiza preview da imagem
+         */
+        function updateImagePreview(url) {
+            if (url) {
+                imagePreview.style.backgroundImage = `url('${url}')`;
+                imagePreview.style.backgroundSize = 'cover';
+                imagePreview.style.backgroundPosition = 'center';
+                imagePreview.innerHTML = '';
+            } else {
+                imagePreview.style.backgroundImage = '';
+                imagePreview.innerHTML = `
+                    <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">add_a_photo</span>
+                    <span class="text-[10px] text-gray-400 mt-1">Preview</span>
+                `;
+            }
+        }
+
+        /**
+         * Salva ou atualiza produto
+         */
+        async function saveProduct() {
+            try {
+                // Validação
+                if (!nomeInput.value.trim()) {
+                    showNotification('Por favor, preencha o nome do produto', 'error');
+                    nomeInput.focus();
+                    return;
+                }
+
+                if (!precoInput.value || parseFloat(precoInput.value) <= 0) {
+                    showNotification('Por favor, informe um preço válido', 'error');
+                    precoInput.focus();
+                    return;
+                }
+
+                // Mostra loading
+                saveButton.disabled = true;
+                saveButton.innerHTML = `
+                    <span class="material-symbols-outlined animate-spin">refresh</span>
+                    Salvando...
+                `;
+
+                // Prepara dados
+                const productData = {
+                    nome: nomeInput.value.trim(),
+                    descricao: descricaoInput.value.trim() || null,
+                    categoria_id: categoriaSelect.value || null,
+                    receita_id: receitaSelect.value || null,
+                    preco_base: parseFloat(precoInput.value),
+                    imagem_url: imagemUrlInput.value.trim() || null,
+                    disponivel: disponivelToggle.checked,
+                    destaque: destaqueToggle.checked
+                };
+
+                let result;
+
+                if (isEditMode && productId) {
+                    // Atualiza produto existente
+                    result = await supabase
+                        .from('produtos')
+                        .update(productData)
+                        .eq('id', productId)
+                        .select();
+                } else {
+                    // Insere novo produto
+                    result = await supabase
+                        .from('produtos')
+                        .insert([productData])
+                        .select();
+                }
+
+                if (result.error) throw result.error;
+
+                showNotification(
+                    isEditMode ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!',
+                    'success'
+                );
+
+                // Aguarda 1 segundo e volta
+                setTimeout(() => {
+                    window.location.href = 'gestao-produtos.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                showNotification('Erro ao salvar produto: ' + error.message, 'error');
+            } finally {
+                // Restaura botão
+                saveButton.disabled = false;
+                saveButton.innerHTML = `
+                    <span class="material-symbols-outlined">save</span>
+                    Salvar Produto
+                `;
+            }
+        }
+
+        /**
+         * Mostra notificação toast
+         */
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg backdrop-blur-md transition-all transform ${type === 'success' ? 'bg-green-500/90' :
+                    type === 'error' ? 'bg-red-500/90' :
+                        'bg-primary/90'
+                } text-white`;
+
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">
+                        ${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}
+                    </span>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        saveButton.addEventListener('click', saveProduct);
+        imagemUrlInput.addEventListener('input', (e) => updateImagePreview(e.target.value));
+
+        // Adiciona animação de spin
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Inicialização
+        if (supabase) {
+            // Verifica se está em modo de edição
+            const urlParams = new URLSearchParams(window.location.search);
+            productId = urlParams.get('id');
+
+            if (productId) {
+                isEditMode = true;
+                pageTitle.textContent = 'Editar Produto';
+                loadProduct(productId);
+            }
+
+            // Carrega receitas e categorias
+            loadReceitas();
+            loadCategorias();
+        } else {
+            showNotification('Supabase não configurado', 'error');
+        }
+    </script>
+</body>
+
+</html>

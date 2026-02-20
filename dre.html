@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>DRE Detalhado</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "accent-orange": "#fb923c",
+                        "accent-green": "#00FFAB",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ios-scroll-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .ios-scroll-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark font-display text-slate-100">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-header px-4 pt-6 pb-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-white cursor-pointer"
+                    onclick="window.location.href='index.html'">chevron_left</span>
+                <h1 class="text-xl font-bold text-white">DRE Detalhado</h1>
+            </div>
+        </div>
+        <!-- Period Selector -->
+        <div class="flex items-center gap-2 overflow-x-auto ios-scroll-hide pb-2">
+            <select id="mesSelect" onchange="loadDados()"
+                class="bg-white/5 border border-white/10 rounded-full px-4 py-2 text-white text-sm font-bold">
+                <option value="0">Janeiro</option>
+                <option value="1">Fevereiro</option>
+                <option value="2">Março</option>
+                <option value="3">Abril</option>
+                <option value="4">Maio</option>
+                <option value="5">Junho</option>
+                <option value="6">Julho</option>
+                <option value="7">Agosto</option>
+                <option value="8">Setembro</option>
+                <option value="9">Outubro</option>
+                <option value="10">Novembro</option>
+                <option value="11">Dezembro</option>
+            </select>
+            <select id="anoSelect" onchange="loadDados()"
+                class="bg-white/5 border border-white/10 rounded-full px-4 py-2 text-white text-sm font-bold">
+                <!-- Será preenchido dinamicamente -->
+            </select>
+        </div>
+    </header>
+
+    <main id="dreContent" class="p-4 space-y-4 pb-32">
+        <div class="text-center py-12">
+            <span class="material-symbols-outlined text-6xl text-slate-600 mb-4 animate-pulse">hourglass_empty</span>
+            <p class="text-slate-400">Carregando dados...</p>
+        </div>
+    </main>
+
+    <!-- Bottom Net Profit -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 glass-header border-t-0 rounded-t-3xl">
+        <div class="flex items-center justify-between bg-accent-green/10 border border-accent-green/30 p-4 rounded-2xl">
+            <div class="flex items-center gap-4">
+                <div class="size-12 rounded-full bg-accent-green flex items-center justify-center text-slate-900">
+                    <span class="material-symbols-outlined font-bold">account_balance_wallet</span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-accent-green uppercase">Lucro Líquido</p>
+                    <p id="lucroLiquido" class="text-2xl font-bold text-white">R$ 0,00</p>
+                </div>
+            </div>
+            <div class="flex flex-col items-end">
+                <span id="margemIcon" class="material-symbols-outlined text-accent-green">trending_up</span>
+                <span id="margem" class="text-xs font-bold text-accent-green">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getAllRecords } from './supabase-utils.js';
+
+        let pedidos = [];
+        let despesas = [];
+        let producoes = [];
+        let categorias = {};
+
+        // Inicializar selects
+        function initSelects() {
+            const anoAtual = new Date().getFullYear();
+            const mesAtual = new Date().getMonth();
+
+            // Preencher anos (últimos 3 anos)
+            const anoSelect = document.getElementById('anoSelect');
+            for (let i = 0; i < 3; i++) {
+                const ano = anoAtual - i;
+                const option = document.createElement('option');
+                option.value = ano;
+                option.textContent = ano;
+                if (ano === anoAtual) option.selected = true;
+                anoSelect.appendChild(option);
+            }
+
+            // Selecionar mês atual
+            document.getElementById('mesSelect').value = mesAtual;
+        }
+
+        // Carregar dados
+        async function loadDados() {
+            try {
+                const mes = parseInt(document.getElementById('mesSelect').value);
+                const ano = parseInt(document.getElementById('anoSelect').value);
+
+                // Datas do período
+                const dataInicio = new Date(ano, mes, 1);
+                const dataFim = new Date(ano, mes + 1, 0, 23, 59, 59);
+
+                // Carregar pedidos
+                const { data: pedData, error: pedError } = await getAllRecords('pedidos');
+                if (pedError) throw pedError;
+                pedidos = (pedData || []).filter(p => {
+                    const dataPedido = new Date(p.data_pedido);
+                    return dataPedido >= dataInicio && dataPedido <= dataFim && p.status !== 'cancelado';
+                });
+
+                // Carregar despesas
+                const { data: despData, error: despError } = await getAllRecords('despesas');
+                if (despError) throw despError;
+                despesas = (despData || []).filter(d => {
+                    if (d.data_pagamento) {
+                        const dataPagamento = new Date(d.data_pagamento);
+                        return dataPagamento >= dataInicio && dataPagamento <= dataFim;
+                    }
+                    return false;
+                });
+
+                // Carregar produções
+                const { data: prodData, error: prodError } = await getAllRecords('producao');
+                if (prodError) throw prodError;
+                producoes = (prodData || []).filter(p => {
+                    const dataProd = new Date(p.data_producao);
+                    return dataProd >= dataInicio && dataProd <= dataFim;
+                });
+
+                // Carregar categorias
+                const { data: catData, error: catError } = await getAllRecords('categorias');
+                if (catError) throw catError;
+                (catData || []).forEach(cat => { categorias[cat.id] = cat; });
+
+                renderDRE();
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                document.getElementById('dreContent').innerHTML = `
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-6xl text-red-500 mb-4">error</span>
+                        <p class="text-slate-400">Erro ao carregar dados</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderizar DRE
+        function renderDRE() {
+            // Calcular receita bruta
+            const receitaBruta = pedidos.reduce((sum, p) => sum + parseFloat(p.valor_total || 0), 0);
+
+            // Agrupar por marketplace
+            const porMarketplace = {};
+            pedidos.forEach(p => {
+                const mkid = p.categoria_marketplace_id || p.marketplace_id || 0;
+                if (!porMarketplace[mkid]) porMarketplace[mkid] = 0;
+                porMarketplace[mkid] += parseFloat(p.valor_total || 0);
+            });
+
+            // Calcular deduções (taxas de marketplace)
+            let deducoes = 0;
+            const detalheDeducoes = [];
+
+            Object.entries(porMarketplace).forEach(([mkid, valor]) => {
+                const cat = categorias[mkid];
+                if (cat && cat.taxa_operacional) {
+                    const taxa = parseFloat(cat.taxa_operacional);
+                    const valorTaxa = valor * (taxa / 100);
+                    deducoes += valorTaxa;
+                    detalheDeducoes.push({
+                        nome: `Taxa ${cat.nome} (${taxa.toFixed(1)}%)`,
+                        valor: valorTaxa
+                    });
+                }
+            });
+
+            // Receita líquida
+            const receitaLiquida = receitaBruta - deducoes;
+
+            // CPV (Custo dos Produtos Vendidos) = custo de produção
+            const cpv = producoes.reduce((sum, p) => sum + parseFloat(p.custo_total || 0), 0);
+
+            // Lucro bruto
+            const lucroBruto = receitaLiquida - cpv;
+
+            // Despesas operacionais
+            const despesasFixas = despesas.filter(d => d.tipo === 'fixa');
+            const despesasVariaveis = despesas.filter(d => d.tipo === 'variavel');
+            const totalDespesas = despesas.reduce((sum, d) => sum + parseFloat(d.valor || 0), 0);
+
+            // EBITDA e Lucro Líquido
+            const ebitda = lucroBruto - totalDespesas;
+            const lucroLiquido = ebitda;
+            const margem = receitaBruta > 0 ? (lucroLiquido / receitaBruta) * 100 : 0;
+
+            // Renderizar
+            const container = document.getElementById('dreContent');
+            container.innerHTML = `
+                <!-- Receita Bruta -->
+                <div class="bg-primary/10 border border-primary/20 rounded-xl overflow-hidden">
+                    <details class="group" open>
+                        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-lg bg-primary flex items-center justify-center text-slate-900">
+                                    <span class="material-symbols-outlined font-bold">payments</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold uppercase text-primary/80">Receita Bruta Total</p>
+                                    <p class="text-2xl font-bold text-primary">R$ ${receitaBruta.toFixed(2).replace('.', ',')}</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+                        </summary>
+                        <div class="px-4 pb-4 space-y-3">
+                            <div class="h-px bg-primary/20 mb-3"></div>
+                            ${Object.entries(porMarketplace).map(([mkid, valor]) => {
+                const cat = categorias[mkid];
+                const nome = cat ? cat.nome : 'Venda Direta';
+                return `
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-slate-400">${nome}</span>
+                                        <span class="text-white font-medium">R$ ${valor.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                `;
+            }).join('')}
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Deduções -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <details class="group">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-lg bg-accent-orange/20 flex items-center justify-center text-accent-orange">
+                                    <span class="material-symbols-outlined">trending_down</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-slate-400">Deduções e Taxas</p>
+                                    <p class="text-lg font-bold text-accent-orange">- R$ ${deducoes.toFixed(2).replace('.', ',')}</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-slate-500 group-open:rotate-180 transition-transform">expand_more</span>
+                        </summary>
+                        <div class="px-4 pb-4 space-y-3">
+                            <div class="h-px bg-white/10 mb-3"></div>
+                            ${detalheDeducoes.length > 0 ? detalheDeducoes.map(d => `
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-slate-400">${d.nome}</span>
+                                    <span class="text-accent-orange font-medium">- R$ ${d.valor.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                            `).join('') : '<p class="text-slate-500 text-sm">Nenhuma dedução</p>'}
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Receita Líquida -->
+                <div class="flex items-center justify-between px-4 py-2 border-y border-white/5">
+                    <span class="text-sm font-semibold uppercase text-slate-500">Receita Líquida</span>
+                    <span class="text-lg font-bold text-white">R$ ${receitaLiquida.toFixed(2).replace('.', ',')}</span>
+                </div>
+
+                <!-- CPV -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <details class="group" open>
+                        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300">
+                                    <span class="material-symbols-outlined">kitchen</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-slate-400">CPV (Custo de Produção)</p>
+                                    <p class="text-lg font-bold text-white">R$ ${cpv.toFixed(2).replace('.', ',')}</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-slate-500 group-open:rotate-180 transition-transform">expand_more</span>
+                        </summary>
+                        <div class="px-4 pb-4 space-y-3">
+                            <div class="h-px bg-white/10 mb-3"></div>
+                            <p class="text-xs text-slate-500">${producoes.length} lotes de produção no período</p>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Lucro Bruto -->
+                <div class="flex items-center justify-between px-4 py-2 border-y border-white/5 bg-white/[0.02]">
+                    <span class="text-sm font-semibold uppercase text-slate-500">Lucro Bruto</span>
+                    <span class="text-lg font-bold text-white">R$ ${lucroBruto.toFixed(2).replace('.', ',')}</span>
+                </div>
+
+                <!-- Despesas Operacionais -->
+                <div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                    <details class="group">
+                        <summary class="flex items-center justify-between p-4 cursor-pointer list-none">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300">
+                                    <span class="material-symbols-outlined">receipt_long</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-slate-400">Despesas Operacionais</p>
+                                    <p class="text-lg font-bold text-white">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-slate-500 group-open:rotate-180 transition-transform">expand_more</span>
+                        </summary>
+                        <div class="px-4 pb-4 space-y-4">
+                            <div class="h-px bg-white/10 mb-1"></div>
+                            ${despesasFixas.length > 0 ? `
+                                <div>
+                                    <p class="text-xs font-bold text-primary mb-2 uppercase">Fixas</p>
+                                    <div class="space-y-2">
+                                        ${despesasFixas.map(d => `
+                                            <div class="flex justify-between items-center text-sm">
+                                                <span class="text-slate-400">${d.descricao}</span>
+                                                <span class="text-slate-200">R$ ${parseFloat(d.valor).toFixed(2).replace('.', ',')}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${despesasVariaveis.length > 0 ? `
+                                <div>
+                                    <p class="text-xs font-bold text-primary mb-2 uppercase">Variáveis</p>
+                                    <div class="space-y-2">
+                                        ${despesasVariaveis.map(d => `
+                                            <div class="flex justify-between items-center text-sm">
+                                                <span class="text-slate-400">${d.descricao}</span>
+                                                <span class="text-slate-200">R$ ${parseFloat(d.valor).toFixed(2).replace('.', ',')}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${despesas.length === 0 ? '<p class="text-slate-500 text-sm">Nenhuma despesa registrada</p>' : ''}
+                        </div>
+                    </details>
+                </div>
+
+                <!-- EBITDA -->
+                <div class="flex items-center justify-between px-4 py-4 rounded-xl bg-white/5 border border-white/10">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 uppercase">EBITDA</p>
+                        <p class="text-xl font-bold text-white">R$ ${ebitda.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <div class="px-3 py-1 bg-primary/20 rounded-full">
+                        <span class="text-xs font-bold text-primary">${margem.toFixed(1)}% Margem</span>
+                    </div>
+                </div>
+            `;
+
+            // Atualizar footer
+            document.getElementById('lucroLiquido').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+            document.getElementById('margem').textContent = `${margem.toFixed(1)}%`;
+
+            const icon = document.getElementById('margemIcon');
+            if (lucroLiquido < 0) {
+                icon.textContent = 'trending_down';
+                icon.className = 'material-symbols-outlined text-red-400';
+            } else {
+                icon.textContent = 'trending_up';
+                icon.className = 'material-symbols-outlined text-accent-green';
+            }
+        }
+
+        // Expor função globalmente
+        window.loadDados = loadDados;
+
+        // Iniciar
+        initSelects();
+        loadDados();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Chaves Pix - Geladinho Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "cta": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#1A1A1A",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .empty-state-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display antialiased">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='index.html'"
+                class="text-white flex size-10 items-center justify-start cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Chaves Pix
+            </h2>
+            <div class="flex w-10 items-center justify-end"></div>
+        </div>
+    </header>
+
+    <main class="pb-8 px-4 max-w-7xl mx-auto">
+        <!-- Content Grid: Horizontal layout for desktop -->
+        <div
+            class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 min-h-[calc(100vh-200px)] items-center animate-fade-in">
+            <!-- Left Column: Empty State & Add Button -->
+            <div class="flex flex-col items-center justify-center text-center">
+                <!-- PIX Icon -->
+                <div class="empty-state-icon mb-6">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="60" cy="60" r="58" stroke="currentColor" stroke-width="2" class="text-white/10" />
+                        <g class="text-primary/40">
+                            <path
+                                d="M64.5 28.9l19 19c3 3 3 7.8 0 10.5l-38 38c-3 3-7.8 3-10.5 0l-19-19c-3-3-3-7.8 0-10.5l38-38c3-3 7.8-3 10.5 0zm-32.5 54.5l19 19c3 3 7.8 3 10.5 0l38-38c3-3 3-7.8 0-10.5l-7-7-31 31c-3 3-7.8 3-10.5 0l-31-31-7 7c-3 3-3 7.8 0 10.5l19 19z"
+                                fill="currentColor" />
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Empty State Text -->
+                <h3 class="text-white text-2xl lg:text-3xl font-bold mb-3">Nenhuma chave Pix cadastrada</h3>
+                <p class="text-white/50 text-sm lg:text-base leading-relaxed max-w-md mb-8 px-4">
+                    Adicione uma chave para começar a receber pagamentos via Pix diretamente na sua conta.
+                </p>
+
+                <!-- Add PIX Key Button -->
+                <button onclick="openAddPixKeyModal()"
+                    class="w-full max-w-sm bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white h-14 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/30 active:scale-[0.98]">
+                    <span class="material-symbols-outlined">add</span>
+                    ADICIONE UMA CHAVE PIX
+                </button>
+            </div>
+
+            <!-- Right Column: Info & Benefits -->
+            <div class="space-y-6">
+                <!-- Key Types Info -->
+                <div class="p-6 bg-surface-dark/50 border border-white/5 rounded-xl">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-primary text-2xl">info</span>
+                        <div class="text-left flex-1">
+                            <p class="text-white text-lg font-bold mb-4">Tipos de chave aceitas:</p>
+                            <ul class="text-white/70 text-sm space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span><strong class="text-white">CPF/CNPJ:</strong> Use seu documento para
+                                        identificação</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span><strong class="text-white">E-mail:</strong> Receba usando seu endereço de
+                                        e-mail</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span><strong class="text-white">Telefone:</strong> Vincule seu número de
+                                        celular</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span><strong class="text-white">Chave aleatória:</strong> Gerada automaticamente
+                                        pelo banco</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefits -->
+                <div class="p-6 bg-surface-dark/50 border border-white/5 rounded-xl">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined text-primary text-2xl">verified</span>
+                        <div class="text-left flex-1">
+                            <p class="text-white text-lg font-bold mb-4">Vantagens do Pix:</p>
+                            <ul class="text-white/70 text-sm space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <span>Receba pagamentos instantaneamente, 24h por dia</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <span>Sem taxas adicionais para recebimentos</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <span>Maior segurança nas transações</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <span>Fácil integração com o sistema</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Add PIX Key -->
+    <div id="addPixKeyModal"
+        class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+        <div
+            class="bg-surface-dark w-full md:max-w-md rounded-t-3xl md:rounded-3xl border border-white/10 shadow-2xl animate-fade-in">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-white/10">
+                <h3 class="text-white text-lg font-bold">Adicionar Chave Pix</h3>
+                <button onclick="closeAddPixKeyModal()" class="text-white/60 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-4">
+                <!-- Key Type Selection -->
+                <div>
+                    <label class="text-white/80 text-sm font-medium mb-2 block">Tipo de Chave</label>
+                    <select id="pixKeyType" onchange="updateKeyPlaceholder()"
+                        class="w-full bg-background-dark border border-white/10 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="cpf">CPF</option>
+                        <option value="cnpj">CNPJ</option>
+                        <option value="email">E-mail</option>
+                        <option value="phone">Telefone</option>
+                        <option value="random">Chave Aleatória</option>
+                    </select>
+                </div>
+
+                <!-- Key Input -->
+                <div>
+                    <label class="text-white/80 text-sm font-medium mb-2 block">Chave PIX</label>
+                    <input id="pixKeyInput" type="text" placeholder="000.000.000-00"
+                        class="w-full bg-background-dark border border-white/10 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-white/30" />
+                </div>
+
+                <!-- Key Name (Optional) -->
+                <div>
+                    <label class="text-white/80 text-sm font-medium mb-2 block">Nome de Identificação (Opcional)</label>
+                    <input id="pixKeyName" type="text" placeholder="Ex: Conta Principal"
+                        class="w-full bg-background-dark border border-white/10 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-white/30" />
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-6 border-t border-white/10 flex gap-3">
+                <button onclick="closeAddPixKeyModal()"
+                    class="flex-1 bg-surface-dark border border-white/10 text-white h-12 rounded-xl font-semibold text-sm hover:bg-white/5 transition-colors">
+                    Cancelar
+                </button>
+                <button onclick="savePixKey()"
+                    class="flex-1 bg-primary hover:bg-primary/90 text-background-dark h-12 rounded-xl font-bold text-sm transition-colors">
+                    Salvar Chave
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openAddPixKeyModal() {
+            document.getElementById('addPixKeyModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddPixKeyModal() {
+            document.getElementById('addPixKeyModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            // Clear form
+            document.getElementById('pixKeyInput').value = '';
+            document.getElementById('pixKeyName').value = '';
+            document.getElementById('pixKeyType').value = 'cpf';
+            updateKeyPlaceholder();
+        }
+
+        function updateKeyPlaceholder() {
+            const keyType = document.getElementById('pixKeyType').value;
+            const input = document.getElementById('pixKeyInput');
+
+            const placeholders = {
+                'cpf': '000.000.000-00',
+                'cnpj': '00.000.000/0000-00',
+                'email': 'seuemail@exemplo.com',
+                'phone': '(00) 00000-0000',
+                'random': 'Cole sua chave aleatória aqui'
+            };
+
+            input.placeholder = placeholders[keyType];
+
+            // Enable/disable input for random key
+            if (keyType === 'random') {
+                input.readOnly = false;
+            } else {
+                input.readOnly = false;
+            }
+        }
+
+        function savePixKey() {
+            const keyType = document.getElementById('pixKeyType').value;
+            const keyValue = document.getElementById('pixKeyInput').value.trim();
+            const keyName = document.getElementById('pixKeyName').value.trim();
+
+            if (!keyValue) {
+                alert('Por favor, insira uma chave PIX.');
+                return;
+            }
+
+            // TODO: Implement actual save logic here
+            console.log('Saving PIX key:', {
+                type: keyType,
+                value: keyValue,
+                name: keyName || 'Sem nome'
+            });
+
+            // Show success and close
+            alert('Chave PIX salva com sucesso!');
+            closeAddPixKeyModal();
+
+            // Reload or update UI to show the key
+            // window.location.reload();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addPixKeyModal')?.addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeAddPixKeyModal();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeAddPixKeyModal();
+            }
+        });
+
+        // Initialize placeholder
+        updateKeyPlaceholder();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Produção - Geladinhos Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#222f2f",
+                        "card-border": "#2d3d3d"
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white min-h-screen">
+    <!-- Top Navigation Bar -->
+    <div class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-slate-800">
+        <div class="flex items-center p-4 justify-between max-w-6xl mx-auto">
+            <div class="flex items-center gap-2">
+                <button onclick="window.location.href='index.html'"
+                    class="hover:bg-white/10 rounded-full p-1 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold">Produção</h1>
+            </div>
+            <button onclick="window.location.href='adicionar-producao.html'"
+                class="bg-primary text-background-dark px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined">add</span>
+                Nova Produção
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto pb-24 px-4">
+        <!-- Quick Stats -->
+        <div class="flex flex-wrap gap-3 p-4">
+            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-4 border border-card-border bg-card-dark">
+                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Total de Lotes</p>
+                <p id="statTotalLotes" class="text-2xl font-bold">0</p>
+            </div>
+            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-4 border border-card-border bg-card-dark">
+                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Produção Mês</p>
+                <div class="flex items-baseline gap-1">
+                    <p id="statProdMes" class="text-2xl font-bold">0</p>
+                    <span class="text-xs text-slate-400">unid.</span>
+                </div>
+            </div>
+            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-4 border border-card-border bg-card-dark">
+                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Custo Total</p>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-sm font-bold">R$</span>
+                    <p id="statCustoTotal" class="text-2xl font-bold">0,00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Header -->
+        <div class="px-4 py-2 flex items-center justify-between">
+            <h3 class="text-lg font-bold">Lotes Registrados</h3>
+            <span id="currentMonth" class="text-xs font-medium text-primary"></span>
+        </div>
+
+        <!-- Production List -->
+        <div id="producoesList"
+            class="mt-2 space-y-px bg-card-border rounded-lg overflow-hidden border border-card-border">
+            <!-- Cards serão inseridos aqui -->
+        </div>
+    </main>
+
+    <script type="module">
+        import { getAllRecords, deleteRecord } from './supabase-utils.js';
+
+        let producoes = [];
+        let receitas = {};
+
+        // Carregar dados
+        async function loadProducoes() {
+            try {
+                // Buscar produções
+                const { data: prodData, error: prodError } = await getAllRecords('producao');
+                if (prodError) throw prodError;
+
+                producoes = prodData || [];
+
+                // Buscar receitas para mostrar nomes
+                const { data: recData, error: recError } = await getAllRecords('receitas');
+                if (recError) throw recError;
+
+                // Criar mapa de receitas
+                (recData || []).forEach(rec => {
+                    receitas[rec.id] = rec;
+                });
+
+                renderProducoes();
+                calcularStats();
+            } catch (error) {
+                console.error('❌ Erro ao carregar produções:', error);
+            }
+        }
+
+        // Calcular estatísticas
+        function calcularStats() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+
+            // Lotes do mês atual
+            const prodMes = producoes.filter(p => {
+                const d = new Date(p.data_producao);
+                return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+            });
+
+            // Total de unidades do mês
+            const totalUnidadesMes = prodMes.reduce((sum, p) => sum + (p.quantidade_produzida || 0), 0);
+
+            // Custo total do mês
+            const custoTotalMes = prodMes.reduce((sum, p) => sum + parseFloat(p.custo_total || 0), 0);
+
+            document.getElementById('statTotalLotes').textContent = producoes.length;
+            document.getElementById('statProdMes').textContent = totalUnidadesMes;
+            document.getElementById('statCustoTotal').textContent = custoTotalMes.toFixed(2).replace('.', ',');
+
+            // Mês atual
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            document.getElementById('currentMonth').textContent = `${meses[currentMonth]} ${currentYear}`;
+        }
+
+        // Renderizar lista
+        function renderProducoes() {
+            const container = document.getElementById('producoesList');
+
+            if (producoes.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-card-dark p-12 text-center">
+                        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">inventory_2</span>
+                        <p class="text-slate-400 text-lg mb-2">Nenhuma produção registrada</p>
+                        <p class="text-slate-500 text-sm">Clique em "Nova Produção" para começar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Ordenar por data (mais recente primeiro)
+            const sorted = [...producoes].sort((a, b) => new Date(b.data_producao) - new Date(a.data_producao));
+
+            container.innerHTML = `
+                <!-- Header -->
+                <div class="grid grid-cols-[1fr_auto_auto] gap-2 bg-[#151d1d] px-3 py-3 text-[10px] uppercase font-bold tracking-widest text-slate-500">
+                    <div>Receita</div>
+                    <div class="text-center min-w-[70px]">Qtd</div>
+                    <div class="text-right min-w-[90px]">Data</div>
+                </div>
+                ${sorted.map(prod => {
+                const receita = receitas[prod.receita_id] || { nome: 'Receita não encontrada', icone: 'help' };
+                const dataObj = new Date(prod.data_producao);
+                const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+
+                return `
+                        <div class="grid grid-cols-[1fr_auto_auto] gap-2 items-center bg-card-dark px-3 py-3 hover:bg-[#2a3a3a] transition-colors">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 border border-slate-700">
+                                    <span class="material-symbols-outlined text-primary">${receita.icone || 'icecream'}</span>
+                                </div>
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-xs font-semibold truncate">${receita.nome}</span>
+                                    <span class="text-[9px] text-primary font-bold">Lote #${prod.id}</span>
+                                </div>
+                            </div>
+                            <div class="text-center flex flex-col gap-0.5 min-w-[70px]">
+                                <span class="text-xs font-medium">${prod.quantidade_produzida} un</span>
+                                <span class="text-[10px] text-slate-400">R$ ${parseFloat(prod.custo_total || 0).toFixed(2)}</span>
+                            </div>
+                            <div class="flex flex-col items-end gap-0.5 min-w-[90px]">
+                                <span class="text-[10px] font-medium">${dataFormatada}</span>
+                                <span class="text-[9px] text-green-500">Concluído</span>
+                                <div class="flex gap-0.5 mt-1">
+                                    <button onclick="deletarProducao(${prod.id})" class="p-0.5 text-slate-400 hover:text-red-400">
+                                        <span class="material-symbols-outlined text-base">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            }).join('')}
+            `;
+        }
+
+        // Deletar produção
+        window.deletarProducao = async function (id) {
+            if (!confirm('Tem certeza que deseja excluir esta produção?')) return;
+
+            try {
+                const { error } = await deleteRecord('producao', id);
+                if (error) throw error;
+
+                alert('✅ Produção excluída com sucesso!');
+                await loadProducoes();
+            } catch (error) {
+                console.error('❌ Erro ao deletar:', error);
+                alert('❌ Erro: ' + error.message);
+            }
+        };
+
+        // Iniciar
+        loadProducoes();
+    </script>
+</body>
+
+</html>

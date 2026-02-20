@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Extrato de Vendas - Gestão Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "accent-orange": "#f97316",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(19, 236, 236, 0.1);
+        }
+
+        .ios-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1a2f2f 25%, #243d3d 50%, #1a2f2f 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.35s ease-out forwards;
+        }
+
+        .toast-anim {
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .glass-footer {
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(19, 236, 236, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 font-display min-h-screen pb-12 lg:pb-6">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-header px-4 py-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <a href="perfil-afiliado.html"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+                <span class="material-symbols-outlined">arrow_back_ios_new</span>
+            </a>
+            <h1 class="text-lg font-semibold tracking-tight">Extrato de Vendas</h1>
+            <button id="btnFiltro" onclick="toggleFiltro()"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+                <span class="material-symbols-outlined">filter_list</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Filter Bar (hidden by default) -->
+    <div id="filterBar" class="max-w-6xl mx-auto px-6 overflow-hidden transition-all duration-300"
+        style="max-height: 0;">
+        <div class="py-4 flex flex-wrap gap-2">
+            <button onclick="filtrar('todos')"
+                class="filter-btn active-filter px-4 py-2 rounded-full text-xs font-bold border transition-all"
+                data-filter="todos">Todos</button>
+            <button onclick="filtrar('pago')"
+                class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-400 hover:border-primary/30 transition-all"
+                data-filter="pago">Pagos</button>
+            <button onclick="filtrar('confirmado')"
+                class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-400 hover:border-primary/30 transition-all"
+                data-filter="confirmado">Confirmados</button>
+            <button onclick="filtrar('pendente')"
+                class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-400 hover:border-primary/30 transition-all"
+                data-filter="pendente">Pendentes</button>
+            <button onclick="filtrar('cancelado')"
+                class="filter-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-400 hover:border-primary/30 transition-all"
+                data-filter="cancelado">Cancelados</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-6 py-6">
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+
+            <!-- LEFT COLUMN: Summary -->
+            <div class="lg:w-[400px] lg:flex-shrink-0 space-y-6 lg:sticky lg:top-20 lg:self-start">
+
+                <!-- Summary Card -->
+                <section class="bg-card-dark rounded-xl p-6 ios-shadow border border-white/5">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-sm font-medium text-slate-400 uppercase tracking-wider">Resumo Geral</h2>
+                        <span class="material-symbols-outlined text-primary/40">account_balance_wallet</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <p class="text-xs text-slate-400">Total Recebido</p>
+                            <p id="totalRecebido" class="text-2xl font-bold text-primary">
+                                <span class="skeleton inline-block h-8 w-32 rounded"></span>
+                            </p>
+                        </div>
+                        <div class="space-y-1 border-l border-white/10 pl-4">
+                            <p class="text-xs text-slate-400">A Receber</p>
+                            <p id="totalAReceber" class="text-2xl font-bold text-accent-orange">
+                                <span class="skeleton inline-block h-8 w-28 rounded"></span>
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Stats Mini Cards -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-card-dark p-4 rounded-lg border border-white/5 text-center">
+                        <span class="material-symbols-outlined text-emerald-400 mb-1 block text-xl">check_circle</span>
+                        <p id="statPagos" class="text-lg font-bold">
+                            <span class="skeleton inline-block h-5 w-6 rounded"></span>
+                        </p>
+                        <p class="text-[10px] text-slate-500 uppercase font-medium mt-1">Pagos</p>
+                    </div>
+                    <div class="bg-card-dark p-4 rounded-lg border border-white/5 text-center">
+                        <span class="material-symbols-outlined text-primary mb-1 block text-xl">schedule</span>
+                        <p id="statPendentes" class="text-lg font-bold">
+                            <span class="skeleton inline-block h-5 w-6 rounded"></span>
+                        </p>
+                        <p class="text-[10px] text-slate-500 uppercase font-medium mt-1">Pendentes</p>
+                    </div>
+                    <div class="bg-card-dark p-4 rounded-lg border border-white/5 text-center">
+                        <span
+                            class="material-symbols-outlined text-accent-orange mb-1 block text-xl">receipt_long</span>
+                        <p id="statTotal" class="text-lg font-bold">
+                            <span class="skeleton inline-block h-5 w-6 rounded"></span>
+                        </p>
+                        <p class="text-[10px] text-slate-500 uppercase font-medium mt-1">Total</p>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Progress -->
+                <section class="bg-card-dark rounded-xl p-5 border border-white/5 space-y-4">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Próximo Saque</span>
+                        <span class="font-semibold text-primary">
+                            <span id="saqueAtual">R$ 0,00</span>
+                            <span class="text-slate-500 font-normal">/ R$ 50,00</span>
+                        </span>
+                    </div>
+                    <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div id="saqueProgress"
+                            class="h-full bg-primary rounded-full shadow-[0_0_8px_rgba(19,236,236,0.6)] transition-all duration-700"
+                            style="width: 0%"></div>
+                    </div>
+                    <button id="btnSacar" onclick="solicitarSaque()" disabled
+                        class="w-full py-3.5 bg-primary text-background-dark font-bold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-40 disabled:cursor-not-allowed">
+                        <span class="material-symbols-outlined text-xl">account_balance</span>
+                        Solicitar Saque
+                    </button>
+                </section>
+            </div>
+
+            <!-- RIGHT COLUMN: Activities -->
+            <div class="flex-1 space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="font-medium text-slate-300 text-lg font-bold">Atividades Recentes</h3>
+                    <span id="actCount" class="text-xs text-primary font-medium">—</span>
+                </div>
+
+                <div id="listaExtrato" class="space-y-3">
+                    <div class="skeleton h-20 rounded-xl"></div>
+                    <div class="skeleton h-20 rounded-xl"></div>
+                    <div class="skeleton h-20 rounded-xl"></div>
+                    <div class="skeleton h-20 rounded-xl"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toastContainer" class="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none"></div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+        let todasIndicacoes = [];
+        let filtroAtual = 'todos';
+
+        // ========================
+        // UTILS
+        // ========================
+
+        function formatBRL(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const colors = {
+                success: 'bg-emerald-500/90 border-emerald-400/30',
+                error: 'bg-red-500/90 border-red-400/30',
+                info: 'bg-primary/90 border-primary/30 text-background-dark'
+            };
+            const el = document.createElement('div');
+            el.className = `toast-anim ${colors[type] || colors.info} text-sm font-semibold px-6 py-3 rounded-xl border shadow-lg pointer-events-auto`;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+        }
+
+        function getInitials(nome) {
+            if (!nome) return '??';
+            return nome.split(/\s+/).map(p => p[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function maskName(nome) {
+            if (!nome) return 'Indicado';
+            const parts = nome.trim().split(/\s+/);
+            if (parts.length === 1) return parts[0][0] + '***';
+            const first = parts[0];
+            const lastInitial = parts[parts.length - 1][0];
+            return `${first} ${lastInitial}***`;
+        }
+
+        // ========================
+        // FILTRO
+        // ========================
+
+        window.toggleFiltro = function () {
+            const bar = document.getElementById('filterBar');
+            if (bar.style.maxHeight === '0px' || !bar.style.maxHeight) {
+                bar.style.maxHeight = '80px';
+            } else {
+                bar.style.maxHeight = '0px';
+            }
+        };
+
+        window.filtrar = function (tipo) {
+            filtroAtual = tipo;
+
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === tipo) {
+                    btn.className = 'filter-btn active-filter px-4 py-2 rounded-full text-xs font-bold border border-primary/30 text-primary bg-primary/10 transition-all';
+                } else {
+                    btn.className = 'filter-btn px-4 py-2 rounded-full text-xs font-bold border border-white/10 text-slate-400 hover:border-primary/30 transition-all';
+                }
+            });
+
+            renderExtrato(filtrarIndicacoes());
+        };
+
+        function filtrarIndicacoes() {
+            if (filtroAtual === 'todos') return todasIndicacoes;
+            if (filtroAtual === 'pago') return todasIndicacoes.filter(i => i.status === 'ativo' && i.comissao_paga);
+            if (filtroAtual === 'confirmado') return todasIndicacoes.filter(i => i.status === 'ativo' && !i.comissao_paga);
+            if (filtroAtual === 'pendente') return todasIndicacoes.filter(i => i.status === 'pendente');
+            if (filtroAtual === 'cancelado') return todasIndicacoes.filter(i => i.status === 'cancelado');
+            return todasIndicacoes;
+        }
+
+        // ========================
+        // SOLICITAR SAQUE
+        // ========================
+
+        window.solicitarSaque = function () {
+            showToast('Solicitação de saque enviada! Processamento em até 48h.', 'success');
+            document.getElementById('btnSacar').disabled = true;
+            document.getElementById('btnSacar').innerHTML = `
+                <span class="material-symbols-outlined text-xl">check</span>
+                Saque Solicitado ✓
+            `;
+        };
+
+        // ========================
+        // CARREGAR DADOS
+        // ========================
+
+        async function carregarDados() {
+            if (!supabase) {
+                mostrarVazio();
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    mostrarVazio();
+                    return;
+                }
+
+                // Buscar cupom do usuário logado
+                const { data: cupom } = await supabase
+                    .from('cupons_afiliado')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .eq('ativo', true)
+                    .limit(1)
+                    .single();
+
+                if (!cupom) {
+                    mostrarVazio();
+                    return;
+                }
+
+                // Buscar indicações
+                const { data: indicacoes, error } = await supabase
+                    .from('indicacoes')
+                    .select('*')
+                    .eq('cupom_id', cupom.id)
+                    .order('data_indicacao', { ascending: false });
+
+                if (error) throw error;
+
+                todasIndicacoes = indicacoes || [];
+
+                // Calcular métricas
+                const ativas = todasIndicacoes.filter(i => i.status === 'ativo');
+                const pagos = ativas.filter(i => i.comissao_paga);
+                const pendentes = todasIndicacoes.filter(i => i.status === 'pendente' || (i.status === 'ativo' && !i.comissao_paga));
+
+                const totalRecebido = pagos.reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+                const totalAReceber = pendentes.reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+
+                // Summary
+                document.getElementById('totalRecebido').textContent = formatBRL(totalRecebido);
+                document.getElementById('totalAReceber').textContent = formatBRL(totalAReceber);
+
+                // Stats
+                document.getElementById('statPagos').textContent = pagos.length;
+                document.getElementById('statPendentes').textContent = pendentes.length;
+                document.getElementById('statTotal').textContent = todasIndicacoes.length;
+
+                // Withdrawal progress
+                const minSaque = 50;
+                const progressoPct = Math.min((totalAReceber / minSaque) * 100, 100);
+                document.getElementById('saqueAtual').textContent = formatBRL(totalAReceber);
+                document.getElementById('saqueProgress').style.width = `${progressoPct}%`;
+
+                if (totalAReceber >= minSaque) {
+                    const btn = document.getElementById('btnSacar');
+                    btn.disabled = false;
+                }
+
+                // Render list
+                renderExtrato(todasIndicacoes);
+
+            } catch (err) {
+                console.error('❌ Erro ao carregar extrato:', err);
+                mostrarVazio();
+            }
+        }
+
+        // ========================
+        // RENDER EXTRATO
+        // ========================
+
+        function renderExtrato(indicacoes) {
+            const container = document.getElementById('listaExtrato');
+            document.getElementById('actCount').textContent =
+                `${indicacoes.length} registro${indicacoes.length !== 1 ? 's' : ''}`;
+
+            if (!indicacoes || indicacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-14 bg-card-dark rounded-xl border border-white/5">
+                        <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">receipt_long</span>
+                        <p class="text-slate-400 text-sm font-medium">Nenhuma atividade encontrada</p>
+                        <p class="text-slate-600 text-xs mt-1">Compartilhe seu código para começar a ganhar!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = indicacoes.map((ind, i) => {
+                const data = new Date(ind.data_indicacao || ind.created_at);
+                const dataStr = data.toLocaleDateString('pt-BR', {
+                    day: '2-digit', month: 'short', year: 'numeric'
+                });
+                const horaStr = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const comissao = parseFloat(ind.valor_comissao || 0);
+                const valorVenda = parseFloat(ind.valor_assinatura || 0);
+                const nome = maskName(ind.nome_indicado);
+                const initials = getInitials(ind.nome_indicado);
+
+                let statusIcon, statusBadge, itemOpacity;
+
+                if (ind.status === 'ativo' && ind.comissao_paga) {
+                    statusIcon = `<span class="material-symbols-outlined text-emerald-400 text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>`;
+                    statusBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 mt-1">Paga</span>`;
+                    itemOpacity = '';
+                } else if (ind.status === 'ativo' && !ind.comissao_paga) {
+                    statusIcon = `<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>`;
+                    statusBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-primary/20 text-primary mt-1">Confirmada</span>`;
+                    itemOpacity = '';
+                } else if (ind.status === 'pendente') {
+                    statusIcon = `<span class="material-symbols-outlined text-accent-orange text-xl">pending</span>`;
+                    statusBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-accent-orange/20 text-accent-orange mt-1">Em Processamento</span>`;
+                    itemOpacity = 'opacity-80';
+                } else if (ind.status === 'cancelado') {
+                    statusIcon = `<span class="material-symbols-outlined text-red-400 text-xl">cancel</span>`;
+                    statusBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-red-500/20 text-red-400 mt-1">Cancelado</span>`;
+                    itemOpacity = 'opacity-60';
+                } else {
+                    statusIcon = `<span class="material-symbols-outlined text-slate-500 text-xl">help</span>`;
+                    statusBadge = `<span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-500/20 text-slate-400 mt-1">${ind.status}</span>`;
+                    itemOpacity = 'opacity-70';
+                }
+
+                const comissaoColor = ind.status === 'cancelado' ? 'text-slate-500 line-through' : 'text-primary';
+
+                return `
+                    <div class="bg-card-dark p-4 rounded-xl flex items-center gap-4 border border-white/5 ${itemOpacity} fade-in-up" style="animation-delay: ${i * 40}ms">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            ${statusIcon}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium truncate">${nome}</p>
+                            <p class="text-[10px] text-slate-500">${dataStr} • ${horaStr}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-xs text-slate-400">Venda ${formatBRL(valorVenda)}</p>
+                            <p class="text-sm font-bold ${comissaoColor}">+ ${formatBRL(comissao)}</p>
+                            ${statusBadge}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========================
+        // EMPTY STATE
+        // ========================
+
+        function mostrarVazio() {
+            document.getElementById('totalRecebido').textContent = 'R$ 0,00';
+            document.getElementById('totalAReceber').textContent = 'R$ 0,00';
+            document.getElementById('statPagos').textContent = '0';
+            document.getElementById('statPendentes').textContent = '0';
+            document.getElementById('statTotal').textContent = '0';
+            document.getElementById('saqueAtual').textContent = 'R$ 0,00';
+            document.getElementById('saqueProgress').style.width = '0%';
+            document.getElementById('actCount').textContent = '0 registros';
+
+            document.getElementById('listaExtrato').innerHTML = `
+                <div class="text-center py-14 bg-card-dark rounded-xl border border-white/5">
+                    <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">receipt_long</span>
+                    <p class="text-slate-400 text-sm font-medium">Nenhuma atividade ainda</p>
+                    <p class="text-slate-600 text-xs mt-1">Compartilhe seu código para começar a ganhar!</p>
+                </div>
+            `;
+        }
+
+        // ========================
+        // INIT
+        // ========================
+
+        async function init() {
+            await carregarDados();
+            // Set initial active filter style
+            window.filtrar('todos');
+            console.log('✅ Extrato Afiliado carregado');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

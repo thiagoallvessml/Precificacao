@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Exemplo - Uso de Configurações</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-background-dark min-h-screen font-display text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-primary">
+            📚 Exemplo de Uso - Config Helper
+        </h1>
+
+        <div class="bg-[#1c2727] rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🎯 Configurações Carregadas</h2>
+            <div id="configs-display" class="space-y-2 text-sm font-mono">
+                <p class="text-gray-400">Carregando configurações...</p>
+            </div>
+        </div>
+
+        <div class="bg-[#1c2727] rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🧮 Cálculos Baseados nas Configurações</h2>
+            <div id="calculations-display" class="space-y-2">
+                <p class="text-gray-400">Calculando...</p>
+            </div>
+        </div>
+
+        <div class="bg-[#1c2727] rounded-xl p-6">
+            <h2 class="text-xl font-semibold mb-4">💡 Exemplos de Código</h2>
+
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-sm font-semibold text-primary mb-2">1. Buscar uma configuração simples</h3>
+                    <pre class="bg-black/50 p-4 rounded text-xs overflow-x-auto"><code>import { getConfigNumber, CONFIG_KEYS } from './config-helper.js';
+
+const custoMaoObra = await getConfigNumber(CONFIG_KEYS.MAO_OBRA_HORA);
+console.log(`Custo por hora: R$ ${custoMaoObra}`);</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-primary mb-2">2. Buscar múltiplas configurações</h3>
+                    <pre class="bg-black/50 p-4 rounded text-xs overflow-x-auto"><code>import { getConfigs, CONFIG_KEYS } from './config-helper.js';
+
+const configs = await getConfigs([
+    CONFIG_KEYS.PESO_GAS,
+    CONFIG_KEYS.PRECO_GAS,
+    CONFIG_KEYS.CUSTO_KWH
+]);
+
+console.log('Peso do gás:', configs.peso_botijao_gas);
+console.log('Preço do gás:', configs.preco_botijao_gas);</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-primary mb-2">3. Usar helpers de cálculo</h3>
+                    <pre class="bg-black/50 p-4 rounded text-xs overflow-x-auto"><code>import { getCustoGasPorKg, getCustoMaoObraPorMinuto } from './config-helper.js';
+
+// Calcular custo do gás por kg automaticamente
+const custoGasKg = await getCustoGasPorKg();
+
+// Calcular custo de mão de obra por minuto
+const custoMinuto = await getCustoMaoObraPorMinuto();
+
+// Usar em cálculos de receita
+const gasUsado = 0.5; // kg
+const tempoProducao = 30; // minutos
+const custoTotal = (gasUsado * custoGasKg) + (tempoProducao * custoMinuto);</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-primary mb-2">4. Salvar uma configuração</h3>
+                    <pre class="bg-black/50 p-4 rounded text-xs overflow-x-auto"><code>import { setConfig } from './config-helper.js';
+
+await setConfig(
+    'nome_empresa',
+    'Geladinhos da Maria',
+    'Nome fantasia da empresa',
+    'geral'
+);</code></pre>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-primary mb-2">5. Buscar por categoria</h3>
+                    <pre class="bg-black/50 p-4 rounded text-xs overflow-x-auto"><code>import { getConfigsByCategory } from './config-helper.js';
+
+// Buscar todas as configurações financeiras
+const configsFinanceiras = await getConfigsByCategory('financeiro');
+
+// Buscar todas as configurações de produção
+const configsProducao = await getConfigsByCategory('producao');</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-4">
+            <button onclick="reloadConfigs()"
+                class="bg-primary text-background-dark px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                🔄 Recarregar Configurações
+            </button>
+            <a href="configuracoes.html"
+                class="bg-white/10 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20 transition-colors">
+                ⚙️ Ir para Configurações
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            getConfigs,
+            getConfigsByCategory,
+            CONFIG_KEYS,
+            getCustoGasPorKg,
+            getCustoMaoObraPorMinuto,
+            getMargemLucroPadrao,
+            clearConfigCache,
+            preloadConfigs
+        } from './config-helper.js';
+
+        // Força dark mode
+        document.documentElement.classList.add('dark');
+
+        async function displayConfigs() {
+            const display = document.getElementById('configs-display');
+
+            try {
+                // Pré-carrega configurações comuns
+                await preloadConfigs();
+
+                // Busca todas as configurações de produção e financeiro
+                const [producao, financeiro] = await Promise.all([
+                    getConfigsByCategory('producao'),
+                    getConfigsByCategory('financeiro')
+                ]);
+
+                let html = '<div class="space-y-4">';
+
+                // Configurações de Produção
+                html += '<div>';
+                html += '<h3 class="text-sm font-semibold text-primary mb-2">🔧 Produção</h3>';
+                html += '<div class="pl-4 space-y-1">';
+                for (const [key, value] of Object.entries(producao)) {
+                    html += `<p><span class="text-gray-400">${key}:</span> <span class="text-white">${value}</span></p>`;
+                }
+                html += '</div></div>';
+
+                // Configurações Financeiras
+                html += '<div>';
+                html += '<h3 class="text-sm font-semibold text-primary mb-2">💰 Financeiro</h3>';
+                html += '<div class="pl-4 space-y-1">';
+                for (const [key, value] of Object.entries(financeiro)) {
+                    html += `<p><span class="text-gray-400">${key}:</span> <span class="text-white">${value}</span></p>`;
+                }
+                html += '</div></div>';
+
+                html += '</div>';
+                display.innerHTML = html;
+
+            } catch (error) {
+                console.error('Erro ao exibir configurações:', error);
+                display.innerHTML = '<p class="text-red-400">❌ Erro ao carregar configurações</p>';
+            }
+        }
+
+        async function displayCalculations() {
+            const display = document.getElementById('calculations-display');
+
+            try {
+                // Usa os helpers de cálculo
+                const [custoGasKg, custoMinuto, margemLucro] = await Promise.all([
+                    getCustoGasPorKg(),
+                    getCustoMaoObraPorMinuto(),
+                    getMargemLucroPadrao()
+                ]);
+
+                // Exemplo de cálculo de custo de produção
+                const gasUsado = 0.5; // kg
+                const tempoProducao = 30; // minutos
+                const custoProducao = (gasUsado * custoGasKg) + (tempoProducao * custoMinuto);
+                const precoVenda = custoProducao * (1 + margemLucro / 100);
+
+                const html = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-black/30 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400 mb-1">Custo do Gás por Kg</p>
+                            <p class="text-2xl font-bold text-primary">R$ ${custoGasKg.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-black/30 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400 mb-1">Custo Mão de Obra por Minuto</p>
+                            <p class="text-2xl font-bold text-primary">R$ ${custoMinuto.toFixed(2)}</p>
+                        </div>
+                        <div class="bg-black/30 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400 mb-1">Margem de Lucro Padrão</p>
+                            <p class="text-2xl font-bold text-primary">${margemLucro.toFixed(0)}%</p>
+                        </div>
+                        <div class="bg-black/30 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400 mb-1">Exemplo: Custo de Produção</p>
+                            <p class="text-xs text-gray-500 mb-1">${gasUsado}kg gás + ${tempoProducao}min trabalho</p>
+                            <p class="text-2xl font-bold text-green-400">R$ ${custoProducao.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 bg-gradient-to-r from-primary/20 to-transparent p-4 rounded-lg border border-primary/30">
+                        <p class="text-sm text-gray-300">
+                            💡 <strong>Preço de venda sugerido:</strong> R$ ${precoVenda.toFixed(2)} 
+                            <span class="text-xs text-gray-400">(com ${margemLucro}% de margem)</span>
+                        </p>
+                    </div>
+                `;
+
+                display.innerHTML = html;
+
+            } catch (error) {
+                console.error('Erro ao calcular:', error);
+                display.innerHTML = '<p class="text-red-400">❌ Erro ao calcular</p>';
+            }
+        }
+
+        // Função global para recarregar
+        window.reloadConfigs = async function () {
+            clearConfigCache();
+            await displayConfigs();
+            await displayCalculations();
+        };
+
+        // Carrega ao iniciar
+        displayConfigs();
+        displayCalculations();
+    </script>
+</body>
+
+</html>

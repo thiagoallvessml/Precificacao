@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Indique e Ganhe</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #0F0F0F;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .glass-effect {
+            background: rgba(26, 47, 47, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(19, 236, 236, 0.1);
+        }
+
+        .neon-border {
+            box-shadow: 0 0 20px rgba(19, 236, 236, 0.25), inset 0 0 8px rgba(19, 236, 236, 0.15);
+        }
+
+        .neon-glow {
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 15px rgba(19, 236, 236, 0.2), inset 0 0 5px rgba(19, 236, 236, 0.1);
+            }
+
+            100% {
+                box-shadow: 0 0 30px rgba(19, 236, 236, 0.4), inset 0 0 10px rgba(19, 236, 236, 0.2);
+            }
+        }
+
+        .copy-flash {
+            animation: flash 0.6s ease-out;
+        }
+
+        @keyframes flash {
+            0% {
+                transform: scale(1);
+            }
+
+            30% {
+                transform: scale(1.15);
+                background-color: rgba(19, 236, 236, 0.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .step-line::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            bottom: -16px;
+            width: 2px;
+            background: linear-gradient(to bottom, rgba(19, 236, 236, 0.3), transparent);
+        }
+
+        .whatsapp-btn:active {
+            transform: scale(0.97);
+        }
+
+        .confetti-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: confettiFall 1s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(40px) rotate(360deg) scale(0.3);
+            }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1a2f2f 25%, #243d3d 50%, #1a2f2f 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-display text-white bg-background-dark min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-effect px-4 py-4 flex items-center justify-between">
+        <button onclick="window.location.href='index.html'"
+            class="p-2 -ml-2 rounded-full hover:bg-primary/10 transition-colors">
+            <span class="material-icons-round text-primary">arrow_back_ios_new</span>
+        </button>
+        <h1 class="text-lg font-bold tracking-tight">Indique e Ganhe</h1>
+        <button onclick="document.getElementById('infoModal').classList.toggle('hidden')"
+            class="p-2 -mr-2 rounded-full hover:bg-primary/10 transition-colors">
+            <span class="material-icons-round text-primary">info</span>
+        </button>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pt-8 pb-24">
+        <!-- Hero (full width) -->
+        <div class="max-w-2xl mx-auto mb-8">
+            <!-- Hero Explanation -->
+            <section class="bg-primary/5 border border-primary/10 rounded-xl p-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 -ml-6 -mb-6 w-24 h-24 bg-primary/5 rounded-full blur-2xl"></div>
+                <div class="relative z-10 flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="material-icons-round text-primary">celebration</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-primary">Vantagem Dupla</span>
+                    </div>
+                    <p class="text-gray-300 leading-relaxed text-sm">
+                        Compartilhe seu código exclusivo. Seus amigos ganham
+                        <span id="heroDesconto" class="text-primary font-bold">10% de desconto</span> na primeira
+                        mensalidade
+                        e você ganha <span id="heroComissao" class="text-primary font-bold">10% de comissão</span>!
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Two-column grid on desktop -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- LEFT COLUMN: Código + Compartilhar -->
+            <div class="space-y-8">
+
+                <!-- Coupon Card -->
+                <section class="space-y-3">
+                    <h2 class="text-sm font-medium text-gray-400 px-1 uppercase tracking-widest">Seu Código de Afiliado
+                    </h2>
+                    <div id="couponCard"
+                        class="bg-card-dark border-2 border-primary rounded-xl p-6 neon-glow flex items-center justify-between relative overflow-hidden">
+                        <div
+                            class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-transparent pointer-events-none">
+                        </div>
+                        <div class="relative z-10">
+                            <span class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Copie para
+                                compartilhar</span>
+                            <div id="couponCode" class="text-3xl font-black tracking-tighter text-white mt-1">
+                                <div class="skeleton h-9 w-48 rounded-lg"></div>
+                            </div>
+                        </div>
+                        <button id="copyBtn" onclick="copiarCodigo()"
+                            class="relative z-10 bg-primary text-background-dark p-4 rounded-lg hover:brightness-110 active:scale-90 transition-all shadow-lg shadow-primary/20">
+                            <span id="copyIcon" class="material-icons-round">content_copy</span>
+                        </button>
+                    </div>
+                    <!-- Feedback de cópia -->
+                    <div id="copyFeedback"
+                        class="hidden text-center text-primary text-xs font-bold flex items-center justify-center gap-1 animate-pulse">
+                        <span class="material-icons-round text-sm">check_circle</span>
+                        Código copiado para a área de transferência!
+                    </div>
+                </section>
+
+                <!-- Cupom Auto-Gerado -->
+                <section>
+                    <div class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <span class="material-icons-round text-primary">auto_awesome</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-400">Gerado automaticamente do seu perfil</p>
+                            <p id="cupomAutoLabel" class="text-sm font-bold text-white mt-0.5">Carregando...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- WhatsApp Sharing -->
+                <button onclick="compartilharWhatsApp()"
+                    class="whatsapp-btn w-full bg-[#25D366] hover:bg-[#20ba5a] text-white py-4 rounded-xl flex items-center justify-center gap-3 font-bold text-lg transition-all shadow-lg shadow-[#25D366]/20 hover:shadow-[#25D366]/30">
+                    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z">
+                        </path>
+                    </svg>
+                    Compartilhar no WhatsApp
+                </button>
+
+                <!-- Outros compartilhamentos -->
+                <div class="flex gap-3">
+                    <button onclick="compartilharGenerico()"
+                        class="flex-1 bg-white/5 border border-white/10 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm hover:bg-white/10 transition-colors active:scale-[0.97]">
+                        <span class="material-icons-round text-lg">share</span>
+                        Compartilhar
+                    </button>
+                    <button onclick="compartilharInstagram()"
+                        class="flex-1 bg-gradient-to-r from-purple-600 to-pink-500 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm hover:brightness-110 transition-all active:scale-[0.97]">
+                        <span class="material-icons-round text-lg">photo_camera</span>
+                        Instagram
+                    </button>
+                </div>
+
+            </div><!-- end left column -->
+
+            <!-- RIGHT COLUMN: Como funciona + Métricas + Histórico + Termos -->
+            <div class="space-y-8">
+
+                <!-- Como funciona -->
+                <section class="space-y-5">
+                    <h2 class="text-sm font-medium text-gray-400 px-1 uppercase tracking-widest">Como funciona?</h2>
+                    <div class="space-y-5">
+                        <!-- Step 1 -->
+                        <div class="flex items-start gap-4 relative step-line">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                                <span class="text-primary font-black text-sm">01</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white">Copie seu código</h3>
+                                <p class="text-sm text-gray-400 leading-relaxed">Clique no botão ao lado do card para
+                                    copiar
+                                    automaticamente.</p>
+                            </div>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="flex items-start gap-4 relative step-line">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                                <span class="text-primary font-black text-sm">02</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white">Envie para amigos</h3>
+                                <p class="text-sm text-gray-400 leading-relaxed">Mande via WhatsApp, Instagram ou
+                                    qualquer rede
+                                    social.</p>
+                            </div>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="flex items-start gap-4 relative">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                                <span class="text-primary font-black text-sm">03</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white">Ganhe comissões</h3>
+                                <p class="text-sm text-gray-400 leading-relaxed">Quando assinarem usando seu código,
+                                    você recebe
+                                    comissão!</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Métricas -->
+                <section class="space-y-3">
+                    <h2 class="text-sm font-medium text-gray-400 px-1 uppercase tracking-widest">Seu Desempenho</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-card-dark rounded-xl p-4 border border-white/5">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                    <span class="material-icons-round text-primary text-lg">group</span>
+                                </div>
+                                <span class="text-[10px] text-gray-500 uppercase font-bold">Indicados</span>
+                            </div>
+                            <p id="totalIndicados" class="text-3xl font-black text-primary">
+                                <span class="skeleton inline-block h-9 w-10 rounded"></span>
+                            </p>
+                            <p class="text-[10px] text-gray-500 mt-1">pessoas convertidas</p>
+                        </div>
+                        <div class="bg-card-dark rounded-xl p-4 border border-white/5">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                                    <span class="material-icons-round text-emerald-400 text-lg">payments</span>
+                                </div>
+                                <span class="text-[10px] text-gray-500 uppercase font-bold">Comissões</span>
+                            </div>
+                            <p id="totalComissoes" class="text-3xl font-black text-emerald-400">
+                                <span class="skeleton inline-block h-9 w-20 rounded"></span>
+                            </p>
+                            <p class="text-[10px] text-gray-500 mt-1">ganhos acumulados</p>
+                        </div>
+                    </div>
+
+                    <!-- Métricas extras -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div
+                            class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                                    <span class="material-icons-round text-amber-400 text-lg">hourglass_top</span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-500 uppercase font-bold">Pendentes</p>
+                                    <p id="totalPendentes" class="text-lg font-black text-amber-400">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                    <span class="material-icons-round text-primary text-lg">analytics</span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-500 uppercase font-bold">Conversão</p>
+                                    <p id="taxaConversao" class="text-lg font-black text-primary">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Histórico de Indicações -->
+                <section class="space-y-3">
+                    <div class="flex items-center justify-between px-1">
+                        <h2 class="text-sm font-medium text-gray-400 uppercase tracking-widest">Últimas Indicações</h2>
+                    </div>
+                    <div id="listaIndicacoes" class="space-y-2">
+                        <!-- Skeleton loading -->
+                        <div class="skeleton h-16 rounded-xl"></div>
+                        <div class="skeleton h-16 rounded-xl"></div>
+                    </div>
+                </section>
+
+                <!-- Termos -->
+                <section class="pb-8">
+                    <div class="bg-white/[0.02] border border-white/5 rounded-xl p-4 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="material-icons-round text-white/30 text-lg">gavel</span>
+                            <h3 class="text-xs font-bold text-white/40 uppercase tracking-wider">Termos do Programa</h3>
+                        </div>
+                        <ul class="text-[11px] text-gray-500 space-y-1.5 leading-relaxed">
+                            <li class="flex items-start gap-2">
+                                <span class="text-primary text-[8px] mt-1">●</span>
+                                O desconto é válido apenas na primeira mensalidade do indicado.
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-primary text-[8px] mt-1">●</span>
+                                A comissão é creditada após a confirmação do pagamento.
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-primary text-[8px] mt-1">●</span>
+                                Não há limite de indicações. Quanto mais indicar, mais ganha!
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-primary text-[8px] mt-1">●</span>
+                                Códigos são pessoais e intransferíveis.
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+            </div><!-- end right column -->
+        </div><!-- end grid -->
+    </main>
+
+    <!-- Info Modal -->
+    <div id="infoModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-4 m-0 sm:m-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Sobre o Programa</h3>
+                <button onclick="document.getElementById('infoModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-icons-round text-white/60">close</span>
+                </button>
+            </div>
+            <div class="space-y-3 text-sm text-gray-300 leading-relaxed">
+                <p>O programa <span class="text-primary font-bold">Indique e Ganhe</span> é a forma mais fácil de
+                    ganhar renda extra!</p>
+                <p>Cada pessoa que assinar usando seu código, você recebe automaticamente <span
+                        class="text-primary font-bold">comissão</span> sobre o valor da mensalidade.</p>
+                <p>Seu amigo também ganha: <span class="text-primary font-bold">desconto</span> na primeira
+                    mensalidade.</p>
+                <p class="text-gray-500 text-xs">Dúvidas? Entre em contato pelo suporte dentro do app.</p>
+            </div>
+            <button onclick="document.getElementById('infoModal').classList.add('hidden')"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Entendi!
+            </button>
+        </div>
+    </div>
+
+
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+        // Estado global
+        let cupomAtual = null;
+        let indicacoes = [];
+
+        // ========================
+        // GERAR CÓDIGO DO NOME
+        // ========================
+
+        function gerarCodigoFromNome(nome) {
+            if (!nome || !nome.trim()) return '';
+            const primeiroNome = nome.trim().split(/\s+/)[0];
+            const semAcento = primeiroNome
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^A-Za-z0-9]/g, '')
+                .toUpperCase();
+            return semAcento + '10';
+        }
+
+
+
+        // ========================
+        // BUSCAR NOME AUTOMATICAMENTE
+        // ========================
+
+        async function buscarNomeUsuario() {
+            if (!supabase) return 'Afiliado';
+
+            // 1. Tentar buscar do perfis_usuarios via sessão
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    try {
+                        const { data: perfil } = await supabase
+                            .from('perfis_usuarios')
+                            .select('nome')
+                            .eq('id', session.user.id)
+                            .single();
+
+                        if (perfil && perfil.nome) {
+                            return perfil.nome;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+            } catch (e) { /* ignore */ }
+
+            // 2. Fallback: buscar da tabela configuracoes
+            try {
+                const { data: configNome } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'nome_afiliado')
+                    .single();
+
+                if (configNome && configNome.valor) {
+                    return configNome.valor;
+                }
+            } catch (err) {
+                console.warn('⚠️ Não foi possível buscar nome do afiliado:', err.message);
+            }
+
+            return 'Afiliado';
+        }
+
+        // ========================
+        // CARREGAR CUPOM (AUTOMÁTICO)
+        // ========================
+
+        async function carregarCupom() {
+            // 1. Buscar o nome do usuário automaticamente
+            const nomeUsuario = await buscarNomeUsuario();
+            const codigoAutoGerado = gerarCodigoFromNome(nomeUsuario);
+
+            if (!supabase) {
+                document.getElementById('cupomAutoLabel').textContent =
+                    `${nomeUsuario} → ${codigoAutoGerado}`;
+                document.getElementById('couponCode').textContent = codigoAutoGerado;
+                document.getElementById('inputCupom').value = codigoAutoGerado;
+                return;
+            }
+
+            try {
+                // 2. Buscar cupom do USUÁRIO LOGADO
+                let data = null;
+                let userId = null;
+
+                // Tentar buscar pelo user_id do usuário logado
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session && session.user) {
+                        userId = session.user.id;
+                        const { data: cupomUser, error: userErr } = await supabase
+                            .from('cupons_afiliado')
+                            .select('*')
+                            .eq('user_id', session.user.id)
+                            .eq('ativo', true)
+                            .limit(1);
+
+                        if (!userErr && cupomUser && cupomUser.length > 0) {
+                            data = cupomUser;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+
+                // Fallback: buscar cupom sem user_id vinculado
+                if (!data || data.length === 0) {
+                    const { data: cupomFallback, error: fbErr } = await supabase
+                        .from('cupons_afiliado')
+                        .select('*')
+                        .eq('ativo', true)
+                        .is('user_id', null)
+                        .order('created_at', { ascending: true })
+                        .limit(1);
+
+                    if (!fbErr && cupomFallback && cupomFallback.length > 0) {
+                        data = cupomFallback;
+
+                        // Vincular ao user_id do usuário logado se possível
+                        if (userId) {
+                            try {
+                                await supabase
+                                    .from('cupons_afiliado')
+                                    .update({ user_id: userId, updated_at: new Date().toISOString() })
+                                    .eq('id', cupomFallback[0].id);
+                            } catch (e) { /* ignore */ }
+                        }
+                    }
+                }
+
+                if (data && data.length > 0) {
+                    cupomAtual = data[0];
+
+                    // Se o cupom salvo ainda é o antigo "GELADINHO10", atualizar automaticamente
+                    if (cupomAtual.codigo === 'GELADINHO10' && codigoAutoGerado !== 'GELADINHO10') {
+                        await supabase
+                            .from('cupons_afiliado')
+                            .update({ codigo: codigoAutoGerado, updated_at: new Date().toISOString() })
+                            .eq('id', cupomAtual.id);
+                        cupomAtual.codigo = codigoAutoGerado;
+                    }
+
+                    document.getElementById('couponCode').textContent = cupomAtual.codigo;
+                    document.getElementById('inputCupom').value = cupomAtual.codigo;
+
+                    // Mostrar código real (salvo no banco), não o auto-gerado
+                    document.getElementById('cupomAutoLabel').textContent =
+                        `${nomeUsuario} → ${cupomAtual.codigo}`;
+
+                    // Atualizar hero
+                    document.getElementById('heroDesconto').textContent =
+                        `${cupomAtual.desconto_percentual}% de desconto`;
+                    document.getElementById('heroComissao').textContent =
+                        `${cupomAtual.comissao_percentual}% de comissão`;
+                } else {
+                    // 3. Criar cupom automaticamente com o nome do usuário
+                    const insertPayload = {
+                        codigo: codigoAutoGerado,
+                        desconto_percentual: 10,
+                        comissao_percentual: 10
+                    };
+                    if (userId) insertPayload.user_id = userId;
+
+                    const { data: novoCupom, error: insertError } = await supabase
+                        .from('cupons_afiliado')
+                        .insert([insertPayload])
+                        .select();
+
+                    if (!insertError && novoCupom) {
+                        cupomAtual = novoCupom[0];
+                        document.getElementById('couponCode').textContent = cupomAtual.codigo;
+                        document.getElementById('inputCupom').value = cupomAtual.codigo;
+                    }
+
+                    document.getElementById('cupomAutoLabel').textContent =
+                        `${nomeUsuario} → ${codigoAutoGerado}`;
+                }
+
+                // Salvar nome na configuracoes se não existir
+                try {
+                    const { data: existingName } = await supabase
+                        .from('configuracoes')
+                        .select('id')
+                        .eq('chave', 'nome_afiliado')
+                        .single();
+
+                    if (!existingName) {
+                        await supabase
+                            .from('configuracoes')
+                            .insert([{
+                                chave: 'nome_afiliado',
+                                valor: nomeUsuario,
+                                tipo: 'string',
+                                descricao: 'Nome do afiliado para gerar código de indicação',
+                                categoria: 'geral'
+                            }]);
+                    }
+                } catch (e) { /* ignora erro se já existir */ }
+
+            } catch (err) {
+                console.error('❌ Erro ao carregar cupom:', err);
+                document.getElementById('couponCode').textContent = codigoAutoGerado;
+            }
+        }
+
+        async function carregarIndicacoes() {
+            if (!supabase || !cupomAtual) {
+                document.getElementById('listaIndicacoes').innerHTML =
+                    '<p class="text-center text-gray-600 py-4 text-sm">Nenhuma indicação registrada ainda.</p>';
+                document.getElementById('totalIndicados').textContent = '0';
+                document.getElementById('totalComissoes').textContent = 'R$ 0';
+                document.getElementById('totalPendentes').textContent = '0';
+                document.getElementById('taxaConversao').textContent = '-';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('indicacoes')
+                    .select('*')
+                    .eq('cupom_id', cupomAtual.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                indicacoes = data || [];
+                atualizarMetricas();
+                renderizarIndicacoes();
+            } catch (err) {
+                console.error('❌ Erro ao carregar indicações:', err);
+                document.getElementById('listaIndicacoes').innerHTML =
+                    '<p class="text-center text-red-400 py-4 text-sm">Erro ao carregar indicações.</p>';
+            }
+        }
+
+        // ========================
+        // MÉTRICAS
+        // ========================
+
+        function atualizarMetricas() {
+            const ativos = indicacoes.filter(i => i.status === 'ativo');
+            const pendentes = indicacoes.filter(i => i.status === 'pendente');
+            const totalComissoes = ativos.reduce((sum, i) => sum + parseFloat(i.valor_comissao || 0), 0);
+            const taxa = indicacoes.length > 0
+                ? ((ativos.length / indicacoes.length) * 100).toFixed(0)
+                : '-';
+
+            document.getElementById('totalIndicados').textContent = ativos.length;
+            document.getElementById('totalComissoes').textContent =
+                `R$ ${totalComissoes.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalPendentes').textContent = pendentes.length;
+            document.getElementById('taxaConversao').textContent = taxa === '-' ? '-' : `${taxa}%`;
+        }
+
+        // ========================
+        // RENDERIZAR LISTA
+        // ========================
+
+        function renderizarIndicacoes() {
+            const container = document.getElementById('listaIndicacoes');
+
+            if (indicacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-card-dark rounded-xl p-6 border border-white/5 text-center">
+                        <span class="material-icons-round text-gray-700 text-4xl mb-2">person_add</span>
+                        <p class="text-gray-500 text-sm">Nenhuma indicação registrada ainda.</p>
+                        <p class="text-gray-600 text-xs mt-1">Compartilhe seu código e comece a ganhar!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = indicacoes.map(ind => {
+                const statusConfig = {
+                    'pendente': { color: 'amber', icon: 'hourglass_top', label: 'Pendente' },
+                    'ativo': { color: 'emerald', icon: 'check_circle', label: 'Ativo' },
+                    'cancelado': { color: 'red', icon: 'cancel', label: 'Cancelado' },
+                    'expirado': { color: 'slate', icon: 'schedule', label: 'Expirado' },
+                };
+                const st = statusConfig[ind.status] || statusConfig['pendente'];
+                const data = new Date(ind.data_indicacao || ind.created_at);
+                const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+                const comissao = parseFloat(ind.valor_comissao || 0);
+
+                return `
+                    <div class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-${st.color}-500/10 flex items-center justify-center flex-shrink-0">
+                            <span class="material-icons-round text-${st.color}-400">${st.icon}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <p class="text-sm font-semibold text-white truncate">${ind.nome_indicado}</p>
+                                <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-${st.color}-500/10 text-${st.color}-400">${st.label}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500">${dataFormatada}${ind.email_indicado ? ' • ' + ind.email_indicado : ''}</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-sm font-bold ${comissao > 0 ? 'text-emerald-400' : 'text-gray-500'}">
+                                ${comissao > 0 ? 'R$ ' + comissao.toFixed(2).replace('.', ',') : '-'}
+                            </p>
+                            <button onclick="excluirIndicacao(${ind.id})" class="text-[10px] text-red-400/60 hover:text-red-400 transition-colors mt-0.5">
+                                excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========================
+        // SALVAR CUPOM
+        // ========================
+
+        window.salvarCupom = async function () {
+            const input = document.getElementById('inputCupom');
+            const btn = document.getElementById('btnSalvarCupom');
+            const novoCodigo = input.value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+
+            if (!novoCodigo || novoCodigo.length < 3) {
+                showNotification('Código deve ter no mínimo 3 caracteres.', 'error');
+                return;
+            }
+
+            if (!supabase) {
+                document.getElementById('couponCode').textContent = novoCodigo;
+                showNotification('Cupom atualizado (modo local).', 'success');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                if (cupomAtual) {
+                    // Atualiza existente
+                    const { error } = await supabase
+                        .from('cupons_afiliado')
+                        .update({ codigo: novoCodigo, updated_at: new Date().toISOString() })
+                        .eq('id', cupomAtual.id);
+
+                    if (error) throw error;
+                    cupomAtual.codigo = novoCodigo;
+                } else {
+                    // Cria novo
+                    const { data, error } = await supabase
+                        .from('cupons_afiliado')
+                        .insert([{ codigo: novoCodigo, desconto_percentual: 10, comissao_percentual: 10 }])
+                        .select();
+
+                    if (error) throw error;
+                    cupomAtual = data[0];
+                }
+
+                document.getElementById('couponCode').textContent = novoCodigo;
+                showNotification('✅ Cupom salvo com sucesso!', 'success');
+            } catch (err) {
+                console.error('❌ Erro ao salvar cupom:', err);
+                if (err.message?.includes('duplicate') || err.code === '23505') {
+                    showNotification('Este código já está em uso. Tente outro.', 'error');
+                } else {
+                    showNotification('Erro ao salvar cupom.', 'error');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Salvar';
+            }
+        };
+
+
+
+        // ========================
+        // EXCLUIR INDICAÇÃO
+        // ========================
+
+        window.excluirIndicacao = async function (id) {
+            if (!confirm('Tem certeza que deseja excluir esta indicação?')) return;
+
+            if (!supabase) return;
+
+            try {
+                const { error } = await supabase
+                    .from('indicacoes')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showNotification('Indicação removida.', 'success');
+                await carregarIndicacoes();
+            } catch (err) {
+                console.error('❌ Erro ao excluir:', err);
+                showNotification('Erro ao excluir indicação.', 'error');
+            }
+        };
+
+        // ========================
+        // COMPARTILHAMENTO
+        // ========================
+
+        function getCouponCode() {
+            return cupomAtual?.codigo || document.getElementById('couponCode').textContent || 'GELADINHO10';
+        }
+
+        function getShareMessage() {
+            const code = getCouponCode();
+            return `🍦 *Geladinhos Gourmet* — Use meu código *${code}* e ganhe desconto na primeira mensalidade!\n\nBaixe o app e comece a empreender com geladinhos! 🚀`;
+        }
+
+        window.copiarCodigo = function () {
+            const code = getCouponCode();
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const icon = document.getElementById('copyIcon');
+                const feedback = document.getElementById('copyFeedback');
+
+                icon.textContent = 'check';
+                btn.classList.add('copy-flash');
+                feedback.classList.remove('hidden');
+
+                criarConfetti(btn);
+
+                setTimeout(() => {
+                    icon.textContent = 'content_copy';
+                    btn.classList.remove('copy-flash');
+                }, 1500);
+
+                setTimeout(() => {
+                    feedback.classList.add('hidden');
+                }, 3000);
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ Código copiado: ' + code);
+            });
+        };
+
+        window.compartilharWhatsApp = function () {
+            const url = `https://wa.me/?text=${encodeURIComponent(getShareMessage())}`;
+            window.open(url, '_blank');
+        };
+
+        window.compartilharGenerico = function () {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Indique e Ganhe — Geladinhos Gourmet',
+                    text: getShareMessage(),
+                }).catch(() => { });
+            } else {
+                navigator.clipboard.writeText(getShareMessage()).then(() => {
+                    alert('✅ Mensagem copiada! Cole onde quiser compartilhar.');
+                });
+            }
+        };
+
+        window.compartilharInstagram = function () {
+            navigator.clipboard.writeText(getShareMessage()).then(() => {
+                alert('✅ Texto copiado!\n\nO Instagram será aberto. Cole na sua bio ou nos Stories.');
+                window.open('https://instagram.com', '_blank');
+            }).catch(() => {
+                alert('Use o código: ' + getCouponCode() + '\n\nCompartilhe no seu Instagram!');
+            });
+        };
+
+        // ========================
+        // CONFETTI
+        // ========================
+
+        function criarConfetti(element) {
+            const rect = element.getBoundingClientRect();
+            const colors = ['#13ecec', '#25D366', '#fb923c', '#a78bfa', '#f472b6'];
+
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti-particle';
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = (rect.left + rect.width / 2 + (Math.random() - 0.5) * 60) + 'px';
+                particle.style.top = (rect.top + (Math.random() - 0.5) * 30) + 'px';
+                particle.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1200);
+            }
+        }
+
+        // ========================
+        // NOTIFICAÇÃO
+        // ========================
+
+        function showNotification(message, type = 'info') {
+            const old = document.querySelector('.notification-toast');
+            if (old) old.remove();
+
+            const el = document.createElement('div');
+            el.className = 'notification-toast fixed top-4 right-4 z-[200] px-5 py-3 rounded-xl shadow-lg backdrop-blur-md transition-all transform';
+
+            if (type === 'success') {
+                el.classList.add('bg-emerald-500/90', 'text-white');
+            } else if (type === 'error') {
+                el.classList.add('bg-red-500/90', 'text-white');
+            } else {
+                el.classList.add('bg-primary/90', 'text-background-dark');
+            }
+
+            el.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-lg">
+                        ${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}
+                    </span>
+                    <span class="font-medium text-sm">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(el);
+            setTimeout(() => {
+                el.style.transform = 'translateX(400px)';
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        // ========================
+        // INICIALIZAÇÃO
+        // ========================
+
+        async function init() {
+            await carregarCupom();
+            await carregarIndicacoes();
+            console.log('✅ Indique e Ganhe carregado!');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

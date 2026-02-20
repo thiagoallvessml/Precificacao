@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Faturamento</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0df2f2",
+                        "accent-cyan": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .glass-effect {
+            background: rgba(40, 57, 57, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white min-h-screen pb-24">
+    <!-- Header -->
+    <header
+        class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <a href="index.html"
+                class="material-symbols-outlined text-white text-2xl cursor-pointer hover:text-primary transition-colors">arrow_back_ios</a>
+            <h1 class="text-lg font-bold text-white">Faturamento</h1>
+        </div>
+    </header>
+
+    <main class="px-4 space-y-6">
+        <!-- Time Period Selector -->
+        <section class="flex p-1 rounded-xl glass-effect mt-2">
+            <button onclick="setPeriodo('hoje')" id="btnHoje"
+                class="flex-1 py-2 text-xs font-semibold rounded-lg bg-primary text-background-dark shadow-lg">Hoje</button>
+            <button onclick="setPeriodo('7dias')" id="btn7dias" class="flex-1 py-2 text-xs font-medium text-slate-400">7
+                dias</button>
+            <button onclick="setPeriodo('30dias')" id="btn30dias"
+                class="flex-1 py-2 text-xs font-medium text-slate-400">30 dias</button>
+        </section>
+
+        <!-- Hero Stats -->
+        <section class="space-y-4">
+            <div class="flex flex-col items-center justify-center py-6">
+                <p class="text-slate-400 text-sm font-medium uppercase tracking-widest mb-1">Faturamento Total Bruto</p>
+                <h2 id="faturamentoTotal" class="text-5xl font-bold text-accent-cyan tracking-tighter">R$ 0,00</h2>
+                <div id="comparacao" class="flex items-center gap-2 mt-2 text-sm font-semibold">
+                    <!-- Será preenchido -->
+                </div>
+                <a href="faturamento_sabor.html"
+                    class="mt-4 flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors">
+                    <span class="material-symbols-outlined text-base">icecream</span>
+                    Faturamento por Sabor
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-card-dark rounded-xl p-4 border border-white/5">
+                    <p class="text-slate-400 text-xs font-medium mb-1">Lucro Líquido</p>
+                    <p id="lucroLiquido" class="text-xl font-bold text-white">R$ 0,00</p>
+                    <div class="w-full h-1 bg-white/10 rounded-full mt-3 overflow-hidden">
+                        <div id="barraLucro" class="bg-emerald-400 h-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="bg-card-dark rounded-xl p-4 border border-white/5">
+                    <p class="text-slate-400 text-xs font-medium mb-1">Ticket Médio</p>
+                    <p id="ticketMedio" class="text-xl font-bold text-white">R$ 0,00</p>
+                    <div class="w-full h-1 bg-white/10 rounded-full mt-3 overflow-hidden">
+                        <div id="barraTicket" class="bg-primary h-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization Breakdown -->
+        <section id="grafico" class="bg-card-dark rounded-xl p-6 border border-white/5">
+            <!-- Será preenchido dinamicamente -->
+        </section>
+
+        <!-- Marketplace List -->
+        <section class="space-y-4">
+            <h3 class="text-lg font-bold text-white px-1">Faturamento por Marketplace</h3>
+            <div id="marketplacesList">
+                <!-- Será preenchido -->
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { getAllRecords } from './supabase-utils.js';
+
+        let pedidos = [];
+        let categorias = {};
+        let periodo = 'hoje';
+
+        // Definir período
+        window.setPeriodo = function (novoPeriodo) {
+            periodo = novoPeriodo;
+
+            // Atualizar botões
+            ['btnHoje', 'btn7dias', 'btn30dias'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (id === 'btn' + novoPeriodo.charAt(0).toUpperCase() + novoPeriodo.slice(1)) {
+                    btn.className = 'flex-1 py-2 text-xs font-semibold rounded-lg bg-primary text-background-dark shadow-lg';
+                } else {
+                    btn.className = 'flex-1 py-2 text-xs font-medium text-slate-400';
+                }
+            });
+
+            loadDados();
+        };
+
+        // Carregar dados
+        async function loadDados() {
+            try {
+                // Calcular datas
+                const dataFim = new Date();
+                let dataInicio = new Date();
+
+                if (periodo === 'hoje') {
+                    dataInicio.setHours(0, 0, 0, 0);
+                } else if (periodo === '7dias') {
+                    dataInicio.setDate(dataInicio.getDate() - 7);
+                } else if (periodo === '30dias') {
+                    dataInicio.setDate(dataInicio.getDate() - 30);
+                }
+
+                // Carregar pedidos
+                const { data: pedData, error: pedError } = await getAllRecords('pedidos');
+                if (pedError) throw pedError;
+
+                // Filtrar período e status
+                pedidos = (pedData || []).filter(p => {
+                    const dataPedido = new Date(p.data_pedido);
+                    return dataPedido >= dataInicio && dataPedido <= dataFim && p.status !== 'cancelado';
+                });
+
+                // Carregar categorias
+                const { data: catData, error: catError } = await getAllRecords('categorias');
+                if (catError) throw catError;
+                (catData || []).forEach(cat => { categorias[cat.id] = cat; });
+
+                renderDashboard();
+            } catch (error) {
+                console.error('❌ Erro:', error);
+            }
+        }
+
+        // Renderizar dashboard
+        function renderDashboard() {
+            // Faturamento total
+            const faturamentoTotal = pedidos.reduce((sum, p) => sum + parseFloat(p.valor_total || 0), 0);
+
+            // Agrupar por marketplace
+            const porMarketplace = {};
+            pedidos.forEach(p => {
+                const mkid = p.categoria_marketplace_id || p.marketplace_id || 0;
+                if (!porMarketplace[mkid]) {
+                    porMarketplace[mkid] = { valor: 0, pedidos: 0 };
+                }
+                porMarketplace[mkid].valor += parseFloat(p.valor_total || 0);
+                porMarketplace[mkid].pedidos++;
+            });
+
+            // Calcular lucro líquido (faturamento - taxas)
+            let lucroLiquido = faturamentoTotal;
+            Object.entries(porMarketplace).forEach(([mkid, data]) => {
+                const cat = categorias[mkid];
+                if (cat && cat.taxa_operacional) {
+                    const taxa = parseFloat(cat.taxa_operacional);
+                    lucroLiquido -= data.valor * (taxa / 100);
+                }
+            });
+
+            // Ticket médio
+            const totalPedidos = pedidos.length;
+            const ticketMedio = totalPedidos > 0 ? faturamentoTotal / totalPedidos : 0;
+
+            // Atualizar hero stats
+            document.getElementById('faturamentoTotal').textContent = `R$ ${faturamentoTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('lucroLiquido').textContent = `R$ ${lucroLiquido.toFixed(2).replace('.', ',')}`;
+            document.getElementById('ticketMedio').textContent = `R$ ${ticketMedio.toFixed(2).replace('.', ',')}`;
+
+            // Barras de progresso
+            const margemLucro = faturamentoTotal > 0 ? (lucroLiquido / faturamentoTotal) * 100 : 0;
+            document.getElementById('barraLucro').style.width = `${Math.min(margemLucro, 100)}%`;
+            document.getElementById('barraTicket').style.width = `${Math.min((ticketMedio / 100) * 100, 100)}%`;
+
+            // Renderizar gráfico
+            renderGrafico(porMarketplace, faturamentoTotal);
+
+            // Renderizar lista de marketplaces
+            renderMarketplaces(porMarketplace, faturamentoTotal);
+        }
+
+        // Renderizar gráfico de pizza
+        function renderGrafico(porMarketplace, total) {
+            const container = document.getElementById('grafico');
+
+            const dados = Object.entries(porMarketplace).map(([mkid, data]) => {
+                const cat = categorias[mkid];
+                const percentual = total > 0 ? (data.valor / total) * 100 : 0;
+                return {
+                    nome: cat ? cat.nome : 'Venda Direta',
+                    icone: cat ? cat.icone : 'storefront',
+                    percentual,
+                    valor: data.valor
+                };
+            }).sort((a, b) => b.percentual - a.percentual);
+
+            const cores = ['primary', 'indigo-400', 'emerald-400', 'orange-400', 'pink-400'];
+
+            container.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 space-y-3">
+                        <h3 class="text-sm font-bold text-white mb-4">Divisão por Canal</h3>
+                        ${dados.map((d, i) => `
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-${cores[i % cores.length]}"></div>
+                                    <p class="text-xs text-slate-300">${d.nome}</p>
+                                </div>
+                                <span class="text-xs font-bold text-white">${d.percentual.toFixed(1)}%</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar lista de marketplaces
+        function renderMarketplaces(porMarketplace, total) {
+            const container = document.getElementById('marketplacesList');
+
+            const dados = Object.entries(porMarketplace).map(([mkid, data]) => {
+                const cat = categorias[mkid];
+                const percentual = total > 0 ? (data.valor / total) * 100 : 0;
+                return {
+                    id: mkid,
+                    nome: cat ? cat.nome : 'Venda Direta',
+                    icone: cat ? cat.icone : 'storefront',
+                    percentual,
+                    valor: data.valor,
+                    pedidos: data.pedidos
+                };
+            }).sort((a, b) => b.valor - a.valor);
+
+            const coresIcone = ['text-red-500 bg-red-500/20', 'text-emerald-500 bg-emerald-500/20', 'text-blue-500 bg-blue-500/20', 'text-purple-500 bg-purple-500/20'];
+
+            container.innerHTML = dados.map((d, i) => `
+                <div class="bg-card-dark rounded-xl p-4 border border-white/5 space-y-3 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center ${coresIcone[i % coresIcone.length]}">
+                                <span class="material-symbols-outlined">${d.icone}</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-white">${d.nome}</p>
+                                <p class="text-xs text-slate-400">Market Share: ${d.percentual.toFixed(1)}%</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-accent-cyan">R$ ${d.valor.toFixed(2).replace('.', ',')}</p>
+                            <p class="text-[10px] text-slate-400 font-medium">${d.pedidos} pedidos</p>
+                        </div>
+                    </div>
+                    <div class="w-full h-2 bg-black/40 rounded-full overflow-hidden">
+                        <div class="bg-primary h-full rounded-full shadow-[0_0_8px_rgba(13,242,242,0.5)]" 
+                             style="width: ${d.percentual}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Iniciar
+        loadDados();
+    </script>
+</body>
+
+</html>

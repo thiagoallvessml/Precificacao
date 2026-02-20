@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "accent": "#f59e0b",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">.glass {
+    background: rgba(26, 47, 47, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+.custom-select {
+    appearance: none;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCeHOMqMaYvDD_-KaWSvDPdexaeUL5AdsWD3JfD9xTZ49zbdpEplW5U0yxb1fBQSNEti1B7iSCS_Xb1n9CKIR-nnkGw3wK4rq36__3nCUiF4VbISwIWsPqcyOs0zu_Epapn7NllHvecGbCAarC3Qn7vyk6v8Am8Rby9NPizFKLlUsAyf4kH6rVWXPEVipg9HcTGs7sAQ20lqIEF6T5MuqeCnFj8io7nACzQGaON0NHDGNmwU0eIrfGBEQkKwZkYbRPjokdBegjhqHk);
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.5em
+    }
+body {
+    min-height: 100dvh
+    }</style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark font-display text-white antialiased">
+    <header class="sticky top-0 z-50 glass px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="faturamento_sabor.html"
+                class="material-symbols-outlined text-primary cursor-pointer hover:text-white transition-colors">arrow_back_ios</a>
+            <h1 class="text-lg font-bold tracking-tight">Custo de Produção</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">receipt_long</span>
+        </div>
+    </header>
+    <main class="max-w-md md:max-w-5xl mx-auto px-4 pb-32 transition-all duration-300">
+        <div class="md:grid md:grid-cols-2 md:gap-8">
+            <!-- Left Column: Settings & Summary -->
+            <div class="space-y-6">
+                <!-- Selector -->
+                <section class="mt-6 md:mt-8">
+                    <div class="relative">
+                        <select
+                            class="custom-select w-full glass rounded-xl px-5 py-4 text-primary font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all cursor-pointer">
+                            <option value="ninho-nutella">Ninho com Nutella</option>
+                            <option value="morango-leite">Morango com Leite Cond.</option>
+                            <option value="pacoquita">Paçoquita Premium</option>
+                            <option value="oreo">Oreo Especial</option>
+                        </select>
+                    </div>
+                </section>
+                <!-- Profit Summary Card -->
+                <section class="mb-8">
+                    <div
+                        class="glass p-6 rounded-2xl border-l-4 border-primary shadow-2xl h-full flex flex-col justify-center">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <span
+                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Margem
+                                    de Lucro Bruta</span>
+                                <span class="text-4xl font-bold text-primary">63%</span>
+                            </div>
+                            <div class="bg-primary/10 p-2 rounded-lg">
+                                <span class="material-symbols-outlined text-primary">trending_up</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+                            <div>
+                                <span class="text-[10px] font-medium text-slate-400 uppercase">Custo Total</span>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-xs font-bold text-slate-300">R$</span>
+                                    <span class="text-xl font-bold text-white">1,85</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-medium text-slate-400 uppercase">Preço de Venda</span>
+                                <div class="flex items-baseline justify-end gap-1">
+                                    <span class="text-xs font-bold text-accent">R$</span>
+                                    <span class="text-xl font-bold text-white">5,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Details & Breakdown -->
+            <div class="space-y-6 md:mt-8">
+                <!-- Cost Composition -->
+                <section>
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Composição de Custos</h2>
+                        <span class="text-[10px] font-bold text-primary">POR UNIDADE</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="glass p-4 rounded-xl">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 class="font-semibold text-sm">Leite Condensado</h3>
+                                    <p class="text-[10px] text-slate-400 uppercase font-medium">50ml • Unid: R$ 0,012/ml
+                                    </p>
+                                </div>
+                                <span class="font-bold text-sm text-white">R$ 0,60</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary" style="width: 32%"></div>
+                            </div>
+                        </div>
+                        <div class="glass p-4 rounded-xl">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 class="font-semibold text-sm">Creme de Leite</h3>
+                                    <p class="text-[10px] text-slate-400 uppercase font-medium">30ml • Unid: R$ 0,010/ml
+                                    </p>
+                                </div>
+                                <span class="font-bold text-sm text-white">R$ 0,30</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary" style="width: 16%"></div>
+                            </div>
+                        </div>
+                        <div class="glass p-4 rounded-xl">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 class="font-semibold text-sm">Nutella</h3>
+                                    <p class="text-[10px] text-slate-400 uppercase font-medium">15g • Unid: R$ 0,040/g
+                                    </p>
+                                </div>
+                                <span class="font-bold text-sm text-white">R$ 0,60</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary" style="width: 32%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Indirect Costs -->
+                <section>
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Custos Indiretos</h2>
+                    </div>
+                    <div class="bg-card-dark/40 rounded-2xl border border-white/5 divide-y divide-white/5">
+                        <div class="p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-500 text-lg">engineering</span>
+                                <div>
+                                    <p class="text-sm font-medium">Mão de Obra</p>
+                                    <p class="text-[10px] text-primary flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[10px]">settings</span>
+                                        Configurações
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="text-sm font-bold text-white">R$ 0,85</span>
+                        </div>
+                        <div class="p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-500 text-lg">package_2</span>
+                                <span class="text-sm font-medium">Embalagem &amp; Adesivo</span>
+                            </div>
+                            <span class="text-sm font-bold text-white">R$ 0,25</span>
+                        </div>
+                        <div class="p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-500 text-lg">bolt</span>
+                                <span class="text-sm font-medium">Energia &amp; Refrigeração</span>
+                            </div>
+                            <span class="text-sm font-bold text-white">R$ 0,10</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    <nav
+        class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 px-6 pt-3 pb-8 flex justify-between items-center z-50">
+        <div class="flex flex-col items-center gap-1 group cursor-pointer">
+            <span
+                class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">home</span>
+            <span
+                class="text-[10px] font-medium text-slate-500 group-hover:text-primary transition-colors uppercase">Início</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 group cursor-pointer">
+            <span class="material-symbols-outlined text-primary">payments</span>
+            <span class="text-[10px] font-medium text-primary uppercase">Custos</span>
+        </div>
+        <div class="relative -top-4">
+            <div onclick="window.location.href='adicionar-receita.html'"
+                class="bg-primary shadow-lg shadow-primary/40 w-14 h-14 rounded-full flex items-center justify-center text-background-dark border-4 border-background-dark cursor-pointer hover:scale-110 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined font-bold">add</span>
+            </div>
+        </div>
+        <div class="flex flex-col items-center gap-1 group cursor-pointer">
+            <span
+                class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">equalizer</span>
+            <span
+                class="text-[10px] font-medium text-slate-500 group-hover:text-primary transition-colors uppercase">Vendas</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 group cursor-pointer">
+            <span
+                class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors">settings</span>
+            <span
+                class="text-[10px] font-medium text-slate-500 group-hover:text-primary transition-colors uppercase">Ajustes</span>
+        </div>
+    </nav>
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+        <div class="absolute top-1/2 -right-24 w-80 h-80 bg-accent/5 rounded-full blur-[100px]"></div>
+    </div>
+
+</body>
+
+</html>

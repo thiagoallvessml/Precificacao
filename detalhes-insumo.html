@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Detalhes do Insumo - Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1A1A1A",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col">
+    <!-- TopAppBar (Fixed) -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 ios-blur border-b border-slate-200 dark:border-white/10">
+        <div class="flex items-center p-4 h-16 max-w-md mx-auto lg:max-w-7xl">
+            <button onclick="window.location.href='gestao-insumos.html'"
+                class="text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined">arrow_back_ios</span>
+            </button>
+            <h1 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-8">Detalhes do Insumo</h1>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="flex items-center justify-center py-20">
+        <div class="text-center">
+            <span class="material-symbols-outlined text-5xl text-primary animate-spin">refresh</span>
+            <p class="text-slate-400 mt-4">Carregando...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="hidden flex-1 w-full pb-32 lg:pb-6">
+        <!-- Desktop Grid Layout -->
+        <div class="max-w-7xl mx-auto lg:grid lg:grid-cols-2 lg:gap-8 lg:p-8">
+
+            <!-- Left Column: Hero + Stats -->
+            <div class="flex flex-col">
+                <!-- ProfileHeader / Hero Section -->
+                <div class="flex p-6 lg:p-0">
+                    <div class="flex w-full flex-col gap-4 items-center lg:items-start">
+                        <div class="flex gap-6 flex-col items-center lg:flex-row lg:items-start">
+                            <div id="insumoImage"
+                                class="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl w-40 h-40 shadow-2xl border-4 border-card-dark shrink-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                                <span class="material-symbols-outlined text-6xl text-slate-600">category</span>
+                            </div>
+                            <div
+                                class="flex flex-col items-center justify-center lg:items-start lg:justify-start flex-1">
+                                <p id="insumoNome"
+                                    class="text-2xl font-bold leading-tight tracking-tight text-center lg:text-left">
+                                    Carregando...</p>
+                                <div class="flex gap-2 mt-2">
+                                    <span id="insumoTipo"
+                                        class="text-[#9db9b9] text-sm font-medium bg-white/5 px-3 py-1 rounded-full border border-white/10">-</span>
+                                    <span id="insumoUnidade"
+                                        class="text-[#9db9b9] text-sm font-medium bg-white/5 px-3 py-1 rounded-full border border-white/10">-</span>
+                                </div>
+                                <p id="insumoFornecedor" class="text-sm text-slate-400 mt-2 hidden"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-4 p-4 lg:p-0 lg:mt-6">
+                    <!-- Qtd Atual -->
+                    <div
+                        class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-card-dark border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                            <span class="material-symbols-outlined text-sm">inventory_2</span>
+                            <p class="text-xs font-semibold uppercase tracking-wider">Quantidade</p>
+                        </div>
+                        <p id="statQuantidade" class="text-2xl font-bold leading-tight">0 <span
+                                class="text-sm font-normal text-slate-400">un</span></p>
+                    </div>
+
+                    <!-- Custo Médio -->
+                    <div
+                        class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-card-dark border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                            <span class="material-symbols-outlined text-sm">payments</span>
+                            <p class="text-xs font-semibold uppercase tracking-wider">Custo Médio</p>
+                        </div>
+                        <p id="statCustoMedio" class="text-2xl font-bold leading-tight">R$ 0,00</p>
+                    </div>
+
+                    <!-- Custo Total -->
+                    <div
+                        class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-card-dark border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                            <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
+                            <p class="text-xs font-semibold uppercase tracking-wider">Custo Total</p>
+                        </div>
+                        <p id="statCustoTotal" class="text-2xl font-bold leading-tight">R$ 0,00</p>
+                    </div>
+
+                    <!-- Estoque Mínimo -->
+                    <div
+                        class="flex flex-col gap-2 rounded-xl p-5 bg-white dark:bg-card-dark border border-slate-200 dark:border-white/5 shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                            <span class="material-symbols-outlined text-sm">shopping_cart</span>
+                            <p class="text-xs font-semibold uppercase tracking-wider">MOQ</p>
+                        </div>
+                        <p id="statMOQ" class="text-2xl font-bold leading-tight text-primary">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Status + History -->
+            <div class="flex flex-col">
+                <!-- SectionHeader: Status de Estoque -->
+                <div class="px-4 lg:px-0 flex justify-between items-end">
+                    <h3 class="text-lg font-bold leading-tight tracking-tight pt-4 lg:pt-0">Status de Estoque</h3>
+                    <span id="statusBadge"
+                        class="bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded mb-1 lg:mb-0">Carregando</span>
+                </div>
+
+                <!-- ProgressBar -->
+                <div class="flex flex-col gap-3 p-4 lg:p-0 lg:mt-4 pt-2">
+                    <div class="flex gap-6 justify-between items-center">
+                        <p class="text-slate-600 dark:text-[#9db9b9] text-sm font-medium leading-normal">Nível de
+                            abastecimento
+                        </p>
+                        <p id="percentualEstoque" class="text-primary text-lg font-bold leading-normal">0%</p>
+                    </div>
+                    <div class="rounded-full bg-slate-200 dark:bg-white/10 h-3 overflow-hidden">
+                        <div id="barraEstoque" class="h-full rounded-full bg-primary" style="width: 0%;"></div>
+                    </div>
+                    <div class="flex justify-between mt-1">
+                        <p id="labelMinimo" class="text-slate-400 text-[11px] font-normal leading-normal">Crítico: 0</p>
+                        <p id="labelMaximo" class="text-slate-400 text-[11px] font-normal leading-normal">Ideal: 0</p>
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="mx-4 lg:mx-0 mt-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
+                    <div class="flex gap-3">
+                        <span class="material-symbols-outlined text-blue-400">info</span>
+                        <div>
+                            <p class="font-bold text-sm text-blue-300">Sobre este Insumo</p>
+                            <p id="insumoInfo" class="text-xs text-blue-200/80 mt-1 leading-relaxed">
+                                Este insumo faz parte do seu estoque de produção.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <h3 class="text-lg font-bold leading-tight tracking-tight px-4 lg:px-0 pb-2 pt-6">Histórico de
+                    Movimentações</h3>
+
+                <!-- Loading State -->
+                <div id="movimentacoesLoading" class="mx-4 lg:mx-0 mt-2 p-8 text-center">
+                    <span class="material-symbols-outlined text-3xl text-primary animate-spin">refresh</span>
+                    <p class="text-sm text-slate-400 mt-2">Carregando histórico...</p>
+                </div>
+
+                <!-- Movimentações Container -->
+                <div id="movimentacoesContainer"
+                    class="hidden mx-4 lg:mx-0 mt-2 overflow-hidden rounded-xl border border-slate-200 dark:border-white/5 bg-white dark:bg-card-dark">
+                    <!-- Movimentações serão inseridas aqui -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="movimentacoesEmpty"
+                    class="hidden mx-4 lg:mx-0 mt-2 p-8 text-center rounded-xl border border-slate-200 dark:border-white/5 bg-white dark:bg-card-dark">
+                    <span class="material-symbols-outlined text-4xl text-slate-400">history</span>
+                    <p class="text-slate-400 text-sm mt-2">Nenhuma movimentação registrada</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Edição -->
+    <div id="modalEditar"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-card-dark rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Header do Modal -->
+            <div
+                class="sticky top-0 bg-white dark:bg-card-dark border-b border-slate-200 dark:border-white/10 p-6 flex items-center justify-between">
+                <h2 class="text-2xl font-bold">Editar Insumo</h2>
+                <button onclick="fecharModal()"
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-3xl">close</span>
+                </button>
+            </div>
+
+            <!-- Formulário de Edição -->
+            <form id="formEditarInsumo" class="p-6 space-y-4">
+                <!-- Nome -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Nome do Insumo
+                    </label>
+                    <input id="editNome" type="text" required
+                        class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Ex: Leite Condensado" />
+                </div>
+
+                <!-- Tipo e Unidade (Grid 2 colunas) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            Tipo
+                        </label>
+                        <select id="editTipo" required
+                            class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="ingrediente">Ingrediente</option>
+                            <option value="embalagem">Embalagem</option>
+                            <option value="equipamento">Equipamento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            Unidade de Medida
+                        </label>
+                        <input id="editUnidade" type="text" required
+                            class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder="Ex: kg, L, UN" />
+                    </div>
+                </div>
+
+                <!-- Estoques (Grid 3 colunas) -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            Estoque Mínimo
+                        </label>
+                        <input id="editEstoqueMin" type="number" step="0.001" min="0" required
+                            class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            Estoque Máximo
+                        </label>
+                        <input id="editEstoqueMax" type="number" step="0.001" min="0"
+                            class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            Custo Unitário (R$)
+                        </label>
+                        <input id="editCustoUnit" type="number" step="0.001" min="0" required
+                            class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent" />
+                    </div>
+                </div>
+
+                <!-- Fornecedor -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Fornecedor (opcional)
+                    </label>
+                    <input id="editFornecedor" type="text"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Ex: Supermercado XYZ" />
+                </div>
+
+                <!-- Observações -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Observações (opcional)
+                    </label>
+                    <textarea id="editObservacoes" rows="3"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/50 focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                        placeholder="Notas adicionais sobre este insumo..."></textarea>
+                </div>
+
+                <!-- Botões -->
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="fecharModal()"
+                        class="flex-1 px-6 py-3 border-2 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="flex-[2] px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-[0.98]">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer Action Buttons (Fixed) -->
+    <footer
+        class="fixed bottom-0 left-0 right-0 bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-white/10 p-4 pb-8 ios-blur z-50">
+        <div class="max-w-md mx-auto flex gap-3 lg:max-w-7xl">
+            <button id="btnExcluir"
+                class="flex-1 border-2 border-red-500 text-red-500 font-bold py-3 px-2 rounded-xl flex items-center justify-center gap-1.5 hover:bg-red-500/10 transition-colors text-sm">
+                <span class="material-symbols-outlined text-base">delete</span>
+                Excluir
+            </button>
+            <button id="btnEditarMobile"
+                class="flex-1 border-2 border-primary text-primary font-bold py-3 px-2 rounded-xl flex items-center justify-center gap-1.5 hover:bg-primary/5 transition-colors text-sm">
+                <span class="material-symbols-outlined text-base">edit</span>
+                Editar
+            </button>
+            <button onclick="window.location.href='gerenciar-insumos.html#entrada'"
+                class="flex-[2] bg-primary text-[#0F0F0F] font-bold py-3 px-2 rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-primary/20 active:scale-[0.98] transition-all text-sm">
+                <span class="material-symbols-outlined text-base">sync_alt</span>
+                Registrar Movimento
+            </button>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { getRecordById, updateRecord, deleteRecord, getRecordsWhere } from './supabase-utils.js';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const insumoId = urlParams.get('id');
+
+        if (!insumoId) {
+            alert('ID do insumo não encontrado!');
+            window.location.href = 'gestao-insumos.html';
+        }
+
+        let insumo = null;
+        let movimentacoes = [];
+
+        // Carregar detalhes do insumo
+        async function loadInsumo() {
+            try {
+                const { data, error } = await getRecordById('insumos', insumoId);
+
+                if (error) throw error;
+                if (!data) {
+                    alert('Insumo não encontrado!');
+                    window.location.href = 'gestao-insumos.html';
+                    return;
+                }
+
+                insumo = data;
+                renderInsumo();
+                loadMovimentacoes();
+
+            } catch (error) {
+                console.error('Erro ao carregar insumo:', error);
+                alert('Erro ao carregar insumo: ' + error.message);
+                window.location.href = 'gestao-insumos.html';
+            }
+        }
+
+        // Carregar movimentações
+        async function loadMovimentacoes() {
+            try {
+                console.log('🔍 Buscando movimentações para insumo ID:', insumoId);
+
+                const { data, error } = await getRecordsWhere('movimentacoes_estoque', {
+                    insumo_id: insumoId
+                });
+
+                console.log('📦 Resposta do Supabase:', { data, error });
+
+                if (error) {
+                    console.error('❌ Erro ao carregar movimentações:', error);
+                    movimentacoes = [];
+                } else {
+                    movimentacoes = data || [];
+                    console.log(`✅ ${movimentacoes.length} movimentações encontradas`);
+                    // Ordenar por data (mais recente primeiro)
+                    movimentacoes.sort((a, b) => new Date(b.data_movimentacao) - new Date(a.data_movimentacao));
+                }
+
+                renderMovimentacoes();
+
+            } catch (error) {
+                console.error('❌ Exceção ao carregar movimentações:', error);
+                renderMovimentacoes();
+            }
+        }
+
+        // Renderizar movimentações
+        function renderMovimentacoes() {
+            const loading = document.getElementById('movimentacoesLoading');
+            const container = document.getElementById('movimentacoesContainer');
+            const empty = document.getElementById('movimentacoesEmpty');
+
+            loading.classList.add('hidden');
+
+            if (movimentacoes.length === 0) {
+                empty.classList.remove('hidden');
+                container.classList.add('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            container.classList.remove('hidden');
+
+            const tipoConfig = {
+                'entrada': { icon: 'add_circle', color: 'primary', label: 'Entrada de Estoque', signal: '+' },
+                'saida': { icon: 'remove_circle', color: 'rose-500', label: 'Saída (Produção)', signal: '-' },
+                'ajuste': { icon: 'tune', color: 'amber-500', label: 'Ajuste Manual', signal: '±' },
+                'perda': { icon: 'warning', color: 'red-500', label: 'Perda', signal: '-' }
+            };
+
+            container.innerHTML = movimentacoes.map((mov, index) => {
+                const config = tipoConfig[mov.tipo] || tipoConfig['entrada'];
+                const isLast = index === movimentacoes.length - 1;
+                const borderClass = isLast ? '' : 'border-b border-slate-100 dark:border-white/5';
+
+                // Formatar data
+                const dataObj = new Date(mov.data_movimentacao);
+                const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                const horaFormatada = dataObj.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="flex items-center justify-between p-4 ${borderClass}">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-${config.color}/20 text-${config.color} rounded-full p-2">
+                                <span class="material-symbols-outlined text-base">${config.icon}</span>
+                            </div>
+                            <div>
+                                <p class="font-bold text-sm">${config.label}</p>
+                                <p class="text-xs text-slate-500 dark:text-[#9db9b9]">${dataFormatada} • ${horaFormatada}</p>
+                                ${mov.motivo ? `<p class="text-xs text-slate-400 mt-1">${mov.motivo}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-sm text-${config.color}">${config.signal}${mov.quantidade} ${insumo.unidade_medida}</p>
+                            ${mov.custo_unitario ? `<p class="text-xs text-slate-400">R$ ${parseFloat(mov.custo_unitario).toFixed(3)}/un</p>` : ''}
+                            ${mov.referencia_tipo ? `<p class="text-xs text-slate-500 mt-0.5">${mov.referencia_tipo} #${mov.referencia_id || '-'}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Renderizar detalhes
+        function renderInsumo() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+
+            // Hero
+            document.getElementById('insumoNome').textContent = insumo.nome;
+
+            const tipoLabels = {
+                'ingrediente': 'Ingrediente',
+                'embalagem': 'Embalagem',
+                'equipamento': 'Equipamento'
+            };
+            document.getElementById('insumoTipo').textContent = tipoLabels[insumo.tipo] || insumo.tipo;
+            document.getElementById('insumoUnidade').textContent = `Un: ${insumo.unidade_medida}`;
+
+            if (insumo.fornecedor) {
+                const fornecedorEl = document.getElementById('insumoFornecedor');
+                fornecedorEl.textContent = `Fornecedor: ${insumo.fornecedor}`;
+                fornecedorEl.classList.remove('hidden');
+            }
+
+            // Imagem
+            if (insumo.imagem_url) {
+                document.getElementById('insumoImage').style.backgroundImage = `url(${insumo.imagem_url})`;
+                document.getElementById('insumoImage').innerHTML = '';
+            }
+
+            // Stats
+            const custoTotal = (parseFloat(insumo.estoque_atual) * parseFloat(insumo.custo_unitario)).toFixed(2);
+            document.getElementById('statQuantidade').innerHTML = `${insumo.estoque_atual} <span class="text-sm font-normal text-slate-400">${insumo.unidade_medida}</span>`;
+            document.getElementById('statCustoMedio').textContent = `R$ ${parseFloat(insumo.custo_unitario).toFixed(3).replace('.', ',')}`;
+            document.getElementById('statCustoTotal').textContent = `R$ ${custoTotal.replace('.', ',')}`;
+            document.getElementById('statMOQ').textContent = insumo.estoque_minimo;
+
+            // Status de Estoque
+            let percentual;
+            let estoqueReferencia; // Para o label
+
+            if (insumo.estoque_maximo && parseFloat(insumo.estoque_maximo) > 0) {
+                // Se tem estoque máximo, usa ele como referência
+                estoqueReferencia = parseFloat(insumo.estoque_maximo);
+                percentual = (parseFloat(insumo.estoque_atual) / estoqueReferencia) * 100;
+            } else {
+                // Se não tem máximo, usa o dobro do mínimo como referência
+                const minimo = parseFloat(insumo.estoque_minimo) || 1;
+                estoqueReferencia = minimo * 2;
+                percentual = (parseFloat(insumo.estoque_atual) / estoqueReferencia) * 100;
+            }
+
+            // Limitar entre 0 e 100%
+            percentual = Math.max(0, Math.min(100, percentual));
+
+            const isCritico = parseFloat(insumo.estoque_atual) <= parseFloat(insumo.estoque_minimo);
+
+            // Badge status
+            const statusBadge = document.getElementById('statusBadge');
+            if (isCritico) {
+                statusBadge.textContent = 'Estoque Crítico';
+                statusBadge.className = 'bg-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded mb-1 lg:mb-0';
+                document.getElementById('barraEstoque').className = 'h-full rounded-full bg-red-500';
+            } else if (percentual >= 70) {
+                statusBadge.textContent = 'Estoque Saudável';
+                statusBadge.className = 'bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded mb-1 lg:mb-0';
+                document.getElementById('barraEstoque').className = 'h-full rounded-full bg-primary';
+            } else {
+                statusBadge.textContent = 'Atenção';
+                statusBadge.className = 'bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded mb-1 lg:mb-0';
+                document.getElementById('barraEstoque').className = 'h-full rounded-full bg-amber-500';
+            }
+
+            document.getElementById('percentualEstoque').textContent = `${percentual.toFixed(0)}%`;
+            document.getElementById('barraEstoque').style.width = `${percentual}%`;
+            document.getElementById('labelMinimo').textContent = `Crítico: ${insumo.estoque_minimo} ${insumo.unidade_medida}`;
+            document.getElementById('labelMaximo').textContent = `Ideal: ${insumo.estoque_maximo || estoqueReferencia} ${insumo.unidade_medida}`;
+
+            // Info
+            const tipoTexto = tipoLabels[insumo.tipo] || insumo.tipo;
+            document.getElementById('insumoInfo').textContent = `${tipoTexto} medido em ${insumo.unidade_medida}. ${isCritico ? 'ATENÇÃO: Estoque abaixo do mínimo!' : 'Estoque em nível adequado.'}`;
+        }
+
+        // Botão de exclusão
+        document.getElementById('btnExcluir').addEventListener('click', async () => {
+            const confirmar = confirm(
+                `⚠️ ATENÇÃO!\n\n` +
+                `Tem certeza que deseja excluir "${insumo.nome}"?\n\n` +
+                `Esta ação NÃO pode ser desfeita e irá:\n` +
+                `• Remover o insumo permanentemente\n` +
+                `• Deletar todo o histórico de movimentações\n` +
+                `• Afetar receitas que usam este insumo\n\n` +
+                `Digite OK para confirmar a exclusão.`
+            );
+
+            if (!confirmar) return;
+
+            try {
+                // Deletar insumo (CASCADE vai deletar as movimentações automaticamente)
+                const { error } = await deleteRecord('insumos', insumoId);
+
+                if (error) throw error;
+
+                alert('✅ Insumo excluído com sucesso!');
+                window.location.href = 'gestao-insumos.html';
+
+            } catch (error) {
+                console.error('❌ Erro ao excluir insumo:', error);
+                alert('❌ Erro ao excluir insumo: ' + error.message);
+            }
+        });
+
+        // Função global para fechar modal
+        window.fecharModal = function () {
+            document.getElementById('modalEditar').classList.add('hidden');
+        };
+
+        // Função global para abrir modal
+        window.abrirModalEditar = function () {
+            if (!insumo) return;
+
+            // Preencher campos do formulário
+            document.getElementById('editNome').value = insumo.nome || '';
+            document.getElementById('editTipo').value = insumo.tipo || 'ingrediente';
+            document.getElementById('editUnidade').value = insumo.unidade_medida || '';
+            document.getElementById('editEstoqueMin').value = insumo.estoque_minimo || '';
+            document.getElementById('editEstoqueMax').value = insumo.estoque_maximo || '';
+            document.getElementById('editCustoUnit').value = insumo.custo_unitario || '';
+            document.getElementById('editFornecedor').value = insumo.fornecedor || '';
+            document.getElementById('editObservacoes').value = insumo.observacoes || '';
+
+            // Mostrar modal
+            document.getElementById('modalEditar').classList.remove('hidden');
+        };
+
+        // Botão de edição do footer
+        document.getElementById('btnEditarMobile').addEventListener('click', abrirModalEditar);
+
+        // Formulário de edição
+        document.getElementById('formEditarInsumo').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const updates = {
+                    nome: document.getElementById('editNome').value,
+                    tipo: document.getElementById('editTipo').value,
+                    unidade_medida: document.getElementById('editUnidade').value,
+                    estoque_minimo: parseFloat(document.getElementById('editEstoqueMin').value),
+                    estoque_maximo: parseFloat(document.getElementById('editEstoqueMax').value) || null,
+                    custo_unitario: parseFloat(document.getElementById('editCustoUnit').value),
+                    fornecedor: document.getElementById('editFornecedor').value || null,
+                    observacoes: document.getElementById('editObservacoes').value || null
+                };
+
+                console.log('📝 Atualizando insumo:', updates);
+
+                const { error } = await updateRecord('insumos', insumoId, updates);
+
+                if (error) throw error;
+
+                alert('✅ Insumo atualizado com sucesso!');
+
+                // Fechar modal
+                fecharModal();
+
+                // Recarregar dados
+                loadInsumo();
+
+            } catch (error) {
+                console.error('❌ Erro ao atualizar insumo:', error);
+                alert('❌ Erro ao atualizar insumo: ' + error.message);
+            }
+        });
+
+        // Carregar ao iniciar
+        loadInsumo();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Detalhes Financeiros do Canal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "fee-orange": "#f59e0b",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen font-display">
+    <!-- Sticky Glassmorphic Header -->
+    <header class="sticky top-0 z-50 glass-header px-4 pt-12 pb-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <a href="faturamento.html"
+                    class="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 text-white cursor-pointer hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back_ios_new</span>
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">iFood</h1>
+                    <p class="text-xs text-slate-400 font-medium">Marketplace Delivery</p>
+                </div>
+            </div>
+            <button
+                class="flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 text-primary border border-primary/20">
+                <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                <span class="text-xs font-bold uppercase tracking-wider">30 Dias</span>
+            </button>
+        </div>
+        <!-- Period Selector Tabs -->
+        <div class="flex gap-6 overflow-x-auto hide-scrollbar">
+            <button class="text-sm font-bold pb-2 border-b-2 border-primary text-primary whitespace-nowrap">Este
+                Mês</button>
+            <button
+                class="text-sm font-medium pb-2 border-b-2 border-transparent text-slate-500 whitespace-nowrap">Últimos
+                7 dias</button>
+            <button
+                class="text-sm font-medium pb-2 border-b-2 border-transparent text-slate-500 whitespace-nowrap">Personalizado</button>
+        </div>
+    </header>
+    <main class="p-4 space-y-6 pb-24">
+        <!-- KPI Cards Section -->
+        <section class="grid grid-cols-1 gap-4">
+            <!-- Gross Revenue -->
+            <div class="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div class="flex justify-between items-start">
+                    <p class="text-slate-400 text-sm font-medium">Faturamento Bruto</p>
+                    <span class="material-symbols-outlined text-slate-500">trending_up</span>
+                </div>
+                <h2 class="text-3xl font-bold mt-1 text-white">R$ 12.450,80</h2>
+                <p class="text-[10px] text-green-400 font-bold mt-2 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[12px]">north</span> 8.4% vs mês anterior
+                </p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Total Fees -->
+                <div class="bg-white/5 border border-white/10 rounded-xl p-5">
+                    <p class="text-slate-400 text-sm font-medium">Total em Taxas</p>
+                    <h2 class="text-xl font-bold mt-2 text-fee-orange">R$ 3.112,70</h2>
+                    <p class="text-[10px] text-slate-500 font-medium mt-1">25% do Bruto</p>
+                </div>
+                <!-- Net Profit -->
+                <div class="bg-white/5 border border-white/10 rounded-xl p-5">
+                    <p class="text-slate-400 text-sm font-medium">Lucro Líquido</p>
+                    <h2 class="text-xl font-bold mt-2 text-primary">R$ 9.338,10</h2>
+                    <p class="text-[10px] text-primary/70 font-medium mt-1">Margem Real: 75%</p>
+                </div>
+            </div>
+        </section>
+        <!-- Chart Section -->
+        <section class="bg-white/5 border border-white/10 rounded-xl p-5">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-base font-bold text-white">Desempenho Diário</h3>
+                <span class="text-xs text-slate-500 font-medium">Maio 2024</span>
+            </div>
+            <div class="flex items-end justify-between h-40 gap-2 px-1">
+                <div class="bg-primary/20 w-full rounded-t-md relative group h-[40%]">
+                    <div
+                        class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                        R$450</div>
+                </div>
+                <div class="bg-primary/20 w-full rounded-t-md h-[65%]"></div>
+                <div class="bg-primary w-full rounded-t-md h-[90%]"></div>
+                <div class="bg-primary/20 w-full rounded-t-md h-[55%]"></div>
+                <div class="bg-primary/20 w-full rounded-t-md h-[30%]"></div>
+                <div class="bg-primary w-full rounded-t-md h-[75%]"></div>
+                <div class="bg-primary/20 w-full rounded-t-md h-[45%]"></div>
+                <div class="bg-primary/20 w-full rounded-t-md h-[60%]"></div>
+                <div class="bg-primary/20 w-full rounded-t-md h-[25%]"></div>
+                <div class="bg-primary w-full rounded-t-md h-[100%]"></div>
+            </div>
+            <div class="flex justify-between mt-3 px-1">
+                <span class="text-[10px] text-slate-500 font-bold">01 Mai</span>
+                <span class="text-[10px] text-slate-500 font-bold">15 Mai</span>
+                <span class="text-[10px] text-slate-500 font-bold">31 Mai</span>
+            </div>
+        </section>
+        <!-- Top Products Section -->
+        <section>
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h3 class="text-base font-bold text-white">Produtos mais vendidos</h3>
+                <button class="text-primary text-xs font-bold uppercase">Ver Todos</button>
+            </div>
+            <div class="space-y-3">
+                <!-- Product Card 1 -->
+                <div class="bg-card-dark rounded-xl p-4 flex items-center gap-4">
+                    <div
+                        class="w-14 h-14 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 border border-white/10 overflow-hidden">
+                        <img class="w-full h-full object-cover" data-alt="Gourmet ice pop chocolate flavor"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlRdZAACbuBxd1JU6YyMAW_VIyoprLJCkHpfEmx3dGegytpv6i7Wm_oupAJTaynUYXo_pXHAu-3g6E8daHWf4urMizoNLkQViHdYARwVlHJz8K7ljRF4q1Hn2UFGeBiL8oVjKm1KzJMwgZAT8-2-Hiah9seHJ_qYwDJx9eReo8OKlAUQ6ABewyWvLKUodNNgXnVrOnL1KICRQzVgepm1azDB3JijTQv4faE9fwXI4AoK0hrM9xErzm-LAT35mS4d-fqtrHYsZqRT0" />
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-sm font-bold text-white">Ninho com Nutella</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white/10 text-slate-300">142
+                                vendidos</span>
+                        </div>
+                        <div class="grid grid-cols-2 mt-2 gap-2">
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-medium">Bruto</p>
+                                <p class="text-xs font-bold text-white">R$ 2.130,00</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-medium">Líquido</p>
+                                <p class="text-xs font-bold text-primary">R$ 1.597,50</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Product Card 2 -->
+                <div class="bg-card-dark rounded-xl p-4 flex items-center gap-4">
+                    <div
+                        class="w-14 h-14 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 border border-white/10 overflow-hidden">
+                        <img class="w-full h-full object-cover" data-alt="Gourmet ice pop fruit flavor"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcrXV6NoUf3U2FANjaOaQS9pxmtmY_AR35sjPCDaz_7qefaAkk_hzVPsNC7fdFvLdTbi6ilZBcdmG70zIegv1ZfalE8Ct9NsCmg5TWZxxJ9CoPLXYsqICMSlnzPHbLEiD5LyrV0hVo6uwcXOQ6HqtMbxKTSxFlJdf5Chgm91-OMJ4ane_8r2CkQCmTAMAonQ2Kyhsn4ksCPlloaCaRS6AZ2icJFfElYxONTEpgdrw_vtSHN5EPMCv3hiNbLfcA_0oal0PSe0jXxT0" />
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-sm font-bold text-white">Morango com Leite Cond.</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-white/10 text-slate-300">98
+                                vendidos</span>
+                        </div>
+                        <div class="grid grid-cols-2 mt-2 gap-2">
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-medium">Bruto</p>
+                                <p class="text-xs font-bold text-white">R$ 1.470,00</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-medium">Líquido</p>
+                                <p class="text-xs font-bold text-primary">R$ 1.102,50</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Last Sales Section -->
+        <section>
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h3 class="text-base font-bold text-white">Últimas Vendas no Canal</h3>
+                <span class="material-symbols-outlined text-slate-500">filter_list</span>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl divide-y divide-white/10">
+                <!-- Sale 1 -->
+                <div class="p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">check_circle</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Pedido #8842</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Hoje, 14:20</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-white">R$ 42,90</p>
+                        <p class="text-[10px] text-green-400 font-bold uppercase">Concluído</p>
+                    </div>
+                </div>
+                <!-- Sale 2 -->
+                <div class="p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-fee-orange/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-fee-orange">pending</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Pedido #8841</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Hoje, 13:45</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-white">R$ 115,00</p>
+                        <p class="text-[10px] text-fee-orange font-bold uppercase">Pendente</p>
+                    </div>
+                </div>
+                <!-- Sale 3 -->
+                <div class="p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">check_circle</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Pedido #8839</p>
+                            <p class="text-[10px] text-slate-500 font-medium">Hoje, 11:10</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-white">R$ 28,50</p>
+                        <p class="text-[10px] text-green-400 font-bold uppercase">Concluído</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Navigation Bar (iOS Style) -->
+    <nav
+        class="fixed bottom-0 w-full glass-header flex justify-around items-center py-3 px-6 pb-8 border-t border-white/10">
+        <button class="flex flex-col items-center gap-1 text-slate-500" onclick="window.location.href='index.html'">
+            <span class="material-symbols-outlined">home</span>
+            <span class="text-[10px] font-bold">Início</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-primary" onclick="window.location.href='faturamento.html'">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+            <span class="text-[10px] font-bold">Vendas</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-slate-500" onclick="window.location.href='estoque.html'">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="text-[10px] font-bold">Estoque</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-slate-500">
+            <span class="material-symbols-outlined">person</span>
+            <span class="text-[10px] font-bold">Perfil</span>
+        </button>
+    </nav>
+</body>
+
+</html>

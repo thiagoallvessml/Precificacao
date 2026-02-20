@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Receitas</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-background-dark/95 backdrop-blur-md border-b border-white/10">
+        <div class="flex items-center p-3 justify-between max-w-6xl mx-auto">
+            <div class="flex items-center gap-2">
+                <button onclick="window.location.href='index.html'"
+                    class="cursor-pointer hover:bg-white/10 rounded-full p-1 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h2 class="text-lg font-bold tracking-tight">Receitas</h2>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto pb-24 px-4">
+        <!-- Grid -->
+        <div id="receitasList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            <!-- Será preenchido -->
+        </div>
+    </main>
+
+    <!-- FAB -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button onclick="window.location.href='adicionar-receita.html'"
+            class="flex items-center justify-center w-14 h-14 rounded-full bg-primary text-background-dark shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-3xl font-bold">add</span>
+        </button>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+        let receitas = [];
+        let insumosMap = {}; // id -> {custo_unitario, unidade, ...}
+        let receitaInsumosMap = {}; // receita_id -> [insumos]
+        let produtosMap = {}; // receita_id -> {preco_base, ...}
+        let configs = {
+            custoMaoObraHora: 0,
+            custoKwh: 0.85,
+            custoGasHora: 2.00
+        };
+
+        // Carregar Tudo
+        async function loadData() {
+            try {
+                // 1. Carregar Configurações
+                const { data: configData } = await supabase.from('configuracoes').select('*');
+                if (configData) {
+                    configData.forEach(c => {
+                        if (c.chave === 'custo_mao_obra_hora') configs.custoMaoObraHora = parseFloat(c.valor) || 0;
+                        if (c.chave === 'custo_kwh') configs.custoKwh = parseFloat(c.valor) || 0.85;
+                        if (c.chave === 'custo_gas_hora') configs.custoGasHora = parseFloat(c.valor) || 2.00;
+                    });
+                }
+
+                // 2. Carregar Insumos (para saber custo atual)
+                const { data: insumosData, error: insumosError } = await supabase
+                    .from('insumos')
+                    .select('id, nome, custo_unitario, unidade_medida, tipo')
+                    .eq('ativo', true);
+
+                if (insumosError) throw insumosError;
+
+                (insumosData || []).forEach(i => {
+                    insumosMap[i.id] = i;
+                });
+
+                // 3. Carregar Receitas
+                const { data: recData, error: recError } = await supabase
+                    .from('receitas')
+                    .select('*')
+                    .eq('ativo', true)
+                    .order('created_at', { ascending: false });
+
+                if (recError) throw recError;
+                receitas = recData || [];
+
+                // 4. Carregar Relacionamento Receitas-Insumos
+                if (receitas.length > 0) {
+                    const { data: riData, error: riError } = await supabase
+                        .from('receitas_insumos')
+                        .select('*');
+
+                    if (riError) throw riError;
+
+                    (riData || []).forEach(ri => {
+                        if (!receitaInsumosMap[ri.receita_id]) {
+                            receitaInsumosMap[ri.receita_id] = [];
+                        }
+                        receitaInsumosMap[ri.receita_id].push(ri);
+                    });
+                }
+
+                // 5. Carregar Produtos (para pegar preço base e imagem)
+                const { data: produtosData, error: prodError } = await supabase
+                    .from('produtos')
+                    .select('id, nome, preco_base, receita_id, imagem_url');
+
+                if (!prodError && produtosData) {
+                    produtosData.forEach(p => {
+                        if (p.receita_id) {
+                            produtosMap[p.receita_id] = p;
+                        }
+                    });
+                }
+
+                renderReceitas();
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                document.getElementById('receitasList').innerHTML = `<p class="text-red-500 text-center col-span-full">Erro ao carregar receitas: ${error.message}</p>`;
+            }
+        }
+
+        // Calcular custo de uma receita
+        function calcularCustoReceita(receita) {
+            const insumosDaReceita = receitaInsumosMap[receita.id] || [];
+            let custoTotal = 0;
+
+            insumosDaReceita.forEach(ri => {
+                const insumo = insumosMap[ri.insumo_id];
+                if (insumo) {
+                    let custoItem = 0;
+
+                    if (insumo.tipo === 'equipamento') {
+                        const horas = (parseFloat(ri.quantidade) || 0) / 60;
+                        custoItem = (insumo.custo_unitario || 0) * horas;
+                    } else {
+                        custoItem = (insumo.custo_unitario || 0) * (parseFloat(ri.quantidade) || 0);
+                    }
+
+                    custoTotal += custoItem;
+                }
+            });
+
+            // Mão de Obra
+            const horasPreparo = (receita.tempo_preparo || 0) / 60;
+            const custoMO = horasPreparo * configs.custoMaoObraHora;
+
+            custoTotal += custoMO;
+
+            return custoTotal;
+        }
+
+        // Renderizar
+        function renderReceitas() {
+            const container = document.getElementById('receitasList');
+
+            if (receitas.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">menu_book</span>
+                        <p class="text-slate-400">Nenhuma receita cadastrada</p>
+                        <button onclick="window.location.href='adicionar-receita.html'" 
+                                class="mt-4 bg-primary text-background-dark px-6 py-3 rounded-lg font-bold hover:bg-primary/90 transition-colors">
+                            Adicionar Primeira Receita
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = receitas.map(r => {
+                const custoTotal = calcularCustoReceita(r);
+                const rendimento = r.rendimento_unidades || 1;
+                const custoUnit = custoTotal / rendimento;
+
+                // Buscar produto associado
+                const produto = produtosMap[r.id];
+                const precoBase = produto ? (parseFloat(produto.preco_base) || 0) : 0;
+                const precoTotal = precoBase * rendimento;
+                const lucroUnit = precoBase - custoUnit;
+                const lucroTotal = lucroUnit * rendimento;
+                const margem = precoBase > 0 ? ((lucroUnit / precoBase) * 100).toFixed(0) : 0;
+                const markup = custoUnit > 0 ? (precoBase / custoUnit).toFixed(1) : 0;
+
+                const gradientes = [
+                    'from-pink-500 to-purple-600',
+                    'from-orange-400 to-pink-500',
+                    'from-green-400 to-blue-500',
+                    'from-blue-500 to-purple-600',
+                    'from-yellow-400 to-orange-500'
+                ];
+                const gradiente = gradientes[r.id % gradientes.length];
+
+                // Priorizar imagem do produto, fallback para imagem da receita
+                const imagemUrl = (produto && produto.imagem_url) || r.imagem_url;
+
+                return `
+                    <div class="flex flex-col rounded-xl border border-[#3b5454] bg-background-dark/50 overflow-hidden shadow-sm hover:shadow-lg transition-all">
+                        <!-- Image -->
+                        <div class="relative aspect-video bg-gradient-to-br ${gradiente} flex items-center justify-center">
+                            ${imagemUrl ?
+                        `<img src="${imagemUrl}" class="w-full h-full object-cover" alt="${r.nome}" />` :
+                        `<span class="material-symbols-outlined text-white text-6xl opacity-50">restaurant</span>`
+                    }
+                        </div>
+
+                        <!-- Content -->
+                        <div class="p-4 flex flex-col gap-3">
+                            <div>
+                                <h3 class="font-bold text-lg leading-tight mb-1">${r.nome}</h3>
+                                <p class="text-[#9db9b9] text-xs truncate">${r.descricao || 'Receita Gourmet'}</p>
+                            </div>
+
+                            <!-- Stats -->
+                            <div class="flex gap-3 text-xs">
+                                <div class="flex items-center gap-1 text-[#9db9b9]">
+                                    <span class="material-symbols-outlined text-sm">inventory_2</span>
+                                    <span>${r.rendimento_unidades || 0} un</span>
+                                </div>
+                                ${r.tempo_preparo ? `
+                                    <div class="flex items-center gap-1 text-[#9db9b9]">
+                                        <span class="material-symbols-outlined text-sm">schedule</span>
+                                        <span>${r.tempo_preparo} min</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <!-- Financial Summary -->
+                            <div class="pt-3 border-t border-white/10 space-y-2">
+                                ${produto ? `
+                                    <!-- Grid with metrics -->
+                                    <div class="grid grid-cols-2 gap-2 text-xs">
+                                        <div class="bg-blue-500/10 rounded p-2 border border-blue-500/20">
+                                            <p class="text-blue-400 text-xs md:text-base uppercase font-bold mb-0.5">Preço Total</p>
+                                            <p class="text-blue-400 font-bold text-sm md:text-lg">R$ ${precoTotal.toFixed(2).replace('.', ',')}</p>
+                                        </div>
+                                        <div class="bg-slate-700/30 rounded p-2 border border-slate-600/20">
+                                            <p class="text-slate-300 text-xs md:text-base uppercase font-bold mb-0.5">Custo Total</p>
+                                            <p class="text-slate-300 font-bold text-sm md:text-lg">R$ ${custoTotal.toFixed(2).replace('.', ',')}</p>
+                                        </div>
+                                        <div class="bg-white/5 rounded p-2 border border-white/5">
+                                            <p class="text-slate-400 text-xs md:text-base uppercase font-bold mb-0.5">Custo Unit.</p>
+                                            <p class="text-white font-bold text-sm md:text-lg">R$ ${custoUnit.toFixed(2).replace('.', ',')}</p>
+                                        </div>
+                                        <div class="bg-green-500/10 rounded p-2 border border-green-500/20">
+                                            <p class="text-green-400 text-xs md:text-base uppercase font-bold mb-0.5">Lucro Total</p>
+                                            <p class="${lucroTotal < 0 ? 'text-red-400' : 'text-green-400'} font-bold text-sm md:text-lg">R$ ${lucroTotal.toFixed(2).replace('.', ',')}</p>
+                                        </div>
+                                        <div class="bg-primary/10 rounded p-2 border border-primary/20">
+                                            <p class="text-primary text-xs md:text-base uppercase font-bold mb-0.5">Lucro Unit.</p>
+                                            <p class="${lucroUnit < 0 ? 'text-red-400' : 'text-primary'} font-bold text-sm md:text-lg">R$ ${lucroUnit.toFixed(2).replace('.', ',')}</p>
+                                        </div>
+                                        <div class="bg-yellow-500/10 rounded p-2 border border-yellow-500/20">
+                                            <p class="text-yellow-400 text-xs md:text-base uppercase font-bold mb-0.5">Margem</p>
+                                            <p class="${margem < 0 ? 'text-red-400' : 'text-yellow-400'} font-bold text-sm md:text-lg">${margem}%</p>
+                                        </div>
+                                        <div class="bg-purple-500/10 rounded p-2 border border-purple-500/20">
+                                            <p class="text-purple-400 text-xs md:text-base uppercase font-bold mb-0.5">Markup</p>
+                                            <p class="${markup < 1 ? 'text-red-400' : 'text-purple-400'} font-bold text-sm md:text-lg">${markup}x</p>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <!-- No product linked -->
+                                    <div class="bg-slate-800/50 rounded p-3 border border-slate-700">
+                                        <p class="text-slate-400 text-xs text-center">Sem produto vinculado</p>
+                                        <p class="text-slate-500 text-[10px] text-center mt-1">Custo: R$ ${custoUnit.toFixed(2).replace('.', ',')}/un</p>
+                                    </div>
+                                `}
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="window.location.href='receita-detalhes.html?id=${r.id}'" 
+                                        class="flex-1 flex items-center justify-center gap-1 rounded-lg h-9 px-3 bg-[#283939] text-white text-xs font-bold hover:bg-[#3b5454] transition-colors">
+                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                    Ver Detalhes
+                                </button>
+                                <button onclick="window.location.href='adicionar-receita.html?id=${r.id}'" 
+                                        class="flex-1 flex items-center justify-center gap-1 rounded-lg h-9 px-3 bg-primary text-background-dark text-xs font-bold hover:bg-primary/90 transition-colors">
+                                    <span class="material-symbols-outlined text-sm">edit</span>
+                                    Editar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Iniciar
+        if (supabase) {
+            loadData();
+
+            // Verificar limites do plano
+            (async () => {
+                const { checkLimiteReceitas } = await import('./plan-limits.js');
+                const bannerContainer = document.createElement('div');
+                bannerContainer.className = 'px-4 pb-2 mt-2';
+                document.querySelector('main').prepend(bannerContainer);
+
+                const info = await checkLimiteReceitas(bannerContainer);
+                if (info.atingiu) {
+                    const fab = document.querySelector('.fixed.bottom-6 button');
+                    if (fab) {
+                        fab.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm('⭐ Limite de receitas atingido!\n\nNo plano Free você pode cadastrar até 5 receitas.\nDeseja fazer upgrade para Premium?')) {
+                                window.location.href = 'planos.html';
+                            }
+                        };
+                        fab.classList.remove('bg-primary', 'shadow-primary/20');
+                        fab.classList.add('bg-slate-700', 'shadow-none');
+                    }
+                }
+            })();
+        } else {
+            console.error('Supabase client not initialized');
+        }
+    </script>
+</body>
+
+</html>

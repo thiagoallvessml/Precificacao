@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Teste Supabase - Gestão Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "card-border": "#2d4444"
+                    },
+                    fontFamily: {
+                        display: ["Work Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .card-glow {
+            box-shadow: 0 0 15px rgba(19, 236, 236, 0.05);
+        }
+
+        .code-block {
+            background: #1e293b;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .step-card {
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(19, 236, 236, 0.15);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 antialiased">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md px-4 pt-6 pb-4 border-b border-slate-800">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='index.html'"
+                    class="p-2 hover:bg-slate-800 rounded-full transition-colors">
+                    <span class="material-icons-round text-2xl">arrow_back</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-primary text-3xl">cloud</span>
+                    <h1 class="text-xl font-bold tracking-tight">Configuração Supabase</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-8 max-w-4xl mx-auto">
+        <!-- Status Card -->
+        <div id="statusCard" class="bg-card-dark border border-card-border rounded-2xl p-6 mb-6 card-glow">
+            <div class="flex items-center gap-3 mb-4">
+                <div id="statusIcon" class="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                    <span class="material-icons-round text-amber-500">pending</span>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold">Status da Conexão</h2>
+                    <p id="statusText" class="text-sm text-slate-400">Aguardando configuração...</p>
+                </div>
+            </div>
+            <button id="testConnectionBtn"
+                class="w-full bg-primary text-background-dark font-semibold py-3 rounded-xl hover:bg-primary/90 transition-all active:scale-95">
+                Testar Conexão
+            </button>
+        </div>
+
+        <!-- Step 1: Criar Conta no Supabase -->
+        <div class="bg-card-dark border border-card-border rounded-2xl p-6 mb-4 step-card card-glow">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span class="text-primary font-bold">1</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-2">Criar Conta no Supabase</h3>
+                    <p class="text-slate-300 mb-3">Se você ainda não tem uma conta, crie uma gratuitamente:</p>
+                    <a href="https://app.supabase.com/" target="_blank"
+                        class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg transition-colors">
+                        <span class="material-icons-round text-sm">open_in_new</span>
+                        <span class="text-sm font-medium">Acessar Supabase</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Criar Projeto -->
+        <div class="bg-card-dark border border-card-border rounded-2xl p-6 mb-4 step-card card-glow">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span class="text-primary font-bold">2</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-2">Criar Novo Projeto</h3>
+                    <p class="text-slate-300 mb-3">No Supabase, clique em "New Project" e configure:</p>
+                    <ul class="list-disc list-inside text-slate-300 space-y-1 mb-3 ml-2">
+                        <li>Nome do projeto (ex: "geladinhos-app")</li>
+                        <li>Senha do banco de dados (guarde em local seguro)</li>
+                        <li>Região (escolha a mais próxima do Brasil)</li>
+                    </ul>
+                    <div class="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                        <p class="text-sm text-blue-300">
+                            💡 <strong>Dica:</strong> Escolha a região "South America (São Paulo)" para melhor
+                            performance no Brasil.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Obter Credenciais -->
+        <div class="bg-card-dark border border-card-border rounded-2xl p-6 mb-4 step-card card-glow">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span class="text-primary font-bold">3</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-2">Obter Credenciais da API</h3>
+                    <p class="text-slate-300 mb-3">No seu projeto Supabase:</p>
+                    <ol class="list-decimal list-inside text-slate-300 space-y-2 mb-4 ml-2">
+                        <li>Clique no ícone de <strong>Settings</strong> (engrenagem) no menu lateral</li>
+                        <li>Vá em <strong>API</strong></li>
+                        <li>Localize a seção "Project URL" e copie a URL</li>
+                        <li>Na seção "Project API keys", copie a chave <strong>anon public</strong></li>
+                    </ol>
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                        <p class="text-sm text-amber-300">
+                            ⚠️ <strong>Importante:</strong> Use apenas a chave "anon public" no front-end. Nunca
+                            compartilhe a "service_role" key!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Configurar Credenciais -->
+        <div class="bg-card-dark border border-card-border rounded-2xl p-6 mb-4 step-card card-glow">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span class="text-primary font-bold">4</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-2">Configurar no Projeto</h3>
+                    <p class="text-slate-300 mb-3">Abra o arquivo <code
+                            class="bg-slate-700 px-2 py-1 rounded text-primary">supabase-config.js</code> e substitua:
+                    </p>
+                    <div class="code-block mb-3">
+                        <code>
+const SUPABASE_URL = 'https://seu-projeto.supabase.co';
+const SUPABASE_ANON_KEY = 'sua-chave-anon-aqui';
+                        </code>
+                    </div>
+                    <button id="openConfigFile"
+                        class="inline-flex items-center gap-2 bg-primary text-background-dark px-4 py-2 rounded-lg hover:bg-primary/90 transition-all active:scale-95 font-medium">
+                        <span class="material-icons-round text-sm">edit</span>
+                        <span class="text-sm">Abrir Arquivo de Configuração</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Testar -->
+        <div class="bg-card-dark border border-card-border rounded-2xl p-6 mb-4 step-card card-glow">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span class="text-primary font-bold">5</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-2">Testar Conexão</h3>
+                    <p class="text-slate-300 mb-3">Clique no botão "Testar Conexão" no topo da página.</p>
+                    <p class="text-sm text-slate-400">
+                        Se tudo estiver configurado corretamente, você verá uma mensagem de sucesso! ✅
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example Usage -->
+        <div class="bg-card-dark border border-card-border rounded-2xl p-6 mb-4 step-card card-glow">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <span class="material-icons-round text-green-500">code</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold mb-2">Exemplo de Uso</h3>
+                    <p class="text-slate-300 mb-3">Aqui está como usar o Supabase no seu código:</p>
+                    <div class="code-block">
+                        <code>
+// Importar funções
+import { getAllRecords, insertRecord } from './supabase-utils.js';
+
+// Buscar todos os produtos
+const produtos = await getAllRecords('produtos');
+console.log(produtos.data);
+
+// Inserir novo produto
+const novoProduto = {
+    nome: 'Geladinho de Morango',
+    preco: 2.50,
+    estoque: 100
+};
+await insertRecord('produtos', novoProduto);
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources -->
+        <div class="bg-gradient-to-br from-primary/10 to-blue-500/10 border border-primary/30 rounded-2xl p-6">
+            <h3 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                <span class="material-icons-round text-primary">school</span>
+                Recursos Úteis
+            </h3>
+            <div class="grid md:grid-cols-2 gap-3">
+                <a href="criar-tabelas.html"
+                    class="flex items-center gap-3 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 p-3 rounded-lg transition-colors">
+                    <span class="material-icons-round text-green-400">storage</span>
+                    <div>
+                        <p class="font-medium text-sm">Criar Tabelas</p>
+                        <p class="text-xs text-green-300">Configure seu banco de dados</p>
+                    </div>
+                </a>
+                <a href="exemplo-categorias-supabase.html"
+                    class="flex items-center gap-3 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 p-3 rounded-lg transition-colors">
+                    <span class="material-icons-round text-blue-400">code</span>
+                    <div>
+                        <p class="font-medium text-sm">Exemplo Prático</p>
+                        <p class="text-xs text-blue-300">CRUD com Categorias</p>
+                    </div>
+                </a>
+                <a href="https://supabase.com/docs" target="_blank"
+                    class="flex items-center gap-3 bg-slate-800/50 hover:bg-slate-700/50 p-3 rounded-lg transition-colors">
+                    <span class="material-icons-round text-primary">menu_book</span>
+                    <div>
+                        <p class="font-medium text-sm">Documentação Oficial</p>
+                        <p class="text-xs text-slate-400">supabase.com/docs</p>
+                    </div>
+                </a>
+                <a href="https://supabase.com/docs/guides/getting-started/tutorials" target="_blank"
+                    class="flex items-center gap-3 bg-slate-800/50 hover:bg-slate-700/50 p-3 rounded-lg transition-colors">
+                    <span class="material-icons-round text-primary">play_circle</span>
+                    <div>
+                        <p class="font-medium text-sm">Tutoriais</p>
+                        <p class="text-xs text-slate-400">Guias passo a passo</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initSupabase } from './supabase-client.js';
+
+        const statusCard = document.getElementById('statusCard');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusText = document.getElementById('statusText');
+        const testBtn = document.getElementById('testConnectionBtn');
+
+        function updateStatus(status, message) {
+            if (status === 'success') {
+                statusIcon.innerHTML = '<div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center"><span class="material-icons-round text-green-500">check_circle</span></div>';
+                statusText.textContent = message;
+                statusCard.classList.remove('border-card-border');
+                statusCard.classList.add('border-green-500/50');
+            } else if (status === 'error') {
+                statusIcon.innerHTML = '<div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center"><span class="material-icons-round text-red-500">error</span></div>';
+                statusText.textContent = message;
+                statusCard.classList.remove('border-card-border');
+                statusCard.classList.add('border-red-500/50');
+            } else {
+                statusIcon.innerHTML = '<div class="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center"><span class="material-icons-round text-amber-500">pending</span></div>';
+                statusText.textContent = message;
+                statusCard.classList.remove('border-green-500/50', 'border-red-500/50');
+                statusCard.classList.add('border-card-border');
+            }
+        }
+
+        testBtn.addEventListener('click', async () => {
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="material-icons-round animate-spin">refresh</span> Testando...';
+            updateStatus('loading', 'Verificando conexão...');
+
+            try {
+                const supabase = initSupabase();
+
+                if (!supabase) {
+                    throw new Error('Configure suas credenciais no arquivo supabase-config.js');
+                }
+
+                // Testa a conexão tentando buscar a sessão
+                const { data, error } = await supabase.auth.getSession();
+
+                if (error) {
+                    throw error;
+                }
+
+                updateStatus('success', '✅ Conexão estabelecida com sucesso!');
+
+            } catch (error) {
+                updateStatus('error', `❌ Erro: ${error.message}`);
+                console.error('Erro na conexão:', error);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.innerHTML = 'Testar Conexão';
+            }
+        });
+
+        // Botão para abrir o arquivo de configuração (apenas visual)
+        document.getElementById('openConfigFile').addEventListener('click', () => {
+            alert('Abra o arquivo "supabase-config.js" no seu editor de código e configure suas credenciais.');
+        });
+    </script>
+</body>
+
+</html>

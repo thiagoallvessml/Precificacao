@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Mercado Pago - Geladinho Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "cta": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#1A1A1A",
+                        "mercadopago": "#00A0E3",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .mp-icon-circle {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 32px;
+            background: linear-gradient(135deg, rgba(0, 160, 227, 0.2) 0%, rgba(0, 160, 227, 0.1) 100%);
+            border: 2px solid rgba(0, 160, 227, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display antialiased">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='pagamento.html'"
+                class="text-white flex size-10 items-center justify-start cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Mercado Pago
+            </h2>
+            <div class="flex w-10 items-center justify-end"></div>
+        </div>
+    </header>
+
+    <main class="pb-8 px-4 max-w-6xl mx-auto">
+        <!-- Container with 2 columns on desktop -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center min-h-[calc(100vh-200px)]">
+
+            <!-- Left Column: Main Content -->
+            <div class="flex flex-col items-center justify-center text-center animate-fade-in">
+                <!-- Mercado Pago Icon -->
+                <div class="mp-icon-circle animate-float">
+                    <span class="material-symbols-outlined text-mercadopago" style="font-size: 64px;">handshake</span>
+                </div>
+
+                <!-- Empty State Text -->
+                <h3 class="text-white text-2xl md:text-3xl font-bold mb-4 px-4">Conecte sua conta Mercado Pago</h3>
+                <p class="text-white/50 text-base leading-relaxed max-w-sm mb-10 px-6">
+                    Para aceitar pagamentos via PIX, cartão de crédito e boleto, você precisa conectar sua conta do
+                    Mercado
+                    Pago.
+                </p>
+
+                <!-- Connect Mercado Pago Button -->
+                <button onclick="connectMercadoPago()"
+                    class="w-full max-w-sm bg-mercadopago hover:bg-mercadopago/90 text-white h-14 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-mercadopago/30 active:scale-[0.98]">
+                    <span class="material-symbols-outlined">link</span>
+                    Conectar Mercado Pago
+                </button>
+
+                <!-- Info Section (visible only on mobile) -->
+                <div class="mt-8 p-4 bg-surface-dark/50 border border-white/5 rounded-xl w-full max-w-sm md:hidden">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-mercadopago text-xl">info</span>
+                        <div class="text-left">
+                            <p class="text-white/80 text-sm font-medium mb-1">Integração Simples</p>
+                            <p class="text-white/50 text-xs">
+                                O processo de conexão é rápido e seguro. Você será redirecionado para o Mercado Pago
+                                para
+                                autorizar a integração.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Benefits -->
+            <div class="w-full space-y-4 animate-fade-in">
+                <h4 class="text-white text-lg font-bold mb-6 text-center md:text-left">Vantagens do Mercado Pago</h4>
+
+                <div
+                    class="flex items-start gap-3 p-4 bg-surface-dark/50 border border-white/5 rounded-xl hover:bg-surface-dark/70 transition-colors">
+                    <div class="shrink-0 w-10 h-10 rounded-full bg-mercadopago/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-mercadopago text-xl">verified</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-white/90 text-sm font-semibold">Pagamentos Seguros</p>
+                        <p class="text-white/50 text-xs mt-1">Proteção para você e seus clientes</p>
+                    </div>
+                </div>
+
+                <div
+                    class="flex items-start gap-3 p-4 bg-surface-dark/50 border border-white/5 rounded-xl hover:bg-surface-dark/70 transition-colors">
+                    <div class="shrink-0 w-10 h-10 rounded-full bg-mercadopago/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-mercadopago text-xl">bolt</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-white/90 text-sm font-semibold">Recebimento Rápido</p>
+                        <p class="text-white/50 text-xs mt-1">Dinheiro disponível em até 1 dia útil</p>
+                    </div>
+                </div>
+
+                <div
+                    class="flex items-start gap-3 p-4 bg-surface-dark/50 border border-white/5 rounded-xl hover:bg-surface-dark/70 transition-colors">
+                    <div class="shrink-0 w-10 h-10 rounded-full bg-mercadopago/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-mercadopago text-xl">credit_card</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-white/90 text-sm font-semibold">Múltiplas Formas de Pagamento</p>
+                        <p class="text-white/50 text-xs mt-1">PIX, cartão de crédito, débito e boleto</p>
+                    </div>
+                </div>
+
+                <div
+                    class="flex items-start gap-3 p-4 bg-surface-dark/50 border border-white/5 rounded-xl hover:bg-surface-dark/70 transition-colors">
+                    <div class="shrink-0 w-10 h-10 rounded-full bg-mercadopago/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-mercadopago text-xl">account_balance</span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-white/90 text-sm font-semibold">Sem Mensalidade</p>
+                        <p class="text-white/50 text-xs mt-1">Você só paga quando vende</p>
+                    </div>
+                </div>
+
+                <!-- Info Section (visible only on desktop) -->
+                <div class="hidden md:block p-4 bg-surface-dark/50 border border-white/5 rounded-xl mt-6">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-mercadopago text-xl">info</span>
+                        <div class="text-left">
+                            <p class="text-white/80 text-sm font-medium mb-1">Integração Simples</p>
+                            <p class="text-white/50 text-xs">
+                                O processo de conexão é rápido e seguro. Você será redirecionado para o Mercado Pago
+                                para
+                                autorizar a integração.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function connectMercadoPago() {
+            // Configurações do OAuth do Mercado Pago
+            const CLIENT_ID = 'YOUR_CLIENT_ID'; // Substitua pelo seu Client ID do Mercado Pago
+            const REDIRECT_URI = encodeURIComponent(window.location.origin + '/conectar-mercado-pago.html');
+
+            // URL de autenticação OAuth do Mercado Pago
+            const authUrl = `https://auth.mercadopago.com/authorization?client_id=${CLIENT_ID}&response_type=code&platform_id=mp&redirect_uri=${REDIRECT_URI}`;
+
+            // Redirecionar para a página de autenticação do Mercado Pago
+            window.location.href = authUrl;
+        }
+    </script>
+</body>
+
+</html>

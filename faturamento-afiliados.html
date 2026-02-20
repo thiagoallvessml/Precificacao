@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Faturamento via Afiliados</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "secondary-orange": "#f97316",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .glass-effect {
+            background: rgba(26, 47, 47, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1a2f2f 25%, #243d3d 50%, #1a2f2f 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        .stat-card {
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-8">
+
+    <!-- Header Section -->
+    <header class="px-4 pt-4 pb-2 sticky top-0 bg-background-dark/80 backdrop-blur-md z-40">
+        <div class="flex items-center justify-between mb-6 max-w-6xl mx-auto">
+            <a href="admin-dashboard.html" class="p-2 -ml-2">
+                <span class="material-symbols-outlined text-slate-100">arrow_back_ios</span>
+            </a>
+            <h1 class="text-lg font-bold tracking-tight">Faturamento por Afiliados</h1>
+            <div class="p-2 -mr-2 opacity-0 pointer-events-none">
+                <span class="material-symbols-outlined text-slate-100">calendar_month</span>
+            </div>
+        </div>
+
+        <!-- Glassmorphic Period Selector -->
+        <div class="glass-effect rounded-full p-1 flex items-center justify-between max-w-6xl mx-auto">
+            <button class="period-btn flex-1 py-2 text-sm font-medium rounded-full text-slate-400"
+                data-period="diario">Diário</button>
+            <button class="period-btn flex-1 py-2 text-sm font-medium rounded-full text-slate-400"
+                data-period="semanal">Semanal</button>
+            <button class="period-btn flex-1 py-2 text-sm font-medium rounded-full bg-primary/20 text-primary"
+                data-period="mensal">Mensal</button>
+            <button class="period-btn flex-1 py-2 text-sm font-medium rounded-full text-slate-400"
+                data-period="anual">Anual</button>
+        </div>
+    </header>
+
+    <main class="px-4 mt-6 space-y-6 max-w-6xl mx-auto">
+
+        <!-- Top Metrics (Horizontal Scroll) -->
+        <div class="flex overflow-x-auto gap-4 pb-2 no-scrollbar lg:grid lg:grid-cols-3">
+            <!-- Metric 1: Faturamento -->
+            <div class="stat-card min-w-[280px] bg-card-dark p-5 rounded-xl border border-white/5 flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 text-sm font-medium">Faturamento via Afiliados</span>
+                    <span class="material-symbols-outlined text-primary">trending_up</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="metricFaturamento" class="text-primary text-3xl font-bold">
+                        <div class="skeleton h-9 w-32 rounded"></div>
+                    </span>
+                    <span id="metricFaturamentoVar" class="text-slate-500 text-xs font-medium mt-1">—</span>
+                </div>
+            </div>
+
+            <!-- Metric 2: Comissões -->
+            <div class="stat-card min-w-[280px] bg-card-dark p-5 rounded-xl border border-white/5 flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 text-sm font-medium">Comissões Pagas</span>
+                    <span class="material-symbols-outlined text-secondary-orange">payments</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="metricComissoes" class="text-secondary-orange text-3xl font-bold">
+                        <div class="skeleton h-9 w-28 rounded"></div>
+                    </span>
+                    <span id="metricComissoesVar" class="text-slate-500 text-xs font-medium mt-1">—</span>
+                </div>
+            </div>
+
+            <!-- Metric 3: ROI -->
+            <div class="stat-card min-w-[280px] bg-card-dark p-5 rounded-xl border border-white/5 flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 text-sm font-medium">Lucro Líquido</span>
+                    <span class="material-symbols-outlined text-white">analytics</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="metricROI" class="text-white text-3xl font-bold">
+                        <div class="skeleton h-9 w-24 rounded"></div>
+                    </span>
+                    <span id="metricROIVar" class="text-green-400 text-xs font-medium mt-1">Faturamento −
+                        Comissões</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extra Stats Row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="stat-card bg-card-dark rounded-xl p-4 border border-white/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-primary text-lg">group</span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Afiliados Ativos</span>
+                </div>
+                <p id="statAfiliados" class="text-2xl font-bold text-white">
+                    <span class="skeleton inline-block h-7 w-8 rounded"></span>
+                </p>
+            </div>
+            <div class="stat-card bg-card-dark rounded-xl p-4 border border-white/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-emerald-400 text-lg">person_add</span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Indicações Ativas</span>
+                </div>
+                <p id="statIndicacoes" class="text-2xl font-bold text-white">
+                    <span class="skeleton inline-block h-7 w-8 rounded"></span>
+                </p>
+            </div>
+            <div class="stat-card bg-card-dark rounded-xl p-4 border border-white/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-amber-400 text-lg">hourglass_top</span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Comissões
+                        Pendentes</span>
+                </div>
+                <p id="statComissoesPendentes" class="text-2xl font-bold text-white">
+                    <span class="skeleton inline-block h-7 w-14 rounded"></span>
+                </p>
+            </div>
+            <div class="stat-card bg-card-dark rounded-xl p-4 border border-white/5">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-red-400 text-lg">cancel</span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Cancelamentos</span>
+                </div>
+                <p id="statCancelamentos" class="text-2xl font-bold text-white">
+                    <span class="skeleton inline-block h-7 w-8 rounded"></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Ranking Section -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Ranking de Afiliados</h2>
+                <span id="rankingPeriodLabel" class="text-primary text-sm font-semibold">Este mês</span>
+            </div>
+
+            <div id="rankingContainer" class="space-y-3">
+                <!-- Skeleton loading -->
+                <div class="skeleton h-20 rounded-xl"></div>
+                <div class="skeleton h-20 rounded-xl"></div>
+                <div class="skeleton h-20 rounded-xl"></div>
+            </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="pb-8">
+            <h2 class="text-xl font-bold mb-4">Distribuição de Receita</h2>
+            <div class="bg-card-dark p-6 rounded-xl border border-white/5">
+                <div class="flex items-center justify-center py-6 relative">
+                    <!-- SVG Donut Chart -->
+                    <svg class="size-48 transform -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" fill="transparent" r="40" stroke="#1e3a3a" stroke-width="20"></circle>
+                        <circle id="chartComissoes" cx="50" cy="50" fill="transparent" r="40" stroke="#f97316"
+                            stroke-dasharray="0 251" stroke-width="20" style="transition: stroke-dasharray 0.8s ease;">
+                        </circle>
+                        <circle id="chartLucro" cx="50" cy="50" fill="transparent" r="40" stroke="#13ecec"
+                            stroke-dasharray="0 251" stroke-width="20" style="transition: stroke-dasharray 0.8s ease;">
+                        </circle>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Faturamento</span>
+                        <span id="chartTotal" class="text-lg font-bold">R$ 0</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="size-3 rounded-full bg-primary"></div>
+                            <span class="text-sm font-medium">Lucro Líquido</span>
+                        </div>
+                        <span id="chartPctLucro" class="text-sm font-bold text-primary">0%</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="size-3 rounded-full bg-secondary-orange"></div>
+                            <span class="text-sm font-medium">Comissões</span>
+                        </div>
+                        <span id="chartPctComissoes" class="text-sm font-bold text-secondary-orange">0%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        import { protectPage } from './auth-guard.js';
+
+        const supabase = getSupabase();
+        let periodoAtual = 'mensal';
+
+        // ========================
+        // PERIOD SELECTOR
+        // ========================
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.period-btn').forEach(b => {
+                    b.classList.remove('bg-primary/20', 'text-primary');
+                    b.classList.add('text-slate-400');
+                });
+                btn.classList.add('bg-primary/20', 'text-primary');
+                btn.classList.remove('text-slate-400');
+                periodoAtual = btn.dataset.period;
+                carregarDados();
+            });
+        });
+
+        // ========================
+        // UTILS
+        // ========================
+
+        function formatBRL(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value || 0);
+        }
+
+        /**
+         * Retorna os limites de data baseado no período selecionado
+         */
+        function getDateRange(period) {
+            const agora = new Date();
+            let inicio, fim;
+
+            switch (period) {
+                case 'diario':
+                    inicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+                    fim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), 23, 59, 59);
+                    break;
+                case 'semanal':
+                    const diaSemana = agora.getDay();
+                    const diffSegunda = diaSemana === 0 ? 6 : diaSemana - 1;
+                    inicio = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() - diffSegunda);
+                    fim = new Date(inicio.getTime() + 6 * 24 * 60 * 60 * 1000);
+                    fim.setHours(23, 59, 59);
+                    break;
+                case 'mensal':
+                    inicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+                    fim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59);
+                    break;
+                case 'anual':
+                    inicio = new Date(agora.getFullYear(), 0, 1);
+                    fim = new Date(agora.getFullYear(), 11, 31, 23, 59, 59);
+                    break;
+                default:
+                    inicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+                    fim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59);
+            }
+
+            return {
+                inicio: inicio.toISOString(),
+                fim: fim.toISOString()
+            };
+        }
+
+        function getPeriodLabel(period) {
+            const labels = {
+                'diario': 'Hoje',
+                'semanal': 'Esta semana',
+                'mensal': 'Este mês',
+                'anual': 'Este ano'
+            };
+            return labels[period] || 'Este mês';
+        }
+
+        // ========================
+        // DATA LOADING
+        // ========================
+
+        async function carregarDados() {
+            if (!supabase) {
+                mostrarVazio();
+                return;
+            }
+
+            const { inicio, fim } = getDateRange(periodoAtual);
+
+            // Atualizar label do período
+            document.getElementById('rankingPeriodLabel').textContent = getPeriodLabel(periodoAtual);
+
+            try {
+                // 1. Buscar todos os cupons de afiliados ativos
+                const { data: cupons, error: cuponsError } = await supabase
+                    .from('cupons_afiliado')
+                    .select('*')
+                    .eq('ativo', true);
+
+                if (cuponsError) throw cuponsError;
+
+                if (!cupons || cupons.length === 0) {
+                    mostrarVazio();
+                    return;
+                }
+
+                const cupomIds = cupons.map(c => c.id);
+
+                // 2. Buscar todas as indicações no período
+                const { data: indicacoes, error: indError } = await supabase
+                    .from('indicacoes')
+                    .select('*')
+                    .in('cupom_id', cupomIds)
+                    .gte('data_indicacao', inicio)
+                    .lte('data_indicacao', fim)
+                    .order('data_indicacao', { ascending: false });
+
+                if (indError) throw indError;
+
+                // 3. Buscar TODAS as indicações (sem filtro de período) para contagens gerais
+                const { data: todasIndicacoes, error: allIndError } = await supabase
+                    .from('indicacoes')
+                    .select('*')
+                    .in('cupom_id', cupomIds);
+
+                if (allIndError) throw allIndError;
+
+                // 4. Tentar buscar nomes dos afiliados pela view ou perfis_usuarios
+                let nomesPorCupom = {};
+                try {
+                    // Tentar buscar via user_id dos cupons
+                    const userIds = cupons.filter(c => c.user_id).map(c => c.user_id);
+                    if (userIds.length > 0) {
+                        const { data: perfis } = await supabase
+                            .from('perfis_usuarios')
+                            .select('id, nome, email')
+                            .in('id', userIds);
+
+                        if (perfis) {
+                            perfis.forEach(p => {
+                                const cupom = cupons.find(c => c.user_id === p.id);
+                                if (cupom) {
+                                    nomesPorCupom[cupom.id] = p.nome || p.email || cupom.codigo;
+                                }
+                            });
+                        }
+                    }
+                } catch (e) {
+                    // Se não conseguir, usar código do cupom como nome
+                    console.warn('Não foi possível buscar nomes dos afiliados:', e);
+                }
+
+                // Buscar nome da config 'nome_afiliado' como fallback
+                try {
+                    const { data: configNome } = await supabase
+                        .from('configuracoes')
+                        .select('valor')
+                        .eq('chave', 'nome_afiliado')
+                        .single();
+
+                    if (configNome && configNome.valor && cupons.length > 0) {
+                        // Atribuir nome ao primeiro cupom se não tiver
+                        const primeiroCupom = cupons[0];
+                        if (!nomesPorCupom[primeiroCupom.id]) {
+                            nomesPorCupom[primeiroCupom.id] = configNome.valor;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+
+                // Preencher nomes faltantes com o código do cupom
+                cupons.forEach(c => {
+                    if (!nomesPorCupom[c.id]) {
+                        nomesPorCupom[c.id] = c.codigo;
+                    }
+                });
+
+                // =====================
+                // PROCESSAR DADOS
+                // =====================
+
+                const indPeriodo = indicacoes || [];
+                const indTodas = todasIndicacoes || [];
+
+                // Indicações ativas no período
+                const ativasPeriodo = indPeriodo.filter(i => i.status === 'ativo');
+                const pendentesPeriodo = indPeriodo.filter(i => i.status === 'pendente');
+                const canceladasPeriodo = indPeriodo.filter(i => i.status === 'cancelado');
+
+                // Faturamento = soma dos valor_assinatura das indicações ativas
+                const faturamento = ativasPeriodo.reduce((s, i) => s + parseFloat(i.valor_assinatura || 0), 0);
+
+                // Comissões pagas no período
+                const comissoesPagas = ativasPeriodo
+                    .filter(i => i.comissao_paga)
+                    .reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+
+                // Comissões totais (pagas + pendentes)
+                const comissoesTotal = ativasPeriodo.reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+
+                // Comissões pendentes de pagamento
+                const comissoesPendentes = ativasPeriodo
+                    .filter(i => !i.comissao_paga)
+                    .reduce((s, i) => s + parseFloat(i.valor_comissao || 0), 0);
+
+                // Lucro líquido
+                const lucro = faturamento - comissoesTotal;
+
+                // =====================
+                // ATUALIZAR MÉTRICAS
+                // =====================
+
+                document.getElementById('metricFaturamento').textContent = formatBRL(faturamento);
+                document.getElementById('metricComissoes').textContent = formatBRL(comissoesPagas);
+                document.getElementById('metricROI').textContent = formatBRL(lucro);
+
+                // Labels extras
+                const pctComissao = faturamento > 0 ? ((comissoesTotal / faturamento) * 100).toFixed(1) : 0;
+                document.getElementById('metricFaturamentoVar').textContent =
+                    `${ativasPeriodo.length} conversão${ativasPeriodo.length !== 1 ? 'ões' : ''} no período`;
+                document.getElementById('metricComissoesVar').textContent =
+                    faturamento > 0 ? `${pctComissao}% do faturamento` : 'Sem faturamento no período';
+                document.getElementById('metricROIVar').textContent = 'Faturamento − Comissões';
+
+                // Stats cards
+                document.getElementById('statAfiliados').textContent = cupons.length;
+                document.getElementById('statIndicacoes').textContent = ativasPeriodo.length;
+                document.getElementById('statComissoesPendentes').textContent = formatBRL(comissoesPendentes);
+                document.getElementById('statCancelamentos').textContent = canceladasPeriodo.length;
+
+                // =====================
+                // RANKING
+                // =====================
+
+                // Agrupar por cupom_id
+                const rankingMap = {};
+                cupons.forEach(c => {
+                    rankingMap[c.id] = {
+                        nome: nomesPorCupom[c.id] || c.codigo,
+                        cupom: c.codigo,
+                        comissao_pct: c.comissao_percentual,
+                        qtd_vendas: 0,
+                        total_vendas: 0,
+                        total_comissoes: 0
+                    };
+                });
+
+                ativasPeriodo.forEach(i => {
+                    if (rankingMap[i.cupom_id]) {
+                        rankingMap[i.cupom_id].qtd_vendas++;
+                        rankingMap[i.cupom_id].total_vendas += parseFloat(i.valor_assinatura || 0);
+                        rankingMap[i.cupom_id].total_comissoes += parseFloat(i.valor_comissao || 0);
+                    }
+                });
+
+                // Converter para array e ordenar por total vendas
+                const ranking = Object.values(rankingMap)
+                    .sort((a, b) => b.total_vendas - a.total_vendas);
+
+                renderRanking(ranking);
+
+                // =====================
+                // GRÁFICO
+                // =====================
+
+                updateChart(faturamento, comissoesTotal, lucro);
+
+            } catch (err) {
+                console.error('❌ Erro ao carregar dados de faturamento:', err);
+                mostrarVazio();
+            }
+        }
+
+        // ========================
+        // EMPTY STATE
+        // ========================
+
+        function mostrarVazio() {
+            document.getElementById('metricFaturamento').textContent = 'R$ 0,00';
+            document.getElementById('metricComissoes').textContent = 'R$ 0,00';
+            document.getElementById('metricROI').textContent = 'R$ 0,00';
+            document.getElementById('metricFaturamentoVar').textContent = 'Nenhuma conversão no período';
+            document.getElementById('metricComissoesVar').textContent = '—';
+            document.getElementById('statAfiliados').textContent = '0';
+            document.getElementById('statIndicacoes').textContent = '0';
+            document.getElementById('statComissoesPendentes').textContent = 'R$ 0,00';
+            document.getElementById('statCancelamentos').textContent = '0';
+
+            document.getElementById('rankingContainer').innerHTML = `
+                <div class="text-center py-10 bg-card-dark rounded-xl border border-white/5">
+                    <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">group</span>
+                    <p class="text-slate-400 text-sm font-medium">Nenhum afiliado com vendas nesse período</p>
+                    <p class="text-slate-600 text-xs mt-1">Os dados aparecerão quando houver indicações registradas</p>
+                </div>
+            `;
+
+            updateChart(0, 0, 0);
+        }
+
+        // ========================
+        // RENDER RANKING
+        // ========================
+
+        function renderRanking(afiliados) {
+            const container = document.getElementById('rankingContainer');
+
+            // Filtrar apenas quem tem vendas OU mostrar todos
+            const comVendas = afiliados.filter(a => a.qtd_vendas > 0);
+            const semVendas = afiliados.filter(a => a.qtd_vendas === 0);
+            const lista = [...comVendas, ...semVendas];
+
+            if (lista.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-card-dark rounded-xl border border-white/5">
+                        <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">group</span>
+                        <p class="text-slate-400 text-sm font-medium">Nenhum afiliado cadastrado</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const totalVendas = comVendas.reduce((sum, a) => sum + a.total_vendas, 0);
+            const tiers = ['Gold', 'Silver', 'Bronze'];
+            const tierColors = {
+                'Gold': 'bg-yellow-500/20 text-yellow-500',
+                'Silver': 'bg-slate-400/20 text-slate-400',
+                'Bronze': 'bg-orange-800/20 text-orange-500'
+            };
+
+            container.innerHTML = lista.map((a, i) => {
+                const pct = totalVendas > 0 ? ((a.total_vendas / totalVendas) * 100).toFixed(1) : 0;
+                const tier = i < 3 ? tiers[i] : null;
+                const tierClass = tier ? tierColors[tier] : 'bg-slate-800/50 text-slate-600';
+                const posClass = i === 0 && a.qtd_vendas > 0
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-slate-800 text-slate-400';
+
+                return `
+                    <div class="bg-card-dark p-4 rounded-xl border border-white/5 flex items-center gap-4 fade-in-up" style="animation-delay: ${i * 60}ms">
+                        <div class="size-12 rounded-full ${posClass} flex items-center justify-center font-bold text-lg flex-shrink-0">${i + 1}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <h3 class="font-semibold text-base truncate">${a.nome}</h3>
+                                    ${tier ? `<span class="px-2 py-0.5 rounded-full ${tierClass} text-[10px] font-bold uppercase tracking-wider flex-shrink-0">${tier}</span>` : ''}
+                                </div>
+                                <span class="text-xs text-slate-500 flex-shrink-0 ml-2">${a.cupom}</span>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-2">
+                                <span>${a.qtd_vendas} Venda${a.qtd_vendas !== 1 ? 's' : ''}</span>
+                                <span class="text-slate-100 font-medium">${formatBRL(a.total_vendas)}</span>
+                            </div>
+                            ${a.qtd_vendas > 0 ? `
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-primary h-full rounded-full transition-all duration-700" style="width: ${pct}%"></div>
+                                </div>
+                                <div class="mt-1 flex justify-between">
+                                    <span class="text-[10px] text-secondary-orange font-medium">Comissão: ${formatBRL(a.total_comissoes)} (${a.comissao_pct}%)</span>
+                                    <span class="text-[10px] text-primary font-medium">${pct}%</span>
+                                </div>
+                            ` : `
+                                <p class="text-[10px] text-slate-600">Sem vendas no período selecionado</p>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========================
+        // CHART
+        // ========================
+
+        function updateChart(faturamento, comissoes, lucro) {
+            const circumference = 2 * Math.PI * 40; // ~251.3
+
+            if (faturamento <= 0) {
+                document.getElementById('chartComissoes').setAttribute('stroke-dasharray', `0 ${circumference}`);
+                document.getElementById('chartLucro').setAttribute('stroke-dasharray', `0 ${circumference}`);
+                document.getElementById('chartPctComissoes').textContent = '0%';
+                document.getElementById('chartPctLucro').textContent = '0%';
+                document.getElementById('chartTotal').textContent = 'R$ 0';
+                return;
+            }
+
+            const pctComissoes = (comissoes / faturamento) * 100;
+            const pctLucro = (lucro / faturamento) * 100;
+
+            // O gráfico de donut usa stroke-dasharray
+            // Comissões (laranja) — parte inferior
+            const dashComissoes = (pctComissoes / 100) * circumference;
+            // Lucro (primary) — parte superior (empilhado depois das comissões)
+            const dashLucro = (pctLucro / 100) * circumference;
+            const offsetLucro = dashComissoes;
+
+            document.getElementById('chartComissoes').setAttribute('stroke-dasharray', `${dashComissoes} ${circumference}`);
+
+            const chartLucro = document.getElementById('chartLucro');
+            chartLucro.setAttribute('stroke-dasharray', `${dashLucro} ${circumference}`);
+            chartLucro.setAttribute('stroke-dashoffset', `-${offsetLucro}`);
+
+            document.getElementById('chartPctComissoes').textContent = `${pctComissoes.toFixed(1)}%`;
+            document.getElementById('chartPctLucro').textContent = `${pctLucro.toFixed(1)}%`;
+            document.getElementById('chartTotal').textContent = formatBRL(faturamento);
+        }
+
+        // ========================
+        // INIT
+        // ========================
+
+        async function init() {
+            const perfil = await protectPage(['admin']);
+            if (!perfil) return;
+
+            await carregarDados();
+            console.log('✅ Faturamento Afiliados carregado');
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

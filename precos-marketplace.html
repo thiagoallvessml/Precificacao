@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestão de Preços por Marketplace</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1c1c27",
+                        "input-dark": "#2c2c2e",
+                        "silver-text": "#d1d1d6",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark min-h-screen text-white">
+    <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md border-b border-white/10">
+        <div class="flex items-center p-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.history.back()"
+                class="text-white flex size-12 shrink-0 items-center cursor-pointer">
+                <span class="material-symbols-outlined">arrow_back_ios</span>
+            </button>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Gestão de
+                Preços</h2>
+            <div class="flex w-12 items-center justify-end">
+                <button
+                    class="flex cursor-pointer items-center justify-center rounded-lg h-12 bg-transparent text-white p-0">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto pb-32">
+        <div class="flex gap-3 p-4 overflow-x-auto no-scrollbar">
+            <div
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-5 text-background-dark shadow-sm cursor-pointer">
+                <p class="text-sm font-semibold">Todos</p>
+            </div>
+            <div
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-card-dark border border-white/10 px-5 shadow-sm cursor-pointer hover:bg-card-dark/80 transition-colors">
+                <p class="text-silver-text text-sm font-medium">Venda Direta</p>
+            </div>
+            <div
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-card-dark border border-white/10 px-5 shadow-sm cursor-pointer hover:bg-card-dark/80 transition-colors">
+                <p class="text-silver-text text-sm font-medium">iFood</p>
+            </div>
+            <div
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-card-dark border border-white/10 px-5 shadow-sm cursor-pointer hover:bg-card-dark/80 transition-colors">
+                <p class="text-silver-text text-sm font-medium">Uber Eats</p>
+            </div>
+            <div
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-card-dark border border-white/10 px-5 shadow-sm cursor-pointer hover:bg-card-dark/80 transition-colors">
+                <p class="text-silver-text text-sm font-medium">Rappi</p>
+            </div>
+        </div>
+        <div class="px-4 py-2">
+            <h3 class="text-white tracking-light text-xl font-bold">Canais de Venda</h3>
+            <p class="text-sm text-gray-400">Preços específicos por marketplace selecionado</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            <!-- Card 1: Ninho com Nutella -->
+            <div class="bg-card-dark rounded-2xl shadow-xl border border-white/5 overflow-hidden">
+                <div class="p-4 flex gap-4 border-b border-white/5">
+                    <div class="w-20 h-20 bg-center bg-no-repeat bg-cover rounded-xl shrink-0"
+                        data-alt="Gourmet chocolate popsicle with nuts"
+                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuACIgIRSJDY_t0OcdqN0QyDopZ0H7i6r0r4mxF714IEU0Cqo0qDFlBK6tXuMEGrmHdCP5dq2bfCRRBCWISqB_b612NT3bectZXcpmhOdbvOp5tGK-NLx-2fwHIJN_as46xJTlTWrlA177lglfjFdW8iuYbstRsbVnkyvXVZVpf_F4qe27QTboDs3ACTljAyRT5jhYfM4qGG86PGFU6J9ajUsHOLuKECrf88WKM_N38imuHWqTjeqYrO2X08vtqqanhhNMu0zcvuOYU");'>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p class="text-white text-lg font-bold leading-tight">Ninho com Nutella</p>
+                        <div class="flex items-center gap-1 mt-1">
+                            <span class="material-symbols-outlined text-sm text-gray-500">payments</span>
+                            <p class="text-gray-400 text-sm">Custo Base: <span class="font-semibold text-white">R$
+                                    2,50</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-white/5">
+                    <div class="flex flex-wrap items-end gap-4">
+                        <label class="flex flex-col flex-1">
+                            <p class="text-silver-text text-[10px] font-bold uppercase tracking-wider pb-2">Preço de
+                                Venda (Canal Selecionado)</p>
+                            <div class="flex w-full items-stretch rounded-xl overflow-hidden border border-white/10">
+                                <span class="flex items-center pl-4 bg-input-dark text-gray-400 font-medium">R$</span>
+                                <input
+                                    class="form-input w-full min-w-0 flex-1 border-none bg-input-dark text-white focus:ring-0 focus:border-none h-12 text-base font-bold"
+                                    step="0.01" type="number" value="12.90" />
+                            </div>
+                        </label>
+                    </div>
+                    <div class="flex mt-4 pt-4 border-t border-white/5 justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Lucro Líquido</span>
+                            <span class="text-lg font-bold text-emerald-400">R$ 6,80</span>
+                        </div>
+                        <div class="h-8 w-px bg-white/10"></div>
+                        <div class="flex flex-col items-end">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Margem Real</span>
+                            <span class="text-lg font-bold text-primary">52.7%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Morango Especial -->
+            <div class="bg-card-dark rounded-2xl shadow-xl border border-white/5 overflow-hidden">
+                <div class="p-4 flex gap-4 border-b border-white/5">
+                    <div class="w-20 h-20 bg-center bg-no-repeat bg-cover rounded-xl shrink-0"
+                        data-alt="Strawberry popsicle with white cream"
+                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAtTdJxBysPln9vhrIH2exYA3BUeZRXELcyIYtqBCkIsjjitRTYqyWvA9ur8SwTCildCfkXU27fS9gwbPC90gFA6YyMZX303dqSwdQJJicPuwRKdTbRggsMUL8kQDr84ZGMjBQW1x7JxbnJQLE0TXl0C0mJ4tpBxRoGMCe9s5Cl4Kwe4SBajCU7AeNsE3PYju5WtQ33PKjxIyuNael8-yvxFEVLO3DJIxsyHq2l4XG9xO_FpSnCcuZl-EL8Yr4m5jOlKLlL69x7UkY");'>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p class="text-white text-lg font-bold leading-tight">Morango Especial</p>
+                        <div class="flex items-center gap-1 mt-1">
+                            <span class="material-symbols-outlined text-sm text-gray-500">payments</span>
+                            <p class="text-gray-400 text-sm">Custo Base: <span class="font-semibold text-white">R$
+                                    1,80</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-white/5">
+                    <div class="flex flex-wrap items-end gap-4">
+                        <label class="flex flex-col flex-1">
+                            <p class="text-silver-text text-[10px] font-bold uppercase tracking-wider pb-2">Preço de
+                                Venda (Canal Selecionado)</p>
+                            <div class="flex w-full items-stretch rounded-xl overflow-hidden border border-white/10">
+                                <span class="flex items-center pl-4 bg-input-dark text-gray-400 font-medium">R$</span>
+                                <input
+                                    class="form-input w-full min-w-0 flex-1 border-none bg-input-dark text-white focus:ring-0 focus:border-none h-12 text-base font-bold"
+                                    step="0.01" type="number" value="10.50" />
+                            </div>
+                        </label>
+                    </div>
+                    <div class="flex mt-4 pt-4 border-t border-white/5 justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Lucro Líquido</span>
+                            <span class="text-lg font-bold text-emerald-400">R$ 5,20</span>
+                        </div>
+                        <div class="h-8 w-px bg-white/10"></div>
+                        <div class="flex flex-col items-end">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Margem Real</span>
+                            <span class="text-lg font-bold text-primary">49.5%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Manga Natural -->
+            <div class="bg-card-dark rounded-2xl shadow-xl border border-white/5 overflow-hidden">
+                <div class="p-4 flex gap-4 border-b border-white/5">
+                    <div class="w-20 h-20 bg-center bg-no-repeat bg-cover rounded-xl shrink-0"
+                        data-alt="Yellow tropical fruit popsicle"
+                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB_5XJFMopqk5y19_nKXqspIgH8Tgl2JXsEWmmPKD7XC9-EXlXovlEmILR3LjBKcxsG74MF_mMW5IsaLPhR4xcQBvKP4ehFgXHLJGnfASVPUa4vjD_Q9o3De06BR5miMrO91w3TpdSE2DkW9yaqHgTtBdN76emVAPH7iXYYAcxHLFA9AdbHrNnvJBxr4t4-bIrWbPsI7V5MLnqXgniKUPTZrF94xsMXGnG_hBfM8WCH0wRLlMO1hmQr_VXAJP5AydikifvVyj6G6zw");'>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p class="text-white text-lg font-bold leading-tight">Manga Natural</p>
+                        <div class="flex items-center gap-1 mt-1">
+                            <span class="material-symbols-outlined text-sm text-gray-500">payments</span>
+                            <p class="text-gray-400 text-sm">Custo Base: <span class="font-semibold text-white">R$
+                                    1,20</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 bg-white/5">
+                    <div class="flex flex-wrap items-end gap-4">
+                        <label class="flex flex-col flex-1">
+                            <p class="text-silver-text text-[10px] font-bold uppercase tracking-wider pb-2">Preço de
+                                Venda (Canal Selecionado)</p>
+                            <div class="flex w-full items-stretch rounded-xl overflow-hidden border border-white/10">
+                                <span class="flex items-center pl-4 bg-input-dark text-gray-400 font-medium">R$</span>
+                                <input
+                                    class="form-input w-full min-w-0 flex-1 border-none bg-input-dark text-white focus:ring-0 focus:border-none h-12 text-base font-bold"
+                                    step="0.01" type="number" value="8.00" />
+                            </div>
+                        </label>
+                    </div>
+                    <div class="flex mt-4 pt-4 border-t border-white/5 justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Lucro Líquido</span>
+                            <span class="text-lg font-bold text-emerald-400">R$ 4,15</span>
+                        </div>
+                        <div class="h-8 w-px bg-white/10"></div>
+                        <div class="flex flex-col items-end">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Margem Real</span>
+                            <span class="text-lg font-bold text-primary">51.8%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="fixed bottom-0 left-0 right-0 bg-background-dark/90 backdrop-blur-lg border-t border-white/10 p-4 max-w-7xl mx-auto flex items-center justify-between z-50">
+            <div class="flex flex-col">
+                <span class="text-[10px] uppercase font-bold text-gray-500">Média do Canal</span>
+                <span class="text-xl font-black text-primary">51.3%</span>
+            </div>
+            <button
+                class="bg-primary text-background-dark font-bold py-3.5 px-8 rounded-2xl flex items-center gap-2 shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-sm">sync_alt</span>
+                Atualizar Preços
+            </button>
+        </div>
+    </main>
+    <script>
+        document.documentElement.classList.add('dark');
+    </script>
+</body>
+
+</html>

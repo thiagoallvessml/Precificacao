@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Adicionar Nova Produção - Geladinhos Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Remove seta nativa do select em todos os navegadores */
+        select.form-select {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            background-image: none !important;
+        }
+
+        /* Remove ícone padrão do IE */
+        select.form-select::-ms-expand {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark min-h-screen">
+    <div class="max-w-[1280px] mx-auto min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+        <!-- Top Navigation Bar -->
+        <div
+            class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center p-4 justify-between max-w-6xl mx-auto">
+                <div class="flex items-center gap-2">
+                    <button onclick="window.location.href='producao.html'"
+                        class="cursor-pointer hover:bg-white/10 rounded-full p-1 transition-colors text-white">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <h1 class="text-xl font-bold leading-tight tracking-tight text-white">Adicionar Nova Produção</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 flex flex-col gap-6 flex-1">
+            <!-- Form Card -->
+            <div
+                class="bg-white dark:bg-[#1c2727] rounded-xl p-6 shadow-xl border border-slate-200 dark:border-[#3b5454]">
+                <!-- Grid Container for Desktop -->
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <!-- Left Column: Form Fields (3/5 = 60%) -->
+                    <div class="lg:col-span-3 flex flex-col gap-6">
+                        <!-- Recipe Field -->
+                        <div class="flex flex-col gap-2">
+                            <label class="flex flex-col w-full">
+                                <p class="text-slate-800 dark:text-white text-base font-semibold leading-normal pb-2">
+                                    Receita
+                                </p>
+                                <div class="relative">
+                                    <select id="recipeSelect" onchange="updateRecipe()"
+                                        class="form-select flex w-full min-w-0 flex-1 appearance-none rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-slate-300 dark:border-[#3b5454] bg-slate-50 dark:bg-background-dark h-14 p-[15px] text-base font-normal leading-normal">
+                                        <option value="">Selecione uma receita...</option>
+                                        <option value="1" data-yield="12">Ninho com Calda de Morango (12 unid.)</option>
+                                        <option value="2" data-yield="15">Chocolate Belga Premium (15 unid.)</option>
+                                        <option value="3" data-yield="10">Limão Siciliano (10 unid.)</option>
+                                        <option value="4" data-yield="12">Prestígio Gourmet (12 unid.)</option>
+                                        <option value="5" data-yield="10">Morango com Leite Condensado (10 unid.)
+                                        </option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 dark:text-primary">
+                                        <span class="material-symbols-outlined">expand_more</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <div
+                                class="flex gap-3 bg-primary/10 dark:bg-primary/5 p-3 rounded-lg border border-primary/20 mt-2">
+                                <span class="material-symbols-outlined text-primary text-lg shrink-0">info</span>
+                                <p class="text-xs text-slate-800 dark:text-slate-200 leading-relaxed">
+                                    A quantidade de unidades por lote será automaticamente calculada com base na receita
+                                    selecionada.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Quantity Field -->
+                        <div class="flex flex-col gap-2">
+                            <label class="flex flex-col w-full">
+                                <p class="text-slate-800 dark:text-white text-base font-semibold leading-normal pb-2">
+                                    Quantidade
+                                    de Lotes a Produzir</p>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex flex-col gap-1">
+                                        <button onclick="increaseQuantity()"
+                                            class="flex items-center justify-center size-8 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors">
+                                            <span class="material-symbols-outlined text-lg font-bold">add</span>
+                                        </button>
+                                        <button onclick="decreaseQuantity()"
+                                            class="flex items-center justify-center size-8 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors">
+                                            <span class="material-symbols-outlined text-lg font-bold">remove</span>
+                                        </button>
+                                    </div>
+                                    <input id="quantityInput"
+                                        class="form-input flex w-full min-w-0 flex-1 rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-slate-300 dark:border-[#3b5454] bg-slate-50 dark:bg-background-dark h-14 placeholder:text-slate-400 dark:placeholder:text-[#9db9b9] p-[15px] text-base font-normal leading-normal text-center text-2xl font-bold"
+                                        placeholder="0" type="number" min="1" value="1" />
+                                    <div class="flex flex-col items-end min-w-[80px]">
+                                        <p class="text-xs text-slate-500 dark:text-[#9db9b9] uppercase tracking-wide">
+                                            Total</p>
+                                        <p id="totalUnits" class="text-lg font-bold text-slate-900 dark:text-white">12
+                                            unid.</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Calendar (2/5 = 40%) -->
+                    <div class="lg:col-span-2 flex flex-col gap-6">
+                        <!-- Date Display -->
+                        <div class="flex flex-col gap-2">
+                            <p class="text-slate-800 dark:text-white text-base font-semibold leading-normal">Data de
+                                Produção
+                            </p>
+                            <div
+                                class="flex items-center gap-3 bg-slate-50 dark:bg-background-dark/50 p-4 rounded-lg border border-slate-200 dark:border-white/5">
+                                <span class="material-symbols-outlined text-primary">calendar_today</span>
+                                <p id="dateDisplay" class="text-slate-700 dark:text-white text-base font-medium">29 de
+                                    janeiro de 2026
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-slate-800 dark:text-white text-base font-semibold leading-normal lg:hidden">
+                            Calendário</p>
+                        <div class="border-t lg:border-t-0 border-slate-100 dark:border-white/5 pt-4 lg:pt-0">
+                            <div class="flex flex-col gap-0.5">
+                                <div class="flex items-center p-1 justify-between mb-2">
+                                    <button onclick="previousMonth()"
+                                        class="text-slate-500 dark:text-white flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                                        <span class="material-symbols-outlined">chevron_left</span>
+                                    </button>
+                                    <p id="monthDisplay"
+                                        class="text-slate-800 dark:text-white text-base font-bold leading-tight flex-1 text-center">
+                                        Janeiro 2026</p>
+                                    <button onclick="nextMonth()"
+                                        class="text-slate-500 dark:text-white flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                                        <span class="material-symbols-outlined">chevron_right</span>
+                                    </button>
+                                </div>
+                                <div id="calendarGrid" class="grid grid-cols-7 text-center">
+                                    <p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">
+                                        Dom</p>
+                                    <p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">
+                                        Seg</p>
+                                    <p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">
+                                        Ter</p>
+                                    <p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">
+                                        Qua</p>
+                                    <p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">
+                                        Qui</p>
+                                    <p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">
+                                        Sex</p>
+                                    <p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">
+                                        Sáb</p>
+                                    <!-- Calendar Days (Janeiro 2026) -->
+                                    <div class="h-10 w-full text-transparent"></div>
+                                    <div class="h-10 w-full text-transparent"></div>
+                                    <div class="h-10 w-full text-transparent"></div>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">1</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">2</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">3</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">4</button>
+
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">5</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">6</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">7</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">8</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">9</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">10</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">11</button>
+
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">12</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">13</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">14</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">15</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">16</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">17</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">18</button>
+
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">19</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">20</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">21</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">22</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">23</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">24</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">25</button>
+
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">26</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">27</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">28</button>
+                                    <!-- Day 29 - Selected/Today -->
+                                    <div class="h-10 w-full flex items-center justify-center relative">
+                                        <div
+                                            class="absolute inset-0 m-1 flex items-center justify-center rounded-full bg-primary text-background-dark font-bold text-sm shadow-lg shadow-primary/40">
+                                            29</div>
+                                    </div>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">30</button>
+                                    <button
+                                        class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors">31</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Action Button -->
+            <div class="mt-auto pb-4 pt-4">
+                <button onclick="registerProduction()"
+                    class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold text-lg py-4 rounded-xl shadow-[0_10px_20px_rgba(19,236,236,0.3)] active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined font-bold">save</span>
+                    Registrar Produção
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Force dark mode
+        document.documentElement.classList.add('dark');
+
+        // Calendar functionality
+        let currentDate = new Date();
+        let selectedDate = new Date();
+        let currentQuantity = 1;
+        let unitsPerBatch = 0; // Starts at 0, updated by recipe selection
+
+        // Initial setup for current date to match today
+        // But the HTML had hardcoded 2026-01-29. Let's respect real today or keep the mock?
+        // User screenshot showed 2026. I'll stick to a dynamic "Today" for functionality, 
+        // effectively replacing the hardcoded logic with real logic.
+
+        const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+        function formatDate(date) {
+            const day = date.getDate();
+            const month = monthNames[date.getMonth()].toLowerCase();
+            const year = date.getFullYear();
+            return `${day} de ${month} de ${year}`;
+        }
+
+        function updateDateDisplay() {
+            const dateDisplay = document.getElementById('dateDisplay');
+            if (dateDisplay) {
+                dateDisplay.textContent = formatDate(selectedDate);
+            }
+        }
+
+        function updateMonthDisplay() {
+            const monthDisplay = document.getElementById('monthDisplay');
+            if (monthDisplay) {
+                monthDisplay.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+            }
+        }
+
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            if (!calendarGrid) return;
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let html = '';
+
+            // Headers
+            const dayHeaders = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            dayHeaders.forEach(day => {
+                html += `<p class="text-slate-400 dark:text-white/50 text-[11px] font-bold uppercase py-2">${day}</p>`;
+            });
+
+            // Empty cells
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="h-10 w-full"></div>';
+            }
+
+            // Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isSelected = selectedDate.getDate() === day &&
+                    selectedDate.getMonth() === month &&
+                    selectedDate.getFullYear() === year;
+
+                // Check if it's "today" for styling (optional, but nice)
+                const now = new Date();
+                const isToday = now.getDate() === day && now.getMonth() === month && now.getFullYear() === year;
+
+                if (isSelected) {
+                    html += `
+                        <div class="h-10 w-full flex items-center justify-center relative">
+                            <div class="absolute inset-0 m-1 flex items-center justify-center rounded-full bg-primary text-background-dark font-bold text-sm shadow-lg shadow-primary/40 cursor-pointer" onclick="selectDay(${day})">
+                                ${day}
+                            </div>
+                        </div>`;
+                } else {
+                    html += `
+                        <button onclick="selectDay(${day})" class="h-10 w-full flex items-center justify-center text-slate-700 dark:text-white/70 text-sm hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors ${isToday ? 'border border-primary/30' : ''}">
+                            ${day}
+                        </button>`;
+                }
+            }
+
+            calendarGrid.innerHTML = html;
+        }
+
+        function selectDay(day) {
+            selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+            updateDateDisplay();
+            renderCalendar();
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateMonthDisplay();
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateMonthDisplay();
+            renderCalendar();
+        }
+
+        function updateRecipe() {
+            const select = document.getElementById('recipeSelect');
+            const selectedOption = select.options[select.selectedIndex];
+            const yieldVal = selectedOption.getAttribute('data-yield');
+
+            if (yieldVal) {
+                unitsPerBatch = parseInt(yieldVal);
+            } else {
+                unitsPerBatch = 0;
+            }
+            updateQuantityDisplay();
+        }
+
+        function updateQuantityDisplay() {
+            const quantityInput = document.getElementById('quantityInput');
+            const totalDisplay = document.getElementById('totalUnits');
+            if (quantityInput) {
+                quantityInput.value = currentQuantity;
+            }
+            if (totalDisplay) {
+                const total = currentQuantity * unitsPerBatch;
+                totalDisplay.textContent = `${total} unid.`;
+            }
+        }
+
+        function increaseQuantity() {
+            currentQuantity++;
+            updateQuantityDisplay();
+        }
+
+        function decreaseQuantity() {
+            if (currentQuantity > 1) {
+                currentQuantity--;
+                updateQuantityDisplay();
+            }
+        }
+
+        function registerProduction() {
+            // Validation
+            const select = document.getElementById('recipeSelect');
+            if (!select.value) {
+                alert('Por favor, selecione uma receita.');
+                return;
+            }
+
+            const productionData = {
+                id: Date.now(),
+                recipeName: select.options[select.selectedIndex].text.split('(')[0].trim(),
+                recipeId: select.value,
+                quantityBatches: currentQuantity,
+                totalUnits: currentQuantity * unitsPerBatch,
+                date: selectedDate.toISOString(),
+                createdAt: new Date().toISOString()
+            };
+
+            // Save to LocalStorage
+            const existing = JSON.parse(localStorage.getItem('producoes') || '[]');
+            existing.push(productionData);
+            localStorage.setItem('producoes', JSON.stringify(existing));
+
+            // Success feedback
+            const btn = document.querySelector('button[onclick="registerProduction()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined font-bold">check</span> Registrado!';
+            btn.classList.add('bg-green-500', 'text-white');
+            btn.classList.remove('bg-primary', 'text-background-dark');
+
+            setTimeout(() => {
+                window.location.href = 'producao.html';
+            }, 1000);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function () {
+            // Reset quantity logic
+            updateRecipe();
+            updateDateDisplay();
+            updateMonthDisplay();
+            renderCalendar();
+        });
+    </script>
+</body>
+
+</html>

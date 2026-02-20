@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Cadastrar Nova Receita</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "input-dark": "#1c1c27",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Work Sans", sans-serif;
+            min-height: max(884px, 100dvh);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .form-select-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2313ecec' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-40">
+    <!-- Header -->
+    <header
+        class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-slate-200 dark:border-white/5">
+        <button onclick="window.location.href='receitas.html'"
+            class="flex items-center justify-center size-10 rounded-full hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
+            <span class="material-symbols-outlined text-primary">arrow_back</span>
+        </button>
+        <h1 id="pageTitle" class="text-lg font-bold tracking-tight">Nova Receita</h1>
+        <div class="size-10"></div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 pb-40">
+        <!-- Grid 2 colunas em telas md+ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Coluna Esquerda -->
+            <div class="space-y-8">
+                <!-- Section 1: Informações Básicas -->
+                <section class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">info</span>
+                        <h2 class="text-base font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Informações Básicas</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="block">
+                            <p class="text-sm font-medium mb-1.5 ml-1 text-slate-700 dark:text-slate-300">Nome da
+                                receita</p>
+                            <input id="nomeInput"
+                                class="w-full h-14 bg-white dark:bg-input-dark border-none rounded-xl px-4 text-base focus:ring-2 focus:ring-primary outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
+                                placeholder="Ex: Ninho com Nutella" type="text" />
+                        </label>
+                        <!-- Categoria removido - tabela receitas não tem categoria_id -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="block">
+                                <p class="text-sm font-medium mb-1.5 ml-1 text-slate-700 dark:text-slate-300">Rendimento
+                                    (un)</p>
+                                <input id="rendimentoInput"
+                                    class="w-full h-14 bg-white dark:bg-input-dark border-none rounded-xl px-4 text-base focus:ring-2 focus:ring-primary outline-none transition-all"
+                                    placeholder="Ex: 10" type="number" min="1" />
+                            </label>
+                            <label class="block">
+                                <p class="text-sm font-medium mb-1.5 ml-1 text-slate-700 dark:text-slate-300">Preparo
+                                    (min)</p>
+                                <input id="preparoInput"
+                                    class="w-full h-14 bg-white dark:bg-input-dark border-none rounded-xl px-4 text-base focus:ring-2 focus:ring-primary outline-none transition-all"
+                                    placeholder="Ex: 45" type="number" min="0" />
+                            </label>
+                        </div>
+                        <label class="block">
+                            <p class="text-sm font-medium mb-1.5 ml-1 text-slate-700 dark:text-slate-300">Descrição
+                                (Opcional)</p>
+                            <textarea id="descricaoInput"
+                                class="w-full bg-white dark:bg-input-dark border-none rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-primary outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all resize-none"
+                                placeholder="Descreva a receita..." rows="3"></textarea>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Section 2: Ingredientes -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">inventory_2</span>
+                            <h2
+                                class="text-base font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Ingredientes</h2>
+                        </div>
+                        <button id="add-ingredient-btn"
+                            class="text-primary text-sm font-semibold flex items-center gap-1 hover:brightness-110">
+                            <span class="material-symbols-outlined text-lg">add_circle</span> Adicionar
+                        </button>
+                    </div>
+                    <div id="ingredients-container" class="space-y-3">
+                        <!-- Cards de ingredientes serão adicionados aqui -->
+                    </div>
+                    <p class="text-xs text-slate-400 ml-1">Adicione pelo menos um ingrediente</p>
+                </section>
+            </div>
+
+            <!-- Coluna Direita -->
+            <div class="space-y-8">
+                <!-- Section 3: Embalagens -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">package_2</span>
+                            <h2
+                                class="text-base font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Embalagens</h2>
+                        </div>
+                        <button id="add-embalagem-btn"
+                            class="text-primary text-sm font-semibold flex items-center gap-1 hover:brightness-110">
+                            <span class="material-symbols-outlined text-lg">add_circle</span> Adicionar
+                        </button>
+                    </div>
+                    <div id="embalagens-container" class="space-y-3">
+                        <!-- Cards de embalagens serão adicionados aqui -->
+                    </div>
+                </section>
+
+                <!-- Section 4: Equipamentos -->
+                <section class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">kitchen</span>
+                            <h2
+                                class="text-base font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Equipamentos</h2>
+                        </div>
+                        <button id="add-equipamento-btn"
+                            class="text-primary text-sm font-semibold flex items-center gap-1 hover:brightness-110">
+                            <span class="material-symbols-outlined text-lg">add_circle</span> Adicionar
+                        </button>
+                    </div>
+                    <div id="equipamentos-container" class="space-y-3">
+                        <!-- Cards de equipamentos serão adicionados aqui -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Prévia de Custos -->
+        <section class="mt-8 space-y-4">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">assessment</span>
+                    <h2 class="text-base font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Prévia de Custos</h2>
+                </div>
+                <button id="btnAtualizarConfigs" onclick="recarregarConfiguracoes()"
+                    title="Atualizar custos (mão de obra e energia)"
+                    class="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    Atualizar Configs
+                </button>
+            </div>
+
+            <div
+                class="bg-white dark:bg-input-dark rounded-xl p-6 border border-slate-200 dark:border-white/5 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Custos Individuais -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Composição de
+                            Custos</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Custo Ingredientes:</span>
+                            <span id="custoIngredientes" class="text-sm font-semibold text-slate-900 dark:text-white">R$
+                                0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Custo Embalagens:</span>
+                            <span id="custoEmbalagens" class="text-sm font-semibold text-slate-900 dark:text-white">R$
+                                0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Custo Equipamentos:</span>
+                            <span id="custoEquipamentos" class="text-sm font-semibold text-slate-900 dark:text-white">R$
+                                0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Custo Mão de Obra:</span>
+                            <span id="custoMaoObra" class="text-sm font-semibold text-slate-900 dark:text-white">R$
+                                0,00</span>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200 dark:border-white/10">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm font-bold text-slate-900 dark:text-white">Custo Total da
+                                    Receita:</span>
+                                <span id="custoTotal" class="text-base font-bold text-primary">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custos Unitários -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Custo Unitário
+                        </h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Custo por Unidade:</span>
+                            <span id="custoUnitario" class="text-sm font-semibold text-slate-900 dark:text-white">R$
+                                0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">Rendimento:</span>
+                            <span id="rendimentoDisplay" class="text-sm font-semibold text-slate-900 dark:text-white">0
+                                un</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer com Botão Salvar -->
+    <div
+        class="fixed bottom-0 left-0 right-0 p-4 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 z-50">
+        <div class="max-w-6xl mx-auto">
+            <button id="saveButton"
+                class="w-full h-12 bg-primary text-background-dark font-semibold text-base rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined text-[22px]">save</span>
+                Salvar Receita
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        document.documentElement.classList.add('dark');
+
+        const supabase = getSupabase();
+
+        // Caches de insumos por tipo
+        let ingredientesData = [];
+        let embalagensData = [];
+        let equipamentosData = [];
+        let categoriasData = [];
+
+        // Referências dos elementos
+        const nomeInput = document.getElementById('nomeInput');
+        // const categoriaSelect = document.getElementById('categoriaSelect'); // Removido - não usado
+        const rendimentoInput = document.getElementById('rendimentoInput');
+        const preparoInput = document.getElementById('preparoInput');
+        const descricaoInput = document.getElementById('descricaoInput');
+        const saveButton = document.getElementById('saveButton');
+        const pageTitle = document.getElementById('pageTitle');
+
+        /**
+         * Carrega insumos do tipo especificado
+         */
+        async function loadInsumos(tipo) {
+            try {
+                const { data, error } = await supabase
+                    .from('insumos')
+                    .select('id, nome, unidade_medida, custo_unitario, tipo, observacoes')
+                    .eq('tipo', tipo)
+                    .eq('ativo', true)
+                    .order('nome');
+
+                if (error) throw error;
+                return data || [];
+            } catch (error) {
+                console.error(`Erro ao carregar insumos do tipo ${tipo}:`, error.message || error);
+                console.error('Detalhes do erro:', JSON.stringify(error, null, 2));
+                showNotification(`Erro ao carregar ${tipo}s: ${error.message || 'Erro desconhecido'}`, 'error');
+                return [];
+            }
+        }
+
+        /**
+         * [REMOVIDO] Carrega categorias de produtos
+         * Receitas não têm categoria no schema atual
+         */
+        /*
+        async function loadCategorias() {
+            // Função removida - tabela receitas não tem categoria_id
+        }
+        */
+
+        /**
+         * Busca o custo de mão de obra das configurações
+         */
+        let custoMaoObraHora = 0;
+        async function loadCustoMaoObra() {
+            try {
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'custo_mao_obra_hora')
+                    .single();
+
+                if (error) {
+                    console.warn('Configuração custo_mao_obra_hora não encontrada:', error);
+                    custoMaoObraHora = 0;
+                    return;
+                }
+
+                custoMaoObraHora = parseFloat(data.valor) || 0;
+                console.log(`✅ Custo mão de obra: R$ ${custoMaoObraHora}/hora`);
+            } catch (error) {
+                console.error('Erro ao carregar custo mão de obra:', error);
+                custoMaoObraHora = 0;
+            }
+        }
+
+        /**
+         * Busca o custo de kWh das configurações
+         */
+        let custoKwh = 0.85; // Valor padrão
+        async function loadCustoKwh() {
+            try {
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'custo_kwh')
+                    .single();
+
+                if (error) {
+                    console.warn('Configuração custo_kwh não encontrada, usando padrão:', custoKwh);
+                    return;
+                }
+
+                custoKwh = parseFloat(data.valor) || 0.85;
+                console.log(`✅ Custo kWh: R$ ${custoKwh}/kWh`);
+            } catch (error) {
+                console.error('Erro ao carregar custo kWh:', error);
+                custoKwh = 0.85;
+            }
+        }
+
+        /**
+         * Busca o custo de gás por kg das configurações (peso e preço do botijão)
+         */
+        let custoGasPorKg = 8.46; // Valor padrão (110/13)
+        async function loadCustoGas() {
+            try {
+                const { data: dataPeso, error: errorPeso } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'peso_botijao_gas')
+                    .single();
+
+                const { data: dataPreco, error: errorPreco } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'preco_botijao_gas')
+                    .single();
+
+                const pesoGas = (!errorPeso && dataPeso) ? parseFloat(dataPeso.valor) : 13;
+                const precoGas = (!errorPreco && dataPreco) ? parseFloat(dataPreco.valor) : 110;
+
+                if (pesoGas > 0) {
+                    custoGasPorKg = precoGas / pesoGas;
+                }
+
+                console.log(`✅ Custo gás: Botijão ${pesoGas}kg = R$ ${precoGas} → R$ ${custoGasPorKg.toFixed(4)}/kg`);
+            } catch (error) {
+                console.error('Erro ao carregar custo gás:', error);
+                custoGasPorKg = 8.46;
+            }
+        }
+
+        /**
+         * Recarrega configurações de custos (mão de obra e kWh)
+         * Pode ser chamado depois de alterar valores em configurações
+         */
+        window.recarregarConfiguracoes = async function () {
+            const btn = document.getElementById('btnAtualizarConfigs');
+            const icon = btn.querySelector('.material-symbols-outlined');
+
+            try {
+                // Animação de loading
+                icon.classList.add('animate-spin');
+                btn.disabled = true;
+
+                // Recarrega configurações
+                await Promise.all([
+                    loadCustoMaoObra(),
+                    loadCustoKwh(),
+                    loadCustoGas()
+                ]);
+
+                // Recalcula custos com novos valores
+                updateCustosPreview();
+
+                showNotification('⚙️ Configurações atualizadas!', 'success');
+
+                console.log('🔄 Configurações recarregadas:', {
+                    custoMaoObra: custoMaoObraHora,
+                    custoKwh: custoKwh,
+                    custoGasPorKg: custoGasPorKg
+                });
+            } catch (error) {
+                showNotification('Erro ao atualizar configurações', 'error');
+                console.error('Erro:', error);
+            } finally {
+                icon.classList.remove('animate-spin');
+                btn.disabled = false;
+            }
+        }
+
+        /**
+         * Atualiza a prévia de custos
+         */
+        function updateCustosPreview() {
+            // Calcular custo de ingredientes
+            let custoIngredientesTotal = 0;
+            document.querySelectorAll('#ingredients-container > div').forEach(card => {
+                const select = card.querySelector('.ingrediente-select');
+                const quantidadeInput = card.querySelector('.quantidade-input');
+
+                if (select && select.value && quantidadeInput && quantidadeInput.value) {
+                    const insumo = ingredientesData.find(i => i.id == select.value);
+                    if (insumo) {
+                        const quantidade = parseFloat(quantidadeInput.value) || 0;
+                        const custo = insumo.custo_unitario * quantidade;
+                        custoIngredientesTotal += custo;
+                    }
+                }
+            });
+
+            // Calcular custo de embalagens
+            let custoEmbalagensTotal = 0;
+            document.querySelectorAll('#embalagens-container > div').forEach(card => {
+                const select = card.querySelector('.embalagem-select');
+                const quantidadeInput = card.querySelector('.quantidade-input');
+
+                if (select && select.value && quantidadeInput && quantidadeInput.value) {
+                    const insumo = embalagensData.find(i => i.id == select.value);
+                    if (insumo) {
+                        const quantidade = parseFloat(quantidadeInput.value) || 0;
+                        const custo = insumo.custo_unitario * quantidade;
+                        custoEmbalagensTotal += custo;
+                    }
+                }
+            });
+
+            // Calcular custo de equipamentos (com recálculo baseado em tipo e potência)
+            let custoEquipamentosTotal = 0;
+            document.querySelectorAll('#equipamentos-container > div').forEach(card => {
+                const select = card.querySelector('.equipamento-select');
+                const tempoInput = card.querySelector('.tempo-input');
+                const isGasVisible = card.querySelector('.consumo-gas-row')?.style.display !== 'none';
+                const consumoEntries = card.querySelectorAll('.consumo-entry');
+
+                if (!select || !select.value) return;
+
+                const insumo = equipamentosData.find(i => i.id == select.value);
+                if (!insumo) return;
+
+                if (isGasVisible && consumoEntries.length > 0) {
+                    // Gas equipment: sum all entries
+                    try {
+                        if (insumo.observacoes) {
+                            const dadosAdicionais = JSON.parse(insumo.observacoes);
+                            const bocas = dadosAdicionais.quantidade_bocas || 1;
+
+                            consumoEntries.forEach(entry => {
+                                const nivelSelect = entry.querySelector('.consumo-nivel-select');
+                                const entryTempo = entry.querySelector('.consumo-tempo-input');
+                                if (!entryTempo || !entryTempo.value) return;
+
+                                const tempoMinutos = parseFloat(entryTempo.value) || 0;
+                                const tempoHoras = tempoMinutos / 60;
+
+                                let consumoKgH = dadosAdicionais.consumo_gas_kgh || 0.12;
+                                if (nivelSelect && nivelSelect.selectedIndex >= 0) {
+                                    const opt = nivelSelect.options[nivelSelect.selectedIndex];
+                                    consumoKgH = parseFloat(opt.dataset.consumo) || consumoKgH;
+                                }
+
+                                const custoPorHora = (consumoKgH / bocas) * custoGasPorKg;
+                                custoEquipamentosTotal += custoPorHora * tempoHoras;
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('Erro ao calcular custo gás:', insumo.nome, e);
+                    }
+                } else if (tempoInput && tempoInput.value) {
+                    // Electric or other equipment
+                    const tempoMinutos = parseFloat(tempoInput.value) || 0;
+                    const tempoHoras = tempoMinutos / 60;
+                    let custoPorHora = insumo.custo_unitario;
+
+                    try {
+                        if (insumo.observacoes) {
+                            const dadosAdicionais = JSON.parse(insumo.observacoes);
+                            if (dadosAdicionais.tipo_equipamento === 'eletrico' && dadosAdicionais.potencia_watts) {
+                                const potenciaKw = dadosAdicionais.potencia_watts / 1000;
+                                custoPorHora = potenciaKw * custoKwh;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Usando custo_unitario direto para:', insumo.nome);
+                    }
+
+                    custoEquipamentosTotal += custoPorHora * tempoHoras;
+                }
+            });
+
+            // Calcular custo de mão de obra
+            const tempoPreparo = parseInt(preparoInput.value) || 0;
+            const custoMaoObraTotal = custoMaoObraHora * (tempoPreparo / 60); // Converter minutos para horas
+
+            // Calcular custo total
+            const custoTotal = custoIngredientesTotal + custoEmbalagensTotal + custoEquipamentosTotal + custoMaoObraTotal;
+
+            // Calcular custo unitário
+            const rendimento = parseInt(rendimentoInput.value) || 1;
+            const custoUnitario = custoTotal / rendimento;
+
+            // Atualizar exibição
+            document.getElementById('custoIngredientes').textContent = `R$ ${custoIngredientesTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('custoEmbalagens').textContent = `R$ ${custoEmbalagensTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('custoEquipamentos').textContent = `R$ ${custoEquipamentosTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('custoMaoObra').textContent = `R$ ${custoMaoObraTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('custoTotal').textContent = `R$ ${custoTotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('custoUnitario').textContent = `R$ ${custoUnitario.toFixed(2).replace('.', ',')}`;
+            document.getElementById('rendimentoDisplay').textContent = `${rendimento} un`;
+        }
+
+        /**
+         * Cria options para select de insumos
+         */
+        function createInsumosOptions(insumos, placeholderText) {
+            let html = `<option disabled selected value="">Selecione ${placeholderText}...</option>`;
+
+            if (insumos.length === 0) {
+                html += `<option disabled>Nenhum ${placeholderText} cadastrado</option>`;
+            } else {
+                insumos.forEach(insumo => {
+                    html += `<option value="${insumo.id}" data-custo="${insumo.custo_unitario}" data-unidade="${insumo.unidade_medida}">${insumo.nome} (${insumo.unidade_medida})</option>`;
+                });
+            }
+
+            return html;
+        }
+
+        /**
+         * Cria card de ingrediente
+         */
+        function createIngredientCard() {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-input-dark p-4 rounded-xl border border-transparent dark:border-white/5 shadow-sm space-y-3';
+            card.innerHTML = `
+                <div class="flex justify-between items-start gap-3">
+                    <div class="flex-1">
+                        <p class="text-xs text-slate-400 mb-1">Ingrediente</p>
+                        <select class="ingrediente-select form-select-icon w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3">
+                            ${createInsumosOptions(ingredientesData, 'o ingrediente')}
+                        </select>
+                    </div>
+                    <div class="w-28">
+                        <p class="text-xs text-slate-400 mb-1">Quantidade</p>
+                        <input class="quantidade-input w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3" type="number" step="0.01" min="0" placeholder="0" />
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-white/5">
+                    <span class="custo-item text-xs font-medium text-primary">Custo: R$ 0,00</span>
+                    <button class="delete-btn text-rose-500"><span class="material-symbols-outlined text-lg">delete</span></button>
+                </div>
+            `;
+            return card;
+        }
+
+        /**
+         * Cria card de embalagem
+         */
+        function createEmbalagemCard() {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-input-dark p-4 rounded-xl border border-transparent dark:border-white/5 shadow-sm space-y-3';
+            card.innerHTML = `
+                <div class="flex justify-between items-start gap-3">
+                    <div class="flex-1">
+                        <p class="text-xs text-slate-400 mb-1">Embalagem</p>
+                        <select class="embalagem-select form-select-icon w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3">
+                            ${createInsumosOptions(embalagensData, 'a embalagem')}
+                        </select>
+                    </div>
+                    <div class="w-28">
+                        <p class="text-xs text-slate-400 mb-1">Quantidade</p>
+                        <input class="quantidade-input w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3" type="number" step="0.01" min="0" placeholder="0" />
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-white/5">
+                    <span class="custo-item text-xs font-medium text-primary">Custo: R$ 0,00</span>
+                    <button class="delete-btn text-rose-500"><span class="material-symbols-outlined text-lg">delete</span></button>
+                </div>
+            `;
+            return card;
+        }
+
+        /**
+         * Cria card de equipamento
+         */
+        function createEquipamentoCard() {
+            const card = document.createElement('div');
+            card.className = 'bg-white dark:bg-input-dark p-4 rounded-xl border border-transparent dark:border-white/5 shadow-sm space-y-3';
+            card.innerHTML = `
+                <div class="flex justify-between items-start gap-3">
+                    <div class="flex-1">
+                        <p class="text-xs text-slate-400 mb-1">Equipamento</p>
+                        <select class="equipamento-select form-select-icon w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3">
+                            ${createInsumosOptions(equipamentosData, 'o equipamento')}
+                        </select>
+                    </div>
+                    <div class="w-28 tempo-simples">
+                        <p class="text-xs text-slate-400 mb-1">Tempo (min)</p>
+                        <input class="tempo-input w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3" type="number" step="1" min="0" placeholder="0" />
+                    </div>
+                </div>
+                <div class="consumo-gas-row" style="display: none;">
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs text-slate-400">🔥 Nível de Consumo</p>
+                        <button type="button" class="btn-add-consumo text-primary flex items-center gap-0.5 hover:brightness-110 transition-colors" title="Adicionar outro nível">
+                            <span class="material-symbols-outlined text-base">add_circle</span>
+                            <span class="text-[10px] font-semibold">Adicionar</span>
+                        </button>
+                    </div>
+                    <div class="consumo-entries space-y-2">
+                        <div class="consumo-entry flex items-center gap-2">
+                            <select class="consumo-nivel-select form-select-icon flex-1 bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3">
+                            </select>
+                            <div class="w-20">
+                                <input class="consumo-tempo-input w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-2 text-center" type="number" step="1" min="0" placeholder="min" />
+                            </div>
+                            <span class="consumo-info text-[10px] text-slate-400 whitespace-nowrap"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-white/5">
+                    <span class="custo-item text-xs font-medium text-primary">Custo: R$ 0,00</span>
+                    <button class="delete-btn text-rose-500"><span class="material-symbols-outlined text-lg">delete</span></button>
+                </div>
+            `;
+            return card;
+        }
+
+        /**
+         * Verifica se o equipamento selecionado é a gás e mostra/esconde o seletor de consumo
+         */
+        function toggleConsumoGasRow(card) {
+            const select = card.querySelector('.equipamento-select');
+            const consumoRow = card.querySelector('.consumo-gas-row');
+            const tempoSimples = card.querySelector('.tempo-simples');
+            if (!select || !consumoRow) return;
+
+            const insumo = equipamentosData.find(i => i.id == select.value);
+            if (insumo && insumo.observacoes) {
+                try {
+                    const dados = JSON.parse(insumo.observacoes);
+                    if (dados.tipo_equipamento === 'gas') {
+                        consumoRow.style.display = 'block';
+                        if (tempoSimples) tempoSimples.style.display = 'none';
+                        const bocas = dados.quantidade_bocas || 1;
+
+                        // Obter níveis de consumo (compatível com formato antigo e novo)
+                        const niveis = dados.niveis_consumo || [
+                            { nome: 'Baixo', valor: dados.consumo_gas_baixo || 0.06 },
+                            { nome: 'Médio', valor: dados.consumo_gas_medio || 0.12 },
+                            { nome: 'Alto', valor: dados.consumo_gas_alto || 0.27 }
+                        ];
+
+                        // Verificar se foi cadastrado em Watts
+                        const unidadeOriginal = dados.unidade_consumo || 'kgh';
+                        const niveisWatts = dados.niveis_consumo_watts || null;
+
+                        // Guardar dados no card para uso posterior
+                        card.dataset.gasNiveis = JSON.stringify(niveis);
+                        card.dataset.gasBocas = bocas;
+                        card.dataset.gasUnidade = unidadeOriginal;
+                        if (niveisWatts) card.dataset.gasNiveisWatts = JSON.stringify(niveisWatts);
+
+                        // Popular todos os selects de nível
+                        populateNivelSelects(card, niveis, bocas, unidadeOriginal, niveisWatts);
+
+                        // Configurar botão +
+                        const btnAdd = card.querySelector('.btn-add-consumo');
+                        if (btnAdd && !btnAdd.dataset.configured) {
+                            btnAdd.dataset.configured = 'true';
+                            btnAdd.addEventListener('click', () => {
+                                addConsumoEntry(card, niveis, bocas, unidadeOriginal, niveisWatts);
+                            });
+                        }
+
+                        // Mostrar info de bocas na primeira entry
+                        const firstInfo = card.querySelector('.consumo-info');
+                        if (firstInfo) {
+                            firstInfo.textContent = `${bocas} boca${bocas > 1 ? 's' : ''}`;
+                        }
+                        return;
+                    }
+                } catch (e) { /* ignore */ }
+            }
+            consumoRow.style.display = 'none';
+            if (tempoSimples) tempoSimples.style.display = 'block';
+        }
+
+        /**
+         * Popula os selects de nível de consumo do card
+         */
+        function populateNivelSelects(card, niveis, bocas, unidade, niveisWatts) {
+            const emojis = ['🟢', '🟡', '🟠', '🔴', '🟣'];
+            const isWatts = unidade === 'watts' && niveisWatts;
+            card.querySelectorAll('.consumo-nivel-select').forEach(nivelSelect => {
+                nivelSelect.innerHTML = '';
+                niveis.forEach((n, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.dataset.consumo = n.valor; // Sempre em kg/h para cálculo
+                    opt.dataset.nome = n.nome;
+                    const emoji = emojis[i % emojis.length];
+                    if (isWatts && niveisWatts[i]) {
+                        // Exibir em Watts
+                        const wattsVal = Math.round(niveisWatts[i].valor);
+                        opt.textContent = `${emoji} ${n.nome} (${wattsVal} W)`;
+                    } else {
+                        // Exibir em kg/h
+                        const porBoca = (n.valor / bocas).toFixed(4).replace('.', ',');
+                        opt.textContent = `${emoji} ${n.nome} (${porBoca} kg/h)`;
+                    }
+                    nivelSelect.appendChild(opt);
+                });
+                const meioIndex = Math.floor(niveis.length / 2);
+                if (niveis.length > meioIndex) {
+                    nivelSelect.selectedIndex = meioIndex;
+                }
+            });
+        }
+
+        /**
+         * Adiciona uma nova entrada de nível de consumo + tempo
+         */
+        function addConsumoEntry(card, niveis, bocas, unidade, niveisWatts) {
+            const container = card.querySelector('.consumo-entries');
+            if (!container) return;
+            const isWatts = unidade === 'watts' && niveisWatts;
+
+            const entry = document.createElement('div');
+            entry.className = 'consumo-entry flex items-center gap-2';
+            entry.innerHTML = `
+                <select class="consumo-nivel-select form-select-icon flex-1 bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-3">
+                </select>
+                <div class="w-20">
+                    <input class="consumo-tempo-input w-full bg-slate-50 dark:bg-background-dark/50 border-none rounded-lg text-sm h-10 px-2 text-center" type="number" step="1" min="0" placeholder="min" />
+                </div>
+                <button type="button" class="btn-remove-entry text-rose-400 hover:text-rose-300 transition-colors shrink-0" title="Remover">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            `;
+            container.appendChild(entry);
+
+            // Popular o select do novo entry
+            const emojis = ['🟢', '🟡', '🟠', '🔴', '🟣'];
+            const newSelect = entry.querySelector('.consumo-nivel-select');
+            niveis.forEach((n, i) => {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.dataset.consumo = n.valor; // Sempre kg/h para cálculo
+                opt.dataset.nome = n.nome;
+                const emoji = emojis[i % emojis.length];
+                if (isWatts && niveisWatts[i]) {
+                    const wattsVal = Math.round(niveisWatts[i].valor);
+                    opt.textContent = `${emoji} ${n.nome} (${wattsVal} W)`;
+                } else {
+                    const porBoca = (n.valor / bocas).toFixed(4).replace('.', ',');
+                    opt.textContent = `${emoji} ${n.nome} (${porBoca} kg/h)`;
+                }
+                newSelect.appendChild(opt);
+            });
+
+            // Events
+            newSelect.addEventListener('change', () => {
+                updateCardCost(card);
+                updateCustosPreview();
+            });
+            entry.querySelector('.consumo-tempo-input').addEventListener('input', () => {
+                updateCardCost(card);
+                updateCustosPreview();
+            });
+            entry.querySelector('.btn-remove-entry').addEventListener('click', () => {
+                entry.remove();
+                updateCardCost(card);
+                updateCustosPreview();
+            });
+        }
+
+        /**
+         * Atualiza custo de um card
+         */
+        function updateCardCost(card) {
+            const select = card.querySelector('select');
+            const quantidadeInput = card.querySelector('.quantidade-input, .tempo-input');
+            const custoSpan = card.querySelector('.custo-item');
+
+            if (!select) return;
+
+            const selectedOption = select.options[select.selectedIndex];
+            const custo = parseFloat(selectedOption?.dataset.custo || 0);
+
+            let custoTotal = 0;
+
+            // Check if it's a gas equipment with consumption entries
+            const consumoEntries = card.querySelectorAll('.consumo-entry');
+            const isGasVisible = card.querySelector('.consumo-gas-row')?.style.display !== 'none';
+
+            if (isGasVisible && consumoEntries.length > 0) {
+                // Gas equipment: sum cost of each entry
+                const equipSelect = card.querySelector('.equipamento-select');
+                if (equipSelect && equipSelect.value) {
+                    const insumo = equipamentosData.find(i => i.id == equipSelect.value);
+                    if (insumo && insumo.observacoes) {
+                        try {
+                            const dados = JSON.parse(insumo.observacoes);
+                            const bocas = dados.quantidade_bocas || 1;
+
+                            consumoEntries.forEach(entry => {
+                                const nivelSelect = entry.querySelector('.consumo-nivel-select');
+                                const tempoInput = entry.querySelector('.consumo-tempo-input');
+                                if (!nivelSelect || !tempoInput) return;
+
+                                const tempo = parseFloat(tempoInput.value || 0);
+                                const tempoHoras = tempo / 60;
+
+                                let consumoKgH = dados.consumo_gas_kgh || 0.12;
+                                if (nivelSelect.selectedIndex >= 0) {
+                                    const opt = nivelSelect.options[nivelSelect.selectedIndex];
+                                    consumoKgH = parseFloat(opt.dataset.consumo) || consumoKgH;
+                                }
+
+                                const custoPorHora = (consumoKgH / bocas) * custoGasPorKg;
+                                custoTotal += custoPorHora * tempoHoras;
+                            });
+                        } catch (e) { /* ignore */ }
+                    }
+                }
+                if (custoSpan) custoSpan.textContent = `Custo: R$ ${custoTotal.toFixed(5)}`;
+            } else if (quantidadeInput && quantidadeInput.classList.contains('tempo-input')) {
+                // Electric or other equipment with simple time
+                const quantidade = parseFloat(quantidadeInput.value || 0);
+                const tempoHoras = quantidade / 60;
+                let custoPorHora = custo;
+
+                const equipSelect = card.querySelector('.equipamento-select');
+                if (equipSelect && equipSelect.value) {
+                    const insumo = equipamentosData.find(i => i.id == equipSelect.value);
+                    if (insumo && insumo.observacoes) {
+                        try {
+                            const dados = JSON.parse(insumo.observacoes);
+                            if (dados.tipo_equipamento === 'eletrico' && dados.potencia_watts) {
+                                const potenciaKw = dados.potencia_watts / 1000;
+                                custoPorHora = potenciaKw * custoKwh;
+                            }
+                        } catch (e) { /* ignore */ }
+                    }
+                }
+
+                custoTotal = custoPorHora * tempoHoras;
+                if (custoSpan) custoSpan.textContent = `Custo: R$ ${custoTotal.toFixed(5)}`;
+            } else if (quantidadeInput) {
+                // Ingredientes e embalagens
+                const quantidade = parseFloat(quantidadeInput.value || 0);
+                custoTotal = custo * quantidade;
+                if (custoSpan) custoSpan.textContent = `Custo: R$ ${custoTotal.toFixed(2)}`;
+            }
+
+            updateTotalCosts();
+        }
+
+        /**
+         * Atualiza custos totais
+         */
+        function updateTotalCosts() {
+            let totalIngredientes = 0;
+            let totalEmbalagens = 0;
+            let totalEquipamentos = 0;
+
+            // Soma ingredientes
+            document.querySelectorAll('#ingredients-container .custo-item').forEach(span => {
+                const value = parseFloat(span.textContent.replace('Custo: R$ ', '').replace(',', '.'));
+                totalIngredientes += isNaN(value) ? 0 : value;
+            });
+
+            // Soma embalagens
+            document.querySelectorAll('#embalagens-container .custo-item').forEach(span => {
+                const value = parseFloat(span.textContent.replace('Custo: R$ ', '').replace(',', '.'));
+                totalEmbalagens += isNaN(value) ? 0 : value;
+            });
+
+            // Soma equipamentos
+            document.querySelectorAll('#equipamentos-container .custo-item').forEach(span => {
+                const value = parseFloat(span.textContent.replace('Custo: R$ ', '').replace(',', '.'));
+                totalEquipamentos += isNaN(value) ? 0 : value;
+            });
+
+            const custoTotal = totalIngredientes + totalEmbalagens + totalEquipamentos;
+            const rendimento = parseInt(rendimentoInput.value) || 0;
+            const custoUnitario = rendimento > 0 ? custoTotal / rendimento : 0;
+
+            document.getElementById('custoIngredientes').textContent = `R$ ${totalIngredientes.toFixed(2)}`;
+            document.getElementById('custoEmbalagens').textContent = `R$ ${totalEmbalagens.toFixed(2)}`;
+            document.getElementById('custoEquipamentos').textContent = `R$ ${totalEquipamentos.toFixed(2)}`;
+            document.getElementById('custoTotal').textContent = `R$ ${custoTotal.toFixed(2)}`;
+            document.getElementById('custoUnitario').textContent = `R$ ${custoUnitario.toFixed(2)}`;
+            document.getElementById('rendimentoDisplay').textContent = `${rendimento} un`;
+        }
+
+        /**
+         * Configura eventos de uma card
+         */
+        function setupCardEvents(card) {
+            const select = card.querySelector('select');
+            const quantidadeInput = card.querySelector('.quantidade-input, .tempo-input');
+            const deleteBtn = card.querySelector('.delete-btn');
+            const equipamentoSelect = card.querySelector('.equipamento-select');
+            const consumoSelect = card.querySelector('.consumo-nivel-select');
+            const consumoTempoInput = card.querySelector('.consumo-tempo-input');
+
+            if (select) {
+                select.addEventListener('change', () => {
+                    updateCardCost(card);
+                    // Se for equipamento, verificar se é a gás
+                    if (equipamentoSelect) {
+                        toggleConsumoGasRow(card);
+                    }
+                });
+            }
+
+            if (quantidadeInput) {
+                quantidadeInput.addEventListener('input', () => updateCardCost(card));
+            }
+
+            if (consumoSelect) {
+                consumoSelect.addEventListener('change', () => {
+                    updateCardCost(card);
+                    updateCustosPreview();
+                });
+            }
+
+            if (consumoTempoInput) {
+                consumoTempoInput.addEventListener('input', () => {
+                    updateCardCost(card);
+                    updateCustosPreview();
+                });
+            }
+
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    card.remove();
+                    updateTotalCosts();
+                });
+            }
+        }
+
+        /**
+         * Salva receita no Supabase
+         */
+        async function saveReceita() {
+            try {
+                // Validações
+                if (!nomeInput.value.trim()) {
+                    showNotification('Por favor, informe o nome da receita', 'error');
+                    return;
+                }
+
+                if (!rendimentoInput.value || parseInt(rendimentoInput.value) <= 0) {
+                    showNotification('Por favor, informe o rendimento da receita', 'error');
+                    return;
+                }
+
+                // Coleta ingredientes
+                const ingredientes = [];
+                document.querySelectorAll('#ingredients-container > div').forEach(card => {
+                    const select = card.querySelector('.ingrediente-select');
+                    const quantidade = card.querySelector('.quantidade-input');
+
+                    if (select.value && quantidade.value) {
+                        ingredientes.push({
+                            insumo_id: parseInt(select.value),
+                            quantidade: parseFloat(quantidade.value)
+                        });
+                    }
+                });
+
+                if (ingredientes.length === 0) {
+                    showNotification('Adicione pelo menos um ingrediente', 'error');
+                    return;
+                }
+
+                // Coleta embalagens
+                const embalagens = [];
+                document.querySelectorAll('#embalagens-container > div').forEach(card => {
+                    const select = card.querySelector('.embalagem-select');
+                    const quantidade = card.querySelector('.quantidade-input');
+
+                    if (select.value && quantidade.value) {
+                        embalagens.push({
+                            insumo_id: parseInt(select.value),
+                            quantidade: parseFloat(quantidade.value)
+                        });
+                    }
+                });
+
+                // Coleta equipamentos
+                const equipamentos = [];
+                document.querySelectorAll('#equipamentos-container > div').forEach(card => {
+                    const select = card.querySelector('.equipamento-select');
+                    const tempoSimples = card.querySelector('.tempo-input');
+                    const isGasVisible = card.querySelector('.consumo-gas-row')?.style.display !== 'none';
+                    const consumoEntries = card.querySelectorAll('.consumo-entry');
+
+                    if (!select || !select.value) return;
+
+                    if (isGasVisible && consumoEntries.length > 0) {
+                        // Gas equipment: save each entry separately
+                        consumoEntries.forEach(entry => {
+                            const nivelSelect = entry.querySelector('.consumo-nivel-select');
+                            const tempoInput = entry.querySelector('.consumo-tempo-input');
+                            if (!tempoInput || !tempoInput.value) return;
+
+                            const equipData = {
+                                insumo_id: parseInt(select.value),
+                                tempo_uso: parseInt(tempoInput.value)
+                            };
+                            if (nivelSelect && nivelSelect.selectedIndex >= 0) {
+                                const opt = nivelSelect.options[nivelSelect.selectedIndex];
+                                equipData.consumo_nivel = opt.dataset.nome || 'Médio';
+                                equipData.consumo_valor = parseFloat(opt.dataset.consumo) || 0;
+                            }
+                            equipamentos.push(equipData);
+                        });
+                    } else if (tempoSimples && tempoSimples.value) {
+                        equipamentos.push({
+                            insumo_id: parseInt(select.value),
+                            tempo_uso: parseInt(tempoSimples.value)
+                        });
+                    }
+                });
+
+                // Loading
+                saveButton.disabled = true;
+                saveButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Salvando...';
+
+                // Prepara dados da receita
+                const receitaData = {
+                    nome: nomeInput.value.trim(),
+                    descricao: descricaoInput.value.trim() || null,
+                    rendimento_unidades: parseInt(rendimentoInput.value),
+                    tempo_preparo: parseInt(preparoInput.value) || 0,
+                    ativo: true
+                };
+
+                // Insere receita
+                const { data: receita, error: receitaError } = await supabase
+                    .from('receitas')
+                    .insert([receitaData])
+                    .select()
+                    .single();
+
+                if (receitaError) throw receitaError;
+
+                // Insere ingredientes
+                if (ingredientes.length > 0) {
+                    const ingredientesData = ingredientes.map(ing => ({
+                        receita_id: receita.id,
+                        insumo_id: ing.insumo_id,
+                        quantidade: ing.quantidade
+                    }));
+
+                    const { error: ingredientesError } = await supabase
+                        .from('receitas_insumos')
+                        .insert(ingredientesData);
+
+                    if (ingredientesError) throw ingredientesError;
+                }
+
+                // Insere embalagens
+                if (embalagens.length > 0) {
+                    const embalagensData = embalagens.map(emb => ({
+                        receita_id: receita.id,
+                        insumo_id: emb.insumo_id,
+                        quantidade: emb.quantidade
+                    }));
+
+                    const { error: embalagensError } = await supabase
+                        .from('receitas_insumos')
+                        .insert(embalagensData);
+
+                    if (embalagensError) throw embalagensError;
+                }
+
+                // Insere equipamentos
+                if (equipamentos.length > 0) {
+                    const equipamentosData = equipamentos.map(eq => ({
+                        receita_id: receita.id,
+                        insumo_id: eq.insumo_id,
+                        quantidade: eq.tempo_uso // Mapeia tempo_uso para quantidade
+                    }));
+
+                    const { error: equipamentosError } = await supabase
+                        .from('receitas_insumos')
+                        .insert(equipamentosData);
+
+                    if (equipamentosError) throw equipamentosError;
+                }
+
+                showNotification('Receita salva com sucesso!', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'receitas.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error('Erro ao salvar receita:', JSON.stringify(error, null, 2));
+                showNotification('Erro ao salvar receita: ' + (error.message || error.code || 'Erro desconhecido'), 'error');
+            } finally {
+                saveButton.disabled = false;
+                saveButton.innerHTML = '<span class="material-symbols-outlined text-[22px]">save</span> Salvar Receita';
+            }
+        }
+
+        /**
+         * Mostra notificação
+         */
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg backdrop-blur-md transition-all transform ${type === 'success' ? 'bg-green-500/90' :
+                type === 'error' ? 'bg-red-500/90' :
+                    'bg-primary/90'
+                } text-white`;
+
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">
+                        ${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}
+                    </span>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.getElementById('add-ingredient-btn').addEventListener('click', () => {
+            const card = createIngredientCard();
+            document.getElementById('ingredients-container').appendChild(card);
+            setupCardEvents(card);
+        });
+
+        document.getElementById('add-embalagem-btn').addEventListener('click', () => {
+            const card = createEmbalagemCard();
+            document.getElementById('embalagens-container').appendChild(card);
+            setupCardEvents(card);
+        });
+
+        document.getElementById('add-equipamento-btn').addEventListener('click', () => {
+            const card = createEquipamentoCard();
+            document.getElementById('equipamentos-container').appendChild(card);
+            setupCardEvents(card);
+        });
+
+        rendimentoInput.addEventListener('input', () => {
+            updateTotalCosts();
+            updateCustosPreview();
+        });
+        preparoInput.addEventListener('input', updateCustosPreview);
+        saveButton.addEventListener('click', saveReceita);
+
+        // Event delegation para atualizar custos quando houver mudanças nos cards
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('.ingrediente-select, .quantidade-input, .embalagem-select, .tempo-input, .equipamento-select')) {
+                updateCustosPreview();
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('.ingrediente-select, .embalagem-select, .equipamento-select, .consumo-nivel-select')) {
+                updateCustosPreview();
+            }
+        });
+
+        // Inicialização
+        if (supabase) {
+            // Carrega dados
+            Promise.all([
+                loadInsumos('ingrediente'),
+                loadInsumos('embalagem'),
+                loadInsumos('equipamento'),
+                loadCustoMaoObra(),
+                loadCustoKwh(),
+                loadCustoGas()
+            ]).then(([ingredientes, embalagens, equipamentos]) => {
+                ingredientesData = ingredientes;
+                embalagensData = embalagens;
+                equipamentosData = equipamentos;
+
+                console.log('✅ Dados carregados:', {
+                    ingredientes: ingredientesData.length,
+                    embalagens: embalagensData.length,
+                    equipamentos: equipamentosData.length,
+                    custoMaoObra: custoMaoObraHora,
+                    custoKwh: custoKwh,
+                    custoGasPorKg: custoGasPorKg
+                });
+
+                // Adiciona primeiro card de cada tipo
+                const firstIngredient = createIngredientCard();
+                document.getElementById('ingredients-container').appendChild(firstIngredient);
+                setupCardEvents(firstIngredient);
+
+                // Atualiza custos iniciais
+                updateCustosPreview();
+            });
+        } else {
+            showNotification('Supabase não configurado', 'error');
+        }
+    </script>
+</body>
+
+</html>

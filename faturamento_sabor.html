@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Faturamento por Sabor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen font-display">
+    <!-- Top Navigation Bar -->
+    <header class="glass-header sticky top-0 z-50 px-4 pt-6 pb-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <a href="faturamento.html"
+                    class="material-symbols-outlined text-white cursor-pointer hover:text-primary transition-colors">arrow_back_ios</a>
+                <h1 class="text-xl font-bold tracking-tight text-white">Faturamento por Sabor</h1>
+            </div>
+            <button class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5">
+                <span class="material-symbols-outlined text-white">calendar_today</span>
+            </button>
+        </div>
+        <!-- Period Selector -->
+        <div class="flex bg-white/10 p-1 rounded-xl">
+            <button onclick="setPeriodo('dia')" id="btnDia"
+                class="flex-1 py-1.5 text-sm font-medium rounded-lg bg-primary text-background-dark">Dia</button>
+            <button onclick="setPeriodo('semana')" id="btnSemana"
+                class="flex-1 py-1.5 text-sm font-medium rounded-lg text-white/60">Semana</button>
+            <button onclick="setPeriodo('mes')" id="btnMes"
+                class="flex-1 py-1.5 text-sm font-medium rounded-lg text-white/60">Mês</button>
+        </div>
+    </header>
+
+    <main class="p-4 pb-48 space-y-6">
+        <!-- Best Sellers Section -->
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-white">Best Sellers</h2>
+                <span id="totalProdutos" class="text-primary text-xs font-semibold uppercase tracking-wider"></span>
+            </div>
+            <div id="bestSellersList" class="space-y-3">
+                <!-- Loading state -->
+                <div class="flex items-center justify-center py-12">
+                    <div class="animate-pulse flex flex-col items-center gap-3">
+                        <span class="material-symbols-outlined text-4xl text-white/20 animate-spin">sync</span>
+                        <p class="text-white/40 text-sm">Carregando dados...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horizontal Bar Chart Section -->
+        <section class="pt-2">
+            <h2 class="text-lg font-bold text-white mb-4">Volume Top 5 Sabores</h2>
+            <div id="volumeChart" class="space-y-4">
+                <!-- Será preenchido dinamicamente -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Highlight Footer Metric -->
+    <div id="footerMetric" class="fixed bottom-0 left-0 right-0 p-4 glass-header">
+        <div class="bg-primary/10 border border-primary/30 p-4 rounded-xl flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-primary uppercase tracking-[0.1em] mb-1">Maior Faturamento</p>
+                <h4 id="footerNome" class="text-white font-bold text-lg leading-none">-</h4>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] text-white/50 uppercase">Faturamento Total</p>
+                <p id="footerValor" class="text-xl font-black text-primary">R$ 0,00</p>
+            </div>
+        </div>
+        <div class="h-6"></div>
+    </div>
+
+    <script type="module">
+        import { getAllRecords } from './supabase-utils.js';
+
+        let pedidos = [];
+        let pedidoItens = [];
+        let produtos = {};
+        let periodo = 'dia';
+
+        // Definir período
+        window.setPeriodo = function (novoPeriodo) {
+            periodo = novoPeriodo;
+
+            // Atualizar botões
+            const buttons = { dia: 'btnDia', semana: 'btnSemana', mes: 'btnMes' };
+            Object.entries(buttons).forEach(([key, id]) => {
+                const btn = document.getElementById(id);
+                if (key === novoPeriodo) {
+                    btn.className = 'flex-1 py-1.5 text-sm font-medium rounded-lg bg-primary text-background-dark';
+                } else {
+                    btn.className = 'flex-1 py-1.5 text-sm font-medium rounded-lg text-white/60';
+                }
+            });
+
+            renderDashboard();
+        };
+
+        // Carregar dados
+        async function loadDados() {
+            try {
+                // Carregar pedidos
+                const { data: pedData, error: pedError } = await getAllRecords('pedidos');
+                if (pedError) throw pedError;
+                pedidos = (pedData || []).filter(p => p.status !== 'cancelado');
+
+                // Carregar itens dos pedidos
+                const { data: itensData, error: itensError } = await getAllRecords('pedido_itens');
+                if (itensError) throw itensError;
+                pedidoItens = itensData || [];
+
+                // Carregar produtos (para imagem e info)
+                const { data: prodData, error: prodError } = await getAllRecords('produtos');
+                if (prodError) throw prodError;
+                (prodData || []).forEach(p => { produtos[p.id] = p; });
+
+                console.log('📦 Pedidos:', pedidos.length);
+                console.log('📝 Itens:', pedidoItens.length);
+                console.log('🍦 Produtos:', Object.keys(produtos).length);
+
+                renderDashboard();
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                document.getElementById('bestSellersList').innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <span class="material-symbols-outlined text-4xl text-red-400 mb-3">error</span>
+                        <p class="text-red-400 text-sm font-medium">Erro ao carregar dados</p>
+                        <p class="text-white/40 text-xs mt-1">${error.message || error}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Filtrar pedidos por período
+        function filtrarPedidosPorPeriodo() {
+            const agora = new Date();
+            let dataInicio = new Date();
+
+            if (periodo === 'dia') {
+                dataInicio.setHours(0, 0, 0, 0);
+            } else if (periodo === 'semana') {
+                dataInicio.setDate(dataInicio.getDate() - 7);
+            } else if (periodo === 'mes') {
+                dataInicio.setDate(dataInicio.getDate() - 30);
+            }
+
+            // IDs dos pedidos no período
+            const pedidosFiltrados = pedidos.filter(p => {
+                const data = new Date(p.data_pedido);
+                return data >= dataInicio && data <= agora;
+            });
+
+            return new Set(pedidosFiltrados.map(p => p.id));
+        }
+
+        // Agregar vendas por produto
+        function agregarPorProduto() {
+            const pedidoIds = filtrarPedidosPorPeriodo();
+
+            const porProduto = {};
+
+            pedidoItens.forEach(item => {
+                // Filtrar pelo período
+                if (!pedidoIds.has(item.pedido_id)) return;
+
+                const prodId = item.produto_id || item.produto_nome;
+                const key = prodId || item.produto_nome;
+
+                if (!porProduto[key]) {
+                    const prod = produtos[item.produto_id];
+                    porProduto[key] = {
+                        id: item.produto_id,
+                        nome: prod ? prod.nome : item.produto_nome,
+                        imagem_url: prod ? prod.imagem_url : null,
+                        quantidade: 0,
+                        faturamento: 0
+                    };
+                }
+
+                porProduto[key].quantidade += parseInt(item.quantidade || 0);
+                porProduto[key].faturamento += parseFloat(item.preco_total || 0);
+            });
+
+            // Ordenar por faturamento (maior primeiro)
+            return Object.values(porProduto).sort((a, b) => b.faturamento - a.faturamento);
+        }
+
+        // Renderizar dashboard
+        function renderDashboard() {
+            const dados = agregarPorProduto();
+
+            document.getElementById('totalProdutos').textContent =
+                dados.length > 0 ? `${dados.length} produtos` : '';
+
+            renderBestSellers(dados);
+            renderVolumeChart(dados.slice(0, 5));
+            renderFooterMetric(dados);
+        }
+
+        // Renderizar Best Sellers
+        function renderBestSellers(dados) {
+            const container = document.getElementById('bestSellersList');
+
+            if (dados.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <span class="material-symbols-outlined text-6xl text-white/10 mb-4">icecream</span>
+                        <p class="text-white/40 text-sm font-medium">Nenhuma venda no período</p>
+                        <p class="text-white/30 text-xs mt-1">Registre vendas para ver o faturamento por sabor</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const maxQtd = dados[0]?.quantidade || 1;
+
+            container.innerHTML = dados.map((d, i) => {
+                // Badge de tendência baseada na posição
+                let badgeClass, badgeIcon, badgeText;
+                if (i === 0) {
+                    badgeClass = 'bg-green-500/20 text-green-400';
+                    badgeIcon = 'trending_up';
+                    badgeText = '#1 Top';
+                } else if (i <= 2) {
+                    badgeClass = 'bg-white/5 text-white/40';
+                    badgeIcon = 'trending_flat';
+                    badgeText = `#${i + 1}`;
+                } else {
+                    badgeClass = 'bg-white/5 text-white/30';
+                    badgeIcon = 'tag';
+                    badgeText = `#${i + 1}`;
+                }
+
+                // Preço unitário médio
+                const precoMedio = d.quantidade > 0 ? (d.faturamento / d.quantidade) : 0;
+
+                return `
+                    <div class="bg-card-dark rounded-xl p-4 flex items-center gap-4 shadow-lg border border-white/5 hover:border-primary/20 transition-colors">
+                        ${d.imagem_url
+                        ? `<div class="w-16 h-16 rounded-full bg-cover bg-center border-2 border-primary/30 shrink-0"
+                                style="background-image: url('${d.imagem_url}');"></div>`
+                        : `<div class="w-16 h-16 rounded-full flex items-center justify-center border-2 border-white/10 bg-white/5 shrink-0">
+                                <span class="material-symbols-outlined text-2xl text-white/30">icecream</span>
+                            </div>`
+                    }
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="font-bold text-base text-white truncate">${d.nome}</h3>
+                                    <p class="text-white/50 text-xs">${d.quantidade} unidades vendidas</p>
+                                </div>
+                                <span class="flex items-center gap-1 text-[10px] font-bold ${badgeClass} px-2 py-0.5 rounded-full uppercase tracking-tighter shrink-0 ml-2">
+                                    <span class="material-symbols-outlined text-[14px]">${badgeIcon}</span> ${badgeText}
+                                </span>
+                            </div>
+                            <div class="mt-2 flex justify-between items-end">
+                                <div class="flex gap-4">
+                                    <div>
+                                        <p class="text-[10px] text-white/40 uppercase">Bruto</p>
+                                        <p class="text-sm font-semibold text-white">R$ ${d.faturamento.toFixed(2).replace('.', ',')}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-white/40 uppercase">Preço Médio</p>
+                                        <p class="text-sm font-semibold text-primary">R$ ${precoMedio.toFixed(2).replace('.', ',')}</p>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-white/20">chevron_right</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Renderizar gráfico de barras
+        function renderVolumeChart(top5) {
+            const container = document.getElementById('volumeChart');
+
+            if (top5.length === 0) {
+                container.innerHTML = `
+                    <p class="text-white/30 text-sm text-center py-4">Sem dados para exibir</p>
+                `;
+                return;
+            }
+
+            const maxQtd = top5[0]?.quantidade || 1;
+
+            // Opacidades decrescentes para as barras
+            const opacities = ['', '/80', '/60', '/40', '/20'];
+
+            container.innerHTML = top5.map((d, i) => {
+                const percent = (d.quantidade / maxQtd) * 100;
+                const opacity = opacities[i] || '/20';
+
+                return `
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-medium">
+                            <span class="text-white/70 truncate flex-1 mr-2">${d.nome}</span>
+                            <span class="text-primary font-bold shrink-0">${d.quantidade}</span>
+                        </div>
+                        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                            <div class="bg-primary${opacity} h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Renderizar métrica do footer
+        function renderFooterMetric(dados) {
+            if (dados.length === 0) {
+                document.getElementById('footerNome').textContent = 'Sem vendas';
+                document.getElementById('footerValor').textContent = 'R$ 0,00';
+                return;
+            }
+
+            const top = dados[0];
+            document.getElementById('footerNome').textContent = top.nome;
+            document.getElementById('footerValor').textContent = `R$ ${top.faturamento.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Iniciar
+        loadDados();
+    </script>
+</body>
+
+</html>

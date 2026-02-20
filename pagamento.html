@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Modo de Pagamento - Geladinho Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "cta": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#1A1A1A",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .payment-card {
+            transition: all 0.2s ease;
+        }
+
+        .payment-card:not(.disabled):hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(11, 239, 239, 0.15);
+        }
+
+        .payment-card:not(.disabled):active {
+            transform: translateY(-2px);
+        }
+
+        .payment-card.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .payment-icon {
+            font-size: 32px;
+            margin-bottom: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .payment-icon {
+                font-size: 48px;
+                margin-bottom: 8px;
+            }
+        }
+
+        .pro-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .stagger-1 {
+            animation-delay: 0.05s;
+        }
+
+        .stagger-2 {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-3 {
+            animation-delay: 0.15s;
+        }
+
+        .stagger-4 {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-5 {
+            animation-delay: 0.25s;
+        }
+
+        .stagger-6 {
+            animation-delay: 0.3s;
+        }
+
+        .stagger-7 {
+            animation-delay: 0.35s;
+        }
+
+        .stagger-8 {
+            animation-delay: 0.4s;
+        }
+
+        .stagger-9 {
+            animation-delay: 0.45s;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display antialiased">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='vendas.html'"
+                class="text-white flex size-10 items-center justify-start cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Modo de
+                Pagamento</h2>
+            <div class="flex w-10 items-center justify-end">
+                <button
+                    class="flex items-center justify-center rounded-xl h-10 w-10 bg-transparent text-white hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="pb-8 px-4 max-w-7xl mx-auto">
+        <!-- Order Summary -->
+        <div class="text-center py-8 animate-fade-in">
+            <p class="text-white/50 text-sm font-medium mb-2">Total do pedido #2</p>
+            <div class="flex items-center justify-center gap-2">
+                <span class="text-white/60 text-3xl font-light">R$</span>
+                <span class="text-white text-6xl font-bold tracking-tight">35,00</span>
+            </div>
+        </div>
+
+        <!-- Payment Methods Grid -->
+        <div class="grid grid-cols-3 md:grid-cols-4 gap-4 mt-8">
+            <!-- Pix -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-1">
+                <div class="payment-icon text-[#00C3A5]">
+                    <svg width="48" height="48" viewBox="0 0 48 48" fill="currentColor" class="w-8 h-8 md:w-12 md:h-12">
+                        <path
+                            d="M29.5 8.9l7.6 7.6c1.2 1.2 1.2 3.1 0 4.2l-15.2 15.2c-1.2 1.2-3.1 1.2-4.2 0l-7.6-7.6c-1.2-1.2-1.2-3.1 0-4.2L25.3 8.9c1.2-1.2 3.1-1.2 4.2 0zm-13 21.8l7.6 7.6c1.2 1.2 3.1 1.2 4.2 0l15.2-15.2c1.2-1.2 1.2-3.1 0-4.2l-2.8-2.8-12.4 12.4c-1.2 1.2-3.1 1.2-4.2 0L11.7 16.1l-2.8 2.8c-1.2 1.2-1.2 3.1 0 4.2l7.6 7.6z" />
+                    </svg>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Pix</p>
+            </div>
+
+            <!-- Dinheiro -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-2">
+                <div class="payment-icon text-[#7CAF5E]">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Dinheiro</p>
+            </div>
+
+            <!-- Stoqui Pay -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-3">
+                <div class="payment-icon text-[#4CAF50]">
+                    <span class="text-3xl md:text-5xl">💵</span>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Stoqui Pay</p>
+            </div>
+
+            <!-- Mercado Pago -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-4">
+                <div class="payment-icon text-[#00A0E3]">
+                    <span class="material-symbols-outlined">handshake</span>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Mercado Pago</p>
+            </div>
+
+            <!-- Pagaleve (Disabled) -->
+            <div
+                class="payment-card disabled bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center relative animate-fade-in stagger-5">
+                <div class="payment-icon text-[#E485D4]">
+                    <span class="text-3xl md:text-5xl">🦋</span>
+                </div>
+                <p class="text-white/40 text-sm md:text-base font-semibold">Pagaleve</p>
+            </div>
+
+            <!-- Cartão de Crédito -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-6">
+                <div class="payment-icon text-[#FF9800]">
+                    <span class="material-symbols-outlined">credit_card</span>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Cartão de</p>
+                <p class="text-white text-sm md:text-base font-semibold -mt-1">Crédito</p>
+            </div>
+
+            <!-- Parcelado (PRO) -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-7">
+                <div class="pro-badge">
+                    <span class="material-symbols-outlined" style="font-size: 10px;">stars</span>
+                    PRO
+                </div>
+                <div class="payment-icon text-[#2196F3]">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Parcelado</p>
+            </div>
+
+            <!-- Fiado (PRO) -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-8">
+                <div class="pro-badge">
+                    <span class="material-symbols-outlined" style="font-size: 10px;">stars</span>
+                    PRO
+                </div>
+                <div class="payment-icon text-[#FFA726]">
+                    <span class="material-symbols-outlined">schedule</span>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Fiado</p>
+            </div>
+
+            <!-- Mais Opções -->
+            <div
+                class="payment-card bg-surface-dark border border-white/10 rounded-2xl p-3 md:p-6 flex flex-col items-center justify-center cursor-pointer relative animate-fade-in stagger-9">
+                <div class="payment-icon text-white/60">
+                    <span class="material-symbols-outlined">more_horiz</span>
+                </div>
+                <p class="text-white text-sm md:text-base font-semibold">Mais</p>
+                <p class="text-white text-sm md:text-base font-semibold -mt-1">Opções</p>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mt-8 p-4 bg-surface-dark/50 border border-white/5 rounded-xl">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">info</span>
+                <div>
+                    <p class="text-white/80 text-sm font-medium">Dica</p>
+                    <p class="text-white/50 text-xs mt-1">Pagamentos via Pix são processados instantaneamente. Para
+                        parcelamento e fiado, é necessário upgrade PRO.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Handle payment method selection
+        document.querySelectorAll('.payment-card:not(.disabled)').forEach(card => {
+            card.addEventListener('click', function () {
+                const paymentMethod = this.querySelector('p').textContent.trim();
+                console.log('Método de pagamento selecionado:', paymentMethod);
+
+                // Visual feedback
+                this.style.borderColor = 'rgb(11, 239, 239)';
+                this.style.backgroundColor = 'rgba(11, 239, 239, 0.05)';
+
+                setTimeout(() => {
+                    this.style.borderColor = '';
+                    this.style.backgroundColor = '';
+
+                    // Navigate based on payment method
+                    if (paymentMethod === 'Pix') {
+                        window.location.href = 'pagamento-pix.html';
+                    } else if (paymentMethod === 'Dinheiro') {
+                        window.location.href = 'pagamento-dinheiro.html';
+                    } else if (paymentMethod === 'Mercado Pago') {
+                        window.location.href = 'mercado-pago.html';
+                    } else {
+                        // For other payment methods, you can add specific pages later
+                        alert('Processamento de ' + paymentMethod + ' em desenvolvimento');
+                        // window.location.href = 'confirmar-pagamento.html?metodo=' + encodeURIComponent(paymentMethod);
+                    }
+                }, 200);
+            });
+        });
+
+        // Handle disabled cards
+        document.querySelectorAll('.payment-card.disabled').forEach(card => {
+            card.addEventListener('click', function (e) {
+                e.preventDefault();
+                alert('Esta forma de pagamento não está disponível no momento.');
+            });
+        });
+    </script>
+</body>
+
+</html>

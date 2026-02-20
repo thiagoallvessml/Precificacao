@@ -1,0 +1,259 @@
+<!-- 
+    EXEMPLO: Integração do Supabase com a página de Categorias
+    
+    Este arquivo demonstra como conectar a página de categorias
+    ao Supabase para armazenar dados reais no banco de dados.
+    
+    ANTES DE USAR:
+    1. Configure suas credenciais em supabase-config.js
+    2. Crie a tabela no Supabase (veja instruções abaixo)
+    3. Adapte este código para suas necessidades
+-->
+
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Categorias (Supabase) - Gestão Geladinhos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "card-border": "#2d4444"
+                    },
+                    fontFamily: {
+                        display: ["Work Sans", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 antialiased">
+    <header class="sticky top-0 z-50 bg-background-dark/80 backdrop-blur-md px-4 pt-6 pb-4 border-b border-slate-800">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='index.html'"
+                    class="p-2 hover:bg-slate-800 rounded-full transition-colors">
+                    <span class="material-icons-round text-2xl">arrow_back</span>
+                </button>
+                <h1 class="text-xl font-bold">Categorias (Exemplo Supabase)</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-4 py-8 max-w-4xl mx-auto">
+        <!-- Instruções -->
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+            <h3 class="font-semibold mb-2 flex items-center gap-2">
+                <span class="material-icons-round text-blue-400">info</span>
+                Como usar este exemplo
+            </h3>
+            <ol class="text-sm text-slate-300 space-y-1 ml-6 list-decimal">
+                <li>Configure suas credenciais em <code
+                        class="bg-slate-700 px-2 py-0.5 rounded">supabase-config.js</code></li>
+                <li>Crie a tabela no Supabase (SQL abaixo)</li>
+                <li>Clique em "Carregar Categorias" para testar</li>
+            </ol>
+        </div>
+
+        <!-- SQL para criar a tabela -->
+        <div class="bg-card-dark border border-card-border rounded-xl p-4 mb-6">
+            <h3 class="font-semibold mb-3">1️⃣ Criar tabela no Supabase</h3>
+            <p class="text-sm text-slate-300 mb-2">
+                No Supabase, vá em <strong>SQL Editor</strong> e execute:
+            </p>
+            <div class="bg-slate-900 rounded-lg p-4 overflow-x-auto">
+                <code class="text-xs text-green-400">
+CREATE TABLE categorias (
+    id BIGSERIAL PRIMARY KEY,
+    nome TEXT NOT NULL,
+    tipo TEXT NOT NULL,
+    icone TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Inserir categorias de exemplo
+INSERT INTO categorias (nome, tipo, icone) VALUES
+    ('Frutas', 'produtos', '🍓'),
+    ('Cremosos', 'produtos', '🍦'),
+    ('Açúcar', 'insumos', '🍬'),
+    ('Embalagens', 'insumos', '📦'),
+    ('Ifood', 'marketplace', '🛵'),
+    ('Rappi', 'marketplace', '🛒');
+                </code>
+            </div>
+        </div>
+
+        <!-- Botão de teste -->
+        <div class="flex gap-3 mb-6">
+            <button id="loadBtn"
+                class="flex-1 bg-primary text-background-dark font-semibold py-3 rounded-xl hover:bg-primary/90 transition-all active:scale-95">
+                <span class="material-icons-round text-sm align-middle">refresh</span>
+                Carregar Categorias
+            </button>
+            <button id="addBtn"
+                class="flex-1 bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 transition-all active:scale-95">
+                <span class="material-icons-round text-sm align-middle">add</span>
+                Adicionar Categoria
+            </button>
+        </div>
+
+        <!-- Status -->
+        <div id="status" class="hidden bg-card-dark border border-card-border rounded-xl p-4 mb-4"></div>
+
+        <!-- Lista de categorias -->
+        <div class="grid md:grid-cols-2 gap-4" id="categoriasList">
+            <div class="bg-card-dark border border-card-border rounded-xl p-6 text-center text-slate-400">
+                Clique em "Carregar Categorias" para buscar do Supabase
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { getAllRecords, insertRecord, deleteRecord } from './supabase-utils.js';
+
+        const loadBtn = document.getElementById('loadBtn');
+        const addBtn = document.getElementById('addBtn');
+        const statusDiv = document.getElementById('status');
+        const categoriasList = document.getElementById('categoriasList');
+
+        function showStatus(message, isError = false) {
+            statusDiv.className = `p-4 rounded-xl mb-4 ${isError ? 'bg-red-500/20 border border-red-500/50 text-red-300' : 'bg-green-500/20 border border-green-500/50 text-green-300'}`;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+            setTimeout(() => statusDiv.classList.add('hidden'), 3000);
+        }
+
+        // Carregar categorias
+        loadBtn.addEventListener('click', async () => {
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<span class="material-icons-round text-sm align-middle animate-spin">refresh</span> Carregando...';
+
+            try {
+                const { data, error } = await getAllRecords('categorias');
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                if (!data || data.length === 0) {
+                    categoriasList.innerHTML = `
+                        <div class="bg-card-dark border border-card-border rounded-xl p-6 text-center text-slate-400 md:col-span-2">
+                            Nenhuma categoria encontrada. Crie a tabela no Supabase primeiro!
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Renderizar categorias
+                categoriasList.innerHTML = data.map(cat => `
+                    <div class="bg-card-dark border border-card-border rounded-xl p-4 hover:border-primary/50 transition-colors">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-3xl">${cat.icone || '📁'}</span>
+                            <div class="flex-1">
+                                <h3 class="font-semibold">${cat.nome}</h3>
+                                <p class="text-xs text-slate-400">${cat.tipo}</p>
+                            </div>
+                            <button onclick="deletarCategoria(${cat.id})" 
+                                class="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                                title="Deletar">
+                                <span class="material-icons-round text-red-400 text-sm">delete</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-500">ID: ${cat.id}</p>
+                    </div>
+                `).join('');
+
+                showStatus(`✅ ${data.length} categoria(s) carregada(s)!`);
+
+            } catch (error) {
+                console.error('Erro:', error);
+                showStatus(`❌ Erro: ${error.message}`, true);
+                categoriasList.innerHTML = `
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center text-red-300 md:col-span-2">
+                        ${error.message}
+                    </div>
+                `;
+            } finally {
+                loadBtn.disabled = false;
+                loadBtn.innerHTML = '<span class="material-icons-round text-sm align-middle">refresh</span> Carregar Categorias';
+            }
+        });
+
+        // Adicionar categoria
+        addBtn.addEventListener('click', async () => {
+            const nome = prompt('Nome da categoria:');
+            if (!nome) return;
+
+            const tipo = prompt('Tipo (produtos, insumos, marketplace, despesas):');
+            if (!tipo) return;
+
+            const icone = prompt('Ícone (emoji):') || '📁';
+
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<span class="material-icons-round text-sm align-middle animate-spin">refresh</span> Adicionando...';
+
+            try {
+                const { data, error } = await insertRecord('categorias', {
+                    nome,
+                    tipo,
+                    icone
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                showStatus('✅ Categoria adicionada!');
+                loadBtn.click(); // Recarregar lista
+
+            } catch (error) {
+                console.error('Erro:', error);
+                showStatus(`❌ Erro: ${error.message}`, true);
+            } finally {
+                addBtn.disabled = false;
+                addBtn.innerHTML = '<span class="material-icons-round text-sm align-middle">add</span> Adicionar Categoria';
+            }
+        });
+
+        // Deletar categoria (global para poder ser chamada do HTML)
+        window.deletarCategoria = async (id) => {
+            if (!confirm('Tem certeza que deseja deletar esta categoria?')) return;
+
+            try {
+                const { error } = await deleteRecord('categorias', id);
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                showStatus('✅ Categoria deletada!');
+                loadBtn.click(); // Recarregar lista
+
+            } catch (error) {
+                console.error('Erro:', error);
+                showStatus(`❌ Erro: ${error.message}`, true);
+            }
+        };
+    </script>
+</body>
+
+</html>

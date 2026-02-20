@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Login - Gestão Geladinhos</title>
+    <meta name="description" content="Faça login para acessar sua conta de Gestão de Geladinhos Gourmet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "danger": "#ff4d4d"
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: #0F0F0F;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .login-bg {
+            background: radial-gradient(ellipse at 30% 50%, rgba(19, 236, 236, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(19, 236, 236, 0.03) 0%, transparent 40%);
+        }
+
+        .glow-input:focus {
+            box-shadow: 0 0 0 3px rgba(19, 236, 236, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #13ecec 0%, #0cc8c8 100%);
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-8px);
+            }
+
+            75% {
+                transform: translateX(8px);
+            }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .fade-in-left {
+            animation: fadeInLeft 0.6s ease-out;
+        }
+
+
+
+        .password-toggle {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #13ecec;
+        }
+
+        /* Brand panel decorative orb */
+        .brand-orb {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(19, 236, 236, 0.12) 0%, transparent 70%);
+            filter: blur(60px);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .feature-item {
+            transition: transform 0.2s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen font-display login-bg">
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <!-- Horizontal container: two panels on lg+ -->
+        <div
+            class="w-full max-w-5xl flex flex-col lg:flex-row bg-card-dark rounded-3xl border border-white/5 shadow-2xl overflow-hidden fade-in">
+
+            <!-- ========== LEFT PANEL: BRAND ========== -->
+            <div
+                class="relative lg:w-1/2 p-8 sm:p-10 lg:p-12 flex flex-col justify-center items-center lg:items-start text-center lg:text-left border-b lg:border-b-0 lg:border-r border-white/5">
+                <div class="brand-orb"></div>
+
+                <div class="relative z-10 w-full">
+                    <!-- Logo -->
+                    <div
+                        class="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-background-dark border border-white/10 flex items-center justify-center mb-6 shadow-lg shadow-primary/5 mx-auto lg:mx-0">
+                        <span class="text-4xl lg:text-5xl">🍦</span>
+                    </div>
+
+                    <h1 class="text-2xl lg:text-3xl font-extrabold text-white mb-2">Gestão Geladinhos</h1>
+                    <p class="text-sm text-gray-500 mb-8 lg:mb-10 max-w-xs mx-auto lg:mx-0">Sua plataforma completa para
+                        gerenciar receitas, custos, vendas e afiliados.</p>
+
+                    <!-- Features list -->
+                    <div class="space-y-4 hidden sm:block">
+                        <div class="feature-item flex items-center gap-3">
+                            <div
+                                class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <span class="material-icons-round text-primary text-lg">receipt_long</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Precificação Inteligente</p>
+                                <p class="text-[11px] text-gray-500">Calcule custos e margens automaticamente</p>
+                            </div>
+                        </div>
+                        <div class="feature-item flex items-center gap-3">
+                            <div
+                                class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <span class="material-icons-round text-primary text-lg">trending_up</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Vendas & Relatórios</p>
+                                <p class="text-[11px] text-gray-500">Acompanhe performance em tempo real</p>
+                            </div>
+                        </div>
+                        <div class="feature-item flex items-center gap-3">
+                            <div
+                                class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <span class="material-icons-round text-primary text-lg">handshake</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Programa de Afiliados</p>
+                                <p class="text-[11px] text-gray-500">Indique e ganhe comissões</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer on brand panel -->
+                    <p class="text-[10px] text-gray-700 mt-8 lg:mt-12 hidden lg:block">
+                        Versão 2.1.0 • Geladinhos Gourmet
+                    </p>
+                </div>
+            </div>
+
+            <!-- ========== RIGHT PANEL: FORM ========== -->
+            <div class="lg:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
+
+                <h2 class="text-lg font-bold text-white mb-1">Bem-vindo de volta!</h2>
+                <p class="text-xs text-gray-500 mb-6">Faça login para acessar sua conta</p>
+
+
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                        E-mail
+                    </label>
+                    <div class="relative">
+                        <span class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">email</span>
+                        <input id="inputEmail" type="email" placeholder="seu@email.com"
+                            class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-5">
+                    <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                        Senha
+                    </label>
+                    <div class="relative">
+                        <span class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">lock</span>
+                        <input id="inputPassword" type="password" placeholder="••••••••"
+                            class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-12 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                        <span onclick="togglePassword()"
+                            class="material-icons-round absolute right-3 top-3.5 text-gray-600 text-lg password-toggle">visibility_off</span>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="errorMessage"
+                    class="hidden bg-danger/10 border border-danger/20 rounded-xl p-3 text-danger text-sm flex items-center gap-2 mb-4">
+                    <span class="material-icons-round text-lg">error</span>
+                    <span id="errorText">Erro ao fazer login</span>
+                </div>
+
+                <!-- Login Button -->
+                <button id="btnLogin" onclick="fazerLogin()"
+                    class="btn-primary w-full text-background-dark font-bold py-4 rounded-xl text-sm flex items-center justify-center gap-2 mb-4">
+                    <span id="btnLoginText">Entrar</span>
+                    <span id="btnLoginLoader" class="hidden">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </span>
+                </button>
+
+                <!-- Divider -->
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="flex-1 h-px bg-white/5"></div>
+                    <span class="text-[10px] text-gray-600 uppercase tracking-widest font-bold">ou</span>
+                    <div class="flex-1 h-px bg-white/5"></div>
+                </div>
+
+                <!-- Cadastro Link -->
+                <a href="cadastro.html"
+                    class="block text-center w-full py-3.5 rounded-xl border-2 border-white/10 text-white font-semibold text-sm hover:border-primary/30 hover:bg-primary/5 transition-all">
+                    Criar uma Conta
+                </a>
+
+                <!-- Mobile footer -->
+                <p class="text-center text-[10px] text-gray-700 mt-6 lg:hidden">
+                    Versão 2.1.0 • Geladinhos Gourmet
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+
+        // Verificar se já está logado
+        async function checkExistingSession() {
+            if (!supabase) return;
+
+            // Se veio do logout, forçar limpeza da sessão
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('logout')) {
+                localStorage.removeItem('userRole');
+                try {
+                    await supabase.auth.signOut({ scope: 'global' });
+                } catch (e) { /* ignora */ }
+                // Limpar o parâmetro da URL sem recarregar
+                window.history.replaceState({}, '', 'login.html');
+                return; // NÃO redirecionar
+            }
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+
+                // Tentar via RPC primeiro
+                let userRole = null;
+                try {
+                    const { data: rpcRole } = await supabase.rpc('get_user_role');
+                    if (rpcRole) userRole = rpcRole;
+                } catch (e) { /* ignora */ }
+
+                // Fallback: leitura direta
+                if (!userRole) {
+                    try {
+                        const { data: perfil } = await supabase
+                            .from('perfis_usuarios')
+                            .select('role')
+                            .eq('id', session.user.id)
+                            .single();
+                        if (perfil) userRole = perfil.role;
+                    } catch (e) { /* ignora */ }
+                }
+
+                if (userRole) {
+                    redirectByRole(userRole);
+                }
+            } catch (e) {
+                console.warn('checkExistingSession falhou:', e);
+            }
+        }
+
+
+
+        // Toggle password visibility
+        window.togglePassword = function () {
+            const input = document.getElementById('inputPassword');
+            const icon = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        };
+
+        // Fazer login
+        window.fazerLogin = async function () {
+            const email = document.getElementById('inputEmail').value.trim();
+            const password = document.getElementById('inputPassword').value;
+            const errorEl = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const btn = document.getElementById('btnLogin');
+
+            // Validações
+            if (!email || !password) {
+                showError('Preencha todos os campos.');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showError('E-mail inválido.');
+                return;
+            }
+
+            // Loading
+            setLoading(true);
+            errorEl.classList.add('hidden');
+
+            if (!supabase) {
+                // Modo demo
+                setLoading(false);
+                redirectByRole('dono');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+
+                // Buscar role do usuário — tentar via RPC primeiro (mais confiável com RLS)
+                let userRole = null;
+
+                try {
+                    const { data: rpcRole, error: rpcErr } = await supabase.rpc('get_user_role');
+                    console.log('🔍 RPC get_user_role resultado:', rpcRole, 'erro:', rpcErr);
+                    if (rpcRole && !rpcErr) {
+                        userRole = rpcRole;
+                    }
+                } catch (rpcErr) {
+                    console.warn('⚠️ RPC get_user_role falhou:', rpcErr);
+                }
+
+                // Fallback: tentar leitura direta da tabela se RPC não retornou
+                if (!userRole) {
+                    try {
+                        const { data: perfil, error: perfilErr } = await supabase
+                            .from('perfis_usuarios')
+                            .select('role')
+                            .eq('id', data.user.id)
+                            .single();
+
+                        console.log('🔍 Leitura direta perfis_usuarios:', perfil, 'erro:', perfilErr);
+
+                        if (perfil && perfil.role) {
+                            userRole = perfil.role;
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ Leitura direta do perfil falhou:', e);
+                    }
+                }
+
+                // Se nada funcionou, usar 'dono' como padrão
+                if (!userRole) {
+                    userRole = 'dono';
+                    console.warn('⚠️ Nenhum role encontrado, usando padrão: dono');
+                }
+
+                console.log('✅ Login OK! Role final:', userRole);
+                redirectByRole(userRole);
+
+            } catch (err) {
+                console.error('Erro login:', err);
+                if (err.message?.includes('Invalid login')) {
+                    showError('E-mail ou senha incorretos.');
+                } else if (err.message?.includes('Email not confirmed')) {
+                    showError('Confirme seu e-mail antes de fazer login.');
+                } else {
+                    showError(err.message || 'Erro ao fazer login. Tente novamente.');
+                }
+                setLoading(false);
+            }
+        };
+
+        function redirectByRole(role) {
+            // Salvar role no localStorage para uso em outras páginas
+            localStorage.setItem('userRole', role);
+            switch (role) {
+                case 'admin':
+                    window.location.href = 'admin-dashboard.html';
+                    break;
+                case 'afiliado':
+                    window.location.href = 'perfil-afiliado.html';
+                    break;
+                case 'dono':
+                default:
+                    window.location.href = 'index.html';
+                    break;
+            }
+        }
+
+        function showError(msg) {
+            const errorEl = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = msg;
+            errorEl.classList.remove('hidden');
+            errorEl.classList.add('shake');
+            setTimeout(() => errorEl.classList.remove('shake'), 300);
+        }
+
+        function setLoading(loading) {
+            const btn = document.getElementById('btnLogin');
+            const text = document.getElementById('btnLoginText');
+            const loader = document.getElementById('btnLoginLoader');
+            btn.disabled = loading;
+            text.textContent = loading ? 'Entrando...' : 'Entrar';
+            loader.classList.toggle('hidden', !loading);
+        }
+
+        // Enter key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') fazerLogin();
+        });
+
+        // Init
+        checkExistingSession();
+    </script>
+</body>
+
+</html>

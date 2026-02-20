@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Detalhes da Receita - Geladinhos Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+    <!-- Top Navigation Bar -->
+    <header
+        class="sticky top-0 z-10 bg-background-light dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+        <div class="flex items-center p-3 justify-between max-w-6xl mx-auto">
+            <div class="flex items-center gap-2">
+                <button onclick="window.location.href='receitas.html'"
+                    class="cursor-pointer hover:bg-white/10 rounded-full p-1 transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h2 class="text-lg font-bold tracking-tight">Detalhes da Receita</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="flex items-center justify-center p-1 hover:bg-white/10 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">share</span>
+                </button>
+                <button class="flex items-center justify-center p-1 hover:bg-white/10 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">more_vert</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto pb-24">
+        <!-- Grid Container for Desktop -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <!-- Left Column: Header + Stats -->
+            <div>
+                <!-- Recipe Profile Header -->
+                <div class="flex p-4 @container">
+                    <div class="flex w-full flex-col gap-4 @[520px]:flex-row @[520px]:justify-between">
+                        <div class="flex gap-4">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl min-h-24 w-24 border-2 border-primary/20"
+                                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAlWDGolGHWrxkixh3R1R9z_ag5cB46uRlTJyxxVEEtam_RDgg5vxFfzEhS4zJPxJpQJB6YQpZqiJbfmgRzv5cwr7YyxgdlUYXgX22Spnc1Pw_g23UMNhn6lyOK1X_8hIkrcfn7IZAEuJLLyyU0A_BhlNxvxBBZ2kfURhHgxAP86dUtKRhYl7MMUdiXmHgwgf8tKj6BdaOalgluCfyYS8mN1Ryp4m_2oR4ZFR90d_JLky4ZhXIM_Mftjbtj4buihDLyG3xee_93u8E");'>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <p id="nomeReceita" class="text-[20px] font-bold leading-tight tracking-tight">Ninho com
+                                    Calda de Morango
+                                </p>
+                                <p id="descricaoReceita" class="text-slate-500 dark:text-[#9db9b9] text-sm font-normal">
+                                    Geladinho Gourmet
+                                    Premium</p>
+                            </div>
+                        </div>
+                        <div class="flex w-full gap-3 mt-2">
+                            <button id="btnEditar"
+                                class="flex items-center justify-center rounded-lg h-10 px-4 bg-slate-200 dark:bg-[#283939] text-slate-900 dark:text-white text-sm font-bold flex-1 hover:bg-slate-300 dark:hover:bg-[#3b5454] transition-colors">
+                                <span class="material-symbols-outlined text-sm mr-2">edit</span>
+                                <span class="truncate">Editar</span>
+                            </button>
+                            <button id="btnExcluir"
+                                class="flex items-center justify-center rounded-lg h-10 px-4 bg-red-500 hover:bg-red-600 text-white text-sm font-bold flex-1 transition-colors">
+                                <span class="material-symbols-outlined text-sm mr-2">delete</span>
+                                <span class="truncate">Excluir</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Row -->
+                <div class="flex flex-wrap gap-3 p-4">
+                    <div
+                        class="flex min-w-[100px] flex-1 flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-transparent shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                            <span class="material-symbols-outlined text-lg">inventory_2</span>
+                            <p class="text-[7px] md:text-xs font-medium uppercase tracking-wider">Rendimento</p>
+                        </div>
+                        <p class="text-xl font-bold">12 unid.</p>
+                    </div>
+                    <div
+                        class="flex min-w-[100px] flex-1 flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-transparent shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                            <span class="material-symbols-outlined text-lg">payments</span>
+                            <p class="text-xs font-medium uppercase tracking-wider">Preço Base</p>
+                        </div>
+                        <p class="text-xl font-bold">R$ 0,00</p>
+                    </div>
+                    <div
+                        class="flex min-w-[100px] flex-1 flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-transparent shadow-sm">
+                        <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                            <span class="material-symbols-outlined text-lg">schedule</span>
+                            <p class="text-xs font-medium uppercase tracking-wider">Tempo</p>
+                        </div>
+                        <p class="text-xl font-bold">60 min</p>
+                    </div>
+                </div>
+            </div> <!-- End Left Column -->
+
+            <!-- Right Column: Accordions -->
+            <div>
+                <!-- Detailed Breakdown Accordions -->
+                <div class="px-4">
+                    <h3 class="text-lg font-bold pb-4">Detalhamento de Custos</h3>
+                    <div class="flex flex-col gap-3">
+                        <!-- Ingredientes -->
+                        <details id="details-ingredientes"
+                            class="flex flex-col rounded-xl border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-background-dark/50 px-4 py-2 group overflow-hidden"
+                            open="">
+                            <summary class="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-primary">shopping_basket</span>
+                                    <p class="text-sm font-bold uppercase tracking-wide">Ingredientes</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="total-ingredientes" class="text-sm font-bold text-primary">R$ 0,00</span>
+                                    <span
+                                        class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                                </div>
+                            </summary>
+                            <div id="list-ingredientes"
+                                class="flex flex-col gap-3 pb-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2">
+                                <p class="text-xs text-slate-500 italic">Carregando...</p>
+                            </div>
+                        </details>
+
+                        <!-- Embalagens -->
+                        <details id="details-embalagens"
+                            class="flex flex-col rounded-xl border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-background-dark/50 px-4 py-2 group overflow-hidden">
+                            <summary class="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-primary">package_2</span>
+                                    <p class="text-sm font-bold uppercase tracking-wide">Embalagens</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="total-embalagens" class="text-sm font-bold text-primary">R$ 0,00</span>
+                                    <span
+                                        class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                                </div>
+                            </summary>
+                            <div id="list-embalagens"
+                                class="flex flex-col gap-3 pb-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2">
+                                <p class="text-xs text-slate-500 italic">Nenhum item.</p>
+                            </div>
+                        </details>
+
+                        <!-- Equipamentos -->
+                        <details id="details-equipamentos"
+                            class="flex flex-col rounded-xl border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-background-dark/50 px-4 py-2 group overflow-hidden">
+                            <summary class="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-primary">blender</span>
+                                    <p class="text-sm font-bold uppercase tracking-wide">Equipamentos</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="total-equipamentos" class="text-sm font-bold text-primary">R$ 0,00</span>
+                                    <span
+                                        class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                                </div>
+                            </summary>
+                            <div id="list-equipamentos"
+                                class="flex flex-col gap-3 pb-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2">
+                                <p class="text-xs text-slate-500 italic">Nenhum item.</p>
+                            </div>
+                        </details>
+
+                        <!-- Mão de Obra -->
+                        <details id="details-mao-obra"
+                            class="flex flex-col rounded-xl border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-background-dark/50 px-4 py-2 group overflow-hidden">
+                            <summary class="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-primary">engineering</span>
+                                    <p class="text-sm font-bold uppercase tracking-wide">Mão de Obra</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="total-mao-obra" class="text-sm font-bold text-primary">R$ 0,00</span>
+                                    <span
+                                        class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                                </div>
+                            </summary>
+                            <div id="list-mao-obra"
+                                class="flex flex-col gap-3 pb-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2">
+                                <p class="text-xs text-slate-500 italic">Carregando...</p>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div> <!-- End Right Column -->
+        </div> <!-- End Grid Container -->
+
+        <!-- Summary Cost Block (Full Width) -->
+        <div
+            class="mx-4 mt-8 p-6 rounded-2xl bg-slate-900 dark:bg-slate-800 shadow-xl border border-white/10 text-white">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h4 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Resumo Financeiro</h4>
+                    <p class="text-xl md:text-3xl font-bold tracking-tighter">Custo Total</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xl md:text-3xl font-bold text-white tracking-tighter">R$ 79.54</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Preço Total -->
+                <div class="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
+                    <p class="text-blue-400 text-xs font-medium mb-1">Preço Total</p>
+                    <p id="summary-preco-total" class="text-lg font-bold text-blue-400">R$ 0,00</p>
+                </div>
+
+                <!-- Custo Unitário -->
+                <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                    <p class="text-slate-400 text-xs font-medium mb-1">Custo Unitário</p>
+                    <p id="summary-custo-unit" class="text-lg font-bold">R$ 0,00</p>
+                </div>
+
+                <!-- Lucro Total -->
+                <div class="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
+                    <p class="text-green-400 text-xs font-medium mb-1">Lucro Total</p>
+                    <p id="summary-lucro-total" class="text-lg font-bold text-green-400">R$ 0,00</p>
+                </div>
+
+                <!-- Lucro Unitário -->
+                <div class="bg-primary/10 rounded-xl p-3 border border-primary/20">
+                    <p class="text-primary text-xs font-medium mb-1">Lucro Unitário</p>
+                    <p id="summary-lucro-unit" class="text-lg font-bold text-primary">R$ 0,00</p>
+                </div>
+
+                <!-- Margem -->
+                <div class="bg-yellow-500/10 rounded-xl p-3 border border-yellow-500/20">
+                    <p class="text-yellow-400 text-xs font-medium mb-1">Margem (%)</p>
+                    <p id="summary-margem" class="text-lg font-bold text-yellow-400">0%</p>
+                </div>
+
+                <!-- Markup -->
+                <div class="bg-purple-500/10 rounded-xl p-3 border border-purple-500/20">
+                    <p class="text-purple-400 text-xs font-medium mb-1">Markup</p>
+                    <p id="summary-markup" class="text-lg font-bold text-purple-400">0x</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        // Force dark mode
+        document.documentElement.classList.add('dark');
+
+        const supabase = getSupabase();
+        const urlParams = new URLSearchParams(window.location.search);
+        const receitaId = urlParams.get('id');
+
+        // Elements
+        const btnExcluir = document.getElementById('btnExcluir');
+        const btnEditar = document.getElementById('btnEditar');
+        const nomeReceitaEl = document.getElementById('nomeReceita');
+        const subtituloEl = document.getElementById('descricaoReceita');
+
+        // Stats elements
+        const rendimentoEl = document.querySelector('.text-2xl.font-bold') || document.evaluate("//p[contains(text(), '12 unid.')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        const precoSugEl = document.evaluate("//p[contains(text(), 'R$ 7.37')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        const tempoEl = document.evaluate("//p[contains(text(), '60 min')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+
+        // Containers for lists
+        // Note: We need better selectors or to rewrite the HTML body to have IDs for these lists.
+        // For now, I will use DOM traversal to find the details elements by their summary title.
+
+        let configs = {
+            custoMaoObraHora: 25.00,
+            custoKwh: 0.85,
+            custoGasHora: 2.00
+        };
+
+        async function init() {
+            if (!receitaId) {
+                alert('ID da receita não encontrado!');
+                window.location.href = 'receitas.html';
+                return;
+            }
+
+            try {
+                // 1. Fetch Configs
+                const { data: configData } = await supabase.from('configuracoes').select('*');
+                if (configData) {
+                    configData.forEach(c => {
+                        if (c.chave === 'custo_mao_obra_hora') configs.custoMaoObraHora = parseFloat(c.valor) || 25.00;
+                        if (c.chave === 'custo_kwh') configs.custoKwh = parseFloat(c.valor) || 0.85;
+                        if (c.chave === 'custo_gas_hora') configs.custoGasHora = parseFloat(c.valor) || 2.00;
+                    });
+                }
+
+                // 2. Fetch Recipe
+                const { data: receita, error: recError } = await supabase
+                    .from('receitas')
+                    .select('*')
+                    .eq('id', receitaId)
+                    .single();
+
+                if (recError) throw recError;
+                if (!receita) throw new Error('Receita não encontrada');
+
+                updateHeader(receita);
+
+                // 3. Fetch Recipe Items (Insumos)
+                // We need to join with insumos table. Supabase JS doesn't do deep joins easily without foreign keys set up perfectly for auto-detection or using views.
+                // We will fetch receitas_insumos and then fetch the insumos details.
+                const { data: riData, error: riError } = await supabase
+                    .from('receitas_insumos')
+                    .select('*')
+                    .eq('receita_id', receitaId);
+
+                if (riError) throw riError;
+
+                const insumosIds = (riData || []).map(ri => ri.insumo_id);
+                let insumosMap = {};
+
+                if (insumosIds.length > 0) {
+                    const { data: insumosData, error: iError } = await supabase
+                        .from('insumos')
+                        .select('*')
+                        .in('id', insumosIds);
+
+                    if (iError) throw iError;
+                    (insumosData || []).forEach(i => insumosMap[i.id] = i);
+                }
+
+                // 4. Fetch Product (to get Preço Base and imagem)
+                const { data: produtosData, error: prodError } = await supabase
+                    .from('produtos')
+                    .select('preco_base, imagem_url')
+                    .eq('receita_id', receitaId)
+                    .limit(1);
+
+                const produtoData = (produtosData && produtosData.length > 0) ? produtosData[0] : null;
+
+                // 5. Calculate Costs
+                const calculations = calculateCosts(receita, riData || [], insumosMap);
+
+                // 6. Render Data
+                renderBreakdown(calculations, receita, riData, insumosMap);
+                renderSummary(calculations, receita, produtoData);
+                updateRecipeImage(produtoData, receita);
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                alert('Erro: ' + error.message);
+            }
+        }
+
+        function updateHeader(receita) {
+            if (nomeReceitaEl) nomeReceitaEl.textContent = receita.nome;
+            if (subtituloEl) subtituloEl.textContent = receita.descricao || 'Receita Personalizada';
+
+            // Stats
+            // Find elements by their label siblings if IDs are missing
+            const allLabels = document.querySelectorAll('.uppercase.tracking-wider');
+            allLabels.forEach(label => {
+                const text = label.textContent.trim();
+                const valueEl = label.parentElement.nextElementSibling;
+                if (text === 'RENDIMENTO') valueEl.textContent = `${receita.rendimento_unidades || 0} un`;
+                if (text === 'TEMPO') valueEl.textContent = `${receita.tempo_preparo || 0} min`;
+                // Precio Sug. will be updated in renderSummary
+            });
+
+            if (btnEditar) {
+                btnEditar.onclick = () => window.location.href = `adicionar-receita.html?id=${receita.id}`;
+            }
+            if (btnExcluir) {
+                btnExcluir.onclick = handleDelete;
+            }
+        }
+
+        function updateRecipeImage(produto, receita) {
+            const imageEl = document.querySelector('.bg-center.bg-no-repeat.aspect-square');
+            if (imageEl) {
+                const imagemUrl = (produto && produto.imagem_url) || receita.imagem_url;
+                if (imagemUrl) {
+                    imageEl.style.backgroundImage = `url("${imagemUrl}")`;
+                } else {
+                    // Manter gradiente padrão se não houver imagem
+                    imageEl.style.backgroundImage = 'linear-gradient(to bottom right, #f59e0b, #ec4899)';
+                }
+            }
+        }
+
+        function calculateCosts(receita, items, insumosMap) {
+            let cats = {
+                ingredientes: { total: 0, items: [] },
+                embalagens: { total: 0, items: [] },
+                equipamentos: { total: 0, items: [] },
+                mao_obra: { total: 0, items: [], time: receita.tempo_preparo || 0 }
+            };
+
+            items.forEach(ri => {
+                const insumo = insumosMap[ri.insumo_id];
+                if (!insumo) return;
+
+                let cost = 0;
+                let qtd = parseFloat(ri.quantidade) || 0;
+
+                if (insumo.tipo === 'ingrediente') {
+                    cost = qtd * (insumo.custo_unitario || 0);
+                    cats.ingredientes.items.push({ name: insumo.nome, qtd, unit: insumo.unidade_medida, cost });
+                    cats.ingredientes.total += cost;
+                } else if (insumo.tipo === 'embalagem') {
+                    cost = qtd * (insumo.custo_unitario || 0);
+                    cats.embalagens.items.push({ name: insumo.nome, qtd, unit: insumo.unidade_medida, cost });
+                    cats.embalagens.total += cost;
+                } else if (insumo.tipo === 'equipamento') {
+                    // Qtd is minutes used
+                    const hours = qtd / 60;
+                    cost = hours * (insumo.custo_unitario || 0);
+                    cats.equipamentos.items.push({ name: insumo.nome, qtd, unit: 'min', cost });
+                    cats.equipamentos.total += cost;
+                }
+            });
+
+            // Labor Cost
+            const laborCost = (cats.mao_obra.time / 60) * configs.custoMaoObraHora;
+            cats.mao_obra.total = laborCost;
+            cats.mao_obra.items.push({
+                name: 'Tempo de Produção',
+                qtd: cats.mao_obra.time,
+                unit: 'min',
+                cost: laborCost
+            });
+
+            const totalCost = cats.ingredientes.total + cats.embalagens.total + cats.equipamentos.total + cats.mao_obra.total;
+            return { cats, totalCost };
+        }
+
+        function renderBreakdown(calc, receita, items, insumosMap) {
+            // Helper to render a category
+            const renderCategory = (listId, totalId, categoryData) => {
+                const totalEl = document.getElementById(totalId);
+                const listEl = document.getElementById(listId);
+
+                if (totalEl) totalEl.textContent = `R$ ${categoryData.total.toFixed(2)}`;
+
+                if (listEl) {
+                    if (categoryData.items.length === 0) {
+                        listEl.innerHTML = '<p class="text-xs text-slate-500 italic p-2">Nenhum item.</p>';
+                    } else {
+                        listEl.innerHTML = categoryData.items.map(item => `
+                            <div class="flex justify-between items-center text-sm py-1">
+                                <span class="text-slate-600 dark:text-[#9db9b9]">${item.name} <span class="text-xs opacity-70">(${item.qtd} ${item.unit})</span></span>
+                                <span class="font-semibold">R$ ${item.cost.toFixed(2)}</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            };
+
+            renderCategory('list-ingredientes', 'total-ingredientes', calc.cats.ingredientes);
+            renderCategory('list-embalagens', 'total-embalagens', calc.cats.embalagens);
+            renderCategory('list-equipamentos', 'total-equipamentos', calc.cats.equipamentos);
+            renderCategory('list-mao-obra', 'total-mao-obra', calc.cats.mao_obra);
+        }
+
+        function renderSummary(calc, receita, produto) {
+            const rendimento = receita.rendimento_unidades || 1;
+            const custoTotal = calc.totalCost;
+            const custoUnit = custoTotal / rendimento;
+            const precoBase = produto ? (parseFloat(produto.preco_base) || 0) : 0;
+
+            // Stats Elements - defined globally or found here
+            // We use the same strategy as before but with error checking
+            const summaryBox = document.querySelector('.bg-slate-900.shadow-xl'); // The dark summary box
+
+            if (summaryBox) {
+                // Total Cost
+                const totalEl = summaryBox.querySelector('.text-right p');
+                if (totalEl) totalEl.textContent = `R$ ${custoTotal.toFixed(2)}`;
+
+                // Calculate profit values
+                const profit = precoBase - custoUnit;
+                const profitTotal = profit * rendimento;
+                const margin = precoBase > 0 ? ((profit / precoBase) * 100).toFixed(0) : 0;
+                const markup = custoUnit > 0 ? ((profit / custoUnit) * 100).toFixed(0) : 0;
+
+                console.log('💰 Cálculos de Lucro:', {
+                    rendimento,
+                    precoBase,
+                    custoUnit,
+                    profit,
+                    profitTotal,
+                    margin,
+                    markup,
+                    'profit * rendimento': profit * rendimento
+                });
+
+                // Update summary boxes using IDs
+                const custoUnitEl = document.getElementById('summary-custo-unit');
+                const precoTotalEl = document.getElementById('summary-preco-total');
+                const lucroTotalEl = document.getElementById('summary-lucro-total');
+                const lucroUnitEl = document.getElementById('summary-lucro-unit');
+                const margemEl = document.getElementById('summary-margem');
+                const markupEl = document.getElementById('summary-markup');
+
+                console.log('🎯 Elementos encontrados:', {
+                    custoUnitEl,
+                    precoTotalEl,
+                    lucroTotalEl,
+                    lucroUnitEl,
+                    margemEl,
+                    markupEl
+                });
+
+                const precoTotal = precoBase * rendimento;
+
+                if (custoUnitEl) {
+                    custoUnitEl.textContent = `R$ ${custoUnit.toFixed(2)}`;
+                    console.log('✅ Custo Unit atualizado para:', custoUnitEl.textContent);
+                }
+                if (precoTotalEl) {
+                    precoTotalEl.textContent = `R$ ${precoTotal.toFixed(2)}`;
+                    console.log('✅ Preço Total atualizado para:', precoTotalEl.textContent);
+                }
+                if (lucroTotalEl) {
+                    lucroTotalEl.textContent = `R$ ${profitTotal.toFixed(2)}`;
+                    console.log('✅ Lucro Total atualizado para:', lucroTotalEl.textContent);
+                    // Color based on total profit
+                    if (profitTotal < 0) {
+                        lucroTotalEl.classList.remove('text-green-400');
+                        lucroTotalEl.classList.add('text-red-400');
+                    } else {
+                        lucroTotalEl.classList.add('text-green-400');
+                        lucroTotalEl.classList.remove('text-red-400');
+                    }
+                }
+                if (lucroUnitEl) {
+                    lucroUnitEl.textContent = `R$ ${profit.toFixed(2)}`;
+                    console.log('✅ Lucro Unit atualizado para:', lucroUnitEl.textContent);
+                    // Color based on unit profit
+                    if (profit < 0) {
+                        lucroUnitEl.classList.remove('text-primary');
+                        lucroUnitEl.classList.add('text-red-400');
+                    } else {
+                        lucroUnitEl.classList.add('text-primary');
+                        lucroUnitEl.classList.remove('text-red-400');
+                    }
+                }
+                if (margemEl) {
+                    margemEl.textContent = `${margin}%`;
+                    console.log('✅ Margem atualizada para:', margemEl.textContent);
+                    // Color based on margin
+                    if (parseFloat(margin) < 0) {
+                        margemEl.classList.remove('text-yellow-400');
+                        margemEl.classList.add('text-red-400');
+                    } else {
+                        margemEl.classList.add('text-yellow-400');
+                        margemEl.classList.remove('text-red-400');
+                    }
+                }
+                if (markupEl) {
+                    const markupMultiplier = custoUnit > 0 ? (precoBase / custoUnit).toFixed(1) : 0;
+                    markupEl.textContent = `${markupMultiplier}x`;
+                    console.log('✅ Markup atualizado para:', markupEl.textContent);
+                    // Color based on markup
+                    if (parseFloat(markupMultiplier) < 1) {
+                        markupEl.classList.remove('text-purple-400');
+                        markupEl.classList.add('text-red-400');
+                    } else {
+                        markupEl.classList.add('text-purple-400');
+                        markupEl.classList.remove('text-red-400');
+                    }
+                }
+
+                // Update "Preço Base" in Top Stats
+                const headers = document.querySelectorAll('p.uppercase.tracking-wider');
+                headers.forEach(h => {
+                    if (h.textContent.toUpperCase().includes('PREÇO BASE')) {
+                        const priceEl = h.parentElement.parentElement.querySelector('p.font-bold');
+                        if (priceEl) {
+                            if (produto) {
+                                priceEl.textContent = `R$ ${precoBase.toFixed(2)}`;
+                                priceEl.classList.remove('text-slate-400', 'text-base');
+                                priceEl.classList.add('text-xl', 'font-bold');
+                            } else {
+                                priceEl.textContent = 'Sem Produto';
+                                priceEl.classList.add('text-slate-400', 'text-base');
+                                priceEl.classList.remove('text-xl', 'font-bold');
+                            }
+                        }
+                    }
+                });
+
+            }
+        }
+
+        async function handleDelete() {
+            if (!confirm('Tem certeza que deseja excluir esta receita? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                btnExcluir.disabled = true;
+                btnExcluir.innerHTML = '<span class="material-symbols-outlined animate-spin mr-2">refresh</span> Excluindo...';
+
+                // Delete from Supabase
+                const { error } = await supabase
+                    .from('receitas')
+                    .delete()
+                    .eq('id', receitaId);
+
+                if (error) throw error;
+
+                alert('Receita excluída com sucesso!');
+                window.location.href = 'receitas.html';
+
+            } catch (error) {
+                console.error('Erro ao excluir:', error);
+                alert('Erro ao excluir: ' + (error.message || 'Erro desconhecido'));
+                btnExcluir.disabled = false;
+                btnExcluir.innerHTML = '<span class="material-symbols-outlined text-sm mr-2">delete</span> <span class="truncate">Excluir</span>';
+            }
+        }
+
+        // Run
+        if (supabase) {
+            init();
+        } else {
+            console.error('Supabase não inicializado');
+        }
+    </script>
+</body>
+
+</html>

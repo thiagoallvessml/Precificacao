@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Perfil do Dono do Negócio - Geladinhos Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .active-nav-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display pb-24">
+
+    <!-- Header Section -->
+    <header class="pt-12 pb-6 px-6 flex flex-col items-center">
+        <div class="relative mb-4">
+            <div class="w-24 h-24 rounded-full border-4 border-primary/30 p-1">
+                <div class="w-full h-full rounded-full bg-card-dark flex items-center justify-center text-4xl">
+                    🍦
+                </div>
+            </div>
+            <button onclick="document.getElementById('editModal').classList.remove('hidden')"
+                class="absolute bottom-0 right-0 bg-primary text-background-dark p-1.5 rounded-full shadow-lg border-2 border-background-dark">
+                <span class="material-symbols-outlined text-sm">edit</span>
+            </button>
+        </div>
+        <h1 id="userName" class="text-2xl font-bold">Carlos Pops</h1>
+        <div class="mt-2 inline-flex items-center px-3 py-1 bg-primary/20 border border-primary/30 rounded-full">
+            <span class="text-primary text-xs font-semibold tracking-wider uppercase">Dono do Negócio</span>
+        </div>
+    </header>
+
+    <!-- Subscription Highlight -->
+    <section class="px-4 mb-8">
+        <div id="planCard"
+            class="bg-gradient-to-br from-card-dark to-[#122424] p-5 rounded-xl border border-primary/20 shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+                <span id="planBgIcon" class="material-symbols-outlined text-6xl text-primary">verified_user</span>
+            </div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-primary/70 text-sm font-medium">Plano Atual</p>
+                        <h2 id="planTitle" class="text-xl font-bold text-white flex items-center gap-2">
+                            <span class="text-slate-400 text-sm">Carregando...</span>
+                        </h2>
+                    </div>
+                    <span id="planStarIcon" class="material-symbols-outlined text-primary">stars</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <p id="planSubtext" class="text-slate-400 text-xs"></p>
+                    <button onclick="window.location.href='planos.html'"
+                        class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-2 px-4 rounded-lg text-sm transition-colors active:scale-95">
+                        Gerenciar Plano
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Groups -->
+    <main class="px-4 space-y-4">
+
+        <!-- Seção: Negócio -->
+        <div class="bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-800/50">
+            <div class="p-4 flex items-center gap-3 border-b border-slate-800/50">
+                <span class="material-symbols-outlined text-primary/80">storefront</span>
+                <span class="text-sm font-semibold uppercase tracking-tight text-slate-400">Dados do Negócio</span>
+            </div>
+            <div class="divide-y divide-slate-800/50">
+                <button onclick="document.getElementById('infoModal').classList.remove('hidden')"
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-300 text-sm">Informações Gerais</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+                <button onclick="document.getElementById('enderecoModal').classList.remove('hidden')"
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-300 text-sm">Endereços da Empresa</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção: App -->
+        <div class="bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-800/50">
+            <div class="p-4 flex items-center gap-3 border-b border-slate-800/50">
+                <span class="material-symbols-outlined text-primary/80">settings</span>
+                <span class="text-sm font-semibold uppercase tracking-tight text-slate-400">Configurações do
+                    App</span>
+            </div>
+            <div class="divide-y divide-slate-800/50">
+                <button onclick="document.getElementById('moedaModal').classList.remove('hidden')"
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex flex-col items-start">
+                        <span class="text-slate-300 text-sm">Moeda e Região</span>
+                        <span id="moedaSubtitle" class="text-slate-500 text-xs">Real (BRL - R$)</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+                <button onclick="window.location.href='configuracoes.html'"
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-300 text-sm">Custos e Produção</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+                <button
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-300 text-sm">Notificações</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção: Assinatura -->
+        <div class="bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-800/50">
+            <div class="p-4 flex items-center gap-3 border-b border-slate-800/50">
+                <span class="material-symbols-outlined text-primary/80">payments</span>
+                <span class="text-sm font-semibold uppercase tracking-tight text-slate-400">Minha Assinatura</span>
+            </div>
+            <div class="divide-y divide-slate-800/50">
+                <button onclick="document.getElementById('faturasModal').classList.remove('hidden')"
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <span class="text-slate-300 text-sm">Histórico de Faturas</span>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+                <button onclick="document.getElementById('pagamentoModal').classList.remove('hidden')"
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex flex-col items-start">
+                        <span class="text-slate-300 text-sm">Método de Pagamento</span>
+                        <span id="pagamentoSubtitle" class="text-slate-500 text-xs">Nenhum cadastrado</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Seção: Segurança e Equipe -->
+        <div class="bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-800/50">
+            <div class="divide-y divide-slate-800/50">
+                <button
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/80">security</span>
+                        <span class="text-slate-300 text-sm">Segurança (Senha &amp; 2FA)</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+                <button
+                    class="w-full flex items-center justify-between p-4 hover:bg-slate-800/20 active:bg-slate-800/40 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/80">group</span>
+                        <span class="text-slate-300 text-sm">Gerenciar Equipe</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="pt-6 space-y-3 pb-8">
+            <button
+                class="w-full flex items-center justify-center gap-2 py-4 rounded-xl border border-slate-800 text-slate-300 font-medium active:scale-95 transition-transform">
+                <span class="material-symbols-outlined">help</span>
+                Central de Ajuda
+            </button>
+            <button onclick="confirmarLogout()"
+                class="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-rose-500 font-semibold active:scale-95 transition-transform bg-rose-500/10 border border-rose-500/20">
+                <span class="material-symbols-outlined">logout</span>
+                Sair da Conta
+            </button>
+        </div>
+    </main>
+
+    <!-- Edit Profile Modal -->
+    <div id="editModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Editar Perfil</h3>
+                <button onclick="document.getElementById('editModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Nome</label>
+                    <input id="inputName" type="text" value="Carlos Pops"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">E-mail</label>
+                    <input type="email" value="carlos@geladinhos.com"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Telefone</label>
+                    <input type="tel" value="(11) 98888-0000"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Nome do
+                        Negócio</label>
+                    <input type="text" value="Geladinhos Gourmet"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+            </div>
+
+            <button onclick="salvarPerfil()"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Salvar Alterações
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Informações Gerais -->
+    <div id="infoModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Informações Gerais</h3>
+                <button onclick="document.getElementById('infoModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Nome
+                        Completo</label>
+                    <input id="infoNome" type="text" placeholder="Seu nome"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">E-mail</label>
+                    <input id="infoEmail" type="email" placeholder="seu@email.com" disabled
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-slate-500 text-sm outline-none cursor-not-allowed opacity-60" />
+                </div>
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Telefone</label>
+                    <input id="infoTelefone" type="tel" placeholder="(11) 99999-0000"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Nome do
+                        Negócio</label>
+                    <input id="infoNomeNegocio" type="text" placeholder="Minha Geladaria"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+            </div>
+
+            <button id="btnSalvarInfo"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Salvar Alterações
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Endereços -->
+    <div id="enderecoModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Endereço da Empresa</h3>
+                <button onclick="document.getElementById('enderecoModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">CEP</label>
+                    <input id="endCep" type="text" placeholder="00000-000" maxlength="9"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Rua /
+                        Logradouro</label>
+                    <input id="endRua" type="text" placeholder="Rua das Flores"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label
+                            class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Número</label>
+                        <input id="endNumero" type="text" placeholder="123"
+                            class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                    </div>
+                    <div class="col-span-2">
+                        <label
+                            class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Complemento</label>
+                        <input id="endComplemento" type="text" placeholder="Apto, Sala..."
+                            class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                    </div>
+                </div>
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Bairro</label>
+                    <input id="endBairro" type="text" placeholder="Centro"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2">
+                        <label
+                            class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Cidade</label>
+                        <input id="endCidade" type="text" placeholder="São Paulo"
+                            class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                    </div>
+                    <div>
+                        <label
+                            class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">UF</label>
+                        <input id="endEstado" type="text" placeholder="SP" maxlength="2"
+                            class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all uppercase" />
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnSalvarEndereco"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Salvar Endereço
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Moeda e Região -->
+    <div id="moedaModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Moeda e Região</h3>
+                <button onclick="document.getElementById('moedaModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Moeda</label>
+                    <select id="selectMoeda"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="BRL">🇧🇷 Real Brasileiro (BRL - R$)</option>
+                        <option value="USD">🇺🇸 Dólar Americano (USD - $)</option>
+                        <option value="EUR">🇪🇺 Euro (EUR - €)</option>
+                        <option value="GBP">🇬🇧 Libra Esterlina (GBP - £)</option>
+                        <option value="ARS">🇦🇷 Peso Argentino (ARS - $)</option>
+                        <option value="PYG">🇵🇾 Guarani (PYG - ₲)</option>
+                        <option value="UYU">🇺🇾 Peso Uruguaio (UYU - $U)</option>
+                        <option value="CLP">🇨🇱 Peso Chileno (CLP - $)</option>
+                        <option value="COP">🇨🇴 Peso Colombiano (COP - $)</option>
+                        <option value="MXN">🇲🇽 Peso Mexicano (MXN - $)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Região /
+                        Estado</label>
+                    <input id="inputRegiao" type="text" placeholder="Ex: São Paulo - SP"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <div>
+                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Formato de
+                        Número</label>
+                    <select id="selectFormato"
+                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <option value="pt-BR">1.234,56 (Brasileiro)</option>
+                        <option value="en-US">1,234.56 (Americano)</option>
+                        <option value="es-ES">1.234,56 (Espanhol)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="btnSalvarMoeda"
+                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
+                Salvar Configuração
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Histórico de Faturas -->
+    <div id="faturasModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Histórico de Faturas</h3>
+                <button onclick="document.getElementById('faturasModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <div id="faturasContent" class="space-y-3">
+                <!-- Conteúdo dinâmico -->
+                <div class="text-center py-8">
+                    <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">receipt_long</span>
+                    <p class="text-slate-400 text-sm">Carregando faturas...</p>
+                </div>
+            </div>
+
+            <button onclick="window.location.href='planos.html'"
+                class="w-full bg-white/5 border border-white/10 text-slate-300 font-semibold py-3 rounded-xl active:scale-[0.97] transition-transform hover:bg-white/10">
+                Ver Planos Disponíveis
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Método de Pagamento -->
+    <div id="pagamentoModal"
+        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onclick="if(event.target === this) this.classList.add('hidden')">
+        <div
+            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Método de Pagamento</h3>
+                <button onclick="document.getElementById('pagamentoModal').classList.add('hidden')"
+                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-white/60">close</span>
+                </button>
+            </div>
+
+            <div id="pagamentoContent" class="space-y-4">
+                <!-- Conteúdo dinâmico -->
+                <div class="text-center py-6">
+                    <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">credit_card</span>
+                    <p class="text-slate-400 text-sm">Carregando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        function salvarPerfil() {
+            const name = document.getElementById('inputName').value.trim();
+            if (name) {
+                document.getElementById('userName').textContent = name;
+            }
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function confirmarLogout() {
+            if (confirm('Tem certeza que deseja sair da conta?')) {
+                alert('Você foi desconectado.\nRedirecionando para a tela de login...');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { getUserPlan } from './plan-limits.js';
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+        let userId = null;
+
+        // ========== CARREGAR PLANO ==========
+        async function carregarPlano() {
+            try {
+                const plano = await getUserPlan();
+                const planTitle = document.getElementById('planTitle');
+                const planCard = document.getElementById('planCard');
+                const planStarIcon = document.getElementById('planStarIcon');
+                const planSubtext = document.getElementById('planSubtext');
+                const planBgIcon = document.getElementById('planBgIcon');
+
+                if (plano === 'premium') {
+                    planTitle.innerHTML = `Premium <span class="bg-primary text-background-dark text-[10px] px-2 py-0.5 rounded-full font-bold">ATIVO</span>`;
+                    planCard.className = 'bg-gradient-to-br from-card-dark to-[#122424] p-5 rounded-xl border border-primary/20 shadow-xl relative overflow-hidden';
+                    planStarIcon.textContent = 'stars';
+                    planStarIcon.className = 'material-symbols-outlined text-primary';
+                    planBgIcon.textContent = 'verified_user';
+                    planBgIcon.className = 'material-symbols-outlined text-6xl text-primary';
+                    planSubtext.innerHTML = 'Você tem acesso a todos os recursos';
+                } else {
+                    planTitle.innerHTML = `Free <span class="bg-slate-600 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">BÁSICO</span>`;
+                    planCard.className = 'bg-gradient-to-br from-card-dark to-[#1a1a2e] p-5 rounded-xl border border-slate-700/50 shadow-xl relative overflow-hidden';
+                    planStarIcon.textContent = 'lock';
+                    planStarIcon.className = 'material-symbols-outlined text-slate-500';
+                    planBgIcon.textContent = 'shield';
+                    planBgIcon.className = 'material-symbols-outlined text-6xl text-slate-600';
+                    planSubtext.innerHTML = 'Faça upgrade para desbloquear todos os recursos';
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar plano:', e);
+                document.getElementById('planTitle').innerHTML = `Free <span class="bg-slate-600 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">BÁSICO</span>`;
+            }
+        }
+
+        // ========== CARREGAR PERFIL DO SUPABASE ==========
+        async function carregarPerfil() {
+            if (!supabase) return;
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return;
+                userId = session.user.id;
+
+                const { data: perfil, error } = await supabase
+                    .from('perfis_usuarios')
+                    .select('nome, email, telefone, nome_negocio, endereco, configuracoes')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) { console.warn('Erro ao buscar perfil:', error); return; }
+
+                // Atualizar header
+                if (perfil.nome) document.getElementById('userName').textContent = perfil.nome;
+
+                // Preencher modal Informações Gerais
+                document.getElementById('infoNome').value = perfil.nome || '';
+                document.getElementById('infoEmail').value = perfil.email || session.user.email || '';
+                document.getElementById('infoTelefone').value = perfil.telefone || '';
+                document.getElementById('infoNomeNegocio').value = perfil.nome_negocio || '';
+
+                // Preencher modal Endereço
+                if (perfil.endereco) {
+                    const end = typeof perfil.endereco === 'string' ? JSON.parse(perfil.endereco) : perfil.endereco;
+                    document.getElementById('endCep').value = end.cep || '';
+                    document.getElementById('endRua').value = end.rua || '';
+                    document.getElementById('endNumero').value = end.numero || '';
+                    document.getElementById('endComplemento').value = end.complemento || '';
+                    document.getElementById('endBairro').value = end.bairro || '';
+                    document.getElementById('endCidade').value = end.cidade || '';
+                    document.getElementById('endEstado').value = end.estado || '';
+                }
+
+                // Preencher modal Moeda e Região
+                if (perfil.configuracoes) {
+                    const cfg = typeof perfil.configuracoes === 'string' ? JSON.parse(perfil.configuracoes) : perfil.configuracoes;
+                    if (cfg.moeda) document.getElementById('selectMoeda').value = cfg.moeda;
+                    if (cfg.regiao) document.getElementById('inputRegiao').value = cfg.regiao;
+                    if (cfg.formato_numero) document.getElementById('selectFormato').value = cfg.formato_numero;
+                    atualizarSubtitleMoeda(cfg.moeda);
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar perfil:', e);
+            }
+        }
+
+        // ========== SALVAR INFORMAÇÕES GERAIS ==========
+        document.getElementById('btnSalvarInfo').addEventListener('click', async () => {
+            if (!supabase || !userId) { alert('Erro: não conectado'); return; }
+
+            const btn = document.getElementById('btnSalvarInfo');
+            btn.textContent = 'Salvando...';
+            btn.disabled = true;
+
+            try {
+                const nome = document.getElementById('infoNome').value.trim();
+                const telefone = document.getElementById('infoTelefone').value.trim();
+                const nome_negocio = document.getElementById('infoNomeNegocio').value.trim();
+
+                const { error } = await supabase
+                    .from('perfis_usuarios')
+                    .update({ nome, telefone, nome_negocio })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                if (nome) document.getElementById('userName').textContent = nome;
+                document.getElementById('infoModal').classList.add('hidden');
+                alert('✅ Informações salvas com sucesso!');
+            } catch (e) {
+                console.error('Erro ao salvar:', e);
+                alert('❌ Erro ao salvar informações');
+            } finally {
+                btn.textContent = 'Salvar Alterações';
+                btn.disabled = false;
+            }
+        });
+
+        // ========== SALVAR ENDEREÇO ==========
+        document.getElementById('btnSalvarEndereco').addEventListener('click', async () => {
+            if (!supabase || !userId) { alert('Erro: não conectado'); return; }
+
+            const btn = document.getElementById('btnSalvarEndereco');
+            btn.textContent = 'Salvando...';
+            btn.disabled = true;
+
+            try {
+                const endereco = {
+                    cep: document.getElementById('endCep').value.trim(),
+                    rua: document.getElementById('endRua').value.trim(),
+                    numero: document.getElementById('endNumero').value.trim(),
+                    complemento: document.getElementById('endComplemento').value.trim(),
+                    bairro: document.getElementById('endBairro').value.trim(),
+                    cidade: document.getElementById('endCidade').value.trim(),
+                    estado: document.getElementById('endEstado').value.trim().toUpperCase()
+                };
+
+                const { error } = await supabase
+                    .from('perfis_usuarios')
+                    .update({ endereco })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                document.getElementById('enderecoModal').classList.add('hidden');
+                alert('✅ Endereço salvo com sucesso!');
+            } catch (e) {
+                console.error('Erro ao salvar endereço:', e);
+                alert('❌ Erro ao salvar endereço');
+            } finally {
+                btn.textContent = 'Salvar Endereço';
+                btn.disabled = false;
+            }
+        });
+
+        // ========== BUSCA CEP ==========
+        document.getElementById('endCep').addEventListener('blur', async (e) => {
+            const cep = e.target.value.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+
+            try {
+                const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await resp.json();
+                if (data.erro) return;
+
+                document.getElementById('endRua').value = data.logradouro || '';
+                document.getElementById('endBairro').value = data.bairro || '';
+                document.getElementById('endCidade').value = data.localidade || '';
+                document.getElementById('endEstado').value = data.uf || '';
+            } catch (e) {
+                console.warn('Erro ao buscar CEP:', e);
+            }
+        });
+
+        // ========== SALVAR MOEDA E REGIÃO ==========
+        const moedaLabels = {
+            'BRL': 'Real (BRL - R$)',
+            'USD': 'Dólar (USD - $)',
+            'EUR': 'Euro (EUR - €)',
+            'GBP': 'Libra (GBP - £)',
+            'ARS': 'Peso Argentino (ARS - $)',
+            'PYG': 'Guarani (PYG - ₲)',
+            'UYU': 'Peso Uruguaio (UYU - $U)',
+            'CLP': 'Peso Chileno (CLP - $)',
+            'COP': 'Peso Colombiano (COP - $)',
+            'MXN': 'Peso Mexicano (MXN - $)'
+        };
+
+        function atualizarSubtitleMoeda(moeda) {
+            const sub = document.getElementById('moedaSubtitle');
+            if (sub && moedaLabels[moeda]) sub.textContent = moedaLabels[moeda];
+        }
+
+        document.getElementById('btnSalvarMoeda').addEventListener('click', async () => {
+            if (!supabase || !userId) { alert('Erro: não conectado'); return; }
+
+            const btn = document.getElementById('btnSalvarMoeda');
+            btn.textContent = 'Salvando...';
+            btn.disabled = true;
+
+            try {
+                const configuracoes = {
+                    moeda: document.getElementById('selectMoeda').value,
+                    regiao: document.getElementById('inputRegiao').value.trim(),
+                    formato_numero: document.getElementById('selectFormato').value
+                };
+
+                const { error } = await supabase
+                    .from('perfis_usuarios')
+                    .update({ configuracoes })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                atualizarSubtitleMoeda(configuracoes.moeda);
+                document.getElementById('moedaModal').classList.add('hidden');
+                alert('✅ Configuração salva com sucesso!');
+            } catch (e) {
+                console.error('Erro ao salvar configuração:', e);
+                alert('❌ Erro ao salvar configuração');
+            } finally {
+                btn.textContent = 'Salvar Configuração';
+                btn.disabled = false;
+            }
+        });
+
+        // ========== CARREGAR ASSINATURA (FATURAS + PAGAMENTO) ==========
+        async function carregarAssinatura() {
+            try {
+                const plano = await getUserPlan();
+                const faturasEl = document.getElementById('faturasContent');
+                const pagamentoEl = document.getElementById('pagamentoContent');
+                const pagSubtitle = document.getElementById('pagamentoSubtitle');
+
+                if (plano === 'premium') {
+                    // Faturas - Premium
+                    const hoje = new Date();
+                    const mesAtual = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                    const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
+                        .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+                    faturasEl.innerHTML = `
+                        <div class="bg-background-dark rounded-lg p-4 border border-white/5">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-white text-sm font-semibold">Plano Premium</span>
+                                <span class="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-bold">PAGO</span>
+                            </div>
+                            <p class="text-slate-500 text-xs capitalize">${mesAtual}</p>
+                            <p class="text-primary font-bold text-sm mt-1">R$ 29,90</p>
+                        </div>
+                        <div class="bg-background-dark rounded-lg p-4 border border-white/5">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-white text-sm font-semibold">Plano Premium</span>
+                                <span class="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-bold">PAGO</span>
+                            </div>
+                            <p class="text-slate-500 text-xs capitalize">${mesAnterior}</p>
+                            <p class="text-primary font-bold text-sm mt-1">R$ 29,90</p>
+                        </div>
+                    `;
+
+                    // Pagamento - Premium
+                    pagSubtitle.textContent = 'Pix configurado';
+                    pagamentoEl.innerHTML = `
+                        <div class="bg-background-dark rounded-lg p-4 border border-primary/20">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-primary">pix</span>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm font-semibold">Pix</p>
+                                    <p class="text-slate-500 text-xs">Método ativo</p>
+                                </div>
+                                <span class="ml-auto bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">ATIVO</span>
+                            </div>
+                            <p class="text-slate-400 text-xs">Cobranças mensais processadas via Pix automaticamente.</p>
+                        </div>
+                        <button onclick="window.location.href='planos.html'"
+                            class="w-full bg-white/5 border border-white/10 text-slate-300 font-semibold py-3 rounded-xl active:scale-[0.97] transition-transform hover:bg-white/10">
+                            Alterar Plano
+                        </button>
+                    `;
+                } else {
+                    // Faturas - Free
+                    faturasEl.innerHTML = `
+                        <div class="text-center py-8">
+                            <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">receipt_long</span>
+                            <p class="text-slate-400 text-sm font-medium mb-1">Nenhuma fatura encontrada</p>
+                            <p class="text-slate-600 text-xs">Você está no plano Free. Assine o Premium para ter acesso completo.</p>
+                        </div>
+                    `;
+
+                    // Pagamento - Free
+                    pagSubtitle.textContent = 'Nenhum cadastrado';
+                    pagamentoEl.innerHTML = `
+                        <div class="text-center py-6">
+                            <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">credit_card_off</span>
+                            <p class="text-slate-400 text-sm font-medium mb-1">Nenhum método de pagamento</p>
+                            <p class="text-slate-600 text-xs mb-4">Cadastre um método de pagamento para assinar o plano Premium.</p>
+                            <button onclick="window.location.href='planos.html'"
+                                class="bg-primary text-background-dark font-bold py-3 px-6 rounded-xl active:scale-[0.97] transition-transform text-sm">
+                                Assinar Premium
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar assinatura:', e);
+            }
+        }
+
+        // ========== INICIALIZAR ==========
+        carregarPlano();
+        carregarPerfil();
+        carregarAssinatura();
+    </script>
+</body>
+
+</html>

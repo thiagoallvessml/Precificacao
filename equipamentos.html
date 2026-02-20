@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestão de Equipamentos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark min-h-screen text-white font-display">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-background-dark border-b border-white/10">
+        <div class="flex items-center p-3 justify-between max-w-6xl mx-auto">
+            <button onclick="window.location.href='index.html'"
+                class="text-white flex size-12 shrink-0 items-center justify-center cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="text-white text-lg font-bold flex-1 text-center pr-12">Gestão de Equipamentos</h1>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto pb-24">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <!-- Lista -->
+            <section>
+                <div class="px-4 pt-6 pb-2 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-white text-lg font-bold">Equipamentos Cadastrados</h3>
+                        <p class="text-[#9db9b9] text-xs uppercase tracking-wider mt-1">Fábrica de Geladinhos Gourmet
+                        </p>
+                    </div>
+                    <button id="btnAtualizarConfigs" onclick="recarregarConfiguracoes()"
+                        title="Atualizar custos (kWh e gás)"
+                        class="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                        <span class="material-symbols-outlined text-sm">refresh</span>
+                        Atualizar Custos
+                    </button>
+                </div>
+                <div
+                    class="px-4 py-2 mt-4 grid grid-cols-12 gap-2 text-[#9db9b9] text-[10px] font-bold uppercase tracking-widest border-b border-white/10">
+                    <div class="col-span-6">Nome / Descrição</div>
+                    <div class="col-span-3 text-center">Status</div>
+                    <div class="col-span-3 text-right">Ações</div>
+                </div>
+                <div id="equipamentosList" class="divide-y divide-white/5">
+                    <!-- Será preenchido -->
+                </div>
+            </section>
+
+            <!-- Form -->
+            <section class="mt-8 px-4">
+                <div class="bg-white/5 rounded-xl border border-white/10 p-5 shadow-xl">
+                    <h2 class="text-white text-xl font-bold mb-6">Registrar Novo Equipamento</h2>
+                    <form id="formEquipamento" class="space-y-5">
+                        <div>
+                            <label class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Nome
+                                do Equipamento</label>
+                            <input id="inputNome" required
+                                class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white placeholder-white/30 focus:ring-primary focus:border-primary"
+                                placeholder="Ex: Freezer Vertical" type="text" />
+                        </div>
+                        <div>
+                            <label
+                                class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Descrição</label>
+                            <textarea id="inputDescricao"
+                                class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white placeholder-white/30 focus:ring-primary focus:border-primary"
+                                placeholder="Detalhes do equipamento" rows="2"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label
+                                    class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Tipo
+                                    de Equipamento</label>
+                                <select id="inputTipoEquipamento"
+                                    class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white focus:ring-primary focus:border-primary">
+                                    <option value="eletrico">⚡ Elétrico</option>
+                                    <option value="gas">🔥 A Gás</option>
+                                    <option value="manual">🔧 Manual</option>
+                                </select>
+                            </div>
+                            <div id="campoPotencia">
+                                <label
+                                    class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Potência
+                                    (Watts)</label>
+                                <input id="inputPotencia" type="number" step="1"
+                                    class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white placeholder-white/30 focus:ring-primary focus:border-primary"
+                                    placeholder="Ex: 150" />
+                                <p class="text-[#9db9b9] text-[10px] mt-1 italic">Para equipamentos elétricos</p>
+                            </div>
+                        </div>
+
+                        <!-- Campos de Consumo de Gás -->
+                        <div id="camposGas" style="display: none;">
+                            <label
+                                class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Níveis
+                                de Consumo de Gás</label>
+
+                            <!-- Seletor de Unidade -->
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-[#9db9b9] text-[10px]">Unidade de entrada:</span>
+                                <div class="flex bg-[#1a3030] rounded-lg border border-white/10 overflow-hidden">
+                                    <button type="button" id="btnUnidadeKgh"
+                                        class="unidade-btn px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-all bg-primary/20 text-primary border-r border-white/10"
+                                        data-unidade="kgh">
+                                        kg/h
+                                    </button>
+                                    <button type="button" id="btnUnidadeWatts"
+                                        class="unidade-btn px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-all text-[#9db9b9] hover:text-white"
+                                        data-unidade="watts">
+                                        Watts (W)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="niveisConsumoContainer" class="grid grid-cols-3 gap-3">
+                                <!-- Níveis padrão -->
+                                <div class="nivel-consumo-card bg-[#1a3030] border border-white/10 rounded-xl p-4 text-center relative"
+                                    data-nivel-id="baixo">
+                                    <input type="text" value="Baixo"
+                                        class="nivel-nome w-full bg-transparent text-[#9db9b9] text-[10px] font-semibold uppercase tracking-wider mb-2 text-center border-0 focus:ring-0 p-0" />
+                                    <input type="number" step="any" value="0.06"
+                                        class="nivel-valor w-full bg-transparent border-0 border-b border-white/20 text-white text-xl font-bold text-center focus:ring-0 focus:border-primary p-0 pb-1" />
+                                    <p class="nivel-unidade text-[#9db9b9] text-[10px] mt-1">kg/h</p>
+                                    <p class="nivel-conversao text-primary/60 text-[9px] mt-0.5 hidden"></p>
+                                </div>
+                                <div class="nivel-consumo-card bg-[#1a3030] border border-white/10 rounded-xl p-4 text-center relative"
+                                    data-nivel-id="medio">
+                                    <input type="text" value="Médio"
+                                        class="nivel-nome w-full bg-transparent text-[#9db9b9] text-[10px] font-semibold uppercase tracking-wider mb-2 text-center border-0 focus:ring-0 p-0" />
+                                    <input type="number" step="any" value="0.12"
+                                        class="nivel-valor w-full bg-transparent border-0 border-b border-white/20 text-white text-xl font-bold text-center focus:ring-0 focus:border-primary p-0 pb-1" />
+                                    <p class="nivel-unidade text-[#9db9b9] text-[10px] mt-1">kg/h</p>
+                                    <p class="nivel-conversao text-primary/60 text-[9px] mt-0.5 hidden"></p>
+                                </div>
+                                <div class="nivel-consumo-card bg-[#1a3030] border border-white/10 rounded-xl p-4 text-center relative"
+                                    data-nivel-id="alto">
+                                    <input type="text" value="Alto"
+                                        class="nivel-nome w-full bg-transparent text-[#9db9b9] text-[10px] font-semibold uppercase tracking-wider mb-2 text-center border-0 focus:ring-0 p-0" />
+                                    <input type="number" step="any" value="0.27"
+                                        class="nivel-valor w-full bg-transparent border-0 border-b border-white/20 text-white text-xl font-bold text-center focus:ring-0 focus:border-primary p-0 pb-1" />
+                                    <p class="nivel-unidade text-[#9db9b9] text-[10px] mt-1">kg/h</p>
+                                    <p class="nivel-conversao text-primary/60 text-[9px] mt-0.5 hidden"></p>
+                                </div>
+                                <!-- Botão Adicionar Nível -->
+                                <button type="button" id="btnAddNivel"
+                                    class="bg-[#1a3030]/50 border-2 border-dashed border-primary/30 rounded-xl p-4 text-center flex flex-col items-center justify-center gap-1 hover:border-primary/60 hover:bg-primary/5 transition-all cursor-pointer min-h-[90px]">
+                                    <span class="material-symbols-outlined text-primary text-2xl">add_circle</span>
+                                    <span
+                                        class="text-primary/70 text-[10px] font-semibold uppercase tracking-wider">Novo
+                                        Nível</span>
+                                </button>
+                            </div>
+                            <p class="text-[#9db9b9] text-[10px] mt-2 italic">Edite os nomes e valores de consumo do
+                                equipamento a gás</p>
+
+                            <!-- Quantidade de Bocas -->
+                            <div class="mt-4">
+                                <label
+                                    class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Quantidade
+                                    de Bocas</label>
+                                <div class="flex items-center gap-3">
+                                    <select id="inputBocas"
+                                        class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white focus:ring-primary focus:border-primary">
+                                        <option value="1">1 boca</option>
+                                        <option value="2">2 bocas</option>
+                                        <option value="3">3 bocas</option>
+                                        <option value="4" selected>4 bocas</option>
+                                        <option value="5">5 bocas</option>
+                                        <option value="6">6 bocas</option>
+                                    </select>
+                                </div>
+                                <p class="text-[#9db9b9] text-[10px] mt-1 italic">O consumo será dividido pela
+                                    quantidade de bocas</p>
+                            </div>
+
+                            <!-- Dica -->
+                            <div
+                                class="mt-4 flex items-start gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                                <span
+                                    class="material-symbols-outlined text-yellow-400 text-lg shrink-0 mt-0.5">lightbulb</span>
+                                <p class="text-yellow-200/80 text-xs leading-relaxed"><strong>Dica:</strong> Verifique o
+                                    manual do fogão. Se informar o consumo em <strong>kg/h</strong>, insira diretamente.
+                                    Se
+                                    informar a potência dos queimadores em <strong>Watts</strong>, selecione a unidade
+                                    "W"
+                                    e o sistema converterá automaticamente usando o PCI do GLP.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label
+                                    class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Valor
+                                    de Compra</label>
+                                <input id="inputValor" type="number" step="0.01"
+                                    class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white placeholder-white/30 focus:ring-primary focus:border-primary"
+                                    placeholder="0.00" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Data
+                                    Compra</label>
+                                <input id="inputDataCompra" type="date"
+                                    class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white placeholder-white/30 focus:ring-primary focus:border-primary" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Vida
+                                Útil (meses)</label>
+                            <input id="inputVidaUtil" type="number"
+                                class="w-full bg-[#1a3030] border-white/10 rounded-lg text-white placeholder-white/30 focus:ring-primary focus:border-primary"
+                                placeholder="60" />
+                            <p class="text-[#9db9b9] text-[10px] mt-1 italic">Para cálculo de depreciação</p>
+                        </div>
+                        <button type="submit" id="btnSubmitEquipamento"
+                            class="w-full bg-primary text-[#0F0F0F] font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(19,236,236,0.2)] hover:bg-[#00d7d7] transition-all flex items-center justify-center gap-2 mt-4">
+                            <span class="material-symbols-outlined" id="btnSubmitIcon">add_circle</span>
+                            <span id="btnSubmitText">Adicionar Equipamento</span>
+                        </button>
+                        <button type="button" id="btnCancelEdit" onclick="cancelarEdicao()"
+                            class="w-full mt-2 bg-transparent border border-white/20 text-white/70 font-medium py-3 rounded-xl hover:bg-white/5 transition-all items-center justify-center gap-2 hidden">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                            Cancelar Edição
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+        let equipamentos = [];
+        let custoKwh = 0.85; // Valor padrão
+        let custoGasPorKg = 8.46; // Valor padrão (110/13)
+        let editingId = null; // ID do equipamento sendo editado
+
+        // PCI do GLP (Poder Calorífico Inferior) em Wh/kg
+        // 1 kg de GLP ≈ 11.100 kcal, 1 kcal = 1,163 Wh → ≈ 12.907 Wh/kg
+        const PCI_GLP_WH_KG = 12900;
+        let unidadeConsumo = 'kgh'; // 'kgh' ou 'watts'
+
+        // Conversões
+        function wattsParaKgh(watts) {
+            return watts / PCI_GLP_WH_KG;
+        }
+        function kghParaWatts(kgh) {
+            return kgh * PCI_GLP_WH_KG;
+        }
+
+        // Carregar configurações de custos
+        async function loadConfiguracoes() {
+            try {
+                // Buscar custo kWh
+                const { data: dataKwh, error: errorKwh } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'custo_kwh')
+                    .single();
+
+                if (!errorKwh && dataKwh) {
+                    custoKwh = parseFloat(dataKwh.valor) || 0.85;
+                }
+
+                // Buscar peso e preço do botijão de gás
+                const { data: dataPeso, error: errorPeso } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'peso_botijao_gas')
+                    .single();
+
+                const { data: dataPreco, error: errorPreco } = await supabase
+                    .from('configuracoes')
+                    .select('valor')
+                    .eq('chave', 'preco_botijao_gas')
+                    .single();
+
+                const pesoGas = (!errorPeso && dataPeso) ? parseFloat(dataPeso.valor) : 13;
+                const precoGas = (!errorPreco && dataPreco) ? parseFloat(dataPreco.valor) : 110;
+
+                if (pesoGas > 0) {
+                    custoGasPorKg = precoGas / pesoGas;
+                }
+
+                console.log('⚙️ Configurações carregadas:', {
+                    custoKwh,
+                    pesoGas,
+                    precoGas,
+                    custoGasPorKg: custoGasPorKg.toFixed(4)
+                });
+            } catch (error) {
+                console.warn('Usando valores padrão de configuração:', error);
+            }
+        }
+
+        // Valores padrão de consumo de gás (kg/h)
+        const CONSUMO_GAS_PADRAO = {
+            baixo: 0.06,
+            medio: 0.12,
+            alto: 0.27
+        };
+
+        // Calcular custo atual baseado nas configurações
+        function calcularCustoAtual(equipamento) {
+            try {
+                if (equipamento.observacoes) {
+                    const dados = JSON.parse(equipamento.observacoes);
+
+                    if (dados.tipo_equipamento === 'eletrico' && dados.potencia_watts) {
+                        const potenciaKw = dados.potencia_watts / 1000;
+                        return potenciaKw * custoKwh;
+                    } else if (dados.tipo_equipamento === 'gas') {
+                        const consumoKgH = dados.consumo_gas_kgh || CONSUMO_GAS_PADRAO.medio;
+                        const bocas = dados.quantidade_bocas || 1;
+                        return (consumoKgH / bocas) * custoGasPorKg;
+                    }
+                }
+            } catch (e) {
+                // Se não conseguir parsear, retorna custo_unitario do banco
+            }
+
+            return equipamento.custo_unitario || 0;
+        }
+
+        // Carregar equipamentos da tabela insumos
+        async function loadEquipamentos() {
+            try {
+                console.log('🔍 Carregando equipamentos...');
+
+                const { data, error } = await supabase
+                    .from('insumos')
+                    .select('*')
+                    .eq('tipo', 'equipamento')
+                    .eq('ativo', true)
+                    .order('nome');
+
+                if (error) throw error;
+
+                equipamentos = data || [];
+                console.log(`✅ ${equipamentos.length} equipamentos carregados`);
+                renderEquipamentos();
+            } catch (error) {
+                console.error('❌ Erro ao carregar equipamentos:', error);
+                alert('Erro ao carregar equipamentos: ' + error.message);
+            }
+        }
+
+        // Renderizar
+        function renderEquipamentos() {
+            const container = document.getElementById('equipamentosList');
+
+            if (equipamentos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 px-4">
+                        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">category</span>
+                        <p class="text-slate-400">Nenhum equipamento cadastrado</p>
+                        <p class="text-slate-500 text-xs mt-2">Cadastre equipamentos em Gestão de Insumos</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = equipamentos.map(e => {
+                const emUso = e.estoque_atual > 0;
+                const statusClass = emUso ? 'text-green-400 bg-green-400/10' : 'text-slate-400 bg-slate-400/10';
+                const statusLabel = emUso ? 'Disponível' : 'Indisponível';
+
+                // Recalcular custo baseado nas configurações atuais
+                const custoAtual = calcularCustoAtual(e);
+
+                // Info extra para gás
+                let gasInfo = '';
+                try {
+                    const dados = JSON.parse(e.observacoes || '{}');
+                    if (dados.tipo_equipamento === 'gas') {
+                        const bocas = dados.quantidade_bocas || 1;
+                        const niveis = dados.niveis_consumo || [
+                            { nome: 'Baixo', valor: dados.consumo_gas_baixo || CONSUMO_GAS_PADRAO.baixo },
+                            { nome: 'Médio', valor: dados.consumo_gas_medio || CONSUMO_GAS_PADRAO.medio },
+                            { nome: 'Alto', valor: dados.consumo_gas_alto || CONSUMO_GAS_PADRAO.alto }
+                        ];
+                        const niveisHtml = niveis.map(n => {
+                            const porBoca = (n.valor / bocas).toFixed(4).replace('.', ',');
+                            return `<span class="text-[#9db9b9] text-[10px]">${n.nome}: ${porBoca} kg/h</span>`;
+                        }).join('<span class="text-white/20 text-[10px]">|</span>');
+                        gasInfo = `
+                            <div class="flex flex-wrap items-center gap-2 mt-1">
+                                <span class="text-[#9db9b9] text-[10px]">🔥 ${bocas} boca${bocas > 1 ? 's' : ''}</span>
+                                <span class="text-white/20 text-[10px]">|</span>
+                                ${niveisHtml}
+                            </div>`;
+                    }
+                } catch (ex) { /* ignore */ }
+
+                return `
+                    <div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 justify-between">
+                        <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                            <div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-10">
+                                <span class="material-symbols-outlined text-[20px]">settings</span>
+                            </div>
+                            <div class="flex flex-col justify-center overflow-hidden">
+                                <p class="text-white text-sm font-medium leading-tight truncate">${e.nome}</p>
+                                <p class="text-[#9db9b9] text-xs font-normal leading-normal truncate">
+                                    ${e.unidade_medida} • Custo: R$ ${custoAtual.toFixed(4)}/${e.unidade_medida}
+                                </p>
+                                ${gasInfo}
+                            </div>
+                        </div>
+                        <div class="w-24 text-center">
+                            <span class="inline-block px-2 py-1 rounded-full text-[10px] font-bold ${statusClass}">${statusLabel}</span>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="editarEquipamento(${e.id})" class="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors" title="Editar">
+                                <span class="material-symbols-outlined text-[20px]">edit</span>
+                            </button>
+                            <button onclick="excluirEquipamento(${e.id}, '${e.nome}')" class="p-2 text-rose-500 hover:bg-rose-500/10 rounded-full transition-colors" title="Excluir">
+                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Excluir equipamento (tornar global para onclick)
+        window.excluirEquipamento = async function (id, nome) {
+            // Confirmação
+            const confirmacao = confirm(`⚠️ Tem certeza que deseja excluir o equipamento "${nome}"?\n\nEsta ação não pode ser desfeita!`);
+
+            if (!confirmacao) {
+                return;
+            }
+
+            try {
+                console.log(`🗑️ Excluindo equipamento ID: ${id}, Nome: ${nome}`);
+
+                // Delete do Supabase (soft delete - marca como inativo)
+                const { error } = await supabase
+                    .from('insumos')
+                    .update({ ativo: false })
+                    .eq('id', id)
+                    .eq('tipo', 'equipamento');
+
+                if (error) throw error;
+
+                // Sucesso
+                alert(`✅ Equipamento "${nome}" excluído com sucesso!`);
+
+                // Recarrega lista
+                loadEquipamentos();
+
+            } catch (error) {
+                console.error('Erro ao excluir equipamento:', error);
+                alert(`❌ Erro ao excluir equipamento: ${error.message}`);
+            }
+        }
+
+        // Editar equipamento (tornar global para onclick)
+        window.editarEquipamento = function (id) {
+            const equip = equipamentos.find(e => e.id === id);
+            if (!equip) return;
+
+            editingId = id;
+
+            // Preencher campos do formulário
+            document.getElementById('inputNome').value = equip.nome || '';
+
+            let dados = {};
+            try { dados = JSON.parse(equip.observacoes || '{}'); } catch (e) { }
+
+            document.getElementById('inputDescricao').value = dados.descricao || '';
+            document.getElementById('inputTipoEquipamento').value = dados.tipo_equipamento || 'outro';
+            toggleCamposTipo();
+
+            if (dados.potencia_watts) {
+                document.getElementById('inputPotencia').value = dados.potencia_watts;
+            }
+
+            // Restaurar níveis de consumo de gás
+            if (dados.tipo_equipamento === 'gas') {
+                const niveis = dados.niveis_consumo || [];
+                const niveisWatts = dados.niveis_consumo_watts || null;
+                const unidadeOriginal = dados.unidade_consumo || 'kgh';
+
+                // Definir unidade correta
+                if (unidadeOriginal === 'watts') {
+                    setUnidadeConsumo('watts');
+                } else {
+                    setUnidadeConsumo('kgh');
+                }
+
+                // Remover cards existentes e recriar com os valores do equipamento
+                const container = document.getElementById('niveisConsumoContainer');
+                const btnAddNivel = document.getElementById('btnAddNivel');
+                // Remover todos os cards antigos
+                container.querySelectorAll('.nivel-consumo-card').forEach(c => c.remove());
+
+                // Criar cards com os dados salvos
+                niveis.forEach((nivel, i) => {
+                    const card = document.createElement('div');
+                    card.className = 'nivel-consumo-card bg-[#1a3030] border border-white/10 rounded-xl p-4 text-center relative';
+                    card.dataset.nivelId = nivel.nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+                    // Determinar valor a exibir
+                    let displayValue, unitLabel;
+                    if (unidadeOriginal === 'watts' && niveisWatts && niveisWatts[i]) {
+                        displayValue = Math.round(niveisWatts[i].valor);
+                        unitLabel = 'W';
+                    } else {
+                        displayValue = nivel.valor;
+                        unitLabel = 'kg/h';
+                    }
+
+                    // Mostrar botão remover exceto nos 3 primeiros
+                    const removeBtn = i >= 3 ? `
+                        <button type="button" class="btn-remove-nivel absolute top-1 right-1 text-rose-400 hover:text-rose-300 transition-colors" title="Remover nível">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>` : '';
+
+                    card.innerHTML = `
+                        ${removeBtn}
+                        <input type="text" value="${nivel.nome}" class="nivel-nome w-full bg-transparent text-[#9db9b9] text-[10px] font-semibold uppercase tracking-wider mb-2 text-center border-0 focus:ring-0 p-0" />
+                        <input type="number" step="any" value="${displayValue}" class="nivel-valor w-full bg-transparent border-0 border-b border-white/20 text-white text-xl font-bold text-center focus:ring-0 focus:border-primary p-0 pb-1" />
+                        <p class="nivel-unidade text-[#9db9b9] text-[10px] mt-1">${unitLabel}</p>
+                        <p class="nivel-conversao text-primary/60 text-[9px] mt-0.5 ${unidadeOriginal === 'watts' ? '' : 'hidden'}"></p>
+                    `;
+                    container.insertBefore(card, btnAddNivel);
+
+                    // Atualizar conversão se Watts
+                    if (unidadeOriginal === 'watts') {
+                        updateConversaoDisplay(card);
+                    }
+
+                    // Evento de remover
+                    const btnRemove = card.querySelector('.btn-remove-nivel');
+                    if (btnRemove) {
+                        btnRemove.addEventListener('click', () => card.remove());
+                    }
+                });
+
+                // Restaurar bocas
+                if (dados.quantidade_bocas) {
+                    document.getElementById('inputBocas').value = dados.quantidade_bocas;
+                }
+            }
+
+            // Valor de compra e vida útil
+            if (dados.valor_compra) {
+                document.getElementById('inputValor').value = dados.valor_compra;
+            }
+            if (dados.data_compra) {
+                document.getElementById('inputDataCompra').value = dados.data_compra;
+            }
+            if (dados.vida_util_meses) {
+                document.getElementById('inputVidaUtil').value = dados.vida_util_meses;
+            }
+
+            // Atualizar botão e mostrar cancelar
+            document.getElementById('btnSubmitIcon').textContent = 'save';
+            document.getElementById('btnSubmitText').textContent = 'Salvar Alterações';
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+            document.getElementById('btnCancelEdit').classList.add('flex');
+
+            // Scroll para o formulário
+            document.getElementById('formEquipamento').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Cancelar edição
+        window.cancelarEdicao = function () {
+            editingId = null;
+            document.getElementById('formEquipamento').reset();
+            document.getElementById('btnSubmitIcon').textContent = 'add_circle';
+            document.getElementById('btnSubmitText').textContent = 'Adicionar Equipamento';
+            document.getElementById('btnCancelEdit').classList.add('hidden');
+            document.getElementById('btnCancelEdit').classList.remove('flex');
+
+            // Restaurar unidade para kg/h
+            setUnidadeConsumo('kgh');
+
+            // Restaurar níveis padrão
+            const container = document.getElementById('niveisConsumoContainer');
+            const btnAddNivel = document.getElementById('btnAddNivel');
+            container.querySelectorAll('.nivel-consumo-card').forEach(c => c.remove());
+
+            const defaultNiveis = [
+                { id: 'baixo', nome: 'Baixo', valor: '0.06' },
+                { id: 'medio', nome: 'Médio', valor: '0.12' },
+                { id: 'alto', nome: 'Alto', valor: '0.27' }
+            ];
+            defaultNiveis.forEach(n => {
+                const card = document.createElement('div');
+                card.className = 'nivel-consumo-card bg-[#1a3030] border border-white/10 rounded-xl p-4 text-center relative';
+                card.dataset.nivelId = n.id;
+                card.innerHTML = `
+                    <input type="text" value="${n.nome}" class="nivel-nome w-full bg-transparent text-[#9db9b9] text-[10px] font-semibold uppercase tracking-wider mb-2 text-center border-0 focus:ring-0 p-0" />
+                    <input type="number" step="any" value="${n.valor}" class="nivel-valor w-full bg-transparent border-0 border-b border-white/20 text-white text-xl font-bold text-center focus:ring-0 focus:border-primary p-0 pb-1" />
+                    <p class="nivel-unidade text-[#9db9b9] text-[10px] mt-1">kg/h</p>
+                    <p class="nivel-conversao text-primary/60 text-[9px] mt-0.5 hidden"></p>
+                `;
+                container.insertBefore(card, btnAddNivel);
+            });
+
+            toggleCamposTipo();
+        }
+
+        // Recarregar configurações e atualizar lista
+        window.recarregarConfiguracoes = async function () {
+            const btn = document.getElementById('btnAtualizarConfigs');
+            const icon = btn.querySelector('.material-symbols-outlined');
+
+            try {
+                // Animação de loading
+                icon.classList.add('animate-spin');
+                btn.disabled = true;
+
+                // Recarrega configurações
+                await loadConfiguracoes();
+
+                // Recarrega lista com novos custos
+                await loadEquipamentos();
+
+                alert('⚙️ Custos atualizados com sucesso!');
+
+                console.log('🔄 Configurações recarregadas:', {
+                    custoKwh,
+                    custoGasPorKg
+                });
+            } catch (error) {
+                alert('Erro ao atualizar configurações: ' + error.message);
+                console.error('Erro:', error);
+            } finally {
+                icon.classList.remove('animate-spin');
+                btn.disabled = false;
+            }
+        }
+
+        // Salvar ou Atualizar equipamento na tabela insumos
+        document.getElementById('formEquipamento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            try {
+                const nome = document.getElementById('inputNome').value;
+                const descricao = document.getElementById('inputDescricao').value;
+                const tipoEquipamento = document.getElementById('inputTipoEquipamento').value;
+                const potencia = document.getElementById('inputPotencia').value ? parseInt(document.getElementById('inputPotencia').value) : null;
+                const valorCompra = document.getElementById('inputValor').value ? parseFloat(document.getElementById('inputValor').value) : 0;
+                const dataCompra = document.getElementById('inputDataCompra').value || null;
+                const vidaUtil = document.getElementById('inputVidaUtil').value ? parseInt(document.getElementById('inputVidaUtil').value) : null;
+
+                // Calcular custo por hora baseado na depreciação e tipo
+                let custoUnitario = 0;
+                let unidadeMedida = 'hora';
+
+                // Obter níveis de consumo de gás (sempre salvar em kg/h)
+                let niveisConsumo = [];
+                if (tipoEquipamento === 'gas') {
+                    document.querySelectorAll('#niveisConsumoContainer .nivel-consumo-card').forEach(card => {
+                        const nome = card.querySelector('.nivel-nome').value.trim() || 'Sem nome';
+                        let valor = parseFloat(card.querySelector('.nivel-valor').value) || 0;
+                        // Se entrada está em Watts, converter para kg/h
+                        if (unidadeConsumo === 'watts') {
+                            valor = wattsParaKgh(valor);
+                        }
+                        niveisConsumo.push({ nome, valor: parseFloat(valor.toFixed(6)) });
+                    });
+                }
+                const quantidadeBocas = tipoEquipamento === 'gas'
+                    ? parseInt(document.getElementById('inputBocas').value) || 4
+                    : null;
+
+                // Encontrar o nível "Médio" ou usar o segundo nível, ou o primeiro
+                let consumoParaCalculo = 0.12;
+                if (niveisConsumo.length > 0) {
+                    const nivelMedio = niveisConsumo.find(n => n.nome.toLowerCase().includes('edio') || n.nome.toLowerCase().includes('médio'));
+                    consumoParaCalculo = nivelMedio ? nivelMedio.valor : niveisConsumo[Math.floor(niveisConsumo.length / 2)].valor;
+                }
+
+                if (tipoEquipamento === 'eletrico' && potencia) {
+                    // Custo elétrico: (Potência em kW) × (Custo kWh)
+                    const potenciaKw = potencia / 1000;
+                    custoUnitario = potenciaKw * custoKwh;
+                    unidadeMedida = 'hora';
+                } else if (tipoEquipamento === 'gas') {
+                    // Custo de gás: (consumo / bocas) × custo por kg
+                    custoUnitario = (consumoParaCalculo / quantidadeBocas) * custoGasPorKg;
+                    unidadeMedida = 'hora';
+                } else if (valorCompra && vidaUtil && vidaUtil > 0) {
+                    // Depreciação para equipamentos sem custo energético
+                    const depreciacaoMensal = valorCompra / vidaUtil;
+                    // Assumindo 30 dias/mês, 8h/dia = 240h/mês
+                    custoUnitario = depreciacaoMensal / 240;
+                    unidadeMedida = 'hora';
+                }
+
+                // Montar dados adicionais em JSON
+                // Salvar valores originais se entrada foi em Watts
+                let niveisConsumoOriginal = null;
+                if (tipoEquipamento === 'gas' && unidadeConsumo === 'watts') {
+                    niveisConsumoOriginal = [];
+                    document.querySelectorAll('#niveisConsumoContainer .nivel-consumo-card').forEach(card => {
+                        const nome = card.querySelector('.nivel-nome').value.trim() || 'Sem nome';
+                        const valorWatts = parseFloat(card.querySelector('.nivel-valor').value) || 0;
+                        niveisConsumoOriginal.push({ nome, valor: valorWatts });
+                    });
+                }
+
+                const dadosAdicionais = {
+                    descricao: descricao || null,
+                    tipo_equipamento: tipoEquipamento,
+                    potencia_watts: potencia,
+                    niveis_consumo: niveisConsumo.length > 0 ? niveisConsumo : null,
+                    unidade_consumo: tipoEquipamento === 'gas' ? unidadeConsumo : null,
+                    niveis_consumo_watts: niveisConsumoOriginal,
+                    consumo_gas_kgh: consumoParaCalculo,
+                    quantidade_bocas: quantidadeBocas,
+                    valor_compra: valorCompra,
+                    data_compra: dataCompra,
+                    vida_util_meses: vidaUtil
+                };
+
+                const equipamento = {
+                    nome,
+                    tipo: 'equipamento',
+                    unidade_medida: unidadeMedida,
+                    estoque_atual: 1,  // Equipamento disponível
+                    estoque_minimo: 0,
+                    custo_unitario: parseFloat(custoUnitario.toFixed(4)),
+                    observacoes: JSON.stringify(dadosAdicionais),
+                    ativo: true
+                };
+
+                console.log('📝 Salvando equipamento:', equipamento);
+
+                let result;
+                if (editingId) {
+                    // ATUALIZAR equipamento existente
+                    result = await supabase
+                        .from('insumos')
+                        .update(equipamento)
+                        .eq('id', editingId)
+                        .select();
+                } else {
+                    // INSERIR novo equipamento
+                    result = await supabase
+                        .from('insumos')
+                        .insert([equipamento])
+                        .select();
+                }
+
+                const { data, error } = result;
+                if (error) throw error;
+
+                console.log('✅ Equipamento salvo:', data);
+                alert(editingId ? '✅ Equipamento atualizado com sucesso!' : '✅ Equipamento cadastrado com sucesso!');
+                cancelarEdicao();
+                document.getElementById('formEquipamento').reset();
+                toggleCamposTipo();
+                await loadEquipamentos();
+            } catch (error) {
+                console.error('❌ Erro ao salvar:', error);
+                alert('Erro ao salvar: ' + error.message);
+            }
+        });
+
+        // Alternar campos visíveis de acordo com o tipo de equipamento
+        function toggleCamposTipo() {
+            const tipo = document.getElementById('inputTipoEquipamento').value;
+            const campoPotencia = document.getElementById('campoPotencia');
+            const camposGas = document.getElementById('camposGas');
+
+            console.log('🔄 Tipo selecionado:', tipo);
+
+            if (tipo === 'gas') {
+                campoPotencia.style.display = 'none';
+                camposGas.style.display = 'block';
+            } else if (tipo === 'eletrico') {
+                campoPotencia.style.display = 'block';
+                camposGas.style.display = 'none';
+            } else {
+                campoPotencia.style.display = 'none';
+                camposGas.style.display = 'none';
+            }
+        }
+
+        // Vincular evento de change ao select
+        document.getElementById('inputTipoEquipamento').addEventListener('change', toggleCamposTipo);
+
+        // ===== LÓGICA DE TROCA DE UNIDADE =====
+        function setUnidadeConsumo(novaUnidade) {
+            const anteriorUnidade = unidadeConsumo;
+            unidadeConsumo = novaUnidade;
+
+            // Atualizar visual dos botões
+            document.querySelectorAll('.unidade-btn').forEach(btn => {
+                if (btn.dataset.unidade === novaUnidade) {
+                    btn.classList.add('bg-primary/20', 'text-primary');
+                    btn.classList.remove('text-[#9db9b9]');
+                } else {
+                    btn.classList.remove('bg-primary/20', 'text-primary');
+                    btn.classList.add('text-[#9db9b9]');
+                }
+            });
+
+            // Converter valores existentes
+            document.querySelectorAll('#niveisConsumoContainer .nivel-consumo-card').forEach(card => {
+                const valorInput = card.querySelector('.nivel-valor');
+                const unidadeLabel = card.querySelector('.nivel-unidade');
+                const conversaoLabel = card.querySelector('.nivel-conversao');
+                if (!valorInput) return;
+
+                const valorAtual = parseFloat(valorInput.value) || 0;
+
+                if (anteriorUnidade === 'kgh' && novaUnidade === 'watts') {
+                    // kg/h → Watts
+                    const watts = kghParaWatts(valorAtual);
+                    valorInput.value = Math.round(watts);
+                    if (unidadeLabel) unidadeLabel.textContent = 'W';
+                    if (conversaoLabel) {
+                        conversaoLabel.textContent = `= ${valorAtual.toFixed(4)} kg/h`;
+                        conversaoLabel.classList.remove('hidden');
+                    }
+                } else if (anteriorUnidade === 'watts' && novaUnidade === 'kgh') {
+                    // Watts → kg/h
+                    const kgh = wattsParaKgh(valorAtual);
+                    valorInput.value = kgh.toFixed(4);
+                    if (unidadeLabel) unidadeLabel.textContent = 'kg/h';
+                    if (conversaoLabel) {
+                        conversaoLabel.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        // Atualizar conversão ao digitar valor
+        function updateConversaoDisplay(card) {
+            if (unidadeConsumo !== 'watts') return;
+            const valorInput = card.querySelector('.nivel-valor');
+            const conversaoLabel = card.querySelector('.nivel-conversao');
+            if (!valorInput || !conversaoLabel) return;
+            const watts = parseFloat(valorInput.value) || 0;
+            const kgh = wattsParaKgh(watts);
+            conversaoLabel.textContent = `= ${kgh.toFixed(4)} kg/h`;
+            conversaoLabel.classList.remove('hidden');
+        }
+
+        // Event listeners dos botões de unidade
+        document.getElementById('btnUnidadeKgh').addEventListener('click', () => setUnidadeConsumo('kgh'));
+        document.getElementById('btnUnidadeWatts').addEventListener('click', () => setUnidadeConsumo('watts'));
+
+        // Event listener para inputs de valor (conversão em tempo real)
+        document.getElementById('niveisConsumoContainer').addEventListener('input', (e) => {
+            if (e.target.classList.contains('nivel-valor')) {
+                updateConversaoDisplay(e.target.closest('.nivel-consumo-card'));
+            }
+        });
+
+        // Botão + para adicionar nível de consumo
+        document.getElementById('btnAddNivel').addEventListener('click', () => {
+            const container = document.getElementById('niveisConsumoContainer');
+            const count = container.querySelectorAll('.nivel-consumo-card').length + 1;
+            const card = document.createElement('div');
+            card.className = 'nivel-consumo-card bg-[#1a3030] border border-white/10 rounded-xl p-4 text-center relative';
+            card.dataset.nivelId = `custom_${count}`;
+
+            const isWatts = unidadeConsumo === 'watts';
+            const defaultValue = isWatts ? '1290' : '0.10';
+            const unitLabel = isWatts ? 'W' : 'kg/h';
+
+            card.innerHTML = `
+                <button type="button" class="btn-remove-nivel absolute top-1 right-1 text-rose-400 hover:text-rose-300 transition-colors" title="Remover n\u00edvel">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+                <input type="text" value="N\u00edvel ${count}" class="nivel-nome w-full bg-transparent text-[#9db9b9] text-[10px] font-semibold uppercase tracking-wider mb-2 text-center border-0 focus:ring-0 p-0" />
+                <input type="number" step="any" value="${defaultValue}" class="nivel-valor w-full bg-transparent border-0 border-b border-white/20 text-white text-xl font-bold text-center focus:ring-0 focus:border-primary p-0 pb-1" />
+                <p class="nivel-unidade text-[#9db9b9] text-[10px] mt-1">${unitLabel}</p>
+                <p class="nivel-conversao text-primary/60 text-[9px] mt-0.5 ${isWatts ? '' : 'hidden'}"></p>
+            `;
+            const btnAddNivel = document.getElementById('btnAddNivel');
+            container.insertBefore(card, btnAddNivel);
+
+            // Atualizar conversão se estiver em Watts
+            if (isWatts) updateConversaoDisplay(card);
+
+            // Evento de remover
+            card.querySelector('.btn-remove-nivel').addEventListener('click', () => {
+                card.remove();
+            });
+        });
+
+        // Iniciar - Carregar configurações primeiro, depois equipamentos
+        (async () => {
+            await loadConfiguracoes();
+            await loadEquipamentos();
+            toggleCamposTipo(); // Ajustar campos iniciais
+        })();
+    </script>
+</body>
+
+</html>

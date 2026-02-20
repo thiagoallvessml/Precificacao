@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Detalhes do Pedido</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen pb-32">
+    <!-- Top Navigation Bar -->
+    <nav
+        class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 ios-blur px-4 py-4 flex items-center border-b border-slate-200 dark:border-white/10">
+        <button class="w-10 h-10 flex items-center justify-start text-slate-900 dark:text-white"
+            onclick="window.location.href='pedidos.html'">
+            <span class="material-symbols-outlined text-3xl">chevron_left</span>
+        </button>
+        <h1 id="headerTitle" class="flex-1 text-center text-lg font-bold tracking-tight pr-10">Pedido</h1>
+    </nav>
+
+    <main
+        class="max-w-7xl mx-auto px-4 pt-6 pb-8 md:grid md:grid-cols-2 md:gap-8 bg-background-light dark:bg-background-dark">
+        <!-- Coluna Esquerda: Itens do Pedido -->
+        <div class="space-y-6">
+            <!-- Itens do Pedido -->
+            <section class="space-y-4">
+                <h2 id="itensHeader"
+                    class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                    Itens do Pedido
+                </h2>
+                <div id="itensList" class="space-y-3">
+                    <!-- Loading -->
+                    <div class="flex items-center justify-center py-8">
+                        <div class="animate-pulse flex flex-col items-center gap-2">
+                            <span class="material-symbols-outlined text-3xl text-white/20 animate-spin">sync</span>
+                            <p class="text-white/40 text-sm">Carregando...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Coluna Direita: Contexto e Financeiro -->
+        <div class="space-y-6 mt-8 md:mt-0">
+            <!-- Status Badge -->
+            <div class="flex justify-center md:justify-start">
+                <div id="statusBadge"
+                    class="bg-white/10 border border-white/10 px-6 py-2 rounded-full flex items-center gap-2">
+                    <span class="material-symbols-outlined text-white/40">hourglass_empty</span>
+                    <span class="text-white/40 font-bold uppercase tracking-wider text-sm">Carregando...</span>
+                </div>
+            </div>
+
+            <!-- Canal de Venda -->
+            <section class="space-y-4">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Canal de
+                    Venda</h2>
+                <div id="canalVenda"
+                    class="flex items-center justify-between bg-slate-100 dark:bg-white/5 p-4 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-white/40">storefront</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-white/40">-</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Marketplace</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Taxa Aplicada</p>
+                        <p class="text-sm font-semibold text-white/40">-</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resumo Financeiro -->
+            <section class="space-y-4">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Resumo
+                    Financeiro</h2>
+                <div id="resumoFinanceiro" class="bg-card-dark rounded-2xl p-6 text-white space-y-4 shadow-xl">
+                    <div class="flex items-center justify-center py-4">
+                        <p class="text-white/30 text-sm">Carregando dados...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data e Hora -->
+            <section class="space-y-4">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Informações
+                </h2>
+                <div id="infoSection" class="bg-slate-100 dark:bg-white/5 rounded-xl p-4 space-y-3">
+                    <p class="text-white/30 text-sm">Carregando...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Fixed Footer Actions -->
+    <footer
+        class="fixed bottom-0 left-0 right-0 p-4 pb-8 bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-white/10 space-y-3">
+        <div class="max-w-7xl mx-auto flex gap-3">
+            <button onclick="window.print()"
+                class="flex-1 bg-primary text-background-dark font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined">print</span>
+                Reimprimir
+            </button>
+            <button id="btnEstornar" onclick="estornarPedido()"
+                class="flex-1 bg-transparent border-2 border-red-500/50 text-red-500 font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined">settings_backup_restore</span>
+                Estornar
+            </button>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { getAllRecords, getRecordById, updateRecord } from './supabase-utils.js';
+
+        let pedido = null;
+        let itens = [];
+        let categorias = {};
+        let produtos = {};
+
+        // Pegar ID da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pedidoId = urlParams.get('id');
+
+        if (!pedidoId) {
+            document.getElementById('itensList').innerHTML = `
+                <div class="text-center py-8">
+                    <span class="material-symbols-outlined text-4xl text-red-400 mb-2">error</span>
+                    <p class="text-red-400 text-sm">ID do pedido não informado</p>
+                </div>
+            `;
+        }
+
+        // Carregar dados
+        async function loadDados() {
+            if (!pedidoId) return;
+
+            try {
+                // Carregar pedido
+                const { data: pedData, error: pedError } = await getRecordById('pedidos', pedidoId);
+                if (pedError) throw pedError;
+                pedido = pedData;
+
+                if (!pedido) throw new Error('Pedido não encontrado');
+
+                // Carregar itens do pedido
+                const { data: allItens, error: itensError } = await getAllRecords('pedido_itens');
+                if (itensError) throw itensError;
+                itens = (allItens || []).filter(i => String(i.pedido_id) === String(pedidoId));
+
+                // Carregar categorias (para marketplace info + taxa)
+                const { data: catData, error: catError } = await getAllRecords('categorias');
+                if (catError) throw catError;
+                (catData || []).forEach(cat => { categorias[cat.id] = cat; });
+
+                // Carregar produtos (para imagens)
+                const { data: prodData, error: prodError } = await getAllRecords('produtos');
+                if (prodError) throw prodError;
+                (prodData || []).forEach(p => { produtos[p.id] = p; });
+
+                renderDetalhes();
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                document.getElementById('itensList').innerHTML = `
+                    <div class="text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-red-400 mb-2">error</span>
+                        <p class="text-red-400 text-sm font-medium">Erro ao carregar pedido</p>
+                        <p class="text-white/30 text-xs mt-1">${error.message || error}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderDetalhes() {
+            // Header
+            document.getElementById('headerTitle').textContent = `Pedido ${pedido.numero_pedido || '#' + pedido.id}`;
+            document.title = `Pedido ${pedido.numero_pedido || '#' + pedido.id}`;
+
+            // Status Badge
+            const statusConfig = getStatusConfig(pedido.status);
+            document.getElementById('statusBadge').innerHTML = `
+                <span class="material-symbols-outlined ${statusConfig.textColor} fill-1">${statusConfig.icone}</span>
+                <span class="${statusConfig.textColor} font-bold uppercase tracking-wider text-sm">${statusConfig.label}</span>
+            `;
+            document.getElementById('statusBadge').className =
+                `${statusConfig.bgColor} border ${statusConfig.borderColor} px-6 py-2 rounded-full flex items-center gap-2`;
+
+            // Canal de Venda
+            const mkId = pedido.categoria_marketplace_id || pedido.marketplace_id;
+            const categoria = mkId ? categorias[mkId] : null;
+            const nomeCanal = categoria ? categoria.nome : 'Venda Direta';
+            const iconeCanal = categoria ? (categoria.icone || 'storefront') : 'storefront';
+            const taxaCanal = categoria && categoria.taxa_operacional ? parseFloat(categoria.taxa_operacional) : 0;
+
+            const coresCanal = [
+                'bg-red-500/20 text-red-400',
+                'bg-emerald-500/20 text-emerald-400',
+                'bg-blue-500/20 text-blue-400',
+                'bg-purple-500/20 text-purple-400',
+                'bg-orange-500/20 text-orange-400'
+            ];
+            const corIndex = mkId ? (mkId % coresCanal.length) : 0;
+            const corCanal = categoria ? coresCanal[corIndex] : 'bg-white/10 text-white/60';
+
+            document.getElementById('canalVenda').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center ${corCanal}">
+                        <span class="material-symbols-outlined">${iconeCanal}</span>
+                    </div>
+                    <div>
+                        <p class="font-bold">${nomeCanal}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Marketplace</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Taxa Aplicada</p>
+                    <p class="text-sm font-semibold ${taxaCanal > 0 ? 'text-red-400' : 'text-emerald-400'}">
+                        ${taxaCanal > 0 ? `- ${taxaCanal.toFixed(1)}%` : '0%'}
+                    </p>
+                </div>
+            `;
+
+            // Itens do Pedido
+            document.getElementById('itensHeader').textContent = `Itens do Pedido (${itens.length})`;
+
+            if (itens.length === 0) {
+                document.getElementById('itensList').innerHTML = `
+                    <div class="text-center py-6">
+                        <span class="material-symbols-outlined text-3xl text-white/20 mb-2">shopping_bag</span>
+                        <p class="text-white/40 text-sm">Nenhum item registrado</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('itensList').innerHTML = itens.map(item => {
+                    const prod = produtos[item.produto_id];
+                    const imgUrl = prod ? prod.imagem_url : null;
+
+                    return `
+                        <div class="flex items-center gap-3 py-2 border-b border-slate-200 dark:border-white/5">
+                            <div class="w-16 h-16 rounded-lg bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0">
+                                ${imgUrl
+                            ? `<img alt="${item.produto_nome}" class="w-full h-full object-cover" src="${imgUrl}" />`
+                            : `<div class="w-full h-full flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-2xl text-white/20">icecream</span>
+                                      </div>`
+                        }
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-sm">${item.produto_nome}</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    ${item.quantidade}x R$ ${parseFloat(item.preco_unitario).toFixed(2).replace('.', ',')}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold">R$ ${parseFloat(item.preco_total).toFixed(2).replace('.', ',')}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Resumo Financeiro
+            const valorBruto = parseFloat(pedido.valor_subtotal || 0);
+            const taxaEntrega = parseFloat(pedido.valor_taxa_entrega || 0);
+            const desconto = parseFloat(pedido.valor_desconto || 0);
+            const valorTotal = parseFloat(pedido.valor_total || 0);
+            const valorTaxa = taxaCanal > 0 ? valorTotal * (taxaCanal / 100) : 0;
+            const valorLiquido = valorTotal - valorTaxa;
+
+            document.getElementById('resumoFinanceiro').innerHTML = `
+                <div class="flex justify-between text-sm opacity-80">
+                    <span>Valor Bruto (Produtos)</span>
+                    <span>R$ ${valorBruto.toFixed(2).replace('.', ',')}</span>
+                </div>
+                ${taxaEntrega > 0 ? `
+                    <div class="flex justify-between text-sm opacity-80">
+                        <span>Taxa Entrega</span>
+                        <span>R$ ${taxaEntrega.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                ` : ''}
+                ${desconto > 0 ? `
+                    <div class="flex justify-between text-sm text-red-400">
+                        <span>Desconto</span>
+                        <span>- R$ ${desconto.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                ` : ''}
+                ${taxaCanal > 0 ? `
+                    <div class="flex justify-between text-sm text-red-400">
+                        <span>Taxa ${nomeCanal} (${taxaCanal.toFixed(1)}%)</span>
+                        <span>- R$ ${valorTaxa.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                ` : ''}
+                <div class="border-t border-white/10 pt-4"></div>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-medium uppercase opacity-60 tracking-wider">Valor Total</p>
+                        <p class="text-2xl font-bold text-white">R$ ${valorTotal.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] uppercase opacity-40">Líquido (após taxa)</p>
+                        <p class="text-lg font-bold text-primary">R$ ${valorLiquido.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center border-t border-white/10 pt-3">
+                    <div>
+                        <p class="text-[10px] uppercase opacity-40">Forma de Pagamento</p>
+                        <div class="flex items-center gap-1 font-semibold text-sm">
+                            <span class="material-symbols-outlined text-sm">payments</span>
+                            ${pedido.metodo_pagamento || 'Não informado'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Informações adicionais
+            const dataPedido = new Date(pedido.data_pedido);
+            const dataFormatada = dataPedido.toLocaleDateString('pt-BR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+            const horaFormatada = dataPedido.toLocaleTimeString('pt-BR', {
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            document.getElementById('infoSection').innerHTML = `
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500 dark:text-slate-400">Data</span>
+                    <span class="font-medium capitalize">${dataFormatada}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500 dark:text-slate-400">Horário</span>
+                    <span class="font-medium">${horaFormatada}</span>
+                </div>
+                ${pedido.cliente_nome ? `
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-500 dark:text-slate-400">Cliente</span>
+                        <span class="font-medium">${pedido.cliente_nome}</span>
+                    </div>
+                ` : ''}
+                ${pedido.observacoes ? `
+                    <div class="pt-2 border-t border-white/5">
+                        <span class="text-slate-500 dark:text-slate-400 text-xs uppercase font-bold">Observações</span>
+                        <p class="text-sm mt-1">${pedido.observacoes}</p>
+                    </div>
+                ` : ''}
+            `;
+
+            // Ocultar botão de estornar se já cancelado
+            if (pedido.status === 'cancelado') {
+                document.getElementById('btnEstornar').disabled = true;
+                document.getElementById('btnEstornar').className =
+                    'flex-1 bg-transparent border-2 border-white/10 text-white/30 font-bold py-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed';
+                document.getElementById('btnEstornar').innerHTML = `
+                    <span class="material-symbols-outlined">block</span>
+                    Cancelado
+                `;
+            }
+        }
+
+        // Config de status
+        function getStatusConfig(status) {
+            const configs = {
+                'entregue': {
+                    label: 'Entregue', icone: 'check_circle',
+                    bgColor: 'bg-primary/20', textColor: 'text-primary', borderColor: 'border-primary/30'
+                },
+                'concluido': {
+                    label: 'Concluído', icone: 'check_circle',
+                    bgColor: 'bg-primary/20', textColor: 'text-primary', borderColor: 'border-primary/30'
+                },
+                'pendente': {
+                    label: 'Pendente', icone: 'schedule',
+                    bgColor: 'bg-orange-500/20', textColor: 'text-orange-400', borderColor: 'border-orange-500/30'
+                },
+                'em_preparo': {
+                    label: 'Em Preparo', icone: 'restaurant',
+                    bgColor: 'bg-blue-500/20', textColor: 'text-blue-400', borderColor: 'border-blue-500/30'
+                },
+                'pronto': {
+                    label: 'Pronto', icone: 'task_alt',
+                    bgColor: 'bg-emerald-500/20', textColor: 'text-emerald-400', borderColor: 'border-emerald-500/30'
+                },
+                'cancelado': {
+                    label: 'Cancelado', icone: 'cancel',
+                    bgColor: 'bg-red-500/20', textColor: 'text-red-400', borderColor: 'border-red-500/30'
+                }
+            };
+            return configs[status] || configs['pendente'];
+        }
+
+        // Estornar pedido
+        window.estornarPedido = async function () {
+            if (!pedido) return;
+            if (!confirm(`⚠️ Deseja realmente cancelar o pedido ${pedido.numero_pedido}?\n\nEsta ação não pode ser desfeita.`)) return;
+
+            try {
+                const { error } = await updateRecord('pedidos', pedido.id, { status: 'cancelado' });
+                if (error) throw error;
+
+                alert('✅ Pedido cancelado com sucesso!');
+                pedido.status = 'cancelado';
+                renderDetalhes();
+            } catch (error) {
+                console.error('❌ Erro ao estornar:', error);
+                alert('❌ Erro ao cancelar pedido: ' + (error.message || error));
+            }
+        };
+
+        // Iniciar
+        loadDados();
+    </script>
+</body>
+
+</html>

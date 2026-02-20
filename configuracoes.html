@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Configurações de Custos e Produção</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Work Sans", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ios-shadow {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        input:focus {
+            border-color: #13ecec !important;
+            box-shadow: 0 0 0 1px #13ecec !important;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark min-h-screen font-display">
+    <header
+        class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-[#3b5454]">
+        <div class="flex items-center p-3 justify-between max-w-6xl mx-auto">
+            <button onclick="window.location.href='index.html'"
+                class="text-gray-900 dark:text-white flex size-10 items-center justify-center cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2
+                class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">
+                Configurações de Custos</h2>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 pb-32">
+        <!-- Grid Container for Desktop -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6">
+            <!-- SECTION 1: GÁS -->
+            <section class="mt-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-primary">local_fire_department</span>
+                    <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Configurações de Gás</h2>
+                </div>
+                <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4">
+                    <div class="flex gap-4">
+                        <label class="flex flex-col flex-1">
+                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Peso Botijão (kg)</p>
+                            <input id="peso_gas"
+                                class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
+                                placeholder="13" type="number" step="0.01" min="0" />
+                        </label>
+                        <label class="flex flex-col flex-1">
+                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Preço (R$)</p>
+                            <input id="preco_gas"
+                                class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
+                                placeholder="110.00" type="number" step="0.01" min="0" />
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: ENERGIA -->
+            <section class="mt-8">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-primary">bolt</span>
+                    <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Configurações de Energia
+                    </h2>
+                </div>
+                <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4">
+                    <label class="flex flex-col">
+                        <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Custo por kWh (R$)</p>
+                        <input id="custo_kwh"
+                            class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
+                            placeholder="0.85" step="0.01" type="number" min="0" />
+                    </label>
+                    <!-- Tip Card -->
+                    <div class="flex gap-3 bg-primary/10 dark:bg-primary/5 p-4 rounded-lg border border-primary/20">
+                        <span class="material-symbols-outlined text-primary text-xl shrink-0">receipt_long</span>
+                        <p class="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
+                            O kWh você pode consultar na sua conta de luz, normalmente é a soma dos dois custos de
+                            tarifa
+                            Aneel (Energia + Distribuição).
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: MÃO DE OBRA -->
+            <section class="mt-8">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-primary">engineering</span>
+                    <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Preço e Mão de Obra</h2>
+                </div>
+                <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-5">
+                    <!-- Calculadora de Salário -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-primary/70 text-lg">calculate</span>
+                            <p class="text-gray-600 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                                Calculadora de Custo/Hora</p>
+                        </div>
+                        <label class="flex flex-col">
+                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Salário Mensal (R$)</p>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
+                                <input id="salario_mensal"
+                                    class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 pl-12 pr-4 text-base focus:outline-none"
+                                    placeholder="1500.00" type="number" step="0.01" min="0" />
+                            </div>
+                        </label>
+
+                        <!-- Resultado do cálculo -->
+                        <div id="resultadoCalculo"
+                            class="hidden bg-primary/10 dark:bg-primary/5 border border-primary/20 rounded-xl p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-primary/70 text-[10px] font-semibold uppercase tracking-widest mb-1">
+                                        Valor Calculado da Hora</p>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-primary text-sm font-bold">R$</span>
+                                        <span id="valorCalculado" class="text-primary text-2xl font-bold">0,00</span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p
+                                        class="text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">
+                                        Base de cálculo</p>
+                                    <p class="text-gray-400 dark:text-gray-500 text-xs">220 horas/mês</p>
+                                </div>
+                            </div>
+                            <button type="button" id="btnUsarCalculado"
+                                class="w-full mt-3 bg-primary/20 hover:bg-primary/30 text-primary font-semibold text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 active:scale-[0.98]">
+                                <span class="material-symbols-outlined text-base">arrow_downward</span>
+                                Usar este valor como Hora Trabalhada
+                            </button>
+                        </div>
+
+                        <!-- Dica -->
+                        <div class="flex gap-3 bg-primary/10 dark:bg-primary/5 p-4 rounded-lg border border-primary/20">
+                            <span class="material-symbols-outlined text-primary text-xl shrink-0">info</span>
+                            <p class="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
+                                Fórmula: Salário ÷ <strong>220 horas mensais</strong> (padrão CLT: 44h/semana).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Divisor -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 h-px bg-gray-200 dark:bg-[#3b5454]"></div>
+                        <span
+                            class="text-gray-400 dark:text-gray-500 text-xs font-medium uppercase tracking-wider">Valor
+                            Final</span>
+                        <div class="flex-1 h-px bg-gray-200 dark:bg-[#3b5454]"></div>
+                    </div>
+
+                    <!-- Input do valor da hora (pode ser editado manualmente ou preenchido pela calculadora) -->
+                    <label class="flex flex-col">
+                        <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Valor da Hora Trabalhada
+                            (R$/hora)</p>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">R$</span>
+                            <input id="custo_mao_obra"
+                                class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 pl-12 pr-4 text-base focus:outline-none"
+                                placeholder="25.00" type="number" step="0.01" min="0" />
+                        </div>
+                    </label>
+                </div>
+            </section>
+        </div> <!-- End Grid Container -->
+    </main>
+
+    <div
+        class="fixed bottom-0 left-0 right-0 p-4 md:p-3 bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-[#3b5454] backdrop-blur-sm">
+        <div class="max-w-6xl mx-auto">
+            <button id="saveButton"
+                class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold text-lg py-4 md:py-3 rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">save</span>
+                Salvar Todas as Configurações
+            </button>
+            <div class="h-4 md:h-2 w-full"></div> <!-- Safe area spacing -->
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        import { getAllRecords, updateRecord, insertRecord } from './supabase-utils.js';
+
+        // Force dark mode
+        document.documentElement.classList.add('dark');
+
+        const supabase = getSupabase();
+
+        // Referências dos inputs usando IDs
+        const pesoGasInput = document.getElementById('peso_gas');
+        const precoGasInput = document.getElementById('preco_gas');
+        const custoKwhInput = document.getElementById('custo_kwh');
+        const custoMaoObraInput = document.getElementById('custo_mao_obra');
+        const saveButton = document.getElementById('saveButton');
+        const salarioMensalInput = document.getElementById('salario_mensal');
+        const resultadoCalculo = document.getElementById('resultadoCalculo');
+        const valorCalculado = document.getElementById('valorCalculado');
+        const btnUsarCalculado = document.getElementById('btnUsarCalculado');
+
+        // Calculadora de custo/hora (220 horas mensais - padrão CLT)
+        const HORAS_MENSAIS = 220;
+
+        function calcularCustoHora() {
+            const salario = parseFloat(salarioMensalInput.value) || 0;
+
+            if (salario > 0) {
+                const valorHora = salario / HORAS_MENSAIS;
+                valorCalculado.textContent = valorHora.toFixed(2).replace('.', ',');
+                resultadoCalculo.classList.remove('hidden');
+            } else {
+                resultadoCalculo.classList.add('hidden');
+            }
+        }
+
+        salarioMensalInput.addEventListener('input', calcularCustoHora);
+
+        btnUsarCalculado.addEventListener('click', () => {
+            const salario = parseFloat(salarioMensalInput.value) || 0;
+
+            if (salario > 0) {
+                const valorHora = salario / HORAS_MENSAIS;
+                custoMaoObraInput.value = valorHora.toFixed(2);
+
+                // Feedback visual
+                custoMaoObraInput.style.borderColor = '#13ecec';
+                custoMaoObraInput.style.boxShadow = '0 0 0 1px #13ecec';
+                setTimeout(() => {
+                    custoMaoObraInput.style.borderColor = '';
+                    custoMaoObraInput.style.boxShadow = '';
+                }, 1500);
+            }
+        });
+
+        // Chaves de configuração no banco
+        const CONFIG_KEYS = {
+            PESO_GAS: 'peso_botijao_gas',
+            PRECO_GAS: 'preco_botijao_gas',
+            CUSTO_KWH: 'custo_kwh',
+            MAO_OBRA: 'custo_mao_obra_hora',
+            SALARIO_MENSAL: 'salario_mensal'
+        };
+
+        /**
+         * Carrega uma configuração específica do Supabase
+         */
+        async function getConfigValue(chave) {
+            const { data, error } = await supabase
+                .from('configuracoes')
+                .select('*')
+                .eq('chave', chave)
+                .single();
+
+            if (error && error.code !== 'PGRST116') { // PGRST116 = não encontrado
+                console.error(`Erro ao buscar configuração ${chave}:`, error);
+                return null;
+            }
+
+            return data;
+        }
+
+        /**
+         * Salva ou atualiza uma configuração no Supabase
+         */
+        async function saveConfigValue(chave, valor, descricao, categoria = 'producao') {
+            const existing = await getConfigValue(chave);
+
+            const configData = {
+                chave,
+                valor: String(valor),
+                tipo: 'number',
+                descricao,
+                categoria
+            };
+
+            if (existing) {
+                // Atualiza registro existente
+                const { error } = await supabase
+                    .from('configuracoes')
+                    .update({ valor: String(valor), updated_at: new Date().toISOString() })
+                    .eq('chave', chave);
+
+                if (error) {
+                    console.error(`Erro ao atualizar ${chave}:`, error);
+                    throw error;
+                }
+            } else {
+                // Insere novo registro
+                const { error } = await supabase
+                    .from('configuracoes')
+                    .insert([configData]);
+
+                if (error) {
+                    console.error(`Erro ao inserir ${chave}:`, error);
+                    throw error;
+                }
+            }
+        }
+
+        /**
+         * Carrega todas as configurações ao iniciar a página
+         */
+        async function carregarConfiguracoes() {
+            try {
+                // Exibe um loading
+                saveButton.disabled = true;
+                saveButton.innerHTML = `
+                    <span class="material-symbols-outlined animate-spin">refresh</span>
+                    Carregando...
+                `;
+
+                // Peso do botijão
+                const pesoGas = await getConfigValue(CONFIG_KEYS.PESO_GAS);
+                if (pesoGas) {
+                    pesoGasInput.value = pesoGas.valor;
+                }
+
+                // Preço do botijão
+                const precoGas = await getConfigValue(CONFIG_KEYS.PRECO_GAS);
+                if (precoGas) {
+                    precoGasInput.value = precoGas.valor;
+                }
+
+                // Custo kWh
+                const custoKwh = await getConfigValue(CONFIG_KEYS.CUSTO_KWH);
+                if (custoKwh) {
+                    custoKwhInput.value = custoKwh.valor;
+                }
+
+                // Custo mão de obra
+                const custoMaoObra = await getConfigValue(CONFIG_KEYS.MAO_OBRA);
+                if (custoMaoObra) {
+                    custoMaoObraInput.value = custoMaoObra.valor;
+                }
+
+                // Salário mensal
+                const salarioMensal = await getConfigValue(CONFIG_KEYS.SALARIO_MENSAL);
+                if (salarioMensal) {
+                    salarioMensalInput.value = salarioMensal.valor;
+                }
+
+                // Recalcular se salário existe
+                calcularCustoHora();
+
+                console.log('✅ Configurações carregadas com sucesso!');
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+                showNotification('Erro ao carregar configurações', 'error');
+            } finally {
+                // Restaura o botão
+                saveButton.disabled = false;
+                saveButton.innerHTML = `
+                    <span class="material-symbols-outlined">save</span>
+                    Salvar Todas as Configurações
+                `;
+            }
+        }
+
+        /**
+         * Salva todas as configurações no Supabase
+         */
+        async function salvarConfiguracoes() {
+            try {
+                // Exibe loading
+                saveButton.disabled = true;
+                saveButton.innerHTML = `
+                    <span class="material-symbols-outlined animate-spin">refresh</span>
+                    Salvando...
+                `;
+
+                // Validação básica
+                const pesoGas = parseFloat(pesoGasInput.value) || 0;
+                const precoGas = parseFloat(precoGasInput.value) || 0;
+                const custoKwh = parseFloat(custoKwhInput.value) || 0;
+                const custoMaoObra = parseFloat(custoMaoObraInput.value) || 0;
+
+                if (pesoGas <= 0 || precoGas <= 0 || custoKwh <= 0 || custoMaoObra <= 0) {
+                    throw new Error('Todos os valores devem ser maiores que zero');
+                }
+
+                // Salva cada configuração
+                await saveConfigValue(
+                    CONFIG_KEYS.PESO_GAS,
+                    pesoGas,
+                    'Peso do botijão de gás em kg'
+                );
+
+                await saveConfigValue(
+                    CONFIG_KEYS.PRECO_GAS,
+                    precoGas,
+                    'Preço do botijão de gás em R$',
+                    'financeiro'
+                );
+
+                await saveConfigValue(
+                    CONFIG_KEYS.CUSTO_KWH,
+                    custoKwh,
+                    'Custo por kWh de energia em R$',
+                    'financeiro'
+                );
+
+                await saveConfigValue(
+                    CONFIG_KEYS.MAO_OBRA,
+                    custoMaoObra,
+                    'Custo de mão de obra por hora em R$',
+                    'financeiro'
+                );
+
+                // Salário Mensal (salva se preenchido)
+                const salarioMensal = parseFloat(salarioMensalInput.value) || 0;
+                if (salarioMensal > 0) {
+                    await saveConfigValue(
+                        CONFIG_KEYS.SALARIO_MENSAL,
+                        salarioMensal,
+                        'Salário mensal para cálculo de custo/hora',
+                        'financeiro'
+                    );
+                }
+
+                console.log('✅ Todas as configurações salvas com sucesso!');
+                showNotification('Configurações salvas com sucesso!', 'success');
+
+            } catch (error) {
+                console.error('Erro ao salvar configurações:', error);
+                showNotification(error.message || 'Erro ao salvar configurações', 'error');
+            } finally {
+                // Restaura o botão
+                saveButton.disabled = false;
+                saveButton.innerHTML = `
+                    <span class="material-symbols-outlined">save</span>
+                    Salvar Todas as Configurações
+                `;
+            }
+        }
+
+        /**
+         * Exibe notificação temporária
+         */
+        function showNotification(message, type = 'info') {
+            // Remove notificações anteriores
+            const oldNotification = document.querySelector('.notification');
+            if (oldNotification) {
+                oldNotification.remove();
+            }
+
+            // Cria nova notificação
+            const notification = document.createElement('div');
+            notification.className = 'notification fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg backdrop-blur-md transition-all transform translate-x-0';
+
+            if (type === 'success') {
+                notification.classList.add('bg-green-500/90', 'text-white');
+            } else if (type === 'error') {
+                notification.classList.add('bg-red-500/90', 'text-white');
+            } else {
+                notification.classList.add('bg-primary/90', 'text-background-dark');
+            }
+
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined">
+                        ${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}
+                    </span>
+                    <span class="font-medium">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Remove após 3 segundos
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        saveButton.addEventListener('click', salvarConfiguracoes);
+
+        // Verificação e debug
+        console.log('🔍 Verificando elementos:', {
+            pesoGasInput: !!pesoGasInput,
+            precoGasInput: !!precoGasInput,
+            custoKwhInput: !!custoKwhInput,
+            custoMaoObraInput: !!custoMaoObraInput,
+            saveButton: !!saveButton,
+            supabase: !!supabase
+        });
+
+        // Verifica se todos os elementos foram encontrados
+        if (!pesoGasInput || !precoGasInput || !custoKwhInput || !custoMaoObraInput || !saveButton) {
+            console.error('❌ Erro: Alguns inputs não foram encontrados!');
+            showNotification('Erro ao inicializar página - verifique o console', 'error');
+        }
+
+        // Carrega configurações ao iniciar
+        if (supabase) {
+            carregarConfiguracoes();
+        } else {
+            showNotification('Supabase não configurado', 'error');
+        }
+
+        // Adiciona animação de spin ao Tailwind
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>

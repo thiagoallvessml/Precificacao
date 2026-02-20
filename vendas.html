@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Registro de Vendas</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "cta": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#1A1A1A",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display antialiased">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='index.html'"
+                class="text-white flex size-10 items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold flex-1 text-center">Registro de Venda</h2>
+            <div class="flex w-10 items-center justify-end">
+                <button onclick="limparCarrinho()"
+                    class="flex items-center justify-center rounded-xl h-10 w-10 text-white hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined">delete_sweep</span>
+                </button>
+            </div>
+        </div>
+        <!-- Channel Selector -->
+        <div id="marketplacesList" class="flex gap-3 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+    </header>
+
+    <main class="pb-60 max-w-7xl mx-auto">
+        <!-- Product List -->
+        <div id="produtosList" class="flex flex-col gap-1 px-2 mt-2">
+            <!-- Será preenchido dinamicamente -->
+        </div>
+    </main>
+
+    <!-- Fixed Checkout Footer -->
+    <footer
+        class="fixed bottom-0 left-0 right-0 bg-surface-dark border-t border-white/10 pt-3 pb-6 px-4 rounded-t-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-50">
+        <div class="max-w-7xl mx-auto">
+            <!-- Totals Summary -->
+            <div class="grid grid-cols-3 gap-3 mb-3 text-center">
+                <div class="flex items-center justify-center gap-1.5">
+                    <span class="text-white/40 text-[8px] uppercase font-semibold tracking-wider">Itens:</span>
+                    <span id="totalItens" class="text-white text-base font-bold">0</span>
+                </div>
+                <div class="flex items-center justify-center gap-1.5 border-x border-white/10">
+                    <span class="text-white/40 text-[8px] uppercase font-semibold tracking-wider">Total:</span>
+                    <span id="totalValor" class="text-white text-base font-bold">R$ 0,00</span>
+                </div>
+                <div class="flex items-center justify-center gap-1.5">
+                    <span class="text-primary text-[8px] uppercase font-semibold tracking-wider">Qtd:</span>
+                    <span id="totalQtd" class="text-primary text-base font-bold">0</span>
+                </div>
+            </div>
+
+            <!-- Main Action Button -->
+            <button onclick="finalizarVenda()"
+                class="w-full bg-cta hover:bg-cta/90 text-background-dark h-12 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-[0.98]">
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                FINALIZAR VENDA
+            </button>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { getAllRecords, insertRecord } from './supabase-utils.js';
+
+        let produtos = [];
+        let marketplaces = [];
+        let precosMarketplace = {}; // { produto_id:{ marketplace_id: preco } }
+        let carrinho = {}; // { produto_id: { produto, quantidade, preco } }
+        let marketplaceSelecionado = null;
+
+        // Carregar dados
+        async function loadDados() {
+            try {
+                // Carregar produtos
+                const { data: prodData, error: prodError } = await getAllRecords('produtos');
+                if (prodError) throw prodError;
+                produtos = (prodData || []).filter(p => p.disponivel);
+
+                // Carregar marketplaces (categorias do tipo marketplace)
+                const { data: catData, error: catError } = await getAllRecords('categorias');
+                if (catError) throw catError;
+                marketplaces = (catData || []).filter(c => c.tipo === 'marketplace' && c.ativo);
+
+                console.log('📦 Marketplaces carregados:', marketplaces);
+
+                // Carregar preços por marketplace
+                const { data: precosData, error: precosError } = await getAllRecords('precos_marketplace');
+                console.log('💰 Preços RAW do banco:', precosData);
+
+                if (!precosError && precosData) {
+                    precosData.forEach(p => {
+                        if (!precosMarketplace[p.produto_id]) {
+                            precosMarketplace[p.produto_id] = {};
+                        }
+                        // Usar categoria_marketplace_id ou marketplace_id (compatibilidade)
+                        const marketplaceId = p.categoria_marketplace_id || p.marketplace_id;
+                        precosMarketplace[p.produto_id][marketplaceId] = p.preco;
+
+                        console.log(`💵 Preço configurado: Produto ${p.produto_id} | Marketplace ${marketplaceId} | R$ ${p.preco}`);
+                    });
+                }
+
+                console.log('🗂️ Objeto precosMarketplace final:', precosMarketplace);
+
+                renderMarketplaces();
+                renderProdutos();
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+            }
+        }
+
+        // Renderizar marketplaces
+        function renderMarketplaces() {
+            const container = document.getElementById('marketplacesList');
+
+            if (marketplaces.length === 0) {
+                marketplaceSelecionado = null;
+                container.innerHTML = `
+                    <div class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-primary text-background-dark px-4 font-bold border-2 border-primary">
+                        <span class="material-symbols-outlined text-[20px]">store</span>
+                        <p class="text-sm">Venda Direta</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Se não tiver selecionado, selecionar o primeiro
+            if (!marketplaceSelecionado && marketplaces.length > 0) {
+                marketplaceSelecionado = marketplaces[0].id;
+            }
+
+            container.innerHTML = marketplaces.map(mkt => {
+                const isActive = mkt.id === marketplaceSelecionado;
+                return `
+                    <div onclick="selecionarMarketplace(${mkt.id})"
+                        class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl px-4 border-2 cursor-pointer transition-all ${isActive
+                        ? 'bg-primary text-background-dark border-primary font-bold'
+                        : 'bg-surface-dark border-white/10 text-white font-medium hover:bg-white/5'
+                    }">
+                        <span class="material-symbols-outlined text-[20px]">storefront</span>
+                        <p class="text-sm">${mkt.nome}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Selecionar marketplace
+        window.selecionarMarketplace = function (id) {
+            marketplaceSelecionado = id;
+
+            // Atualizar preços dos itens já no carrinho ou removê-los se não tiverem preço
+            Object.keys(carrinho).forEach(produtoId => {
+                if (precosMarketplace[produtoId]?.[marketplaceSelecionado]) {
+                    // Tem preço - atualizar
+                    const novoPreco = parseFloat(precosMarketplace[produtoId][marketplaceSelecionado]);
+                    carrinho[produtoId].preco = novoPreco;
+                } else {
+                    // Sem preço - remover do carrinho
+                    delete carrinho[produtoId];
+                }
+            });
+
+            renderMarketplaces();
+            renderProdutos(); // Atualizar preços
+            atualizarTotais(); // Atualizar totais com novos preços
+        };
+
+        // Renderizar produtos
+        function renderProdutos() {
+            const container = document.getElementById('produtosList');
+
+            if (produtos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <span class="material-symbols-outlined text-6xl mb-4 opacity-30">icecream</span>
+                        <p>Nenhum produto disponível</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = produtos.map(prod => {
+                console.log(`\n🔍 Renderizando produto: ${prod.nome} (ID: ${prod.id})`);
+                console.log(`   Marketplace selecionado: ${marketplaceSelecionado}`);
+                console.log(`   Preços disponíveis para este produto:`, precosMarketplace[prod.id]);
+
+                // Buscar preço específico do marketplace selecionado
+                let preco = null;
+                let temPreco = false;
+
+                if (marketplaceSelecionado && precosMarketplace[prod.id]?.[marketplaceSelecionado]) {
+                    preco = parseFloat(precosMarketplace[prod.id][marketplaceSelecionado]);
+                    temPreco = true;
+                    console.log(`   ✅ PREÇO ENCONTRADO: R$ ${preco.toFixed(2)}`);
+                } else {
+                    console.log(`   ❌ SEM PREÇO para marketplace ${marketplaceSelecionado}`);
+                    console.log(`   Verificação:`);
+                    console.log(`      - marketplaceSelecionado existe? ${!!marketplaceSelecionado}`);
+                    console.log(`      - precosMarketplace[${prod.id}] existe? ${!!precosMarketplace[prod.id]}`);
+                    console.log(`      - precosMarketplace[${prod.id}][${marketplaceSelecionado}] existe? ${!!precosMarketplace[prod.id]?.[marketplaceSelecionado]}`);
+                }
+
+                const qtd = carrinho[prod.id]?.quantidade || 0;
+
+                return `
+                    <div class="flex items-center gap-4 bg-transparent px-2 min-h-[88px] py-3 justify-between border-b border-white/5">
+                        <div class="flex items-center gap-4">
+                            ${prod.imagem_url
+                        ? `<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-16 border border-white/10" style="background-image: url('${prod.imagem_url}');"></div>`
+                        : `<div class="flex items-center justify-center aspect-square rounded-lg size-16 border border-white/10 bg-white/5">
+                                     <span class="material-symbols-outlined text-slate-400">icecream</span>
+                                   </div>`
+                    }
+                            <div class="flex flex-col justify-center">
+                                <p class="text-white text-base font-semibold leading-tight line-clamp-1">${prod.nome}</p>
+                                ${temPreco ? `
+                                    <p class="text-primary text-sm font-bold leading-normal mt-1">R$ ${preco.toFixed(2).replace('.', ',')}</p>
+                                    <p class="text-white/40 text-[10px] uppercase tracking-wider font-medium">Preço Marketplace</p>
+                                ` : `
+                                    <p class="text-red-400 text-xs font-medium leading-normal mt-1">Sem preço configurado</p>
+                                    <p class="text-white/40 text-[10px] uppercase tracking-wider font-medium">Configure em Precificação</p>
+                                `}
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            ${temPreco ? `
+                                <div class="flex items-center gap-3 text-white">
+                                    <button onclick="alterarQtd(${prod.id}, -1)"
+                                        class="text-lg font-bold flex h-8 w-8 items-center justify-center rounded-lg bg-surface-dark border border-white/10 text-white/60 active:scale-95 transition-transform">
+                                        -
+                                    </button>
+                                    <span class="text-base font-bold w-6 text-center">${qtd}</span>
+                                    <button onclick="alterarQtd(${prod.id}, 1)"
+                                        class="text-lg font-bold flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-background-dark active:scale-95 transition-transform">
+                                        +
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="text-white/30 text-xs text-center px-2 w-24">
+                                    <span class="material-symbols-outlined text-2xl">block</span>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Alterar quantidade no carrinho
+        window.alterarQtd = function (produtoId, delta) {
+            const produto = produtos.find(p => p.id === produtoId);
+            if (!produto) return;
+
+            // Verificar se tem preço configurado
+            if (!marketplaceSelecionado || !precosMarketplace[produtoId]?.[marketplaceSelecionado]) {
+                alert('❌ Este produto não tem preço configurado para este marketplace!\n\nConfigure em: Adicionar Produto → Precificação');
+                return;
+            }
+
+            const qtdAtual = carrinho[produtoId]?.quantidade || 0;
+            const novaQtd = Math.max(0, qtdAtual + delta);
+
+            if (novaQtd === 0) {
+                delete carrinho[produtoId];
+            } else {
+                // Buscar preço específico do marketplace
+                const preco = parseFloat(precosMarketplace[produtoId][marketplaceSelecionado]);
+
+                carrinho[produtoId] = {
+                    produto,
+                    quantidade: novaQtd,
+                    preco: preco
+                };
+            }
+
+            atualizarTotais();
+            renderProdutos();
+        };
+
+        // Atualizar totais
+        function atualizarTotais() {
+            const itens = Object.keys(carrinho).length;
+            const qtdTotal = Object.values(carrinho).reduce((sum, item) => sum + item.quantidade, 0);
+            const valorTotal = Object.values(carrinho).reduce((sum, item) => sum + (item.quantidade * item.preco), 0);
+
+            document.getElementById('totalItens').textContent = itens;
+            document.getElementById('totalQtd').textContent = qtdTotal;
+            document.getElementById('totalValor').textContent = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Limpar carrinho
+        window.limparCarrinho = function () {
+            if (!confirm('Limpar todos os itens do carrinho?')) return;
+            carrinho = {};
+            atualizarTotais();
+            renderProdutos();
+        };
+
+        // Finalizar venda
+        window.finalizarVenda = async function () {
+            if (Object.keys(carrinho).length === 0) {
+                alert('❌ Adicione produtos ao carrinho primeiro!');
+                return;
+            }
+
+            try {
+                const itens = Object.values(carrinho);
+                const subtotal = itens.reduce((sum, item) => sum + (item.quantidade * item.preco), 0);
+
+                // Gerar número único
+                const numeroPedido = `VND-${Date.now()}`;
+
+                // Criar pedido
+                const pedido = {
+                    numero_pedido: numeroPedido,
+                    categoria_marketplace_id: marketplaceSelecionado,
+                    status: 'entregue',  // Status válido: pendente, em_preparo, pronto, entregue, cancelado
+                    valor_subtotal: subtotal,
+                    valor_desconto: 0,
+                    valor_taxa_entrega: 0,
+                    valor_total: subtotal,
+                    metodo_pagamento: 'Não informado',
+                    data_pedido: new Date().toISOString()
+                };
+
+                const { data: pedidoData, error: pedidoError } = await insertRecord('pedidos', pedido);
+                if (pedidoError) throw pedidoError;
+
+                console.log('📦 Pedido criado:', pedidoData);
+
+                // pedidoData é um array retornado pelo .select() do Supabase
+                const pedidoCriado = Array.isArray(pedidoData) ? pedidoData[0] : pedidoData;
+
+                if (!pedidoCriado || !pedidoCriado.id) {
+                    throw new Error('Pedido foi criado mas ID não foi retornado. Verifique RLS da tabela pedidos.');
+                }
+
+
+                // Criar itens do pedido
+                for (const item of itens) {
+                    const pedidoItem = {
+                        pedido_id: pedidoCriado.id,
+                        produto_id: item.produto.id,
+                        produto_nome: item.produto.nome,
+                        quantidade: item.quantidade,
+                        preco_unitario: item.preco,
+                        preco_total: item.quantidade * item.preco
+                    };
+
+                    console.log('📝 Criando item do pedido:', pedidoItem);
+
+                    const { error: itemError } = await insertRecord('pedido_itens', pedidoItem);
+                    if (itemError) throw itemError;
+                }
+
+                alert(`✅ Venda registrada com sucesso!\n\nPedido: ${numeroPedido}\nTotal: R$ ${subtotal.toFixed(2)}`);
+
+                // Limpar carrinho
+                carrinho = {};
+                atualizarTotais();
+                renderProdutos();
+
+            } catch (error) {
+                console.error('❌ Erro ao finalizar venda:', error);
+                alert('❌ Erro ao registrar venda: ' + error.message);
+            }
+        };
+
+        let vendasLimitInfo = { atingiu: false };
+
+        // Iniciar
+        loadDados();
+
+        // Verificar limites do plano
+        (async () => {
+            try {
+                const { checkLimiteVendas } = await import('./plan-limits.js');
+                const bannerContainer = document.createElement('div');
+                bannerContainer.className = 'px-2 pb-1 mt-1';
+                document.querySelector('main').prepend(bannerContainer);
+
+                vendasLimitInfo = await checkLimiteVendas(bannerContainer);
+            } catch (e) {
+                console.warn('plan-limits não disponível:', e);
+            }
+        })();
+
+        // Override finalizarVenda para checar limite
+        const _finalizarVendaOriginal = window.finalizarVenda;
+        window.finalizarVenda = async function () {
+            if (vendasLimitInfo.atingiu) {
+                if (confirm('⭐ Limite de vendas manuais atingido!\n\nNo plano Free você pode registrar até 30 vendas por mês.\nDeseja fazer upgrade para Premium?')) {
+                    window.location.href = 'planos.html';
+                }
+                return;
+            }
+            return _finalizarVendaOriginal();
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Pagamento PIX - Geladinho Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "cta": "#13ecec",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "surface-dark": "#1A1A1A",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .numpad-button {
+            transition: all 0.15s ease;
+        }
+
+        .numpad-button:active {
+            transform: scale(0.95);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .pix-card {
+            background: linear-gradient(135deg, rgba(11, 239, 239, 0.1) 0%, rgba(11, 239, 239, 0.05) 100%);
+            border: 1px solid rgba(11, 239, 239, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white font-display antialiased">
+    <!-- Header Section -->
+    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.location.href='pagamento.html'"
+                class="text-white flex size-10 items-center justify-start cursor-pointer hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Pagamento PIX
+            </h2>
+            <div class="flex w-10 items-center justify-end"></div>
+        </div>
+    </header>
+
+    <main class="pb-8 px-4 max-w-6xl mx-auto">
+        <!-- Grid Container for Desktop -->
+        <div
+            class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start md:items-center min-h-[calc(100vh-200px)]">
+
+            <!-- Left Column: Payment Card -->
+            <div class="space-y-6 animate-fade-in">
+                <!-- PIX Payment Card -->
+                <div class="pix-card rounded-2xl p-6 text-center">
+                    <p class="text-white/50 text-sm font-medium uppercase tracking-wider mb-3">Valor a Receber</p>
+
+                    <div class="flex items-center justify-center gap-2 mb-6">
+                        <span class="text-white/60 text-2xl font-light">R$</span>
+                        <input id="pixAmount" type="text" value="35,00" readonly
+                            class="text-primary text-5xl font-bold tracking-tight bg-transparent border-none focus:outline-none focus:ring-0 w-auto text-center p-0"
+                            style="width: fit-content; min-width: 120px;" />
+                    </div>
+
+                    <!-- Configure PIX Key Button -->
+                    <button onclick="window.location.href='chaves-pix.html'"
+                        class="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 h-12 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all">
+                        <svg width="20" height="20" viewBox="0 0 48 48" fill="currentColor">
+                            <path
+                                d="M29.5 8.9l7.6 7.6c1.2 1.2 1.2 3.1 0 4.2l-15.2 15.2c-1.2 1.2-3.1 1.2-4.2 0l-7.6-7.6c-1.2-1.2-1.2-3.1 0-4.2L25.3 8.9c1.2-1.2 3.1-1.2 4.2 0zm-13 21.8l7.6 7.6c1.2 1.2 3.1 1.2 4.2 0l15.2-15.2c1.2-1.2 1.2-3.1 0-4.2l-2.8-2.8-12.4 12.4c-1.2 1.2-3.1 1.2-4.2 0L11.7 16.1l-2.8 2.8c-1.2 1.2-1.2 3.1 0 4.2l7.6 7.6z" />
+                        </svg>
+                        Configure uma Chave PIX
+                    </button>
+                </div>
+
+                <!-- Action Button -->
+                <button id="confirmButton" onclick="confirmPayment()"
+                    class="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white h-14 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/30 active:scale-[0.98]">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Adicionar
+                </button>
+
+                <!-- Additional Information -->
+                <div class="p-4 bg-surface-dark/50 border border-white/5 rounded-xl">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-xl">info</span>
+                        <div>
+                            <p class="text-white/80 text-sm font-medium">Informação</p>
+                            <p class="text-white/50 text-xs mt-1">O pagamento via PIX é instantâneo. Certifique-se de
+                                ter
+                                configurado sua chave PIX antes de finalizar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Numpad -->
+            <div class="animate-fade-in">
+                <!-- Custom Numpad -->
+                <div class="grid grid-cols-3 gap-4 max-w-sm mx-auto md:mx-0">
+                    <!-- Row 1 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('1')">1</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('2')">2</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('3')">3</button>
+
+                    <!-- Row 2 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('4')">4</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('5')">5</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('6')">6</button>
+
+                    <!-- Row 3 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('7')">7</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('8')">8</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('9')">9</button>
+
+                    <!-- Row 4 -->
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5 flex items-center justify-center"
+                        onclick="addDecimal()">
+                        <span class="material-symbols-outlined">more_horiz</span>
+                    </button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white text-2xl font-semibold hover:bg-white/5"
+                        onclick="addDigit('0')">0</button>
+                    <button
+                        class="numpad-button h-16 rounded-xl bg-surface-dark border border-white/10 text-white hover:bg-white/5 flex items-center justify-center"
+                        onclick="deleteDigit()">
+                        <span class="material-symbols-outlined text-3xl">backspace</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentValue = '35,00';
+        const amountInput = document.getElementById('pixAmount');
+
+        function formatCurrency(value) {
+            // Remove all non-digits
+            const digits = value.replace(/\D/g, '');
+
+            if (digits === '' || digits === '0') {
+                return '0,00';
+            }
+
+            // Convert to cents
+            const cents = parseInt(digits);
+
+            // Format as currency
+            const reais = Math.floor(cents / 100);
+            const centavos = (cents % 100).toString().padStart(2, '0');
+
+            return `${reais},${centavos}`;
+        }
+
+        function addDigit(digit) {
+            // Remove formatting and add new digit
+            const digits = currentValue.replace(/\D/g, '') + digit;
+            currentValue = formatCurrency(digits);
+            amountInput.value = currentValue;
+            updateButtonState();
+        }
+
+        function deleteDigit() {
+            // Remove last digit
+            const digits = currentValue.replace(/\D/g, '');
+            if (digits.length > 0) {
+                const newDigits = digits.slice(0, -1);
+                currentValue = formatCurrency(newDigits);
+                amountInput.value = currentValue;
+                updateButtonState();
+            }
+        }
+
+        function addDecimal() {
+            // This could be used for additional functionality
+            // For now, it's just a placeholder matching the reference image
+        }
+
+        function updateButtonState() {
+            const confirmButton = document.getElementById('confirmButton');
+            const value = parseFloat(currentValue.replace(',', '.'));
+
+            if (value > 0) {
+                confirmButton.disabled = false;
+                confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                confirmButton.disabled = true;
+                confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function confirmPayment() {
+            const value = currentValue;
+            console.log('Pagamento PIX confirmado:', value);
+
+            // Show confirmation
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processando...';
+
+            setTimeout(() => {
+                alert(`Pagamento PIX de R$ ${value} processado com sucesso!`);
+                // Navigate back or to confirmation page
+                // window.location.href = 'confirmacao-venda.html?metodo=pix&valor=' + value;
+                window.location.href = 'vendas.html';
+            }, 1500);
+        }
+
+        // Initialize button state
+        updateButtonState();
+
+        // Allow keyboard input for desktop
+        document.addEventListener('keydown', function (event) {
+            if (event.key >= '0' && event.key <= '9') {
+                addDigit(event.key);
+            } else if (event.key === 'Backspace') {
+                event.preventDefault();
+                deleteDigit();
+            } else if (event.key === 'Enter') {
+                confirmPayment();
+            }
+        });
+    </script>
+</body>
+
+</html>

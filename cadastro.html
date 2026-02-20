@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <title>Criar Conta - Gestão Geladinhos</title>
+    <meta name="description" content="Crie sua conta para começar a gerenciar seu negócio de geladinhos" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "danger": "#ff4d4d",
+                        "success": "#22c55e"
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: #0F0F0F;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .login-bg {
+            background: radial-gradient(ellipse at 50% 0%, rgba(19, 236, 236, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(19, 236, 236, 0.03) 0%, transparent 40%);
+        }
+
+        .glow-input:focus {
+            box-shadow: 0 0 0 3px rgba(19, 236, 236, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #13ecec 0%, #0cc8c8 100%);
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-8px);
+            }
+
+            75% {
+                transform: translateX(8px);
+            }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .role-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .role-option.selected {
+            border-color: #13ecec;
+            background: rgba(19, 236, 236, 0.08);
+        }
+
+        .role-option:not(.selected):hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .password-strength {
+            height: 3px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #13ecec;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen font-display login-bg">
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-5xl w-full fade-in">
+
+            <div
+                class="lg:grid lg:grid-cols-5 lg:gap-0 lg:rounded-3xl lg:overflow-hidden lg:border lg:border-white/5 lg:shadow-2xl">
+
+                <!-- Painel Esquerdo — Branding (desktop) -->
+                <div
+                    class="hidden lg:flex lg:col-span-2 bg-gradient-to-br from-card-dark to-background-dark flex-col justify-between p-10 border-r border-white/5">
+                    <div>
+                        <a href="login.html"
+                            class="inline-flex items-center gap-1 text-gray-500 hover:text-primary transition-colors text-sm mb-10">
+                            <span class="material-icons-round text-lg">arrow_back</span>
+                            Voltar ao Login
+                        </a>
+                        <div
+                            class="w-28 h-28 rounded-full overflow-hidden bg-white/10 border-2 border-primary/30 flex items-center justify-center mb-6 shadow-lg shadow-primary/10">
+                            <img src="assets/logo-precificax.png" alt="PrecificaX Logo"
+                                class="w-24 h-24 object-contain" />
+                        </div>
+                        <h1 class="text-3xl font-extrabold text-white mb-3">Criar Conta</h1>
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                            Comece a gerenciar seu negócio de forma profissional
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 mt-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-primary text-base">inventory_2</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Controle total de produtos e receitas</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-primary text-base">trending_up</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Precificação inteligente e automática</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-primary text-base">storefront</span>
+                            </div>
+                            <p class="text-sm text-gray-400">Venda em múltiplos canais</p>
+                        </div>
+                    </div>
+
+                    <p class="text-[10px] text-gray-700 mt-8">
+                        Versão 2.1.0 • Geladinhos Gourmet
+                    </p>
+                </div>
+
+                <!-- Painel Direito — Formulário -->
+                <div class="lg:col-span-3 lg:bg-card-dark">
+
+                    <!-- Header mobile -->
+                    <div class="text-center mb-6 lg:hidden">
+                        <a href="login.html"
+                            class="inline-flex items-center gap-1 text-gray-500 hover:text-primary transition-colors text-sm mb-6">
+                            <span class="material-icons-round text-lg">arrow_back</span>
+                            Voltar ao Login
+                        </a>
+                        <div
+                            class="w-24 h-24 rounded-full overflow-hidden bg-white/10 border-2 border-primary/30 mx-auto flex items-center justify-center mb-5 shadow-lg shadow-primary/5">
+                            <img src="assets/logo-precificax.png" alt="PrecificaX Logo"
+                                class="w-20 h-20 object-contain" />
+                        </div>
+                        <h1 class="text-2xl font-bold text-white mb-2">Criar Conta</h1>
+                        <p class="text-sm text-gray-500">Preencha os dados para começar</p>
+                    </div>
+
+                    <!-- Form -->
+                    <div
+                        class="bg-card-dark rounded-2xl lg:rounded-none p-6 sm:p-8 border border-white/5 lg:border-0 space-y-5 shadow-xl lg:shadow-none">
+
+                        <!-- Título desktop -->
+                        <div class="hidden lg:block mb-2">
+                            <h2 class="text-xl font-bold text-white">Preencha seus dados</h2>
+                            <p class="text-xs text-gray-500 mt-1">Crie sua conta em poucos segundos</p>
+                        </div>
+
+                        <!-- Role Selector -->
+                        <div>
+                            <label
+                                class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-2 block">
+                                Tipo de Conta
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div id="opt-dono" onclick="selectRole('dono')"
+                                    class="role-option selected rounded-xl p-4 border border-white/10 flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                        <span class="material-icons-round text-primary">storefront</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="text-sm font-bold text-white">Dono do Negócio</h3>
+                                        <p class="text-[11px] text-gray-500">Gerencie produtos, receitas e vendas</p>
+                                    </div>
+                                    <span id="check-dono"
+                                        class="material-icons-round text-primary text-lg">check_circle</span>
+                                </div>
+                                <div id="opt-afiliado" onclick="selectRole('afiliado')"
+                                    class="role-option rounded-xl p-4 border border-white/10 flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                        <span class="material-icons-round text-primary">handshake</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="text-sm font-bold text-white">Afiliado</h3>
+                                        <p class="text-[11px] text-gray-500">Indique e ganhe comissões</p>
+                                    </div>
+                                    <span id="check-afiliado"
+                                        class="material-icons-round text-primary text-lg hidden">check_circle</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grid de campos (2 colunas no desktop) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Nome -->
+                            <div>
+                                <label
+                                    class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                                    Nome Completo
+                                </label>
+                                <div class="relative">
+                                    <span
+                                        class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">person</span>
+                                    <input id="inputNome" type="text" placeholder="Seu nome completo"
+                                        class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label
+                                    class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                                    E-mail
+                                </label>
+                                <div class="relative">
+                                    <span
+                                        class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">email</span>
+                                    <input id="inputEmail" type="email" placeholder="seu@email.com"
+                                        class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                                </div>
+                            </div>
+
+                            <!-- Telefone -->
+                            <div>
+                                <label
+                                    class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                                    Telefone <span class="text-gray-700">(opcional)</span>
+                                </label>
+                                <div class="relative">
+                                    <span
+                                        class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">phone</span>
+                                    <input id="inputTelefone" type="tel" placeholder="(11) 99999-0000"
+                                        class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                                </div>
+                            </div>
+
+                            <!-- Nome do Negócio -->
+                            <div id="fieldNegocio">
+                                <label
+                                    class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                                    Nome do Negócio
+                                </label>
+                                <div class="relative">
+                                    <span
+                                        class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">store</span>
+                                    <input id="inputNegocio" type="text" placeholder="Ex: Geladinhos Gourmet"
+                                        class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div>
+                                <label
+                                    class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                                    Senha
+                                </label>
+                                <div class="relative">
+                                    <span
+                                        class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">lock</span>
+                                    <input id="inputPassword" type="password" placeholder="Mínimo 6 caracteres"
+                                        oninput="checkPasswordStrength()"
+                                        class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-12 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                                    <span onclick="togglePassword('inputPassword')"
+                                        class="material-icons-round absolute right-3 top-3.5 text-gray-600 text-lg password-toggle">visibility_off</span>
+                                </div>
+                                <!-- Password strength -->
+                                <div class="flex gap-1 mt-2 px-1">
+                                    <div id="str1" class="password-strength flex-1 bg-gray-800"></div>
+                                    <div id="str2" class="password-strength flex-1 bg-gray-800"></div>
+                                    <div id="str3" class="password-strength flex-1 bg-gray-800"></div>
+                                    <div id="str4" class="password-strength flex-1 bg-gray-800"></div>
+                                </div>
+                                <p id="strengthLabel" class="text-[10px] text-gray-600 mt-1 ml-1"></p>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div>
+                                <label
+                                    class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-1.5 block">
+                                    Confirmar Senha
+                                </label>
+                                <div class="relative">
+                                    <span
+                                        class="material-icons-round absolute left-3 top-3.5 text-gray-600 text-lg">lock</span>
+                                    <input id="inputPasswordConfirm" type="password" placeholder="Repita a senha"
+                                        class="glow-input w-full bg-background-dark border border-white/10 rounded-xl pl-10 pr-12 py-3.5 text-white text-sm outline-none focus:border-primary transition-all" />
+                                    <span onclick="togglePassword('inputPasswordConfirm')"
+                                        class="material-icons-round absolute right-3 top-3.5 text-gray-600 text-lg password-toggle">visibility_off</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="errorMessage"
+                            class="hidden bg-danger/10 border border-danger/20 rounded-xl p-3 text-danger text-sm flex items-center gap-2">
+                            <span class="material-icons-round text-lg">error</span>
+                            <span id="errorText">Erro ao criar conta</span>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div id="successMessage"
+                            class="hidden bg-success/10 border border-success/20 rounded-xl p-4 text-center">
+                            <span class="material-icons-round text-success text-3xl block mb-2">check_circle</span>
+                            <h3 class="text-success font-bold text-sm mb-1">Conta criada com sucesso!</h3>
+                            <p class="text-gray-400 text-xs">Verifique seu e-mail para confirmar a conta.</p>
+                            <a href="login.html"
+                                class="inline-block mt-3 text-primary text-sm font-bold hover:underline">Ir
+                                para o Login →</a>
+                        </div>
+
+                        <!-- Signup Button -->
+                        <button id="btnCadastro" onclick="fazerCadastro()"
+                            class="btn-primary w-full text-background-dark font-bold py-4 rounded-xl text-sm flex items-center justify-center gap-2">
+                            <span id="btnText">Criar Conta</span>
+                            <span id="btnLoader" class="hidden">
+                                <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4">
+                                    </circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <!-- Login Link -->
+                        <p class="text-center text-sm text-gray-500">
+                            Já tem uma conta?
+                            <a href="login.html" class="text-primary font-bold hover:underline">Faça Login</a>
+                        </p>
+                    </div>
+
+                    <!-- Footer mobile -->
+                    <p class="text-center text-[10px] text-gray-700 mt-6 lg:hidden">
+                        Versão 2.1.0 • Geladinhos Gourmet
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+        let selectedRole = 'dono';
+
+        // Selecionar role
+        window.selectRole = function (role) {
+            selectedRole = role;
+            ['dono', 'afiliado'].forEach(r => {
+                const opt = document.getElementById(`opt-${r}`);
+                const check = document.getElementById(`check-${r}`);
+                if (r === role) {
+                    opt.classList.add('selected');
+                    check.classList.remove('hidden');
+                } else {
+                    opt.classList.remove('selected');
+                    check.classList.add('hidden');
+                }
+            });
+
+            // Mostrar/esconder campo de negócio
+            const fieldNegocio = document.getElementById('fieldNegocio');
+            fieldNegocio.style.display = role === 'dono' ? 'block' : 'none';
+        };
+
+        // Toggle password
+        window.togglePassword = function (inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        };
+
+        // Password strength
+        window.checkPasswordStrength = function () {
+            const password = document.getElementById('inputPassword').value;
+            let strength = 0;
+
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength++;
+
+            const colors = ['#ff4d4d', '#f59e0b', '#22c55e', '#13ecec'];
+            const labels = ['Fraca', 'Razoável', 'Boa', 'Forte'];
+
+            for (let i = 1; i <= 4; i++) {
+                const bar = document.getElementById(`str${i}`);
+                if (i <= strength) {
+                    bar.style.background = colors[strength - 1];
+                } else {
+                    bar.style.background = '#1f2937';
+                }
+            }
+
+            const label = document.getElementById('strengthLabel');
+            if (password.length === 0) {
+                label.textContent = '';
+            } else {
+                label.textContent = `Força: ${labels[strength - 1] || 'Muito fraca'}`;
+                label.style.color = colors[strength - 1] || '#9ca3af';
+            }
+        };
+
+        // Fazer cadastro
+        window.fazerCadastro = async function () {
+            const nome = document.getElementById('inputNome').value.trim();
+            const email = document.getElementById('inputEmail').value.trim();
+            const telefone = document.getElementById('inputTelefone').value.trim();
+            const negocio = document.getElementById('inputNegocio').value.trim();
+            const password = document.getElementById('inputPassword').value;
+            const passwordConfirm = document.getElementById('inputPasswordConfirm').value;
+
+            // Validações
+            if (!nome) return showError('Informe seu nome.');
+            if (!email || !email.includes('@')) return showError('Informe um e-mail válido.');
+            if (password.length < 6) return showError('A senha deve ter pelo menos 6 caracteres.');
+            if (password !== passwordConfirm) return showError('As senhas não coincidem.');
+            if (selectedRole === 'dono' && !negocio) return showError('Informe o nome do seu negócio.');
+
+            setLoading(true);
+            hideError();
+
+            if (!supabase) {
+                // Demo mode
+                setLoading(false);
+                showSuccess();
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            nome: nome,
+                            full_name: nome,
+                            role: selectedRole,
+                            telefone: telefone,
+                            nome_negocio: negocio
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                // Atualizar perfil com dados extras
+                if (data.user) {
+                    try {
+                        await supabase
+                            .from('perfis_usuarios')
+                            .update({
+                                telefone: telefone,
+                                nome_negocio: negocio
+                            })
+                            .eq('id', data.user.id);
+                    } catch (e) {
+                        console.warn('Não foi possível atualizar dados extras do perfil:', e);
+                    }
+                }
+
+                showSuccess();
+
+            } catch (err) {
+                console.error('Erro cadastro:', err);
+                if (err.message?.includes('already registered')) {
+                    showError('Este e-mail já está cadastrado. Tente fazer login.');
+                } else if (err.message?.includes('Password should be')) {
+                    showError('A senha deve ter pelo menos 6 caracteres.');
+                } else {
+                    showError(err.message || 'Erro ao criar conta. Tente novamente.');
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            document.getElementById('errorText').textContent = msg;
+            el.classList.remove('hidden');
+            el.classList.add('shake');
+            setTimeout(() => el.classList.remove('shake'), 300);
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function showSuccess() {
+            document.getElementById('successMessage').classList.remove('hidden');
+            document.getElementById('btnCadastro').classList.add('hidden');
+        }
+
+        function setLoading(loading) {
+            const btn = document.getElementById('btnCadastro');
+            const text = document.getElementById('btnText');
+            const loader = document.getElementById('btnLoader');
+            btn.disabled = loading;
+            text.textContent = loading ? 'Criando...' : 'Criar Conta';
+            loader.classList.toggle('hidden', !loading);
+        }
+
+        // Enter key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') fazerCadastro();
+        });
+    </script>
+</body>
+
+</html>

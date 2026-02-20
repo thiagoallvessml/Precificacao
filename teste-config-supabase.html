@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>✅ Teste de Configurações - Supabase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .test-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .test-fail {
+            background: #ef4444;
+            color: white;
+        }
+
+        .test-pending {
+            background: #6b7280;
+            color: white;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-background-dark min-h-screen p-8 text-white">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold mb-2 text-primary">✅ Teste: Configurações + Supabase</h1>
+        <p class="text-gray-400 mb-8">Verificando se o botão salvar está funcionando corretamente</p>
+
+        <div class="bg-gray-900 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🔍 Diagnóstico do Sistema</h2>
+            <div id="diagnostics" class="space-y-2">
+                <div class="test-pending p-3 rounded text-sm">⏳ Verificando conexão com Supabase...</div>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">📝 Teste de Salvamento</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Valor de Teste</label>
+                    <input id="testValue" type="number" value="999.99"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white">
+                </div>
+                <button id="testSaveBtn"
+                    class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 rounded-xl transition-all">
+                    💾 Testar Salvamento no Supabase
+                </button>
+                <div id="testResult" class="hidden p-4 rounded-lg"></div>
+            </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-xl p-6">
+            <h2 class="text-xl font-semibold mb-4">📊 Configurações Atuais no Banco</h2>
+            <div id="currentConfigs" class="space-y-2">
+                <p class="text-gray-400">Carregando...</p>
+            </div>
+            <button id="refreshBtn"
+                class="mt-4 bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm transition-all">
+                🔄 Atualizar
+            </button>
+        </div>
+
+        <div class="mt-6 flex gap-4">
+            <a href="configuracoes.html"
+                class="bg-primary text-background-dark px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-all">
+                ⚙️ Ir para Página de Configurações
+            </a>
+            <a href="exemplo-uso-config.html"
+                class="bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all">
+                📚 Ver Exemplos de Uso
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        document.documentElement.classList.add('dark');
+
+        const supabase = getSupabase();
+        const diagnosticsDiv = document.getElementById('diagnostics');
+        const testResultDiv = document.getElementById('testResult');
+        const currentConfigsDiv = document.getElementById('currentConfigs');
+        const testSaveBtn = document.getElementById('testSaveBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const testValueInput = document.getElementById('testValue');
+
+        // ========== DIAGNÓSTICO ==========
+        async function runDiagnostics() {
+            let html = '';
+
+            // Teste 1: Supabase conectado?
+            if (!supabase) {
+                html += '<div class="test-fail p-3 rounded text-sm">❌ Supabase NÃO configurado</div>';
+                diagnosticsDiv.innerHTML = html;
+                return;
+            }
+            html += '<div class="test-success p-3 rounded text-sm">✅ Supabase configurado</div>';
+
+            // Teste 2: Tabela configuracoes existe?
+            try {
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .select('count');
+
+                if (error) {
+                    html += `<div class="test-fail p-3 rounded text-sm">❌ Tabela 'configuracoes' não encontrada: ${error.message}</div>`;
+                } else {
+                    html += '<div class="test-success p-3 rounded text-sm">✅ Tabela "configuracoes" existe</div>';
+                }
+            } catch (e) {
+                html += `<div class="test-fail p-3 rounded text-sm">❌ Erro ao acessar tabela: ${e.message}</div>`;
+            }
+
+            // Teste 3: Permissões OK?
+            try {
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .select('*')
+                    .limit(1);
+
+                if (error) {
+                    html += `<div class="test-fail p-3 rounded text-sm">❌ Sem permissão de leitura: ${error.message}</div>`;
+                    html += '<div class="test-pending p-3 rounded text-sm text-xs mt-2">💡 Execute: supabase-allow-public.sql</div>';
+                } else {
+                    html += '<div class="test-success p-3 rounded text-sm">✅ Permissões de leitura OK</div>';
+                }
+            } catch (e) {
+                html += `<div class="test-fail p-3 rounded text-sm">❌ Erro de permissão: ${e.message}</div>`;
+            }
+
+            diagnosticsDiv.innerHTML = html;
+        }
+
+        // ========== CARREGAR CONFIGURAÇÕES ==========
+        async function loadCurrentConfigs() {
+            try {
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .select('*')
+                    .order('categoria', { ascending: true })
+                    .order('chave', { ascending: true });
+
+                if (error) {
+                    currentConfigsDiv.innerHTML = `<p class="text-red-400">❌ Erro: ${error.message}</p>`;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    currentConfigsDiv.innerHTML = `
+                        <p class="text-yellow-400">⚠️ Nenhuma configuração encontrada no banco</p>
+                        <p class="text-sm text-gray-500 mt-2">Execute: configuracoes-iniciais.sql</p>
+                    `;
+                    return;
+                }
+
+                let html = '<div class="space-y-2">';
+                let currentCategory = '';
+
+                data.forEach(config => {
+                    if (config.categoria !== currentCategory) {
+                        if (currentCategory) html += '</div>';
+                        currentCategory = config.categoria;
+                        html += `<div class="mt-3"><h3 class="text-sm font-semibold text-primary mb-2">📁 ${config.categoria}</h3>`;
+                    }
+
+                    html += `
+                        <div class="bg-gray-800 p-3 rounded text-sm border-l-4 border-primary/50">
+                            <div class="font-mono text-xs text-gray-400">${config.chave}</div>
+                            <div class="text-white font-semibold mt-1">${config.valor}</div>
+                            <div class="text-xs text-gray-500 mt-1">${config.descricao || 'Sem descrição'}</div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+                currentConfigsDiv.innerHTML = html;
+
+            } catch (e) {
+                currentConfigsDiv.innerHTML = `<p class="text-red-400">❌ Erro: ${e.message}</p>`;
+            }
+        }
+
+        // ========== TESTE DE SALVAMENTO ==========
+        async function testSave() {
+            testSaveBtn.disabled = true;
+            testSaveBtn.innerHTML = '⏳ Salvando...';
+            testResultDiv.classList.add('hidden');
+
+            try {
+                const testValue = testValueInput.value;
+                const testKey = 'teste_salvamento_' + Date.now();
+
+                // Tenta inserir
+                const { data, error } = await supabase
+                    .from('configuracoes')
+                    .insert([{
+                        chave: testKey,
+                        valor: testValue,
+                        tipo: 'number',
+                        descricao: 'Teste de salvamento automático',
+                        categoria: 'teste'
+                    }])
+                    .select();
+
+                if (error) {
+                    throw error;
+                }
+
+                // Sucesso! Agora deleta o registro de teste
+                await supabase
+                    .from('configuracoes')
+                    .delete()
+                    .eq('chave', testKey);
+
+                testResultDiv.className = 'test-success p-4 rounded-lg';
+                testResultDiv.innerHTML = `
+                    <div class="font-bold mb-2">✅ TESTE PASSOU!</div>
+                    <div class="text-sm">O botão salvar está funcionando perfeitamente!</div>
+                    <div class="text-xs mt-2 opacity-75">Chave de teste: ${testKey}</div>
+                `;
+                testResultDiv.classList.remove('hidden');
+
+                // Recarrega as configurações
+                await loadCurrentConfigs();
+
+            } catch (e) {
+                testResultDiv.className = 'test-fail p-4 rounded-lg';
+                testResultDiv.innerHTML = `
+                    <div class="font-bold mb-2">❌ TESTE FALHOU</div>
+                    <div class="text-sm">${e.message}</div>
+                    <div class="text-xs mt-2 opacity-75">Verifique as permissões no Supabase</div>
+                `;
+                testResultDiv.classList.remove('hidden');
+            } finally {
+                testSaveBtn.disabled = false;
+                testSaveBtn.innerHTML = '💾 Testar Salvamento no Supabase';
+            }
+        }
+
+        // Event Listeners
+        testSaveBtn.addEventListener('click', testSave);
+        refreshBtn.addEventListener('click', () => {
+            runDiagnostics();
+            loadCurrentConfigs();
+        });
+
+        // Inicializa
+        runDiagnostics();
+        loadCurrentConfigs();
+    </script>
+</body>
+
+</html>

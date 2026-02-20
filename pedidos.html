@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Histórico de Pedidos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0de7e7",
+                        "accent": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-white min-h-screen">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-header border-b border-white/5 pb-2">
+        <div class="flex items-center justify-between px-4 pt-6 pb-2">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-white cursor-pointer"
+                    onclick="window.location.href='index.html'">arrow_back</span>
+                <h1 class="text-xl font-bold tracking-tight">Meus Pedidos</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="totalPedidos" class="text-primary text-sm font-bold">0</span>
+            </div>
+        </div>
+        <!-- Search Bar -->
+        <div class="px-4 py-2">
+            <div
+                class="relative flex items-center bg-white/10 rounded-xl overflow-hidden px-4 h-11 border border-white/10">
+                <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
+                <input id="searchInput" oninput="filtrarPedidos()"
+                    class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-500 text-white font-display"
+                    placeholder="Pesquisar por pedido ou cliente..." type="text" />
+            </div>
+        </div>
+        <!-- Filter Chips -->
+        <div class="flex gap-2 px-4 py-3 overflow-x-auto no-scrollbar">
+            <button onclick="filtrarStatus('todos')" id="btnTodos"
+                class="whitespace-nowrap px-5 py-1.5 rounded-full bg-primary text-background-dark font-semibold text-sm">
+                Todos
+            </button>
+            <button onclick="filtrarStatus('concluido')" id="btnConcluido"
+                class="whitespace-nowrap px-5 py-1.5 rounded-full bg-white/10 text-slate-300 font-medium text-sm">
+                Concluídos
+            </button>
+            <button onclick="filtrarStatus('cancelado')" id="btnCancelado"
+                class="whitespace-nowrap px-5 py-1.5 rounded-full bg-white/10 text-slate-300 font-medium text-sm">
+                Cancelados
+            </button>
+            <button onclick="filtrarStatus('pendente')" id="btnPendente"
+                class="whitespace-nowrap px-5 py-1.5 rounded-full bg-white/10 text-slate-300 font-medium text-sm">
+                Pendentes
+            </button>
+        </div>
+    </header>
+
+    <main id="pedidosContainer" class="pb-32 px-4">
+        <!-- Será preenchido dinamicamente -->
+    </main>
+
+    <!-- FAB: Nova Venda -->
+    <div class="fixed bottom-28 right-6">
+        <button onclick="window.location.href='vendas.html'"
+            class="flex items-center gap-2 bg-primary hover:bg-accent text-background-dark font-bold py-4 px-6 rounded-full shadow-[0_8px_32px_rgba(13,231,231,0.3)] transform transition active:scale-95">
+            <span class="material-symbols-outlined font-bold">add</span>
+            <span class="font-display">Nova Venda</span>
+        </button>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full glass-header border-t border-white/5 h-20 px-6 flex items-center justify-around">
+        <div class="flex flex-col items-center text-slate-500 cursor-pointer"
+            onclick="window.location.href='index.html'">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[10px] font-medium mt-1">Início</span>
+        </div>
+        <div class="flex flex-col items-center text-primary cursor-pointer">
+            <span class="material-symbols-outlined fill-1">receipt_long</span>
+            <span class="text-[10px] font-bold mt-1">Pedidos</span>
+        </div>
+        <div class="flex flex-col items-center text-slate-500 cursor-pointer"
+            onclick="window.location.href='estoque.html'">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="text-[10px] font-medium mt-1">Estoque</span>
+        </div>
+        <div class="flex flex-col items-center text-slate-500 cursor-pointer">
+            <span class="material-symbols-outlined">person</span>
+            <span class="text-[10px] font-medium mt-1">Perfil</span>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { getAllRecords } from './supabase-utils.js';
+
+        let pedidos = [];
+        let pedidosFiltrados = [];
+        let statusFiltro = 'todos';
+        let categorias = {};
+
+        // Carregar pedidos
+        async function loadPedidos() {
+            try {
+                // Carregar pedidos
+                const { data: pedData, error: pedError } = await getAllRecords('pedidos');
+                if (pedError) throw pedError;
+                pedidos = pedData || [];
+
+                // Carregar categorias de marketplace
+                const { data: catData, error: catError } = await getAllRecords('categorias');
+                if (catError) throw catError;
+                (catData || []).forEach(cat => { categorias[cat.id] = cat; });
+
+                // Ordenar por data mais recente
+                pedidos.sort((a, b) => new Date(b.data_pedido) - new Date(a.data_pedido));
+
+                pedidosFiltrados = [...pedidos];
+                renderPedidos();
+            } catch (error) {
+                console.error('❌ Erro ao carregar pedidos:', error);
+                document.getElementById('pedidosContainer').innerHTML = `
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">error</span>
+                        <p class="text-slate-400">Erro ao carregar pedidos</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Filtrar por status
+        window.filtrarStatus = function (status) {
+            statusFiltro = status;
+
+            // Atualizar botões
+            ['btnTodos', 'btnConcluido', 'btnCancelado', 'btnPendente'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (id === 'btn' + status.charAt(0).toUpperCase() + status.slice(1) || (status === 'todos' && id === 'btnTodos')) {
+                    btn.className = 'whitespace-nowrap px-5 py-1.5 rounded-full bg-primary text-background-dark font-semibold text-sm';
+                } else {
+                    btn.className = 'whitespace-nowrap px-5 py-1.5 rounded-full bg-white/10 text-slate-300 font-medium text-sm';
+                }
+            });
+
+            filtrarPedidos();
+        };
+
+        // Filtrar pedidos por status e busca
+        window.filtrarPedidos = function () {
+            const busca = document.getElementById('searchInput').value.toLowerCase();
+
+            pedidosFiltrados = pedidos.filter(p => {
+                // Filtro de status
+                if (statusFiltro !== 'todos' && p.status !== statusFiltro) return false;
+
+                // Filtro de busca
+                if (busca) {
+                    const matchNumero = p.numero_pedido.toLowerCase().includes(busca);
+                    const matchCliente = (p.cliente_nome || '').toLowerCase().includes(busca);
+                    if (!matchNumero && !matchCliente) return false;
+                }
+
+                return true;
+            });
+
+            renderPedidos();
+        };
+
+        // Renderizar pedidos
+        function renderPedidos() {
+            const container = document.getElementById('pedidosContainer');
+            document.getElementById('totalPedidos').textContent = pedidosFiltrados.length;
+
+            if (pedidosFiltrados.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">receipt_long</span>
+                        <p class="text-slate-400">Nenhum pedido encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Agrupar por data
+            const pedidosPorData = agruparPorData(pedidosFiltrados);
+
+            container.innerHTML = Object.entries(pedidosPorData).map(([data, pedidosDia]) => {
+                return `
+                    <h3 class="text-slate-500 text-xs font-bold uppercase tracking-wider mt-6 mb-3 px-1">${data}</h3>
+                    ${pedidosDia.map(pedido => renderCard(pedido)).join('')}
+                `;
+            }).join('');
+        }
+
+        // Agrupar pedidos por data
+        function agruparPorData(pedidos) {
+            const grupos = {};
+            const hoje = new Date();
+            const ontem = new Date(hoje);
+            ontem.setDate(ontem.getDate() - 1);
+
+            pedidos.forEach(pedido => {
+                const dataPedido = new Date(pedido.data_pedido);
+                let chave;
+
+                if (isSameDay(dataPedido, hoje)) {
+                    chave = 'Hoje';
+                } else if (isSameDay(dataPedido, ontem)) {
+                    chave = 'Ontem';
+                } else {
+                    chave = formatarData(dataPedido);
+                }
+
+                if (!grupos[chave]) grupos[chave] = [];
+                grupos[chave].push(pedido);
+            });
+
+            return grupos;
+        }
+
+        // Verificar se são o mesmo dia
+        function isSameDay(d1, d2) {
+            return d1.getDate() === d2.getDate() &&
+                d1.getMonth() === d2.getMonth() &&
+                d1.getFullYear() === d2.getFullYear();
+        }
+
+        // Formatar data
+        function formatarData(data) {
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return `${data.getDate()} de ${meses[data.getMonth()]}`;
+        }
+
+        // Renderizar card de pedido
+        function renderCard(pedido) {
+            const status = getStatusConfig(pedido.status);
+            const hora = new Date(pedido.data_pedido).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const categoria = categorias[pedido.categoria_marketplace_id || pedido.marketplace_id];
+            const nomeCanal = categoria ? categoria.nome : 'Direto';
+            const iconeCanal = categoria ? categoria.icone : 'storefront';
+
+            return `
+                <div class="bg-card-dark rounded-xl p-4 mb-4 border border-white/5 ${pedido.status === 'cancelado' ? 'opacity-80' : 'shadow-lg'}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex flex-col">
+                            <span class="text-[11px] font-medium text-slate-400">${pedido.numero_pedido} • ${hora}</span>
+                            <h4 class="text-lg font-bold text-white mt-0.5">${nomeCanal}</h4>
+                        </div>
+                        <div class="flex items-center gap-1.5 ${status.bgColor} ${status.textColor} px-3 py-1 rounded-full">
+                            <span class="material-symbols-outlined text-[14px] fill-1">${status.icone}</span>
+                            <span class="text-[11px] font-bold uppercase tracking-wide">${status.label}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex items-center justify-center w-6 h-6 rounded-full ${status.iconBg} ${status.textColor}">
+                            <span class="material-symbols-outlined text-[16px]">${iconeCanal}</span>
+                        </div>
+                        <p class="text-slate-400 text-sm font-medium">${pedido.cliente_nome || 'Cliente'}</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-white/5">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] uppercase text-slate-500 font-bold">Total</span>
+                            <span class="text-accent text-xl font-bold leading-tight ${pedido.status === 'cancelado' ? 'line-through opacity-50' : ''}">
+                                R$ ${parseFloat(pedido.valor_total).toFixed(2).replace('.', ',')}
+                            </span>
+                        </div>
+                        <button onclick="window.location.href='detalhes_pedido.html?id=${pedido.id}'"
+                            class="${pedido.status === 'cancelado' ? 'text-slate-500' : 'text-primary'} text-sm font-bold flex items-center gap-1 cursor-pointer">
+                            Ver Detalhes
+                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Configuração de status
+        function getStatusConfig(status) {
+            const configs = {
+                'concluido': {
+                    label: 'Concluído',
+                    icone: 'check_circle',
+                    bgColor: 'bg-primary/20',
+                    textColor: 'text-primary',
+                    iconBg: 'bg-green-500/20'
+                },
+                'entregue': {
+                    label: 'Entregue',
+                    icone: 'check_circle',
+                    bgColor: 'bg-primary/20',
+                    textColor: 'text-primary',
+                    iconBg: 'bg-green-500/20'
+                },
+                'pendente': {
+                    label: 'Pendente',
+                    icone: 'schedule',
+                    bgColor: 'bg-orange-500/20',
+                    textColor: 'text-orange-400',
+                    iconBg: 'bg-slate-500/20'
+                },
+                'em_preparo': {
+                    label: 'Em Preparo',
+                    icone: 'restaurant',
+                    bgColor: 'bg-blue-500/20',
+                    textColor: 'text-blue-400',
+                    iconBg: 'bg-blue-500/20'
+                },
+                'cancelado': {
+                    label: 'Cancelado',
+                    icone: 'cancel',
+                    bgColor: 'bg-red-500/20',
+                    textColor: 'text-red-400',
+                    iconBg: 'bg-red-500/10'
+                }
+            };
+
+            return configs[status] || configs['pendente'];
+        }
+
+        // Iniciar
+        loadPedidos();
+    </script>
+</body>
+
+</html>

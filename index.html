@@ -65,7 +65,7 @@
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
                     <span class="material-icons-round text-primary text-3xl">ac_unit</span>
-                    <h1 class="text-xl font-bold tracking-tight hidden sm:block">Geladinhos</h1>
+                    <h1 id="navNomeNegocio" class="text-xl font-bold tracking-tight hidden sm:block">Carregando...</h1>
                 </div>
                 <div class="flex-1 relative">
                     <span
@@ -325,6 +325,34 @@
 
             // Auth OK — mostrar página
             document.body.style.opacity = '1';
+
+            // ========== CARREGAR NOME DO NEGÓCIO NA NAVBAR ==========
+            try {
+                const sb = getSupabase();
+                if (sb) {
+                    const { data: { user } } = await sb.auth.getUser();
+                    if (user) {
+                        let nomeNegocio = '';
+                        // Tentar buscar do perfil no banco
+                        const { data: perfil } = await sb
+                            .from('perfis_usuarios')
+                            .select('nome_negocio')
+                            .eq('id', user.id)
+                            .single();
+                        if (perfil && perfil.nome_negocio) {
+                            nomeNegocio = perfil.nome_negocio;
+                        } else if (user.user_metadata?.nome_negocio) {
+                            // Fallback: metadados do auth
+                            nomeNegocio = user.user_metadata.nome_negocio;
+                        }
+                        const navEl = document.getElementById('navNomeNegocio');
+                        navEl.textContent = nomeNegocio || 'Geladinhos';
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar nome do negócio:', e);
+                document.getElementById('navNomeNegocio').textContent = 'Geladinhos';
+            }
 
             // ========== VERIFICAR PLANO PARA DRE ==========
             try {

@@ -487,6 +487,30 @@
             clearInterval(timerInterval);
             clearInterval(pollingInterval);
 
+            // ======== ATIVAR PLANO PREMIUM NO SUPABASE ========
+            if (supabase) {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session && session.user) {
+                        const { error } = await supabase
+                            .from('perfis_usuarios')
+                            .update({
+                                plano: 'premium',
+                                premium_inicio: new Date().toISOString(),
+                            })
+                            .eq('id', session.user.id);
+
+                        if (error) {
+                            console.error('❌ Erro ao ativar plano Premium:', error);
+                        } else {
+                            console.log('✅ Plano Premium ativado com sucesso!');
+                        }
+                    }
+                } catch (err) {
+                    console.error('❌ Erro ao ativar plano Premium:', err);
+                }
+            }
+
             // Registrar indicação no Supabase
             await registrarIndicacao();
 

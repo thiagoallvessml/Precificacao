@@ -1,20 +1,22 @@
 -- ============================================================
--- MIGRAÇÃO: ADICIONAR user_id E RLS POR USUÁRIO
+-- MIGRAÇÃO: ISOLAMENTO DE DADOS POR USUÁRIO
 -- ============================================================
 -- EXECUTE ESTE SCRIPT NO SQL EDITOR DO SUPABASE
 -- 
 -- O que este script faz:
 -- 1. Adiciona coluna user_id em todas as tabelas principais
--- 2. Atualiza registros existentes para o primeiro admin (seu user)
+-- 2. Cria trigger para auto-preencher user_id (sem alterar frontend)
 -- 3. Remove políticas RLS antigas (acesso público)
--- 4. Cria políticas novas (cada usuário vê só seus dados)
+-- 4. Cria políticas novas (cada usuário vê SÓ seus dados)
+-- 5. Atribuir dados existentes ao admin
 -- ============================================================
 
 -- ====================
 -- PASSO 0: Descobrir seu user_id atual
 -- ====================
--- Copie o resultado deste SELECT e cole no PASSO 2
-SELECT id, email FROM auth.users ORDER BY created_at ASC LIMIT 5;
+-- EXECUTE PRIMEIRO e anote o ID do seu usuário admin:
+SELECT id, email, created_at FROM auth.users ORDER BY created_at ASC LIMIT 10;
+
 
 -- ====================
 -- PASSO 1: ADICIONAR COLUNA user_id EM TODAS AS TABELAS
@@ -36,9 +38,9 @@ CREATE INDEX IF NOT EXISTS idx_produtos_user_id ON produtos(user_id);
 ALTER TABLE receitas ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 CREATE INDEX IF NOT EXISTS idx_receitas_user_id ON receitas(user_id);
 
--- Receita Insumos
-ALTER TABLE receita_insumos ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
-CREATE INDEX IF NOT EXISTS idx_receita_insumos_user_id ON receita_insumos(user_id);
+-- Receita Insumos (receitas_insumos)
+ALTER TABLE receitas_insumos ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_receitas_insumos_user_id ON receitas_insumos(user_id);
 
 -- Pedidos
 ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
@@ -80,175 +82,222 @@ CREATE INDEX IF NOT EXISTS idx_precos_marketplace_user_id ON precos_marketplace(
 ALTER TABLE marketplaces ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 CREATE INDEX IF NOT EXISTS idx_marketplaces_user_id ON marketplaces(user_id);
 
--- ====================
--- PASSO 2: ATRIBUIR DADOS EXISTENTES AO SEU USUÁRIO
--- ====================
--- ⚠️ IMPORTANTE: Substitua 'SEU_USER_ID_AQUI' pelo ID do PASSO 0
--- Exemplo: UPDATE categorias SET user_id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' WHERE user_id IS NULL;
 
--- Descomente e substitua o ID real:
+-- ====================
+-- PASSO 2: CRIAR TRIGGER PARA AUTO-PREENCHER user_id
+-- ====================
+-- Com isso, NÃO precisa alterar nenhuma página HTML/JS!
+-- O banco preenche user_id = auth.uid() automaticamente ao inserir.
+
+CREATE OR REPLACE FUNCTION auto_set_user_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.user_id IS NULL THEN
+        NEW.user_id = auth.uid();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Aplicar trigger em TODAS as tabelas
+DO $$
+DECLARE
+    tabelas TEXT[] := ARRAY[
+        'categorias', 'insumos', 'produtos', 'receitas',
+        'receitas_insumos', 'pedidos', 'pedido_itens',
+        'producao', 'movimentacoes_estoque', 'despesas',
+        'equipamentos', 'chaves_pix', 'configuracoes',
+        'precos_marketplace', 'marketplaces'
+    ];
+    t TEXT;
+BEGIN
+    FOREACH t IN ARRAY tabelas
+    LOOP
+        -- Verificar se a tabela existe antes de criar o trigger
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = t AND table_schema = 'public') THEN
+            EXECUTE format('DROP TRIGGER IF EXISTS auto_user_id ON %I', t);
+            EXECUTE format('CREATE TRIGGER auto_user_id BEFORE INSERT ON %I FOR EACH ROW EXECUTE FUNCTION auto_set_user_id()', t);
+        END IF;
+    END LOOP;
+END $$;
+
+
+-- ====================
+-- PASSO 3: ATRIBUIR DADOS EXISTENTES AO ADMIN
+-- ====================
+-- ⚠️ IMPORTANTE: Substitua 'SEU_USER_ID_AQUI' pelo ID do PASSO 0!
+-- Exemplo: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+-- Descomente as linhas abaixo e cole o ID correto:
+
 /*
-UPDATE categorias SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE insumos SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE produtos SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE receitas SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE receita_insumos SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE pedidos SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE pedido_itens SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE producao SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE movimentacoes_estoque SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE despesas SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE equipamentos SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE chaves_pix SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE configuracoes SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE precos_marketplace SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
-UPDATE marketplaces SET user_id = 'SEU_USER_ID_AQUI' WHERE user_id IS NULL;
+DO $$
+DECLARE
+    admin_id UUID := 'SEU_USER_ID_AQUI';
+BEGIN
+    UPDATE categorias SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE insumos SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE produtos SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE receitas SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE receitas_insumos SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE pedidos SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE pedido_itens SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE producao SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE movimentacoes_estoque SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE despesas SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE equipamentos SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE chaves_pix SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE configuracoes SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE precos_marketplace SET user_id = admin_id WHERE user_id IS NULL;
+    UPDATE marketplaces SET user_id = admin_id WHERE user_id IS NULL;
+    
+    RAISE NOTICE '✅ Todos os dados existentes atribuídos ao admin: %', admin_id;
+END $$;
 */
 
--- ====================
--- PASSO 3: REMOVER POLÍTICAS RLS ANTIGAS
--- ====================
-
--- Remover todas as políticas públicas antigas
-DROP POLICY IF EXISTS "Permitir acesso público" ON categorias;
-DROP POLICY IF EXISTS "Permitir acesso público" ON insumos;
-DROP POLICY IF EXISTS "Permitir acesso público" ON produtos;
-DROP POLICY IF EXISTS "Permitir acesso público" ON receitas;
-DROP POLICY IF EXISTS "Permitir acesso público" ON receita_insumos;
-DROP POLICY IF EXISTS "Permitir acesso público" ON precos_marketplace;
-DROP POLICY IF EXISTS "Permitir acesso público" ON pedidos;
-DROP POLICY IF EXISTS "Permitir acesso público" ON pedido_itens;
-DROP POLICY IF EXISTS "Permitir acesso público" ON producao;
-DROP POLICY IF EXISTS "Permitir acesso público" ON movimentacoes_estoque;
-DROP POLICY IF EXISTS "Permitir acesso público" ON despesas;
-DROP POLICY IF EXISTS "Permitir acesso público" ON equipamentos;
-DROP POLICY IF EXISTS "Permitir acesso público" ON chaves_pix;
-DROP POLICY IF EXISTS "Permitir acesso público" ON configuracoes;
-DROP POLICY IF EXISTS "Permitir acesso público" ON marketplaces;
-
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON categorias;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON insumos;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON produtos;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON receitas;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON receita_insumos;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON precos_marketplace;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON pedidos;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON pedido_itens;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON producao;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON movimentacoes_estoque;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON despesas;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON equipamentos;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON chaves_pix;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON configuracoes;
-DROP POLICY IF EXISTS "Permitir tudo para usuários autenticados" ON marketplaces;
 
 -- ====================
--- PASSO 4: CRIAR POLÍTICAS RLS POR USUÁRIO
+-- PASSO 4: REMOVER TODAS AS POLÍTICAS RLS ANTIGAS
 -- ====================
 
--- Cada usuário só vê/edita/deleta seus próprios dados
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN 
+        SELECT schemaname, tablename, policyname 
+        FROM pg_policies 
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', r.policyname, r.schemaname, r.tablename);
+    END LOOP;
+    RAISE NOTICE '✅ Todas as políticas RLS antigas removidas';
+END $$;
 
--- Categorias: SELECT livre (ver categorias de todos), INSERT/UPDATE/DELETE só do próprio
-CREATE POLICY "Usuarios veem suas categorias" ON categorias FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem suas categorias" ON categorias FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam suas categorias" ON categorias FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam suas categorias" ON categorias FOR DELETE USING (user_id = auth.uid());
-
--- Insumos
-CREATE POLICY "Usuarios veem seus insumos" ON insumos FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus insumos" ON insumos FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus insumos" ON insumos FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus insumos" ON insumos FOR DELETE USING (user_id = auth.uid());
-
--- Produtos
-CREATE POLICY "Usuarios veem seus produtos" ON produtos FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus produtos" ON produtos FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus produtos" ON produtos FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus produtos" ON produtos FOR DELETE USING (user_id = auth.uid());
-
--- Receitas
-CREATE POLICY "Usuarios veem suas receitas" ON receitas FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem suas receitas" ON receitas FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam suas receitas" ON receitas FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam suas receitas" ON receitas FOR DELETE USING (user_id = auth.uid());
-
--- Receita Insumos
-CREATE POLICY "Usuarios veem seus receita_insumos" ON receita_insumos FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus receita_insumos" ON receita_insumos FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus receita_insumos" ON receita_insumos FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus receita_insumos" ON receita_insumos FOR DELETE USING (user_id = auth.uid());
-
--- Pedidos
-CREATE POLICY "Usuarios veem seus pedidos" ON pedidos FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus pedidos" ON pedidos FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus pedidos" ON pedidos FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus pedidos" ON pedidos FOR DELETE USING (user_id = auth.uid());
-
--- Pedido Itens
-CREATE POLICY "Usuarios veem seus pedido_itens" ON pedido_itens FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus pedido_itens" ON pedido_itens FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus pedido_itens" ON pedido_itens FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus pedido_itens" ON pedido_itens FOR DELETE USING (user_id = auth.uid());
-
--- Produção
-CREATE POLICY "Usuarios veem sua producao" ON producao FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem sua producao" ON producao FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam sua producao" ON producao FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam sua producao" ON producao FOR DELETE USING (user_id = auth.uid());
-
--- Movimentações Estoque
-CREATE POLICY "Usuarios veem suas movimentacoes" ON movimentacoes_estoque FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem suas movimentacoes" ON movimentacoes_estoque FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam suas movimentacoes" ON movimentacoes_estoque FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam suas movimentacoes" ON movimentacoes_estoque FOR DELETE USING (user_id = auth.uid());
-
--- Despesas
-CREATE POLICY "Usuarios veem suas despesas" ON despesas FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem suas despesas" ON despesas FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam suas despesas" ON despesas FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam suas despesas" ON despesas FOR DELETE USING (user_id = auth.uid());
-
--- Equipamentos
-CREATE POLICY "Usuarios veem seus equipamentos" ON equipamentos FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus equipamentos" ON equipamentos FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus equipamentos" ON equipamentos FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus equipamentos" ON equipamentos FOR DELETE USING (user_id = auth.uid());
-
--- Chaves Pix
-CREATE POLICY "Usuarios veem suas chaves_pix" ON chaves_pix FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem suas chaves_pix" ON chaves_pix FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam suas chaves_pix" ON chaves_pix FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam suas chaves_pix" ON chaves_pix FOR DELETE USING (user_id = auth.uid());
-
--- Configurações
-CREATE POLICY "Usuarios veem suas configuracoes" ON configuracoes FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem suas configuracoes" ON configuracoes FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam suas configuracoes" ON configuracoes FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam suas configuracoes" ON configuracoes FOR DELETE USING (user_id = auth.uid());
-
--- Preços Marketplace
-CREATE POLICY "Usuarios veem seus precos" ON precos_marketplace FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus precos" ON precos_marketplace FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus precos" ON precos_marketplace FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus precos" ON precos_marketplace FOR DELETE USING (user_id = auth.uid());
-
--- Marketplaces
-CREATE POLICY "Usuarios veem seus marketplaces" ON marketplaces FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Usuarios inserem seus marketplaces" ON marketplaces FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios editam seus marketplaces" ON marketplaces FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Usuarios deletam seus marketplaces" ON marketplaces FOR DELETE USING (user_id = auth.uid());
 
 -- ====================
--- PASSO 5: VERIFICAÇÃO FINAL
+-- PASSO 5: HABILITAR RLS EM TODAS AS TABELAS
 -- ====================
 
+ALTER TABLE categorias ENABLE ROW LEVEL SECURITY;
+ALTER TABLE insumos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE produtos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE receitas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pedidos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pedido_itens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE producao ENABLE ROW LEVEL SECURITY;
+ALTER TABLE movimentacoes_estoque ENABLE ROW LEVEL SECURITY;
+ALTER TABLE despesas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE equipamentos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chaves_pix ENABLE ROW LEVEL SECURITY;
+ALTER TABLE configuracoes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE precos_marketplace ENABLE ROW LEVEL SECURITY;
+ALTER TABLE marketplaces ENABLE ROW LEVEL SECURITY;
+ALTER TABLE perfis_usuarios ENABLE ROW LEVEL SECURITY;
+
+-- Tabelas que podem ter nomes diferentes
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'receitas_insumos' AND table_schema = 'public') THEN
+        ALTER TABLE receitas_insumos ENABLE ROW LEVEL SECURITY;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'receita_insumos' AND table_schema = 'public') THEN
+        ALTER TABLE receita_insumos ENABLE ROW LEVEL SECURITY;
+    END IF;
+END $$;
+
+
+-- ====================
+-- PASSO 6: CRIAR POLÍTICAS RLS POR USUÁRIO
+-- ====================
+-- Cada usuário só vê, insere, edita e deleta SEUS PRÓPRIOS dados
+
+-- Helper: cria 4 políticas (SELECT, INSERT, UPDATE, DELETE) para uma tabela
+DO $$
+DECLARE
+    tabelas TEXT[] := ARRAY[
+        'categorias', 'insumos', 'produtos', 'receitas',
+        'pedidos', 'pedido_itens', 'producao', 'movimentacoes_estoque',
+        'despesas', 'equipamentos', 'chaves_pix', 'configuracoes',
+        'precos_marketplace', 'marketplaces'
+    ];
+    t TEXT;
+BEGIN
+    FOREACH t IN ARRAY tabelas
+    LOOP
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = t AND table_schema = 'public') THEN
+            -- SELECT: ver só seus dados
+            EXECUTE format(
+                'CREATE POLICY "user_select_%1$s" ON %1$I FOR SELECT USING (user_id = auth.uid())',
+                t
+            );
+            -- INSERT: inserir só com seu user_id
+            EXECUTE format(
+                'CREATE POLICY "user_insert_%1$s" ON %1$I FOR INSERT WITH CHECK (user_id = auth.uid())',
+                t
+            );
+            -- UPDATE: editar só seus dados
+            EXECUTE format(
+                'CREATE POLICY "user_update_%1$s" ON %1$I FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid())',
+                t
+            );
+            -- DELETE: deletar só seus dados
+            EXECUTE format(
+                'CREATE POLICY "user_delete_%1$s" ON %1$I FOR DELETE USING (user_id = auth.uid())',
+                t
+            );
+        END IF;
+    END LOOP;
+END $$;
+
+-- Receitas_insumos (pode ter nome com s ou sem)
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'receitas_insumos' AND table_schema = 'public') THEN
+        CREATE POLICY "user_select_receitas_insumos" ON receitas_insumos FOR SELECT USING (user_id = auth.uid());
+        CREATE POLICY "user_insert_receitas_insumos" ON receitas_insumos FOR INSERT WITH CHECK (user_id = auth.uid());
+        CREATE POLICY "user_update_receitas_insumos" ON receitas_insumos FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+        CREATE POLICY "user_delete_receitas_insumos" ON receitas_insumos FOR DELETE USING (user_id = auth.uid());
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'receita_insumos' AND table_schema = 'public') THEN
+        CREATE POLICY "user_select_receita_insumos" ON receita_insumos FOR SELECT USING (user_id = auth.uid());
+        CREATE POLICY "user_insert_receita_insumos" ON receita_insumos FOR INSERT WITH CHECK (user_id = auth.uid());
+        CREATE POLICY "user_update_receita_insumos" ON receita_insumos FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+        CREATE POLICY "user_delete_receita_insumos" ON receita_insumos FOR DELETE USING (user_id = auth.uid());
+    END IF;
+END $$;
+
+-- Perfis Usuarios: cada um vê só o SEU perfil
+CREATE POLICY "user_select_perfil" ON perfis_usuarios FOR SELECT USING (id = auth.uid());
+CREATE POLICY "user_update_perfil" ON perfis_usuarios FOR UPDATE USING (id = auth.uid()) WITH CHECK (id = auth.uid());
+-- Admin pode ver todos os perfis
+CREATE POLICY "admin_select_all_perfis" ON perfis_usuarios FOR SELECT USING (
+    EXISTS (SELECT 1 FROM perfis_usuarios WHERE id = auth.uid() AND role = 'admin')
+);
+CREATE POLICY "admin_update_all_perfis" ON perfis_usuarios FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM perfis_usuarios WHERE id = auth.uid() AND role = 'admin')
+);
+-- INSERT do perfil (feito pelo trigger do cadastro)
+CREATE POLICY "user_insert_perfil" ON perfis_usuarios FOR INSERT WITH CHECK (id = auth.uid());
+
+
+-- ====================
+-- PASSO 7: VERIFICAÇÃO FINAL
+-- ====================
+
+-- Verificar que as políticas foram criadas
 SELECT 
     tablename,
     policyname,
-    cmd,
-    qual
+    cmd
 FROM pg_policies
 WHERE schemaname = 'public'
 ORDER BY tablename, policyname;
 
-SELECT '✅ Migração concluída! Cada usuário agora vê apenas seus próprios dados.' as status;
+-- Verificar que user_id existe nas tabelas
+SELECT 
+    table_name,
+    column_name
+FROM information_schema.columns
+WHERE column_name = 'user_id'
+  AND table_schema = 'public'
+ORDER BY table_name;
+
+SELECT '✅ Migração concluída! Cada usuário agora vê apenas seus próprios dados.' AS status;

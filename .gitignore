@@ -27,8 +27,7 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Supabase (credenciais sensíveis)
-supabase-config.js
+# Credenciais sensíveis estão em .env.local (já coberto por .env.*.local acima)
 
 # Agent / AI
 .gemini/

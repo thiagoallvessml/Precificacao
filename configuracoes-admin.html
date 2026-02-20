@@ -139,7 +139,23 @@
                             type="number" value="10" min="0" max="100" />
                         <span class="text-4xl font-bold text-primary/60 ml-1">%</span>
                     </div>
-                    <p class="text-sm text-slate-500 mt-2 font-medium">Porcentagem geral de comissão</p>
+                    <p class="text-sm text-slate-500 mt-2 font-medium">Porcentagem geral de comissão do afiliado</p>
+                </div>
+            </section>
+
+            <!-- Seção 1b: Desconto Padrão do Cupom -->
+            <section class="space-y-3">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Desconto Padrão do
+                    Cupom</label>
+                <div
+                    class="bg-card-dark rounded-xl p-8 flex flex-col items-center justify-center border border-white/5">
+                    <div class="relative flex items-baseline">
+                        <input id="inputDescontoPadrao"
+                            class="bg-transparent text-6xl font-bold text-amber-400 text-center focus:outline-none w-32 border-none focus:ring-0 p-0"
+                            type="number" value="10" min="0" max="100" />
+                        <span class="text-4xl font-bold text-amber-400/60 ml-1">%</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-2 font-medium">Desconto que o indicado recebe no checkout</p>
                 </div>
             </section>
 
@@ -282,6 +298,7 @@
         // Chaves de configuração para afiliados
         const CONFIG_KEYS = {
             COMISSAO_PADRAO: 'afiliado_comissao_padrao',
+            DESCONTO_PADRAO: 'afiliado_desconto_padrao',
             COMISSAO_RECORRENTE: 'afiliado_comissao_recorrente',
             SOMENTE_PRIMEIRA_VENDA: 'afiliado_somente_primeira_venda',
             NIVEL_BRONZE: 'afiliado_nivel_bronze',
@@ -293,6 +310,7 @@
         // Valores padrão
         const DEFAULTS = {
             [CONFIG_KEYS.COMISSAO_PADRAO]: '10',
+            [CONFIG_KEYS.DESCONTO_PADRAO]: '10',
             [CONFIG_KEYS.COMISSAO_RECORRENTE]: 'true',
             [CONFIG_KEYS.SOMENTE_PRIMEIRA_VENDA]: 'false',
             [CONFIG_KEYS.NIVEL_BRONZE]: '10',
@@ -304,6 +322,7 @@
         // Elementos do DOM
         const els = {
             comissaoPadrao: document.getElementById('inputComissaoPadrao'),
+            descontoPadrao: document.getElementById('inputDescontoPadrao'),
             recorrente: document.getElementById('toggleRecorrente'),
             primeiraVenda: document.getElementById('togglePrimeiraVenda'),
             nivelBronze: document.getElementById('inputNivelBronze'),
@@ -396,6 +415,7 @@
                 const val = (key) => configMap[key] || DEFAULTS[key];
 
                 els.comissaoPadrao.value = val(CONFIG_KEYS.COMISSAO_PADRAO);
+                els.descontoPadrao.value = val(CONFIG_KEYS.DESCONTO_PADRAO);
                 els.recorrente.checked = val(CONFIG_KEYS.COMISSAO_RECORRENTE) === 'true';
                 els.primeiraVenda.checked = val(CONFIG_KEYS.SOMENTE_PRIMEIRA_VENDA) === 'true';
                 els.nivelBronze.value = val(CONFIG_KEYS.NIVEL_BRONZE);
@@ -425,6 +445,7 @@
 
                 await Promise.all([
                     saveConfig(CONFIG_KEYS.COMISSAO_PADRAO, els.comissaoPadrao.value, 'Comissão padrão para afiliados (%)'),
+                    saveConfig(CONFIG_KEYS.DESCONTO_PADRAO, els.descontoPadrao.value, 'Desconto padrão do cupom para indicados (%)'),
                     saveConfig(CONFIG_KEYS.COMISSAO_RECORRENTE, els.recorrente.checked, 'Se afiliado recebe comissão recorrente'),
                     saveConfig(CONFIG_KEYS.SOMENTE_PRIMEIRA_VENDA, els.primeiraVenda.checked, 'Se comissão é somente na primeira venda'),
                     saveConfig(CONFIG_KEYS.NIVEL_BRONZE, els.nivelBronze.value, 'Comissão nível Bronze (%)'),

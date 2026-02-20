@@ -593,10 +593,28 @@
                         `${cupomAtual.comissao_percentual}% de comissão`;
                 } else {
                     // 3. Criar cupom automaticamente com o nome do usuário
+                    // Buscar valores padrão da configuração de afiliados
+                    let descontoPadrao = 10;
+                    let comissaoPadrao = 10;
+
+                    try {
+                        const { data: configs } = await supabase
+                            .from('configuracoes')
+                            .select('chave, valor')
+                            .in('chave', ['afiliado_comissao_padrao', 'afiliado_desconto_padrao']);
+
+                        if (configs) {
+                            configs.forEach(c => {
+                                if (c.chave === 'afiliado_comissao_padrao') comissaoPadrao = parseFloat(c.valor) || 10;
+                                if (c.chave === 'afiliado_desconto_padrao') descontoPadrao = parseFloat(c.valor) || 10;
+                            });
+                        }
+                    } catch (e) { /* usa valores padrão */ }
+
                     const insertPayload = {
                         codigo: codigoAutoGerado,
-                        desconto_percentual: 10,
-                        comissao_percentual: 10
+                        desconto_percentual: descontoPadrao,
+                        comissao_percentual: comissaoPadrao
                     };
                     if (userId) insertPayload.user_id = userId;
 

@@ -515,7 +515,6 @@
                 document.getElementById('cupomAutoLabel').textContent =
                     `${nomeUsuario} → ${codigoAutoGerado}`;
                 document.getElementById('couponCode').textContent = codigoAutoGerado;
-                document.getElementById('inputCupom').value = codigoAutoGerado;
                 return;
             }
 
@@ -580,7 +579,6 @@
                     }
 
                     document.getElementById('couponCode').textContent = cupomAtual.codigo;
-                    document.getElementById('inputCupom').value = cupomAtual.codigo;
 
                     // Mostrar código real (salvo no banco), não o auto-gerado
                     document.getElementById('cupomAutoLabel').textContent =
@@ -626,7 +624,6 @@
                     if (!insertError && novoCupom) {
                         cupomAtual = novoCupom[0];
                         document.getElementById('couponCode').textContent = cupomAtual.codigo;
-                        document.getElementById('inputCupom').value = cupomAtual.codigo;
                     }
 
                     document.getElementById('cupomAutoLabel').textContent =
@@ -657,6 +654,8 @@
             } catch (err) {
                 console.error('❌ Erro ao carregar cupom:', err);
                 document.getElementById('couponCode').textContent = codigoAutoGerado;
+                document.getElementById('cupomAutoLabel').textContent =
+                    `${nomeUsuario} → ${codigoAutoGerado}`;
             }
         }
 
@@ -769,9 +768,9 @@
         // ========================
 
         window.salvarCupom = async function () {
-            const input = document.getElementById('inputCupom');
+            const codeEl = document.getElementById('couponCode');
             const btn = document.getElementById('btnSalvarCupom');
-            const novoCodigo = input.value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+            const novoCodigo = (codeEl?.textContent || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
 
             if (!novoCodigo || novoCodigo.length < 3) {
                 showNotification('Código deve ter no mínimo 3 caracteres.', 'error');

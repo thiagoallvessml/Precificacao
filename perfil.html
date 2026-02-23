@@ -59,8 +59,21 @@
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display pb-24">
 
+    <!-- Top Nav Bar -->
+    <nav class="sticky top-0 z-50 px-4 py-4" style="background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(12px);">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="window.location.href='index.html'"
+                    class="text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h2 class="text-xl font-bold">Meu Perfil</h2>
+            </div>
+        </div>
+    </nav>
+
     <!-- Header Section -->
-    <header class="pt-12 pb-6 px-6 flex flex-col items-center">
+    <header class="pt-8 pb-6 px-6 flex flex-col items-center">
         <div class="relative mb-4">
             <div class="w-24 h-24 rounded-full border-4 border-primary/30 p-1">
                 <div class="w-full h-full rounded-full bg-card-dark flex items-center justify-center text-4xl">

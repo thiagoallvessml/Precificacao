@@ -477,12 +477,31 @@
                             .eq('id', session.user.id)
                             .single();
 
-                        if (perfil && perfil.nome) {
+                        console.log('🔍 [nome] perfil:', perfil);
+                        if (perfil && perfil.nome && perfil.nome.trim()) {
                             return perfil.nome;
                         }
-                    } catch (e) { /* ignore */ }
+                    } catch (e) {
+                        console.warn('🔍 [nome] Erro ao buscar perfil:', e);
+                    }
+
+                    // Fallback: usar parte do email como nome
+                    if (session.user.email) {
+                        const emailName = session.user.email.split('@')[0];
+                        // Capitalizar primeira letra
+                        const nome = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+                        console.log('🔍 [nome] Usando email como nome:', nome);
+                        return nome;
+                    }
+
+                    // Fallback: user_metadata
+                    if (session.user.user_metadata?.full_name) {
+                        return session.user.user_metadata.full_name;
+                    }
                 }
-            } catch (e) { /* ignore */ }
+            } catch (e) {
+                console.warn('🔍 [nome] Erro ao buscar sessão:', e);
+            }
 
             // 2. Fallback: buscar da tabela configuracoes
             try {
@@ -648,6 +667,15 @@
                         .select();
 
                     console.log('🔍 [11] Resultado insert:', { novoCupom, insertError });
+                    if (insertError) {
+                        console.error('🔍 [11-DETAIL] Insert error details:', {
+                            message: insertError.message,
+                            code: insertError.code,
+                            details: insertError.details,
+                            hint: insertError.hint,
+                            status: insertError.status
+                        });
+                    }
 
                     if (!insertError && novoCupom) {
                         cupomAtual = novoCupom[0];

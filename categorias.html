@@ -478,6 +478,8 @@
 
                 alert('✅ Categoria excluída!');
                 await loadCategorias();
+                // Re-checar limite após exclusão
+                await checkCategoryLimit(currentTab);
             } catch (error) {
                 console.error('❌ Erro ao deletar:', error);
                 alert('❌ Erro: ' + error.message);

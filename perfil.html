@@ -581,13 +581,30 @@
                 if (!session) return;
                 userId = session.user.id;
 
-                const { data: perfil, error } = await supabase
+                let { data: perfil, error } = await supabase
                     .from('perfis_usuarios')
                     .select('nome, email, telefone, nome_negocio, endereco, configuracoes')
                     .eq('id', userId)
                     .single();
 
-                if (error) { console.warn('Erro ao buscar perfil:', error); return; }
+                // Se não existe registro, criar automaticamente
+                if (error && (error.code === 'PGRST116' || error.details?.includes('0 rows'))) {
+                    const { data: novoPerfil, error: insertErr } = await supabase
+                        .from('perfis_usuarios')
+                        .upsert({
+                            id: userId,
+                            email: session.user.email,
+                            nome: session.user.user_metadata?.full_name || '',
+                        }, { onConflict: 'id' })
+                        .select('nome, email, telefone, nome_negocio, endereco, configuracoes')
+                        .single();
+
+                    if (insertErr) { console.warn('Erro ao criar perfil:', insertErr); return; }
+                    perfil = novoPerfil;
+                } else if (error) {
+                    console.warn('Erro ao buscar perfil:', error);
+                    return;
+                }
 
                 // Atualizar header
                 if (perfil.nome) document.getElementById('userName').textContent = perfil.nome;
@@ -638,8 +655,7 @@
 
                 const { error } = await supabase
                     .from('perfis_usuarios')
-                    .update({ nome, telefone, nome_negocio })
-                    .eq('id', userId);
+                    .upsert({ id: userId, nome, telefone, nome_negocio }, { onConflict: 'id' });
 
                 if (error) throw error;
 
@@ -676,8 +692,7 @@
 
                 const { error } = await supabase
                     .from('perfis_usuarios')
-                    .update({ endereco })
-                    .eq('id', userId);
+                    .upsert({ id: userId, endereco }, { onConflict: 'id' });
 
                 if (error) throw error;
 
@@ -746,8 +761,7 @@
 
                 const { error } = await supabase
                     .from('perfis_usuarios')
-                    .update({ configuracoes })
-                    .eq('id', userId);
+                    .upsert({ id: userId, configuracoes }, { onConflict: 'id' });
 
                 if (error) throw error;
 

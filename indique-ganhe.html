@@ -507,16 +507,21 @@
         // ========================
 
         async function carregarCupom() {
+            console.log('🔍 [1] carregarCupom() iniciou');
+
             // 1. Buscar o nome do usuário automaticamente
             const nomeUsuario = await buscarNomeUsuario();
             const codigoAutoGerado = gerarCodigoFromNome(nomeUsuario);
+            console.log('🔍 [2] nomeUsuario:', nomeUsuario, '| codigoAutoGerado:', codigoAutoGerado);
 
             if (!supabase) {
+                console.log('🔍 [3] Supabase NÃO disponível, usando fallback local');
                 document.getElementById('cupomAutoLabel').textContent =
                     `${nomeUsuario} → ${codigoAutoGerado}`;
                 document.getElementById('couponCode').textContent = codigoAutoGerado;
                 return;
             }
+            console.log('🔍 [3] Supabase disponível, seguindo...');
 
             try {
                 // 2. Buscar cupom do USUÁRIO LOGADO
@@ -526,6 +531,7 @@
                 // Tentar buscar pelo user_id do usuário logado
                 try {
                     const { data: { session } } = await supabase.auth.getSession();
+                    console.log('🔍 [4] Session:', session ? 'OK (user: ' + session.user.id + ')' : 'SEM SESSÃO');
                     if (session && session.user) {
                         userId = session.user.id;
                         const { data: cupomUser, error: userErr } = await supabase
@@ -535,14 +541,19 @@
                             .eq('ativo', true)
                             .limit(1);
 
+                        console.log('🔍 [5] Busca cupom por user_id:', { cupomUser, userErr });
+
                         if (!userErr && cupomUser && cupomUser.length > 0) {
                             data = cupomUser;
                         }
                     }
-                } catch (e) { /* ignore */ }
+                } catch (e) {
+                    console.error('🔍 [5-ERR] Erro ao buscar sessão/cupom:', e);
+                }
 
                 // Fallback: buscar cupom sem user_id vinculado
                 if (!data || data.length === 0) {
+                    console.log('🔍 [6] Nenhum cupom encontrado por user_id, tentando fallback...');
                     const { data: cupomFallback, error: fbErr } = await supabase
                         .from('cupons_afiliado')
                         .select('*')
@@ -550,6 +561,8 @@
                         .is('user_id', null)
                         .order('created_at', { ascending: true })
                         .limit(1);
+
+                    console.log('🔍 [7] Fallback cupom (user_id=null):', { cupomFallback, fbErr });
 
                     if (!fbErr && cupomFallback && cupomFallback.length > 0) {
                         data = cupomFallback;
@@ -561,13 +574,19 @@
                                     .from('cupons_afiliado')
                                     .update({ user_id: userId, updated_at: new Date().toISOString() })
                                     .eq('id', cupomFallback[0].id);
-                            } catch (e) { /* ignore */ }
+                                console.log('🔍 [7b] Vinculou cupom ao user_id');
+                            } catch (e) {
+                                console.error('🔍 [7b-ERR] Erro ao vincular:', e);
+                            }
                         }
                     }
                 }
 
+                console.log('🔍 [8] data final:', data);
+
                 if (data && data.length > 0) {
                     cupomAtual = data[0];
+                    console.log('🔍 [9] cupomAtual encontrado:', cupomAtual);
 
                     // Se o cupom salvo ainda é o antigo "GELADINHO10", atualizar automaticamente
                     if (cupomAtual.codigo === 'GELADINHO10' && codigoAutoGerado !== 'GELADINHO10') {
@@ -576,6 +595,7 @@
                             .update({ codigo: codigoAutoGerado, updated_at: new Date().toISOString() })
                             .eq('id', cupomAtual.id);
                         cupomAtual.codigo = codigoAutoGerado;
+                        console.log('🔍 [9b] Atualizou código GELADINHO10 para:', codigoAutoGerado);
                     }
 
                     document.getElementById('couponCode').textContent = cupomAtual.codigo;
@@ -585,13 +605,15 @@
                         `${nomeUsuario} → ${cupomAtual.codigo}`;
 
                     // Atualizar hero
-                    document.getElementById('heroDesconto').textContent =
-                        `${cupomAtual.desconto_percentual}% de desconto`;
-                    document.getElementById('heroComissao').textContent =
-                        `${cupomAtual.comissao_percentual}% de comissão`;
+                    const heroDesconto = document.getElementById('heroDesconto');
+                    const heroComissao = document.getElementById('heroComissao');
+                    if (heroDesconto) heroDesconto.textContent = `${cupomAtual.desconto_percentual}% de desconto`;
+                    if (heroComissao) heroComissao.textContent = `${cupomAtual.comissao_percentual}% de comissão`;
+
+                    console.log('🔍 [10] ✅ Código exibido:', cupomAtual.codigo);
                 } else {
+                    console.log('🔍 [9] Nenhum cupom existe, criando novo...');
                     // 3. Criar cupom automaticamente com o nome do usuário
-                    // Buscar valores padrão da configuração de afiliados
                     let descontoPadrao = 10;
                     let comissaoPadrao = 10;
 
@@ -607,7 +629,9 @@
                                 if (c.chave === 'afiliado_desconto_padrao') descontoPadrao = parseFloat(c.valor) || 10;
                             });
                         }
-                    } catch (e) { /* usa valores padrão */ }
+                    } catch (e) {
+                        console.warn('🔍 [9b] Erro ao buscar configs padrão:', e);
+                    }
 
                     const insertPayload = {
                         codigo: codigoAutoGerado,
@@ -616,14 +640,23 @@
                     };
                     if (userId) insertPayload.user_id = userId;
 
+                    console.log('🔍 [10] Inserindo cupom:', insertPayload);
+
                     const { data: novoCupom, error: insertError } = await supabase
                         .from('cupons_afiliado')
                         .insert([insertPayload])
                         .select();
 
+                    console.log('🔍 [11] Resultado insert:', { novoCupom, insertError });
+
                     if (!insertError && novoCupom) {
                         cupomAtual = novoCupom[0];
                         document.getElementById('couponCode').textContent = cupomAtual.codigo;
+                        console.log('🔍 [12] ✅ Novo cupom criado:', cupomAtual.codigo);
+                    } else {
+                        // Se falhou o insert, pelo menos mostra o auto-gerado
+                        document.getElementById('couponCode').textContent = codigoAutoGerado;
+                        console.error('🔍 [12] ❌ Falha ao criar cupom, mostrando auto-gerado:', codigoAutoGerado);
                     }
 
                     document.getElementById('cupomAutoLabel').textContent =
@@ -652,7 +685,7 @@
                 } catch (e) { /* ignora erro se já existir */ }
 
             } catch (err) {
-                console.error('❌ Erro ao carregar cupom:', err);
+                console.error('🔍 [FATAL] Erro geral ao carregar cupom:', err);
                 document.getElementById('couponCode').textContent = codigoAutoGerado;
                 document.getElementById('cupomAutoLabel').textContent =
                     `${nomeUsuario} → ${codigoAutoGerado}`;

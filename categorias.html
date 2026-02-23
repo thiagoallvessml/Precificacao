@@ -102,6 +102,16 @@
         <!-- Banner de limites do plano -->
         <div id="planLimitBannerCat" class="mb-4"></div>
 
+        <!-- Dica contextual por aba -->
+        <div id="dicaTab"
+            class="mb-5 flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-2xl px-4 py-3">
+            <span class="material-symbols-outlined text-primary text-xl mt-0.5 shrink-0">lightbulb</span>
+            <p id="dicaTexto" class="text-sm text-slate-300 leading-relaxed">
+                Cadastre os tipos de produtos que você vende. <span class="text-primary font-semibold">Exemplo:</span>
+                Gourmet, Premium, Simples.
+            </p>
+        </div>
+
         <!-- List Container -->
         <div id="categoriasList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <!-- Cards serão inseridos aqui dinamicamente -->
@@ -297,6 +307,21 @@
 
         let currentLimitInfo = { atingiu: false };
 
+        // Dicas contextuais por aba
+        const dicasTab = {
+            produtos: 'Cadastre os tipos de produtos que você vende. <span class="text-primary font-semibold">Exemplo:</span> Gourmet, Premium, Simples.',
+            marketplace: 'Cadastre os meios de venda que você usa. <span class="text-primary font-semibold">Exemplo:</span> WhatsApp, iFood, Balcão, Porta de Casa.',
+            insumos: 'Cadastre o tipo de insumo que usa. <span class="text-primary font-semibold">Exemplo:</span> Ingredientes, Embalagens, Recheio, Cobertura.',
+            despesas: 'Cadastre as despesas que tem no seu negócio. <span class="text-primary font-semibold">Exemplo:</span> Aluguel, Contador, Combustível.'
+        };
+
+        function atualizarDica(tab) {
+            const dicaTexto = document.getElementById('dicaTexto');
+            if (dicaTexto && dicasTab[tab]) {
+                dicaTexto.innerHTML = dicasTab[tab];
+            }
+        }
+
         // Switch de tabs
         window.switchTab = function (tab) {
             currentTab = tab;
@@ -324,6 +349,9 @@
                 campoTaxa.classList.add('hidden');
                 document.getElementById('inputTaxa').value = '';
             }
+
+            // Atualizar dica contextual
+            atualizarDica(tab);
 
             renderCategorias();
             renderIconGrid();

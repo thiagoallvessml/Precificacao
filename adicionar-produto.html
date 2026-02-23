@@ -328,7 +328,7 @@
                 data.forEach(categoria => {
                     const option = document.createElement('option');
                     option.value = categoria.id;
-                    option.textContent = `${categoria.icone || ''} ${categoria.nome}`.trim();
+                    option.textContent = categoria.nome;
                     categoriaSelect.appendChild(option);
                 });
 
@@ -475,8 +475,8 @@
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg backdrop-blur-md transition-all transform ${type === 'success' ? 'bg-green-500/90' :
-                    type === 'error' ? 'bg-red-500/90' :
-                        'bg-primary/90'
+                type === 'error' ? 'bg-red-500/90' :
+                    'bg-primary/90'
                 } text-white`;
 
             notification.innerHTML = `

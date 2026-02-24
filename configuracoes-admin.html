@@ -191,12 +191,21 @@
             </section>
 
             <!-- Seção 3: Níveis de Afiliados -->
-            <section class="space-y-3">
+            <section class="space-y-3 lg:col-span-2">
                 <label class="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Níveis de
                     Afiliados</label>
+                <p class="text-xs text-slate-600 ml-1 -mt-1">Comissão que o afiliado recebe + desconto que o indicado
+                    ganha no checkout</p>
                 <div class="bg-card-dark rounded-xl border border-white/5 overflow-hidden">
+                    <!-- Header -->
+                    <div
+                        class="grid grid-cols-3 p-3 border-b border-white/5 text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                        <span>Nível</span>
+                        <span class="text-center">Comissão</span>
+                        <span class="text-center">Desconto Cupom</span>
+                    </div>
                     <!-- Bronze -->
-                    <div class="flex items-center justify-between p-4 border-b border-white/5">
+                    <div class="grid grid-cols-3 items-center p-4 border-b border-white/5">
                         <div class="flex items-center space-x-3">
                             <div
                                 class="w-10 h-10 rounded-full bg-orange-900/30 flex items-center justify-center text-orange-500">
@@ -204,15 +213,23 @@
                             </div>
                             <span class="font-medium">Bronze</span>
                         </div>
-                        <div class="flex items-center bg-white/5 rounded-lg px-3 py-1 border border-white/5">
+                        <div
+                            class="flex items-center justify-center bg-white/5 rounded-lg px-3 py-1 border border-white/5 mx-auto">
                             <input id="inputNivelBronze"
                                 class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-primary"
                                 type="number" value="10" min="0" max="100" />
                             <span class="text-slate-500 ml-1 text-sm">%</span>
                         </div>
+                        <div
+                            class="flex items-center justify-center bg-white/5 rounded-lg px-3 py-1 border border-amber-500/20 mx-auto">
+                            <input id="inputDescontoBronze"
+                                class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-amber-400"
+                                type="number" value="10" min="0" max="100" />
+                            <span class="text-amber-400/60 ml-1 text-sm">%</span>
+                        </div>
                     </div>
                     <!-- Prata -->
-                    <div class="flex items-center justify-between p-4 border-b border-white/5">
+                    <div class="grid grid-cols-3 items-center p-4 border-b border-white/5">
                         <div class="flex items-center space-x-3">
                             <div
                                 class="w-10 h-10 rounded-full bg-slate-400/20 flex items-center justify-center text-slate-400">
@@ -220,15 +237,23 @@
                             </div>
                             <span class="font-medium">Prata</span>
                         </div>
-                        <div class="flex items-center bg-white/5 rounded-lg px-3 py-1 border border-white/5">
+                        <div
+                            class="flex items-center justify-center bg-white/5 rounded-lg px-3 py-1 border border-white/5 mx-auto">
                             <input id="inputNivelPrata"
                                 class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-primary"
                                 type="number" value="12" min="0" max="100" />
                             <span class="text-slate-500 ml-1 text-sm">%</span>
                         </div>
+                        <div
+                            class="flex items-center justify-center bg-white/5 rounded-lg px-3 py-1 border border-amber-500/20 mx-auto">
+                            <input id="inputDescontoPrata"
+                                class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-amber-400"
+                                type="number" value="12" min="0" max="100" />
+                            <span class="text-amber-400/60 ml-1 text-sm">%</span>
+                        </div>
                     </div>
                     <!-- Ouro -->
-                    <div class="flex items-center justify-between p-4">
+                    <div class="grid grid-cols-3 items-center p-4">
                         <div class="flex items-center space-x-3">
                             <div
                                 class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500">
@@ -236,11 +261,19 @@
                             </div>
                             <span class="font-medium">Ouro</span>
                         </div>
-                        <div class="flex items-center bg-white/5 rounded-lg px-3 py-1 border border-white/5">
+                        <div
+                            class="flex items-center justify-center bg-white/5 rounded-lg px-3 py-1 border border-white/5 mx-auto">
                             <input id="inputNivelOuro"
                                 class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-primary"
                                 type="number" value="15" min="0" max="100" />
                             <span class="text-slate-500 ml-1 text-sm">%</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-center bg-white/5 rounded-lg px-3 py-1 border border-amber-500/20 mx-auto">
+                            <input id="inputDescontoOuro"
+                                class="bg-transparent text-right w-8 focus:outline-none border-none focus:ring-0 p-0 font-bold text-amber-400"
+                                type="number" value="15" min="0" max="100" />
+                            <span class="text-amber-400/60 ml-1 text-sm">%</span>
                         </div>
                     </div>
                 </div>
@@ -304,6 +337,9 @@
             NIVEL_BRONZE: 'afiliado_nivel_bronze',
             NIVEL_PRATA: 'afiliado_nivel_prata',
             NIVEL_OURO: 'afiliado_nivel_ouro',
+            DESCONTO_BRONZE: 'afiliado_desconto_bronze',
+            DESCONTO_PRATA: 'afiliado_desconto_prata',
+            DESCONTO_OURO: 'afiliado_desconto_ouro',
             SAQUE_MINIMO: 'afiliado_saque_minimo'
         };
 
@@ -316,6 +352,9 @@
             [CONFIG_KEYS.NIVEL_BRONZE]: '10',
             [CONFIG_KEYS.NIVEL_PRATA]: '12',
             [CONFIG_KEYS.NIVEL_OURO]: '15',
+            [CONFIG_KEYS.DESCONTO_BRONZE]: '10',
+            [CONFIG_KEYS.DESCONTO_PRATA]: '12',
+            [CONFIG_KEYS.DESCONTO_OURO]: '15',
             [CONFIG_KEYS.SAQUE_MINIMO]: '50.00'
         };
 
@@ -328,6 +367,9 @@
             nivelBronze: document.getElementById('inputNivelBronze'),
             nivelPrata: document.getElementById('inputNivelPrata'),
             nivelOuro: document.getElementById('inputNivelOuro'),
+            descontoBronze: document.getElementById('inputDescontoBronze'),
+            descontoPrata: document.getElementById('inputDescontoPrata'),
+            descontoOuro: document.getElementById('inputDescontoOuro'),
             saqueMinimo: document.getElementById('inputSaqueMinimo'),
             btnSalvar: document.getElementById('btnSalvar'),
             btnText: document.getElementById('btnSalvarText'),
@@ -421,6 +463,9 @@
                 els.nivelBronze.value = val(CONFIG_KEYS.NIVEL_BRONZE);
                 els.nivelPrata.value = val(CONFIG_KEYS.NIVEL_PRATA);
                 els.nivelOuro.value = val(CONFIG_KEYS.NIVEL_OURO);
+                els.descontoBronze.value = val(CONFIG_KEYS.DESCONTO_BRONZE);
+                els.descontoPrata.value = val(CONFIG_KEYS.DESCONTO_PRATA);
+                els.descontoOuro.value = val(CONFIG_KEYS.DESCONTO_OURO);
 
                 // Formatar saque mínimo
                 const saqueVal = parseFloat(val(CONFIG_KEYS.SAQUE_MINIMO));
@@ -451,11 +496,20 @@
                     saveConfig(CONFIG_KEYS.NIVEL_BRONZE, els.nivelBronze.value, 'Comissão nível Bronze (%)'),
                     saveConfig(CONFIG_KEYS.NIVEL_PRATA, els.nivelPrata.value, 'Comissão nível Prata (%)'),
                     saveConfig(CONFIG_KEYS.NIVEL_OURO, els.nivelOuro.value, 'Comissão nível Ouro (%)'),
+                    saveConfig(CONFIG_KEYS.DESCONTO_BRONZE, els.descontoBronze.value, 'Desconto cupom nível Bronze (%)'),
+                    saveConfig(CONFIG_KEYS.DESCONTO_PRATA, els.descontoPrata.value, 'Desconto cupom nível Prata (%)'),
+                    saveConfig(CONFIG_KEYS.DESCONTO_OURO, els.descontoOuro.value, 'Desconto cupom nível Ouro (%)'),
                     saveConfig(CONFIG_KEYS.SAQUE_MINIMO, saqueNum.toFixed(2), 'Valor mínimo para saque (R$)')
                 ]);
 
-                showToast('✅ Configurações salvas com sucesso!', 'success');
-                console.log('✅ Configurações de afiliados salvas');
+                // ============================================
+                // ATUALIZAR CUPONS DE TODOS OS AFILIADOS
+                // baseado no nível de cada um (perfis_usuarios.nivel_afiliado)
+                // ============================================
+                await atualizarCuponsAfiliados();
+
+                showToast('✅ Configurações e cupons atualizados!', 'success');
+                console.log('✅ Configurações de afiliados salvas e cupons sincronizados');
             } catch (err) {
                 console.error('Erro ao salvar:', err);
                 showToast('❌ Erro ao salvar. Tente novamente.', 'error');
@@ -488,6 +542,74 @@
             container.appendChild(toast);
 
             setTimeout(() => toast.remove(), 3000);
+        }
+
+        /**
+         * Atualiza desconto_percentual e comissao_percentual de todos os cupons
+         * baseado no nivel_afiliado de cada afiliado no perfis_usuarios
+         */
+        async function atualizarCuponsAfiliados() {
+            if (!supabase) return;
+
+            try {
+                // Mapa de nível → { comissão, desconto }
+                const nivelConfig = {
+                    bronze: {
+                        comissao: parseFloat(els.nivelBronze.value) || 10,
+                        desconto: parseFloat(els.descontoBronze.value) || 10
+                    },
+                    prata: {
+                        comissao: parseFloat(els.nivelPrata.value) || 12,
+                        desconto: parseFloat(els.descontoPrata.value) || 12
+                    },
+                    ouro: {
+                        comissao: parseFloat(els.nivelOuro.value) || 15,
+                        desconto: parseFloat(els.descontoOuro.value) || 15
+                    }
+                };
+
+                // Buscar todos os afiliados com seus níveis
+                const { data: afiliados, error: affErr } = await supabase
+                    .from('perfis_usuarios')
+                    .select('id, nivel_afiliado')
+                    .eq('role', 'afiliado');
+
+                if (affErr) {
+                    console.error('Erro ao buscar afiliados:', affErr);
+                    return;
+                }
+
+                if (!afiliados || afiliados.length === 0) {
+                    console.log('Nenhum afiliado encontrado para atualizar cupons');
+                    return;
+                }
+
+                // Para cada afiliado, atualizar seus cupons
+                let atualizados = 0;
+                for (const af of afiliados) {
+                    const nivel = af.nivel_afiliado || 'bronze';
+                    const cfg = nivelConfig[nivel] || nivelConfig.bronze;
+
+                    const { error: upErr, count } = await supabase
+                        .from('cupons_afiliado')
+                        .update({
+                            comissao_percentual: cfg.comissao,
+                            desconto_percentual: cfg.desconto,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('user_id', af.id);
+
+                    if (upErr) {
+                        console.warn(`Erro ao atualizar cupom do afiliado ${af.id}:`, upErr);
+                    } else {
+                        atualizados++;
+                    }
+                }
+
+                console.log(`✅ ${atualizados} afiliado(s) com cupons atualizados`);
+            } catch (err) {
+                console.error('Erro ao atualizar cupons:', err);
+            }
         }
 
         // ========== INIT ==========

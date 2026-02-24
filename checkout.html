@@ -290,16 +290,43 @@
                 let cupomEncontrado = null;
 
                 if (supabase) {
-                    // Buscar cupom no Supabase
+                    // Buscar cupom no Supabase (case-insensitive, sem exigir user_id)
                     const { data, error } = await supabase
                         .from('cupons_afiliado')
                         .select('*')
-                        .eq('codigo', code)
+                        .ilike('codigo', code)
                         .eq('ativo', true)
-                        .single();
+                        .maybeSingle();
+
+                    console.log('🔍 Busca cupom:', code, '→', data, error);
 
                     if (!error && data) {
                         cupomEncontrado = data;
+                    }
+
+                    // Se não encontrou com ativo=true, tentar sem filtro de ativo
+                    if (!cupomEncontrado) {
+                        const { data: dataAny, error: errAny } = await supabase
+                            .from('cupons_afiliado')
+                            .select('*')
+                            .ilike('codigo', code)
+                            .maybeSingle();
+
+                        console.log('🔍 Busca cupom (sem filtro ativo):', dataAny, errAny);
+
+                        if (!errAny && dataAny && !dataAny.ativo) {
+                            // Cupom existe mas está desativado
+                            btn.textContent = 'Aplicar';
+                            btn.disabled = false;
+                            feedback.innerHTML = `
+                                <div class="flex items-center gap-2 px-1 text-amber-400 text-sm">
+                                    <span class="material-icons-round text-sm">warning</span>
+                                    <p class="font-medium">Este cupom está desativado</p>
+                                </div>
+                            `;
+                            feedback.classList.remove('hidden');
+                            return;
+                        }
                     }
                 }
 

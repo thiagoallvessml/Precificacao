@@ -23,27 +23,49 @@ const FREE_LIMITS = {
 };
 
 /**
- * Busca o plano do usuário logado
- * @returns {Promise<string>} 'free' ou 'premium'
+ * Busca o plano e info de trial do usuário logado
+ * @returns {Promise<{plano: string, emTrial: boolean, diasRestantes: number, trialExpira: Date|null}>}
  */
-export async function getUserPlan() {
+export async function getTrialInfo() {
     const supabase = getSupabase();
-    if (!supabase) return 'free';
+    if (!supabase) return { plano: 'free', emTrial: false, diasRestantes: 0, trialExpira: null };
 
     try {
-        // Tentar via RPC
-        const { data: rpcRole } = await supabase.rpc('get_user_role');
-
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return 'free';
+        if (!session) return { plano: 'free', emTrial: false, diasRestantes: 0, trialExpira: null };
 
         const { data: perfil } = await supabase
             .from('perfis_usuarios')
-            .select('plano')
+            .select('plano, trial_expires_at')
             .eq('id', session.user.id)
             .single();
 
-        return perfil?.plano || 'free';
+        const plano = perfil?.plano || 'free';
+        const trialExpira = perfil?.trial_expires_at ? new Date(perfil.trial_expires_at) : null;
+        const agora = new Date();
+        const emTrial = trialExpira ? trialExpira > agora : false;
+        const diasRestantes = emTrial
+            ? Math.ceil((trialExpira - agora) / (1000 * 60 * 60 * 24))
+            : 0;
+
+        return { plano, emTrial, diasRestantes, trialExpira };
+    } catch (e) {
+        console.warn('plan-limits: erro ao buscar trial info:', e);
+        return { plano: 'free', emTrial: false, diasRestantes: 0, trialExpira: null };
+    }
+}
+
+/**
+ * Busca o plano do usuário logado
+ * Retorna 'premium' se estiver no período de trial
+ * @returns {Promise<string>} 'free' ou 'premium'
+ */
+export async function getUserPlan() {
+    try {
+        const { plano, emTrial } = await getTrialInfo();
+        // Trial ativo = acesso premium completo
+        if (emTrial) return 'premium';
+        return plano;
     } catch (e) {
         console.warn('plan-limits: erro ao buscar plano:', e);
         return 'free';

@@ -266,8 +266,16 @@
 
         // Toggle status
         window.toggleStatus = async function (id, statusAtual) {
+            const novoStatus = statusAtual === 'paga' ? 'pendente' : 'paga';
+
+            // Pedir confirmação antes de alterar
+            const mensagem = novoStatus === 'paga'
+                ? '✅ Confirmar que esta despesa foi paga?'
+                : '⚠️ Desmarcar esta despesa como paga?';
+
+            if (!confirm(mensagem)) return;
+
             try {
-                const novoStatus = statusAtual === 'paga' ? 'pendente' : 'paga';
                 const dataPagamento = novoStatus === 'paga' ? new Date().toISOString().split('T')[0] : null;
 
                 const { error } = await updateRecord('despesas', id, {

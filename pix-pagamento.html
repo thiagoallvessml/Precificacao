@@ -683,7 +683,7 @@
                 } catch (e) { /* usa fallback */ }
 
                 const valorOriginal = total + valorDesconto;
-                const comissao = valorOriginal * (comissaoPct / 100);
+                const comissao = total * (comissaoPct / 100); // comissão sobre valor pago (com desconto)
 
                 const novaIndicacao = {
                     cupom_id: cupomId,

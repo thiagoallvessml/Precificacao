@@ -372,7 +372,7 @@
                 // 0. Buscar contagem REAL de afiliados (pela mesma fonte do admin dashboard)
                 const { data: afiliadosPerfis, error: afiliadosError } = await supabase
                     .from('perfis_usuarios')
-                    .select('id, nome, email')
+                    .select('id, nome, email, nivel_afiliado, comissao_recorrente, somente_primeira_venda')
                     .eq('role', 'afiliado');
 
                 const totalAfiliados = (afiliadosPerfis || []).length;
@@ -462,7 +462,7 @@
                     if (userIds.length > 0) {
                         const { data: perfis } = await supabase
                             .from('perfis_usuarios')
-                            .select('id, nome, email')
+                            .select('id, nome, email, nivel_afiliado, comissao_recorrente, somente_primeira_venda')
                             .in('id', userIds);
 
                         if (perfis) {
@@ -561,14 +561,28 @@
 
                 // Agrupar por cupom_id
                 const rankingMap = {};
+
+                // Mapa de user_id → perfil do afiliado
+                const perfilPorUserId = {};
+                if (afiliadosPerfis) {
+                    afiliadosPerfis.forEach(a => {
+                        perfilPorUserId[a.id] = a;
+                    });
+                }
+
                 cuponsAtivos.forEach(c => {
+                    const perfil = c.user_id ? perfilPorUserId[c.user_id] : null;
                     rankingMap[c.id] = {
                         nome: nomesPorCupom[c.id] || c.codigo,
                         cupom: c.codigo,
                         comissao_pct: c.comissao_percentual,
                         qtd_vendas: 0,
                         total_vendas: 0,
-                        total_comissoes: 0
+                        total_comissoes: 0,
+                        user_id: c.user_id || null,
+                        nivel: perfil?.nivel_afiliado || 'bronze',
+                        comissao_recorrente: perfil?.comissao_recorrente ?? true,
+                        somente_primeira_venda: perfil?.somente_primeira_venda ?? false
                     };
                 });
 
@@ -591,7 +605,11 @@
                                 comissao_pct: 0,
                                 qtd_vendas: 0,
                                 total_vendas: 0,
-                                total_comissoes: 0
+                                total_comissoes: 0,
+                                user_id: a.id,
+                                nivel: a.nivel_afiliado || 'bronze',
+                                comissao_recorrente: a.comissao_recorrente ?? true,
+                                somente_primeira_venda: a.somente_primeira_venda ?? false
                             };
                         }
                     });
@@ -679,37 +697,92 @@
                     ? 'bg-primary/20 text-primary'
                     : 'bg-slate-800 text-slate-400';
 
+                const nivelLabels = { bronze: '🥉 Bronze', prata: '🥈 Prata', ouro: '🥇 Ouro' };
+                const nivelLabel = nivelLabels[a.nivel] || '🥉 Bronze';
+
+                const uid = a.user_id || '';
+                const recorrenteChecked = a.comissao_recorrente ? 'checked' : '';
+                const primeiraChecked = a.somente_primeira_venda ? 'checked' : '';
+
                 return `
-                    <div class="bg-card-dark p-4 rounded-xl border border-white/5 flex items-center gap-4 fade-in-up" style="animation-delay: ${i * 60}ms">
-                        <div class="size-12 rounded-full ${posClass} flex items-center justify-center font-bold text-lg flex-shrink-0">${i + 1}</div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-1">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <h3 class="font-semibold text-base truncate">${a.nome}</h3>
-                                    ${tier ? `<span class="px-2 py-0.5 rounded-full ${tierClass} text-[10px] font-bold uppercase tracking-wider flex-shrink-0">${tier}</span>` : ''}
+                    <div class="bg-card-dark p-4 rounded-xl border border-white/5 fade-in-up" style="animation-delay: ${i * 60}ms">
+                        <div class="flex items-center gap-4">
+                            <div class="size-12 rounded-full ${posClass} flex items-center justify-center font-bold text-lg flex-shrink-0">${i + 1}</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <h3 class="font-semibold text-base truncate">${a.nome}</h3>
+                                        ${tier ? `<span class="px-2 py-0.5 rounded-full ${tierClass} text-[10px] font-bold uppercase tracking-wider flex-shrink-0">${tier}</span>` : ''}
+                                    </div>
+                                    <span class="text-xs text-slate-500 flex-shrink-0 ml-2">${a.cupom}</span>
                                 </div>
-                                <span class="text-xs text-slate-500 flex-shrink-0 ml-2">${a.cupom}</span>
+                                <div class="flex justify-between text-xs text-slate-400 mb-2">
+                                    <span>${a.qtd_vendas} Venda${a.qtd_vendas !== 1 ? 's' : ''}</span>
+                                    <span class="text-slate-100 font-medium">${formatBRL(a.total_vendas)}</span>
+                                </div>
+                                ${a.qtd_vendas > 0 ? `
+                                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                        <div class="bg-primary h-full rounded-full transition-all duration-700" style="width: ${pct}%"></div>
+                                    </div>
+                                    <div class="mt-1 flex justify-between">
+                                        <span class="text-[10px] text-secondary-orange font-medium">Comissão: ${formatBRL(a.total_comissoes)} (${a.comissao_pct}%)</span>
+                                        <span class="text-[10px] text-primary font-medium">${pct}%</span>
+                                    </div>
+                                ` : `
+                                    <p class="text-[10px] text-slate-600">Sem vendas no período selecionado</p>
+                                `}
                             </div>
-                            <div class="flex justify-between text-xs text-slate-400 mb-2">
-                                <span>${a.qtd_vendas} Venda${a.qtd_vendas !== 1 ? 's' : ''}</span>
-                                <span class="text-slate-100 font-medium">${formatBRL(a.total_vendas)}</span>
-                            </div>
-                            ${a.qtd_vendas > 0 ? `
-                                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                    <div class="bg-primary h-full rounded-full transition-all duration-700" style="width: ${pct}%"></div>
-                                </div>
-                                <div class="mt-1 flex justify-between">
-                                    <span class="text-[10px] text-secondary-orange font-medium">Comissão: ${formatBRL(a.total_comissoes)} (${a.comissao_pct}%)</span>
-                                    <span class="text-[10px] text-primary font-medium">${pct}%</span>
-                                </div>
-                            ` : `
-                                <p class="text-[10px] text-slate-600">Sem vendas no período selecionado</p>
-                            `}
                         </div>
+                        ${uid ? `
+                        <div class="mt-3 pt-3 border-t border-white/5">
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Nível: ${nivelLabel}</span>
+                                <div class="flex items-center gap-4">
+                                    <label class="flex items-center gap-1.5 cursor-pointer" title="Comissão Recorrente">
+                                        <input type="checkbox" ${recorrenteChecked}
+                                            onchange="toggleRegra('${uid}', 'comissao_recorrente', this.checked)"
+                                            class="w-3.5 h-3.5 rounded border-slate-600 text-primary focus:ring-primary/50" />
+                                        <span class="text-[10px] text-slate-400">Recorrente</span>
+                                    </label>
+                                    <label class="flex items-center gap-1.5 cursor-pointer" title="Somente Primeira Venda">
+                                        <input type="checkbox" ${primeiraChecked}
+                                            onchange="toggleRegra('${uid}', 'somente_primeira_venda', this.checked)"
+                                            class="w-3.5 h-3.5 rounded border-slate-600 text-amber-500 focus:ring-amber-500/50" />
+                                        <span class="text-[10px] text-slate-400">Só 1ª venda</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
         }
+
+        // ========================
+        // TOGGLE REGRA INDIVIDUAL
+        // ========================
+
+        window.toggleRegra = async function (userId, campo, valor) {
+            if (!supabase || !userId) return;
+
+            try {
+                const { error } = await supabase
+                    .from('perfis_usuarios')
+                    .update({ [campo]: valor })
+                    .eq('id', userId);
+
+                if (error) {
+                    console.error(`❌ Erro ao atualizar ${campo}:`, error);
+                    alert('Erro ao salvar. Tente novamente.');
+                } else {
+                    const label = campo === 'comissao_recorrente' ? 'Comissão Recorrente' : 'Somente 1ª Venda';
+                    console.log(`✅ ${label} → ${valor ? 'Ligado' : 'Desligado'} para afiliado ${userId}`);
+                }
+            } catch (err) {
+                console.error('Erro:', err);
+            }
+        };
 
         // ========================
         // CHART

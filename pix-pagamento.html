@@ -688,24 +688,51 @@
                 } catch (e) { /* usa fallback */ }
 
                 // ============================================
-                // VERIFICAR REGRAS DE GANHO
+                // VERIFICAR REGRAS DE GANHO DO AFILIADO
+                // (individual por afiliado, com fallback global)
                 // ============================================
                 let comissaoRecorrente = true;
                 let somentePrimeiraVenda = false;
 
                 try {
-                    const { data: regras } = await supabase
-                        .from('configuracoes')
-                        .select('chave, valor')
-                        .in('chave', ['afiliado_comissao_recorrente', 'afiliado_somente_primeira_venda']);
+                    // 1. Buscar o user_id do dono do cupom
+                    const { data: cupomData } = await supabase
+                        .from('cupons_afiliado')
+                        .select('user_id')
+                        .eq('id', cupomId)
+                        .single();
 
-                    if (regras) {
-                        regras.forEach(r => {
-                            if (r.chave === 'afiliado_comissao_recorrente') comissaoRecorrente = r.valor === 'true';
-                            if (r.chave === 'afiliado_somente_primeira_venda') somentePrimeiraVenda = r.valor === 'true';
-                        });
+                    if (cupomData?.user_id) {
+                        // 2. Buscar regras individuais do afiliado
+                        const { data: afiliadoPerfil } = await supabase
+                            .from('perfis_usuarios')
+                            .select('comissao_recorrente, somente_primeira_venda')
+                            .eq('id', cupomData.user_id)
+                            .single();
+
+                        if (afiliadoPerfil && afiliadoPerfil.comissao_recorrente !== null) {
+                            comissaoRecorrente = afiliadoPerfil.comissao_recorrente;
+                            somentePrimeiraVenda = afiliadoPerfil.somente_primeira_venda;
+                            console.log(`📋 Regras do afiliado: recorrente=${comissaoRecorrente}, primeiraVenda=${somentePrimeiraVenda}`);
+                        } else {
+                            // 3. Fallback: usar config global
+                            const { data: regras } = await supabase
+                                .from('configuracoes')
+                                .select('chave, valor')
+                                .in('chave', ['afiliado_comissao_recorrente', 'afiliado_somente_primeira_venda']);
+
+                            if (regras) {
+                                regras.forEach(r => {
+                                    if (r.chave === 'afiliado_comissao_recorrente') comissaoRecorrente = r.valor === 'true';
+                                    if (r.chave === 'afiliado_somente_primeira_venda') somentePrimeiraVenda = r.valor === 'true';
+                                });
+                            }
+                            console.log('📋 Usando regras globais (afiliado sem config individual)');
+                        }
                     }
-                } catch (e) { /* usa defaults */ }
+                } catch (e) {
+                    console.warn('Erro ao buscar regras do afiliado, usando defaults:', e);
+                }
 
                 // Verificar se já existe indicação anterior deste cliente com este cupom
                 let isRenovacao = false;

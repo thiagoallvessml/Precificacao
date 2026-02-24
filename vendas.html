@@ -111,6 +111,52 @@
         let precosMarketplace = {}; // { produto_id:{ marketplace_id: preco } }
         let carrinho = {}; // { produto_id: { produto, quantidade, preco } }
         let marketplaceSelecionado = null;
+        let estoqueMap = {}; // { produto_id: quantidade_disponivel }
+
+        // ========================
+        // CALCULAR ESTOQUE
+        // produzido (por receita_id) - vendido (por produto_id)
+        // ========================
+        async function calcularEstoque() {
+            try {
+                // 1. Buscar todas as produções
+                const { data: producoes, error: prodErr } = await getAllRecords('producoes');
+                if (prodErr) console.warn('Erro ao buscar produções:', prodErr);
+
+                // 2. Buscar todos os itens vendidos
+                const { data: itensVendidos, error: itensErr } = await getAllRecords('pedido_itens');
+                if (itensErr) console.warn('Erro ao buscar itens vendidos:', itensErr);
+
+                // 3. Somar produção por receita_id
+                const produzidoPorReceita = {};
+                (producoes || []).forEach(p => {
+                    const rid = p.receita_id;
+                    if (!rid) return;
+                    produzidoPorReceita[rid] = (produzidoPorReceita[rid] || 0) + (p.total_unidades || 0);
+                });
+
+                // 4. Somar vendido por produto_id
+                const vendidoPorProduto = {};
+                (itensVendidos || []).forEach(item => {
+                    const pid = item.produto_id;
+                    if (!pid) return;
+                    vendidoPorProduto[pid] = (vendidoPorProduto[pid] || 0) + (item.quantidade || 0);
+                });
+
+                // 5. Para cada produto, estoque = produzido(receita) - vendido(produto)
+                estoqueMap = {};
+                produtos.forEach(prod => {
+                    const receitaId = prod.receita_id;
+                    const totalProduzido = receitaId ? (produzidoPorReceita[receitaId] || 0) : 0;
+                    const totalVendido = vendidoPorProduto[prod.id] || 0;
+                    estoqueMap[prod.id] = Math.max(0, totalProduzido - totalVendido);
+                });
+
+                console.log('📊 Estoque calculado:', estoqueMap);
+            } catch (err) {
+                console.error('❌ Erro ao calcular estoque:', err);
+            }
+        }
 
         // Carregar dados
         async function loadDados() {
@@ -125,26 +171,24 @@
                 if (catError) throw catError;
                 marketplaces = (catData || []).filter(c => c.tipo === 'marketplace' && c.ativo);
 
-                console.log('📦 Marketplaces carregados:', marketplaces);
-
                 // Carregar preços por marketplace
                 const { data: precosData, error: precosError } = await getAllRecords('precos_marketplace');
-                console.log('💰 Preços RAW do banco:', precosData);
 
                 if (!precosError && precosData) {
                     precosData.forEach(p => {
                         if (!precosMarketplace[p.produto_id]) {
                             precosMarketplace[p.produto_id] = {};
                         }
-                        // Usar categoria_marketplace_id ou marketplace_id (compatibilidade)
                         const marketplaceId = p.categoria_marketplace_id || p.marketplace_id;
                         precosMarketplace[p.produto_id][marketplaceId] = p.preco;
-
-                        console.log(`💵 Preço configurado: Produto ${p.produto_id} | Marketplace ${marketplaceId} | R$ ${p.preco}`);
                     });
                 }
 
-                console.log('🗂️ Objeto precosMarketplace final:', precosMarketplace);
+                // Calcular estoque real
+                await calcularEstoque();
+
+                // Filtrar para mostrar somente produtos com estoque > 0
+                produtos = produtos.filter(p => (estoqueMap[p.id] || 0) > 0);
 
                 renderMarketplaces();
                 renderProdutos();
@@ -168,7 +212,6 @@
                 return;
             }
 
-            // Se não tiver selecionado, selecionar o primeiro
             if (!marketplaceSelecionado && marketplaces.length > 0) {
                 marketplaceSelecionado = marketplaces[0].id;
             }
@@ -192,21 +235,18 @@
         window.selecionarMarketplace = function (id) {
             marketplaceSelecionado = id;
 
-            // Atualizar preços dos itens já no carrinho ou removê-los se não tiverem preço
             Object.keys(carrinho).forEach(produtoId => {
                 if (precosMarketplace[produtoId]?.[marketplaceSelecionado]) {
-                    // Tem preço - atualizar
                     const novoPreco = parseFloat(precosMarketplace[produtoId][marketplaceSelecionado]);
                     carrinho[produtoId].preco = novoPreco;
                 } else {
-                    // Sem preço - remover do carrinho
                     delete carrinho[produtoId];
                 }
             });
 
             renderMarketplaces();
-            renderProdutos(); // Atualizar preços
-            atualizarTotais(); // Atualizar totais com novos preços
+            renderProdutos();
+            atualizarTotais();
         };
 
         // Renderizar produtos
@@ -217,34 +257,33 @@
                 container.innerHTML = `
                     <div class="text-center py-12 text-slate-400">
                         <span class="material-symbols-outlined text-6xl mb-4 opacity-30">icecream</span>
-                        <p>Nenhum produto disponível</p>
+                        <p class="text-lg font-semibold mb-1">Nenhum produto em estoque</p>
+                        <p class="text-sm text-slate-500">Registre uma produção primeiro em<br><strong>Produção → Nova Produção</strong></p>
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = produtos.map(prod => {
-                console.log(`\n🔍 Renderizando produto: ${prod.nome} (ID: ${prod.id})`);
-                console.log(`   Marketplace selecionado: ${marketplaceSelecionado}`);
-                console.log(`   Preços disponíveis para este produto:`, precosMarketplace[prod.id]);
-
-                // Buscar preço específico do marketplace selecionado
                 let preco = null;
                 let temPreco = false;
+                const estoque = estoqueMap[prod.id] || 0;
 
                 if (marketplaceSelecionado && precosMarketplace[prod.id]?.[marketplaceSelecionado]) {
                     preco = parseFloat(precosMarketplace[prod.id][marketplaceSelecionado]);
                     temPreco = true;
-                    console.log(`   ✅ PREÇO ENCONTRADO: R$ ${preco.toFixed(2)}`);
-                } else {
-                    console.log(`   ❌ SEM PREÇO para marketplace ${marketplaceSelecionado}`);
-                    console.log(`   Verificação:`);
-                    console.log(`      - marketplaceSelecionado existe? ${!!marketplaceSelecionado}`);
-                    console.log(`      - precosMarketplace[${prod.id}] existe? ${!!precosMarketplace[prod.id]}`);
-                    console.log(`      - precosMarketplace[${prod.id}][${marketplaceSelecionado}] existe? ${!!precosMarketplace[prod.id]?.[marketplaceSelecionado]}`);
                 }
 
                 const qtd = carrinho[prod.id]?.quantidade || 0;
+                const estoqueRestante = estoque - qtd;
+
+                // Cor do badge de estoque
+                let estoqueBadgeClass = 'bg-green-500/10 text-green-400 border-green-500/20';
+                if (estoqueRestante <= 0) {
+                    estoqueBadgeClass = 'bg-red-500/10 text-red-400 border-red-500/20';
+                } else if (estoqueRestante <= 5) {
+                    estoqueBadgeClass = 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+                }
 
                 return `
                     <div class="flex items-center gap-4 bg-transparent px-2 min-h-[88px] py-3 justify-between border-b border-white/5">
@@ -259,11 +298,13 @@
                                 <p class="text-white text-base font-semibold leading-tight line-clamp-1">${prod.nome}</p>
                                 ${temPreco ? `
                                     <p class="text-primary text-sm font-bold leading-normal mt-1">R$ ${preco.toFixed(2).replace('.', ',')}</p>
-                                    <p class="text-white/40 text-[10px] uppercase tracking-wider font-medium">Preço Marketplace</p>
                                 ` : `
                                     <p class="text-red-400 text-xs font-medium leading-normal mt-1">Sem preço configurado</p>
-                                    <p class="text-white/40 text-[10px] uppercase tracking-wider font-medium">Configure em Precificação</p>
                                 `}
+                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${estoqueBadgeClass} border uppercase mt-1 w-fit">
+                                    <span class="material-symbols-outlined text-[12px]">inventory_2</span>
+                                    ${estoqueRestante} em estoque
+                                </span>
                             </div>
                         </div>
                         <div class="shrink-0">
@@ -275,7 +316,7 @@
                                     </button>
                                     <span class="text-base font-bold w-6 text-center">${qtd}</span>
                                     <button onclick="alterarQtd(${prod.id}, 1)"
-                                        class="text-lg font-bold flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-background-dark active:scale-95 transition-transform">
+                                        class="text-lg font-bold flex h-8 w-8 items-center justify-center rounded-lg ${estoqueRestante <= 0 ? 'bg-white/10 text-white/30 cursor-not-allowed' : 'bg-primary text-background-dark'} active:scale-95 transition-transform">
                                         +
                                     </button>
                                 </div>
@@ -295,21 +336,27 @@
             const produto = produtos.find(p => p.id === produtoId);
             if (!produto) return;
 
-            // Verificar se tem preço configurado
             if (!marketplaceSelecionado || !precosMarketplace[produtoId]?.[marketplaceSelecionado]) {
                 alert('❌ Este produto não tem preço configurado para este marketplace!\n\nConfigure em: Adicionar Produto → Precificação');
                 return;
             }
 
             const qtdAtual = carrinho[produtoId]?.quantidade || 0;
-            const novaQtd = Math.max(0, qtdAtual + delta);
+            const estoque = estoqueMap[produtoId] || 0;
+            let novaQtd = qtdAtual + delta;
+
+            // Limitar ao estoque disponível
+            if (novaQtd > estoque) {
+                alert(`⚠️ Estoque insuficiente!\n\nDisponível: ${estoque} unidades\nNo carrinho: ${qtdAtual}`);
+                return;
+            }
+
+            novaQtd = Math.max(0, novaQtd);
 
             if (novaQtd === 0) {
                 delete carrinho[produtoId];
             } else {
-                // Buscar preço específico do marketplace
                 const preco = parseFloat(precosMarketplace[produtoId][marketplaceSelecionado]);
-
                 carrinho[produtoId] = {
                     produto,
                     quantidade: novaQtd,
@@ -351,14 +398,12 @@
                 const itens = Object.values(carrinho);
                 const subtotal = itens.reduce((sum, item) => sum + (item.quantidade * item.preco), 0);
 
-                // Gerar número único
                 const numeroPedido = `VND-${Date.now()}`;
 
-                // Criar pedido
                 const pedido = {
                     numero_pedido: numeroPedido,
                     categoria_marketplace_id: marketplaceSelecionado,
-                    status: 'entregue',  // Status válido: pendente, em_preparo, pronto, entregue, cancelado
+                    status: 'entregue',
                     valor_subtotal: subtotal,
                     valor_desconto: 0,
                     valor_taxa_entrega: 0,
@@ -370,17 +415,12 @@
                 const { data: pedidoData, error: pedidoError } = await insertRecord('pedidos', pedido);
                 if (pedidoError) throw pedidoError;
 
-                console.log('📦 Pedido criado:', pedidoData);
-
-                // pedidoData é um array retornado pelo .select() do Supabase
                 const pedidoCriado = Array.isArray(pedidoData) ? pedidoData[0] : pedidoData;
 
                 if (!pedidoCriado || !pedidoCriado.id) {
                     throw new Error('Pedido foi criado mas ID não foi retornado. Verifique RLS da tabela pedidos.');
                 }
 
-
-                // Criar itens do pedido
                 for (const item of itens) {
                     const pedidoItem = {
                         pedido_id: pedidoCriado.id,
@@ -391,18 +431,16 @@
                         preco_total: item.quantidade * item.preco
                     };
 
-                    console.log('📝 Criando item do pedido:', pedidoItem);
-
                     const { error: itemError } = await insertRecord('pedido_itens', pedidoItem);
                     if (itemError) throw itemError;
                 }
 
                 alert(`✅ Venda registrada com sucesso!\n\nPedido: ${numeroPedido}\nTotal: R$ ${subtotal.toFixed(2)}`);
 
-                // Limpar carrinho
+                // Recarregar dados (recalcular estoque)
                 carrinho = {};
                 atualizarTotais();
-                renderProdutos();
+                await loadDados();
 
             } catch (error) {
                 console.error('❌ Erro ao finalizar venda:', error);

@@ -398,7 +398,7 @@
             btn.innerHTML = '<span class="material-symbols-outlined font-bold animate-spin">sync</span> Salvando...';
 
             try {
-                const producao = {
+                const producaoRecord = {
                     receita_id: receitaId,
                     nome_receita: receita ? receita.nome : select.options[select.selectedIndex].text,
                     quantidade_lotes: currentQuantity,
@@ -406,7 +406,7 @@
                     data_producao: selectedDate.toISOString().split('T')[0],
                 };
 
-                const { error } = await insertRecord('producoes', producao);
+                const { error } = await insertRecord('producoes', producaoRecord);
 
                 if (error) throw error;
 
@@ -415,7 +415,7 @@
                 btn.classList.remove('bg-primary', 'text-background-dark');
 
                 setTimeout(() => {
-                    window.location.href = 'producao.html';
+                    window.location.href = 'estoque.html';
                 }, 1000);
 
             } catch (err) {

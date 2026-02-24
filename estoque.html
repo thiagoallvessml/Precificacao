@@ -93,13 +93,13 @@
         // Carregar dados
         async function loadDados() {
             try {
-                // Carregar produtos
+                // Carregar produtos (todos, disponíveis)
                 const { data: prodData, error: prodError } = await getAllRecords('produtos');
                 if (prodError) throw prodError;
                 produtos = (prodData || []).filter(p => p.disponivel);
 
                 // Carregar produções
-                const { data: producaoData, error: producaoError } = await getAllRecords('producao');
+                const { data: producaoData, error: producaoError } = await getAllRecords('producoes');
                 if (producaoError) throw producaoError;
                 producoes = producaoData || [];
 
@@ -109,6 +109,10 @@
                 (recData || []).forEach(rec => {
                     receitas[rec.id] = rec;
                 });
+
+                console.log('📦 Produtos:', produtos.length, produtos.map(p => ({ id: p.id, nome: p.nome, receita_id: p.receita_id })));
+                console.log('📦 Producoes:', producoes.length, producoes.map(p => ({ id: p.id, receita_id: p.receita_id, nome_receita: p.nome_receita, total_unidades: p.total_unidades })));
+                console.log('📦 Receitas:', Object.values(receitas).map(r => ({ id: r.id, nome: r.nome })));
 
                 calcularEstoque();
                 calcularEstatisticas();
@@ -122,15 +126,67 @@
         function calcularEstoque() {
             estoque = {};
 
-            // Contar produção por produto
-            producoes.forEach(prod => {
-                const receita = receitas[prod.receita_id];
-                if (!receita || !receita.produto_id) return;
+            console.log('📦 [Estoque] Iniciando cálculo...');
+            console.log('📦 [Estoque] Produtos carregados:', produtos.length, produtos.map(p => ({ id: p.id, nome: p.nome, receita_id: p.receita_id })));
+            console.log('📦 [Estoque] Produções carregadas:', producoes.length, producoes.map(p => ({ id: p.id, receita_id: p.receita_id, nome_receita: p.nome_receita, total_unidades: p.total_unidades, quantidade_produzida: p.quantidade_produzida })));
+            console.log('📦 [Estoque] Receitas carregadas:', Object.keys(receitas).length, Object.values(receitas).map(r => ({ id: r.id, nome: r.nome })));
 
-                const produtoId = receita.produto_id;
-                if (!estoque[produtoId]) estoque[produtoId] = 0;
-                estoque[produtoId] += prod.quantidade_produzida || 0;
+            // === CAMADA 1: mapa receita_id → produto.id (via produto.receita_id) ===
+            const receitaIdParaProdutoId = {};
+            produtos.forEach(produto => {
+                if (produto.receita_id) {
+                    receitaIdParaProdutoId[produto.receita_id] = produto.id;
+                }
             });
+            console.log('📦 [Estoque] Mapa receita_id→produto_id:', receitaIdParaProdutoId);
+
+            // === CAMADA 2: mapa nome da receita → produto.id (via receitas[].nome ↔ produto.nome) ===
+            const nomeReceitaParaProdutoId = {};
+            Object.values(receitas).forEach(receita => {
+                const nomeLower = (receita.nome || '').trim().toLowerCase();
+                const produtoMatch = produtos.find(p => (p.nome || '').trim().toLowerCase() === nomeLower);
+                if (produtoMatch) {
+                    nomeReceitaParaProdutoId[receita.id] = produtoMatch.id;
+                }
+            });
+            console.log('📦 [Estoque] Mapa nomeReceita→produto_id:', nomeReceitaParaProdutoId);
+
+            // Somar unidades produzidas por produto (tenta as 3 camadas em ordem)
+            let naoAssociadas = 0;
+            producoes.forEach(prod => {
+                // Aceita total_unidades OU quantidade_produzida (compatibilidade)
+                const unidades = prod.total_unidades || prod.quantidade_produzida || 0;
+
+                // Camada 1: por receita_id → produto.receita_id
+                let produtoId = receitaIdParaProdutoId[prod.receita_id];
+
+                // Camada 2: por receita_id → nome da receita → nome do produto
+                if (!produtoId) {
+                    produtoId = nomeReceitaParaProdutoId[prod.receita_id];
+                }
+
+                // Camada 3: por nome_receita direto → nome do produto
+                if (!produtoId && prod.nome_receita) {
+                    const nomeProdLower = prod.nome_receita.trim().toLowerCase();
+                    const produtoMatch = produtos.find(p => (p.nome || '').trim().toLowerCase() === nomeProdLower);
+                    if (produtoMatch) produtoId = produtoMatch.id;
+                }
+
+                if (!produtoId) {
+                    console.warn('📦 [Estoque] Produção SEM produto associado:', prod);
+                    naoAssociadas++;
+                    return;
+                }
+
+                if (!estoque[produtoId]) estoque[produtoId] = 0;
+                estoque[produtoId] += unidades;
+                console.log(`📦 [Estoque] Produto ${produtoId} +${unidades} unidades (prod #${prod.id})`);
+            });
+
+            console.log('📦 [Estoque] Resultado final:', estoque);
+            if (naoAssociadas > 0) {
+                console.warn(`📦 [Estoque] ⚠️ ${naoAssociadas} produção(ões) sem produto associado! Verifique se os produtos têm receita_id preenchido ou se o nome do produto bate com o nome da receita.`);
+            }
 
             // TODO: Subtrair vendas quando a tabela pedidos_itens estiver integrada
         }

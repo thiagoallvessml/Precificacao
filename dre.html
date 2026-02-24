@@ -110,11 +110,10 @@
         import { getAllRecords } from './supabase-utils.js';
 
         let pedidos = [];
+        let pedidoItens = [];
         let despesas = [];
-        let producoes = [];
         let categorias = {};
-        let receitas = {};
-        let produtos = {};
+        let produtos = {}; // id -> produto (para buscar custo unitario)
 
         // Inicializar selects
         function initSelects() {
@@ -165,19 +164,16 @@
                     return false;
                 });
 
-                // Carregar produções (tabela correta: 'producoes')
-                const { data: prodData, error: prodError } = await getAllRecords('producoes');
-                if (prodError) throw prodError;
-                producoes = (prodData || []).filter(p => {
-                    const dataProd = new Date(p.data_producao);
-                    return dataProd >= dataInicio && dataProd <= dataFim;
-                });
+                // Carregar itens vendidos (pedido_itens) dos pedidos do período
+                const pedidoIds = pedidos.map(p => p.id);
+                pedidoItens = [];
+                if (pedidoIds.length > 0) {
+                    const { data: itensData } = await getAllRecords('pedido_itens');
+                    // Filtrar apenas os itens dos pedidos do período
+                    pedidoItens = (itensData || []).filter(i => pedidoIds.includes(i.pedido_id));
+                }
 
-                // Carregar receitas e produtos para calcular CPV
-                const { data: recData } = await getAllRecords('receitas');
-                receitas = {};
-                (recData || []).forEach(r => { receitas[r.id] = r; });
-
+                // Carregar produtos para obter custo unitário
                 const { data: pData } = await getAllRecords('produtos');
                 produtos = {};
                 (pData || []).forEach(p => { produtos[p.id] = p; });
@@ -232,21 +228,45 @@
             // Receita líquida
             const receitaLiquida = receitaBruta - deducoes;
 
-            // Calcular custo de cada lote (mesma lógica do producao.html)
-            function calcularCustoProd(prod) {
-                if (prod.custo_total && parseFloat(prod.custo_total) > 0)
-                    return parseFloat(prod.custo_total);
-                const rec = receitas[prod.receita_id];
-                if (rec && rec.custo_mao_obra > 0)
-                    return parseFloat(rec.custo_mao_obra) * (prod.quantidade_lotes || 1);
-                const prodAssoc = Object.values(produtos).find(p => p.receita_id === prod.receita_id);
-                if (prodAssoc && prodAssoc.preco_base > 0)
-                    return (prod.total_unidades || 0) * parseFloat(prodAssoc.preco_base) * 0.6;
+            // ====== CPV (Custo dos Produtos Vendidos) ======
+            // Calculado sobre as unidades VENDIDAS no período, não sobre produção
+
+            // Retorna o custo unitário de um produto (em cascata)
+            function getCustoUnitario(produtoId, nomeFallback) {
+                const prod = produtos[produtoId];
+                if (!prod) return 0;
+                // 1º custo_producao (campo dedicado)
+                if (prod.custo_producao && parseFloat(prod.custo_producao) > 0)
+                    return parseFloat(prod.custo_producao);
+                // 2º custo_unitario
+                if (prod.custo_unitario && parseFloat(prod.custo_unitario) > 0)
+                    return parseFloat(prod.custo_unitario);
+                // 3º preco_custo
+                if (prod.preco_custo && parseFloat(prod.preco_custo) > 0)
+                    return parseFloat(prod.preco_custo);
+                // 4º 60% do preco_base como estimativa
+                if (prod.preco_base && parseFloat(prod.preco_base) > 0)
+                    return parseFloat(prod.preco_base) * 0.6;
                 return 0;
             }
 
-            // CPV (Custo dos Produtos Vendidos) = soma do custo de todos os lotes no período
-            const cpv = producoes.reduce((sum, p) => sum + calcularCustoProd(p), 0);
+            // Agrupar itens vendidos por produto
+            const itensPorProduto = {};
+            pedidoItens.forEach(item => {
+                const pid = item.produto_id;
+                const nome = item.produto_nome || (produtos[pid] ? produtos[pid].nome : 'Produto');
+                if (!itensPorProduto[pid]) {
+                    itensPorProduto[pid] = { nome, quantidade: 0, custoTotal: 0, receita: 0 };
+                }
+                const qtd = parseFloat(item.quantidade || 0);
+                const custoUnit = getCustoUnitario(pid, nome);
+                itensPorProduto[pid].quantidade += qtd;
+                itensPorProduto[pid].custoTotal += qtd * custoUnit;
+                itensPorProduto[pid].receita += parseFloat(item.preco_total || 0);
+            });
+
+            const cpv = Object.values(itensPorProduto).reduce((s, p) => s + p.custoTotal, 0);
+            const totalItensVendidos = pedidoItens.reduce((s, i) => s + parseFloat(i.quantidade || 0), 0);
 
             // Lucro bruto
             const lucroBruto = receitaLiquida - cpv;
@@ -337,7 +357,7 @@
                                     <span class="material-symbols-outlined">kitchen</span>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-slate-400">CPV (Custo de Produção)</p>
+                                    <p class="text-sm font-medium text-slate-400">CPV — Custo dos Produtos Vendidos</p>
                                     <p class="text-lg font-bold text-white">R$ ${cpv.toFixed(2).replace('.', ',')}</p>
                                 </div>
                             </div>
@@ -345,19 +365,18 @@
                         </summary>
                         <div class="px-4 pb-4 space-y-3">
                             <div class="h-px bg-white/10 mb-3"></div>
-                            <p class="text-xs text-slate-500 mb-3">${producoes.length} lote(s) de produção no período</p>
-                            ${producoes.length === 0
-                    ? '<p class="text-slate-600 text-sm">Nenhum lote registrado neste período.</p>'
-                    : producoes.map(prod => {
-                        const rec = receitas[prod.receita_id];
-                        const nome = rec ? rec.nome : (prod.receita_nome || 'Produção');
-                        const custo = calcularCustoProd(prod);
-                        const data = new Date(prod.data_producao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-                        return `<div class="flex justify-between items-center text-sm">
-                                        <span class="text-slate-400">${nome} <span class="text-slate-600 text-xs">(${prod.total_unidades || 0} un · ${data})</span></span>
-                                        <span class="text-slate-200 font-medium">R$ ${custo.toFixed(2).replace('.', ',')}</span>
-                                    </div>`;
-                    }).join('')
+                            <p class="text-xs text-slate-500 mb-3">${totalItensVendidos} unidade(s) vendida(s) em ${Object.keys(itensPorProduto).length} produto(s)</p>
+                            ${Object.values(itensPorProduto).length === 0
+                    ? '<p class="text-slate-600 text-sm">Nenhuma venda registrada neste período.</p>'
+                    : Object.values(itensPorProduto).map(p => `
+                                    <div class="flex justify-between items-center text-sm py-1 border-b border-white/5 last:border-0">
+                                        <div>
+                                            <span class="text-slate-300 font-medium">${p.nome}</span>
+                                            <span class="text-slate-600 text-xs ml-2">${p.quantidade} un</span>
+                                        </div>
+                                        <span class="text-slate-200 font-medium">R$ ${p.custoTotal.toFixed(2).replace('.', ',')}</span>
+                                    </div>
+                                `).join('')
                 }
                         </div>
                     </details>

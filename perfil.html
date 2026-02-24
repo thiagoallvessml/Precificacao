@@ -80,10 +80,6 @@
                     🍦
                 </div>
             </div>
-            <button onclick="document.getElementById('editModal').classList.remove('hidden')"
-                class="absolute bottom-0 right-0 bg-primary text-background-dark p-1.5 rounded-full shadow-lg border-2 border-background-dark">
-                <span class="material-symbols-outlined text-sm">edit</span>
-            </button>
         </div>
         <h1 id="userName" class="text-2xl font-bold">Carlos Pops</h1>
         <div class="mt-2 inline-flex items-center px-3 py-1 bg-primary/20 border border-primary/30 rounded-full">
@@ -239,53 +235,7 @@
         </div>
     </main>
 
-    <!-- Edit Profile Modal -->
-    <div id="editModal"
-        class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
-        onclick="if(event.target === this) this.classList.add('hidden')">
-        <div
-            class="bg-card-dark border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 max-w-md w-full space-y-5 m-0 sm:m-4">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white">Editar Perfil</h3>
-                <button onclick="document.getElementById('editModal').classList.add('hidden')"
-                    class="p-1 rounded-full hover:bg-white/10 transition-colors">
-                    <span class="material-symbols-outlined text-white/60">close</span>
-                </button>
-            </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label
-                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Nome</label>
-                    <input id="inputName" type="text" value="Carlos Pops"
-                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
-                </div>
-                <div>
-                    <label
-                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">E-mail</label>
-                    <input type="email" value="carlos@geladinhos.com"
-                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
-                </div>
-                <div>
-                    <label
-                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Telefone</label>
-                    <input type="tel" value="(11) 98888-0000"
-                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
-                </div>
-                <div>
-                    <label class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block">Nome do
-                        Negócio</label>
-                    <input type="text" value="Geladinhos Gourmet"
-                        class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
-                </div>
-            </div>
-
-            <button onclick="salvarPerfil()"
-                class="w-full bg-primary text-background-dark font-bold py-3 rounded-xl active:scale-[0.97] transition-transform">
-                Salvar Alterações
-            </button>
-        </div>
-    </div>
 
     <!-- Modal Informações Gerais -->
     <div id="infoModal"
@@ -517,14 +467,6 @@
 
 
     <script>
-        function salvarPerfil() {
-            const name = document.getElementById('inputName').value.trim();
-            if (name) {
-                document.getElementById('userName').textContent = name;
-            }
-            document.getElementById('editModal').classList.add('hidden');
-        }
-
         function confirmarLogout() {
             if (confirm('Tem certeza que deseja sair da conta?')) {
                 alert('Você foi desconectado.\nRedirecionando para a tela de login...');

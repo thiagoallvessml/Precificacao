@@ -57,7 +57,7 @@
     <!-- Main Content -->
     <main class="p-4">
         <!-- Global Metrics -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
             <div class="flex flex-col gap-1 rounded-xl p-4 bg-card-dark border border-white/5 shadow-sm">
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Produtos</p>
                 <p id="statTotalProdutos" class="text-2xl font-bold text-white">0</p>
@@ -66,6 +66,11 @@
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Unidades</p>
                 <p id="statTotalUnidades" class="text-2xl font-bold text-white">0 <span
                         class="text-sm font-normal text-slate-500">un</span></p>
+            </div>
+            <div
+                class="flex flex-col gap-1 rounded-xl p-4 bg-card-dark border-l-4 border-primary shadow-sm col-span-2 md:col-span-1">
+                <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Valor Total</p>
+                <p id="statValorTotal" class="text-xl font-bold text-primary">R$ 0,00</p>
             </div>
             <div class="flex flex-col gap-1 rounded-xl p-4 bg-card-dark border-l-4 border-amber-500 shadow-sm">
                 <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Estoque Baixo</p>
@@ -198,15 +203,19 @@
 
             let baixo = 0;
             let zerado = 0;
+            let valorTotal = 0;
 
             produtos.forEach(produto => {
                 const qtd = estoque[produto.id] || 0;
+                const preco = parseFloat(produto.preco_base || 0);
+                valorTotal += qtd * preco;
                 if (qtd === 0) zerado++;
-                else if (qtd <= 10) baixo++; // Critério: menos de 10 unidades
+                else if (qtd <= 10) baixo++;
             });
 
             document.getElementById('statTotalProdutos').textContent = produtosComEstoque;
             document.getElementById('statTotalUnidades').innerHTML = `${totalUnidades} <span class="text-sm font-normal text-slate-500">un</span>`;
+            document.getElementById('statValorTotal').textContent = `R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('statBaixo').textContent = baixo;
             document.getElementById('statZerado').textContent = zerado;
         }

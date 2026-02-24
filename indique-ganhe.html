@@ -858,10 +858,25 @@
                     if (error) throw error;
                     cupomAtual.codigo = novoCodigo;
                 } else {
-                    // Cria novo
+                    // Cria novo — buscar valores padrão das configurações do admin
+                    let descontoPadrao = 10;
+                    let comissaoPadrao = 10;
+                    try {
+                        const { data: cfgs } = await supabase
+                            .from('configuracoes')
+                            .select('chave, valor')
+                            .in('chave', ['afiliado_comissao_padrao', 'afiliado_desconto_padrao']);
+                        if (cfgs) {
+                            cfgs.forEach(c => {
+                                if (c.chave === 'afiliado_comissao_padrao') comissaoPadrao = parseFloat(c.valor) || 10;
+                                if (c.chave === 'afiliado_desconto_padrao') descontoPadrao = parseFloat(c.valor) || 10;
+                            });
+                        }
+                    } catch (e) { /* usa defaults */ }
+
                     const { data, error } = await supabase
                         .from('cupons_afiliado')
-                        .insert([{ codigo: novoCodigo, desconto_percentual: 10, comissao_percentual: 10 }])
+                        .insert([{ codigo: novoCodigo, desconto_percentual: descontoPadrao, comissao_percentual: comissaoPadrao }])
                         .select();
 
                     if (error) throw error;

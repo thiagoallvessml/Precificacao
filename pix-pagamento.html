@@ -670,8 +670,13 @@
             if (!cupomId || !supabase) return;
 
             try {
+                // Buscar nome do cliente
                 let nomeCliente = 'Cliente via Pix';
+                let userId = null;
                 try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session?.user) userId = session.user.id;
+
                     const { data: configNome } = await supabase
                         .from('configuracoes')
                         .select('valor')
@@ -682,8 +687,58 @@
                     }
                 } catch (e) { /* usa fallback */ }
 
+                // ============================================
+                // VERIFICAR REGRAS DE GANHO
+                // ============================================
+                let comissaoRecorrente = true;
+                let somentePrimeiraVenda = false;
+
+                try {
+                    const { data: regras } = await supabase
+                        .from('configuracoes')
+                        .select('chave, valor')
+                        .in('chave', ['afiliado_comissao_recorrente', 'afiliado_somente_primeira_venda']);
+
+                    if (regras) {
+                        regras.forEach(r => {
+                            if (r.chave === 'afiliado_comissao_recorrente') comissaoRecorrente = r.valor === 'true';
+                            if (r.chave === 'afiliado_somente_primeira_venda') somentePrimeiraVenda = r.valor === 'true';
+                        });
+                    }
+                } catch (e) { /* usa defaults */ }
+
+                // Verificar se já existe indicação anterior deste cliente com este cupom
+                let isRenovacao = false;
+                if (userId) {
+                    const { data: indicacoesAntigas, error: indErr } = await supabase
+                        .from('indicacoes')
+                        .select('id')
+                        .eq('cupom_id', cupomId)
+                        .eq('nome_indicado', nomeCliente)
+                        .limit(1);
+
+                    if (!indErr && indicacoesAntigas && indicacoesAntigas.length > 0) {
+                        isRenovacao = true;
+                        console.log('🔄 Renovação detectada para este cupom');
+                    }
+                }
+
+                // Calcular comissão
                 const valorOriginal = total + valorDesconto;
-                const comissao = total * (comissaoPct / 100); // comissão sobre valor pago (com desconto)
+                let comissao = total * (comissaoPct / 100); // comissão sobre valor pago
+
+                // Aplicar regras de ganho
+                if (isRenovacao) {
+                    if (somentePrimeiraVenda) {
+                        comissao = 0;
+                        console.log('⚠️ Somente primeira venda ativo — comissão zerada para renovação');
+                    } else if (!comissaoRecorrente) {
+                        comissao = 0;
+                        console.log('⚠️ Comissão recorrente desligada — comissão zerada para renovação');
+                    } else {
+                        console.log('✅ Comissão recorrente ativa — comissão registrada normalmente');
+                    }
+                }
 
                 const novaIndicacao = {
                     cupom_id: cupomId,
@@ -703,7 +758,7 @@
                 if (error) {
                     console.error('❌ Erro ao registrar indicação:', error);
                 } else {
-                    console.log('✅ Indicação registrada automaticamente!');
+                    console.log(`✅ Indicação registrada! Comissão: R$ ${comissao.toFixed(2)} ${isRenovacao ? '(renovação)' : '(primeira venda)'}`);
                 }
             } catch (err) {
                 console.error('❌ Erro ao registrar indicação:', err);

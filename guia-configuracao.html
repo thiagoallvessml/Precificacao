@@ -133,16 +133,40 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Insumos -->
+                <!-- Step 2: Configurações -->
+                <div id="step-configuracoes" onclick="window.location.href='configuracoes.html'"
+                    class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    style="animation-delay: 0.08s">
+                    <div
+                        class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
+                        <span class="material-symbols-outlined">settings</span>
+                    </div>
+                    <div class="flex flex-col flex-1">
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">2.
+                            Configurações
+                        </p>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Custos fixos, mão de obra e
+                            parâmetros gerais.</p>
+                    </div>
+                    <div id="badge-configuracoes" class="shrink-0">
+                        <div
+                            class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            <span
+                                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pendente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Insumos -->
                 <div id="step-insumos" onclick="window.location.href='gerenciar-insumos.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.1s">
+                    style="animation-delay: 0.12s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">inventory_2</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">2. Cadastrar
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">3. Cadastrar
                             Insumo</p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Leite, açúcar, frutas e
                             embalagens.</p>
@@ -156,16 +180,16 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Categorias -->
+                <!-- Step 4: Categorias -->
                 <div id="step-categorias" onclick="window.location.href='categorias.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.15s">
+                    style="animation-delay: 0.18s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">category</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">3. Categorias
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">4. Categorias
                         </p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Organize em Gourmet,
                             Alcoólicos ou Fruta.</p>
@@ -179,16 +203,16 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Despesas -->
+                <!-- Step 5: Despesas -->
                 <div id="step-despesas" onclick="window.location.href='despesas.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.2s">
+                    style="animation-delay: 0.24s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">account_balance_wallet</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">4. Despesas</p>
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">5. Despesas</p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Luz, água, aluguel e
                             marketing.</p>
                     </div>
@@ -201,16 +225,16 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Produtos -->
+                <!-- Step 6: Produtos -->
                 <div id="step-produtos" onclick="window.location.href='adicionar-produto.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.25s">
+                    style="animation-delay: 0.3s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">icecream</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">5. Produtos</p>
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">6. Produtos</p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Crie o catálogo de geladinhos
                             para venda.</p>
                     </div>
@@ -223,16 +247,16 @@
                     </div>
                 </div>
 
-                <!-- Step 6: Receitas -->
+                <!-- Step 7: Receitas -->
                 <div id="step-receitas" onclick="window.location.href='adicionar-receita.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.3s">
+                    style="animation-delay: 0.36s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">menu_book</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">6. Receitas</p>
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">7. Receitas</p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Vincule os insumos e
                             quantidades a cada produto.</p>
                     </div>
@@ -245,16 +269,16 @@
                     </div>
                 </div>
 
-                <!-- Step 7: Precificação -->
+                <!-- Step 8: Precificação -->
                 <div id="step-precificacao" onclick="window.location.href='precificacao.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.35s">
+                    style="animation-delay: 0.42s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">sell</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">7. Precificação
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">8. Precificação
                         </p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Defina preços ideais para
                             cada canal.</p>
@@ -296,6 +320,7 @@
         // Passos do guia e suas tabelas correspondentes no Supabase
         const steps = [
             { key: 'equipamentos', tabela: 'equipamentos' },
+            { key: 'configuracoes', tabela: 'configuracoes' },
             { key: 'insumos', tabela: 'insumos' },
             { key: 'categorias', tabela: 'categorias' },
             { key: 'despesas', tabela: 'despesas' },

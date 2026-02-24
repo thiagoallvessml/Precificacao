@@ -121,7 +121,7 @@
                                     <input id="quantityInput"
                                         class="form-input flex w-full min-w-0 flex-1 rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary border border-slate-300 dark:border-[#3b5454] bg-slate-50 dark:bg-background-dark h-14 placeholder:text-slate-400 dark:placeholder:text-[#9db9b9] p-[15px] text-base font-normal leading-normal text-center text-2xl font-bold"
                                         placeholder="0" type="number" min="1" value="1"
-                                        oninput="currentQuantity = Math.max(1, parseInt(this.value) || 1); updateQuantityDisplay();" />
+                                        oninput="window.handleQuantityInput(this.value)" />
                                     <div class="flex flex-col items-end min-w-[80px]">
                                         <p class="text-xs text-slate-500 dark:text-[#9db9b9] uppercase tracking-wide">
                                             Total</p>
@@ -272,6 +272,11 @@
                 totalDisplay.textContent = `${total} unid.`;
             }
         }
+
+        window.handleQuantityInput = function (val) {
+            currentQuantity = Math.max(1, parseInt(val) || 1);
+            updateQuantityDisplay();
+        };
 
         window.increaseQuantity = function () {
             currentQuantity++;

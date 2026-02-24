@@ -369,45 +369,96 @@
             document.getElementById('rankingPeriodLabel').textContent = getPeriodLabel(periodoAtual);
 
             try {
-                // 1. Buscar todos os cupons de afiliados ativos
+                // 0. Buscar contagem REAL de afiliados (pela mesma fonte do admin dashboard)
+                const { data: afiliadosPerfis, error: afiliadosError } = await supabase
+                    .from('perfis_usuarios')
+                    .select('id, nome, email')
+                    .eq('role', 'afiliado');
+
+                const totalAfiliados = (afiliadosPerfis || []).length;
+
+                // 1. Buscar todos os cupons de afiliados (ativos e inativos para ter visão completa)
                 const { data: cupons, error: cuponsError } = await supabase
                     .from('cupons_afiliado')
-                    .select('*')
-                    .eq('ativo', true);
+                    .select('*');
 
                 if (cuponsError) throw cuponsError;
 
+                // Atualizar stat de Afiliados Ativos (usa perfis_usuarios, não cupons)
+                document.getElementById('statAfiliados').textContent = totalAfiliados;
+
                 if (!cupons || cupons.length === 0) {
-                    mostrarVazio();
+                    // Sem cupons, mas pode ter afiliados cadastrados
+                    document.getElementById('metricFaturamento').textContent = 'R$ 0,00';
+                    document.getElementById('metricComissoes').textContent = 'R$ 0,00';
+                    document.getElementById('metricROI').textContent = 'R$ 0,00';
+                    document.getElementById('metricFaturamentoVar').textContent = 'Nenhuma conversão no período';
+                    document.getElementById('metricComissoesVar').textContent = '—';
+                    document.getElementById('statIndicacoes').textContent = '0';
+                    document.getElementById('statComissoesPendentes').textContent = 'R$ 0,00';
+                    document.getElementById('statCancelamentos').textContent = '0';
+
+                    // Mostrar afiliados sem vendas no ranking
+                    if (afiliadosPerfis && afiliadosPerfis.length > 0) {
+                        const rankingSemCupom = afiliadosPerfis.map(a => ({
+                            nome: a.nome || a.email || 'Afiliado',
+                            cupom: '—',
+                            comissao_pct: 0,
+                            qtd_vendas: 0,
+                            total_vendas: 0,
+                            total_comissoes: 0
+                        }));
+                        renderRanking(rankingSemCupom);
+                    } else {
+                        document.getElementById('rankingContainer').innerHTML = `
+                            <div class="text-center py-10 bg-card-dark rounded-xl border border-white/5">
+                                <span class="material-symbols-outlined text-5xl text-slate-600 mb-3 block">group</span>
+                                <p class="text-slate-400 text-sm font-medium">Nenhum afiliado com vendas nesse período</p>
+                                <p class="text-slate-600 text-xs mt-1">Os dados aparecerão quando houver indicações registradas</p>
+                            </div>
+                        `;
+                    }
+
+                    updateChart(0, 0, 0);
                     return;
                 }
 
-                const cupomIds = cupons.map(c => c.id);
+                // Filtrar apenas cupons ativos para cálculos financeiros
+                const cuponsAtivos = cupons.filter(c => c.ativo);
+                const cupomIds = cuponsAtivos.map(c => c.id);
 
                 // 2. Buscar todas as indicações no período
-                const { data: indicacoes, error: indError } = await supabase
-                    .from('indicacoes')
-                    .select('*')
-                    .in('cupom_id', cupomIds)
-                    .gte('data_indicacao', inicio)
-                    .lte('data_indicacao', fim)
-                    .order('data_indicacao', { ascending: false });
+                let indicacoes = [];
+                if (cupomIds.length > 0) {
+                    const { data: indData, error: indError } = await supabase
+                        .from('indicacoes')
+                        .select('*')
+                        .in('cupom_id', cupomIds)
+                        .gte('data_indicacao', inicio)
+                        .lte('data_indicacao', fim)
+                        .order('data_indicacao', { ascending: false });
 
-                if (indError) throw indError;
+                    if (indError) throw indError;
+                    indicacoes = indData || [];
+                }
 
                 // 3. Buscar TODAS as indicações (sem filtro de período) para contagens gerais
-                const { data: todasIndicacoes, error: allIndError } = await supabase
-                    .from('indicacoes')
-                    .select('*')
-                    .in('cupom_id', cupomIds);
+                let todasIndicacoes = [];
+                if (cupomIds.length > 0) {
+                    const { data: allIndData, error: allIndError } = await supabase
+                        .from('indicacoes')
+                        .select('*')
+                        .in('cupom_id', cupomIds);
 
-                if (allIndError) throw allIndError;
+                    if (allIndError) throw allIndError;
+                    todasIndicacoes = allIndData || [];
+                }
 
                 // 4. Tentar buscar nomes dos afiliados pela view ou perfis_usuarios
                 let nomesPorCupom = {};
                 try {
                     // Tentar buscar via user_id dos cupons
-                    const userIds = cupons.filter(c => c.user_id).map(c => c.user_id);
+                    const userIds = cuponsAtivos.filter(c => c.user_id).map(c => c.user_id);
                     if (userIds.length > 0) {
                         const { data: perfis } = await supabase
                             .from('perfis_usuarios')
@@ -416,7 +467,7 @@
 
                         if (perfis) {
                             perfis.forEach(p => {
-                                const cupom = cupons.find(c => c.user_id === p.id);
+                                const cupom = cuponsAtivos.find(c => c.user_id === p.id);
                                 if (cupom) {
                                     nomesPorCupom[cupom.id] = p.nome || p.email || cupom.codigo;
                                 }
@@ -436,9 +487,9 @@
                         .eq('chave', 'nome_afiliado')
                         .single();
 
-                    if (configNome && configNome.valor && cupons.length > 0) {
+                    if (configNome && configNome.valor && cuponsAtivos.length > 0) {
                         // Atribuir nome ao primeiro cupom se não tiver
-                        const primeiroCupom = cupons[0];
+                        const primeiroCupom = cuponsAtivos[0];
                         if (!nomesPorCupom[primeiroCupom.id]) {
                             nomesPorCupom[primeiroCupom.id] = configNome.valor;
                         }
@@ -446,7 +497,7 @@
                 } catch (e) { /* ignore */ }
 
                 // Preencher nomes faltantes com o código do cupom
-                cupons.forEach(c => {
+                cuponsAtivos.forEach(c => {
                     if (!nomesPorCupom[c.id]) {
                         nomesPorCupom[c.id] = c.codigo;
                     }
@@ -456,8 +507,8 @@
                 // PROCESSAR DADOS
                 // =====================
 
-                const indPeriodo = indicacoes || [];
-                const indTodas = todasIndicacoes || [];
+                const indPeriodo = indicacoes;
+                const indTodas = todasIndicacoes;
 
                 // Indicações ativas no período
                 const ativasPeriodo = indPeriodo.filter(i => i.status === 'ativo');
@@ -500,7 +551,6 @@
                 document.getElementById('metricROIVar').textContent = 'Faturamento − Comissões';
 
                 // Stats cards
-                document.getElementById('statAfiliados').textContent = cupons.length;
                 document.getElementById('statIndicacoes').textContent = ativasPeriodo.length;
                 document.getElementById('statComissoesPendentes').textContent = formatBRL(comissoesPendentes);
                 document.getElementById('statCancelamentos').textContent = canceladasPeriodo.length;
@@ -511,7 +561,7 @@
 
                 // Agrupar por cupom_id
                 const rankingMap = {};
-                cupons.forEach(c => {
+                cuponsAtivos.forEach(c => {
                     rankingMap[c.id] = {
                         nome: nomesPorCupom[c.id] || c.codigo,
                         cupom: c.codigo,
@@ -529,6 +579,23 @@
                         rankingMap[i.cupom_id].total_comissoes += parseFloat(i.valor_comissao || 0);
                     }
                 });
+
+                // Adicionar afiliados da perfis_usuarios que não têm cupom
+                const userIdsComCupom = cuponsAtivos.filter(c => c.user_id).map(c => c.user_id);
+                if (afiliadosPerfis) {
+                    afiliadosPerfis.forEach(a => {
+                        if (!userIdsComCupom.includes(a.id)) {
+                            rankingMap['perfil_' + a.id] = {
+                                nome: a.nome || a.email || 'Afiliado',
+                                cupom: '—',
+                                comissao_pct: 0,
+                                qtd_vendas: 0,
+                                total_vendas: 0,
+                                total_comissoes: 0
+                            };
+                        }
+                    });
+                }
 
                 // Converter para array e ordenar por total vendas
                 const ranking = Object.values(rankingMap)

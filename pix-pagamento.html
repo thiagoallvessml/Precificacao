@@ -246,7 +246,6 @@
 
     <script type="module">
         import { getSupabase } from './supabase-client.js';
-        import { ABACATEPAY_API_KEY, ABACATEPAY_API_URL } from './supabase-config.js';
 
         const supabase = getSupabase();
 
@@ -278,12 +277,8 @@
         // ========================
 
         async function criarCobrancaPix() {
-            // Se a chave não foi configurada, usar fallback
-            if (!ABACATEPAY_API_KEY || ABACATEPAY_API_KEY === 'SUA_CHAVE_ABACATEPAY_AQUI') {
-                console.warn('⚠️ Chave AbacatePay não configurada. Usando modo simulado.');
-                usarFallback();
-                return;
-            }
+            // Usar proxy serverless da Vercel (evita CORS)
+            const API_BASE = '/api';
 
             const amountCentavos = Math.round(total * 100); // AbacatePay usa centavos
 
@@ -321,11 +316,10 @@
 
                 console.log('🔍 Pix QR Code payload:', JSON.stringify(pixPayload));
 
-                const response = await fetch(`${ABACATEPAY_API_URL}/pixQrCode/create`, {
+                const response = await fetch(`${API_BASE}/pix-create`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
                     },
                     body: JSON.stringify(pixPayload),
                 });
@@ -453,11 +447,8 @@
             // Verificar a cada 5 segundos
             pollingInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(`${ABACATEPAY_API_URL}/pixQrCode/check?id=${pixChargeId}`, {
+                    const response = await fetch(`/api/pix-status?id=${pixChargeId}`, {
                         method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
-                        },
                     });
 
                     const result = await response.json();
@@ -735,11 +726,8 @@
             // Se tem pixChargeId, verificar status real na AbacatePay
             if (pixChargeId) {
                 try {
-                    const response = await fetch(`${ABACATEPAY_API_URL}/pixQrCode/check?id=${pixChargeId}`, {
+                    const response = await fetch(`/api/pix-status?id=${pixChargeId}`, {
                         method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${ABACATEPAY_API_KEY}`,
-                        },
                     });
 
                     const result = await response.json();

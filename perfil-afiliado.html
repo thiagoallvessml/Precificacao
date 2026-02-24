@@ -499,7 +499,34 @@
                     document.getElementById('cupomPerfilLabel').textContent = cupomExistente[0].codigo;
                     console.log('✅ Perfil atualizado. Cupom mantido:', cupomExistente[0].codigo);
                 } else {
-                    // Nenhum cupom existe — criar um novo com código gerado do nome
+                    // Buscar nível do afiliado
+                    const { data: perfilData } = await supabase
+                        .from('perfis_usuarios')
+                        .select('nivel_afiliado')
+                        .eq('id', currentUserId)
+                        .single();
+
+                    const nivel = perfilData?.nivel_afiliado || 'bronze';
+
+                    // Buscar configs de desconto e comissão do nível
+                    const chaveDesconto = `afiliado_desconto_${nivel}`;
+                    const chaveComissao = `afiliado_nivel_${nivel}`;
+
+                    const { data: configs } = await supabase
+                        .from('configuracoes')
+                        .select('chave, valor')
+                        .in('chave', [chaveDesconto, chaveComissao]);
+
+                    let descontoPct = 10;
+                    let comissaoPct = 10;
+                    if (configs) {
+                        configs.forEach(c => {
+                            if (c.chave === chaveDesconto) descontoPct = parseFloat(c.valor) || 10;
+                            if (c.chave === chaveComissao) comissaoPct = parseFloat(c.valor) || 10;
+                        });
+                    }
+
+                    // Criar cupom com valores dinâmicos do nível
                     const primeiroNome = name.trim().split(/\s+/)[0];
                     const codigoNovo = primeiroNome
                         .normalize('NFD')
@@ -511,13 +538,13 @@
                         .from('cupons_afiliado')
                         .insert([{
                             codigo: codigoNovo,
-                            desconto_percentual: 10,
-                            comissao_percentual: 10,
+                            desconto_percentual: descontoPct,
+                            comissao_percentual: comissaoPct,
                             user_id: currentUserId
                         }]);
 
                     document.getElementById('cupomPerfilLabel').textContent = codigoNovo;
-                    console.log('✅ Perfil e cupom criados:', name, '→', codigoNovo);
+                    console.log(`✅ Cupom criado (${nivel}): ${codigoNovo} → desconto: ${descontoPct}%, comissão: ${comissaoPct}%`);
                 }
             } catch (err) {
                 console.error('❌ Erro ao salvar nome no Supabase:', err);

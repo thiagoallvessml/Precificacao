@@ -280,6 +280,7 @@
 
     <script type="module">
         import { getSupabase } from './supabase-client.js';
+        import './presence-tracker.js';
 
         document.documentElement.classList.add('dark');
 
@@ -1105,61 +1106,85 @@
                     ativo: true
                 };
 
-                // Insere receita
-                const { data: receita, error: receitaError } = await supabase
-                    .from('receitas')
-                    .insert([receitaData])
-                    .select()
-                    .single();
+                let receitaId;
 
-                if (receitaError) throw receitaError;
+                if (isEditMode && editReceitaId) {
+                    // === MODO EDIÇÃO: Atualizar receita existente ===
+                    receitaId = parseInt(editReceitaId);
+
+                    const { error: updateError } = await supabase
+                        .from('receitas')
+                        .update(receitaData)
+                        .eq('id', receitaId);
+
+                    if (updateError) throw updateError;
+
+                    // Deletar todos os insumos antigos da receita
+                    const { error: deleteError } = await supabase
+                        .from('receitas_insumos')
+                        .delete()
+                        .eq('receita_id', receitaId);
+
+                    if (deleteError) throw deleteError;
+
+                } else {
+                    // === MODO CRIAÇÃO: Inserir nova receita ===
+                    const { data: receita, error: receitaError } = await supabase
+                        .from('receitas')
+                        .insert([receitaData])
+                        .select()
+                        .single();
+
+                    if (receitaError) throw receitaError;
+                    receitaId = receita.id;
+                }
 
                 // Insere ingredientes
                 if (ingredientes.length > 0) {
-                    const ingredientesData = ingredientes.map(ing => ({
-                        receita_id: receita.id,
+                    const ingredientesInsert = ingredientes.map(ing => ({
+                        receita_id: receitaId,
                         insumo_id: ing.insumo_id,
                         quantidade: ing.quantidade
                     }));
 
                     const { error: ingredientesError } = await supabase
                         .from('receitas_insumos')
-                        .insert(ingredientesData);
+                        .insert(ingredientesInsert);
 
                     if (ingredientesError) throw ingredientesError;
                 }
 
                 // Insere embalagens
                 if (embalagens.length > 0) {
-                    const embalagensData = embalagens.map(emb => ({
-                        receita_id: receita.id,
+                    const embalagensInsert = embalagens.map(emb => ({
+                        receita_id: receitaId,
                         insumo_id: emb.insumo_id,
                         quantidade: emb.quantidade
                     }));
 
                     const { error: embalagensError } = await supabase
                         .from('receitas_insumos')
-                        .insert(embalagensData);
+                        .insert(embalagensInsert);
 
                     if (embalagensError) throw embalagensError;
                 }
 
                 // Insere equipamentos
                 if (equipamentos.length > 0) {
-                    const equipamentosData = equipamentos.map(eq => ({
-                        receita_id: receita.id,
+                    const equipamentosInsert = equipamentos.map(eq => ({
+                        receita_id: receitaId,
                         insumo_id: eq.insumo_id,
                         quantidade: eq.tempo_uso // Mapeia tempo_uso para quantidade
                     }));
 
                     const { error: equipamentosError } = await supabase
                         .from('receitas_insumos')
-                        .insert(equipamentosData);
+                        .insert(equipamentosInsert);
 
                     if (equipamentosError) throw equipamentosError;
                 }
 
-                showNotification('Receita salva com sucesso!', 'success');
+                showNotification(isEditMode ? 'Receita atualizada com sucesso!' : 'Receita salva com sucesso!', 'success');
 
                 setTimeout(() => {
                     window.location.href = 'receitas.html';
@@ -1170,7 +1195,7 @@
                 showNotification('Erro ao salvar receita: ' + (error.message || error.code || 'Erro desconhecido'), 'error');
             } finally {
                 saveButton.disabled = false;
-                saveButton.innerHTML = '<span class="material-symbols-outlined text-[22px]">save</span> Salvar Receita';
+                saveButton.innerHTML = `<span class="material-symbols-outlined text-[22px]">save</span> ${isEditMode ? 'Atualizar' : 'Salvar'} Receita`;
             }
         }
 
@@ -1240,6 +1265,155 @@
             }
         });
 
+        // === MODO EDIÇÃO ===
+        // Detectar se estamos editando uma receita existente
+        const urlParams = new URLSearchParams(window.location.search);
+        const editReceitaId = urlParams.get('id');
+        let isEditMode = false;
+
+        /**
+         * Carrega dados de uma receita existente para edição
+         */
+        async function loadReceitaExistente(receitaId) {
+            try {
+                // Carregar receita
+                const { data: receita, error: receitaError } = await supabase
+                    .from('receitas')
+                    .select('*')
+                    .eq('id', receitaId)
+                    .single();
+
+                if (receitaError) throw receitaError;
+                if (!receita) {
+                    showNotification('Receita não encontrada', 'error');
+                    return;
+                }
+
+                // Atualizar título e botão
+                isEditMode = true;
+                pageTitle.textContent = 'Editar Receita';
+                document.title = 'Editar Receita';
+                saveButton.innerHTML = '<span class="material-symbols-outlined text-[22px]">save</span> Atualizar Receita';
+
+                // Preencher campos básicos
+                nomeInput.value = receita.nome || '';
+                rendimentoInput.value = receita.rendimento_unidades || '';
+                preparoInput.value = receita.tempo_preparo || '';
+                descricaoInput.value = receita.descricao || '';
+
+                // Carregar insumos da receita
+                const { data: receitaInsumos, error: insumosError } = await supabase
+                    .from('receitas_insumos')
+                    .select('insumo_id, quantidade')
+                    .eq('receita_id', receitaId);
+
+                if (insumosError) {
+                    console.error('Erro ao carregar insumos da receita:', insumosError);
+                    return;
+                }
+
+                // Limpar containers
+                document.getElementById('ingredients-container').innerHTML = '';
+                document.getElementById('embalagens-container').innerHTML = '';
+                document.getElementById('equipamentos-container').innerHTML = '';
+
+                // Classificar insumos por tipo e criar cards
+                let hasIngrediente = false;
+                let hasEmbalagem = false;
+                let hasEquipamento = false;
+
+                if (receitaInsumos && receitaInsumos.length > 0) {
+                    for (const ri of receitaInsumos) {
+                        // Encontrar o insumo nos dados carregados para saber o tipo
+                        const ingrediente = ingredientesData.find(i => i.id === ri.insumo_id);
+                        const embalagem = embalagensData.find(i => i.id === ri.insumo_id);
+                        const equipamento = equipamentosData.find(i => i.id === ri.insumo_id);
+
+                        if (ingrediente) {
+                            hasIngrediente = true;
+                            const card = createIngredientCard();
+                            document.getElementById('ingredients-container').appendChild(card);
+                            setupCardEvents(card);
+
+                            // Selecionar o ingrediente
+                            const select = card.querySelector('.ingrediente-select');
+                            if (select) {
+                                select.value = ri.insumo_id.toString();
+                            }
+
+                            // Preencher quantidade
+                            const quantidadeInput = card.querySelector('.quantidade-input');
+                            if (quantidadeInput) {
+                                quantidadeInput.value = ri.quantidade;
+                            }
+
+                            // Atualizar custo do card
+                            updateCardCost(card);
+                        } else if (embalagem) {
+                            hasEmbalagem = true;
+                            const card = createEmbalagemCard();
+                            document.getElementById('embalagens-container').appendChild(card);
+                            setupCardEvents(card);
+
+                            // Selecionar a embalagem
+                            const select = card.querySelector('.embalagem-select');
+                            if (select) {
+                                select.value = ri.insumo_id.toString();
+                            }
+
+                            // Preencher quantidade
+                            const quantidadeInput = card.querySelector('.quantidade-input');
+                            if (quantidadeInput) {
+                                quantidadeInput.value = ri.quantidade;
+                            }
+
+                            // Atualizar custo do card
+                            updateCardCost(card);
+                        } else if (equipamento) {
+                            hasEquipamento = true;
+                            const card = createEquipamentoCard();
+                            document.getElementById('equipamentos-container').appendChild(card);
+                            setupCardEvents(card);
+
+                            // Selecionar o equipamento
+                            const select = card.querySelector('.equipamento-select');
+                            if (select) {
+                                select.value = ri.insumo_id.toString();
+                            }
+
+                            // Verificar se é equipamento a gás
+                            toggleConsumoGasRow(card);
+
+                            // Preencher tempo de uso (quantidade = minutos para equipamentos)
+                            const tempoInput = card.querySelector('.tempo-input');
+                            if (tempoInput) {
+                                tempoInput.value = ri.quantidade;
+                            }
+
+                            // Atualizar custo do card
+                            updateCardCost(card);
+                        }
+                    }
+                }
+
+                // Se não tem nenhum ingrediente, adicionar card vazio para facilitar
+                if (!hasIngrediente) {
+                    const firstIngredient = createIngredientCard();
+                    document.getElementById('ingredients-container').appendChild(firstIngredient);
+                    setupCardEvents(firstIngredient);
+                }
+
+                // Atualizar custos
+                updateCustosPreview();
+
+                console.log('✅ Receita carregada para edição:', receita.nome, '- Insumos:', receitaInsumos?.length || 0);
+
+            } catch (error) {
+                console.error('❌ Erro ao carregar receita para edição:', error);
+                showNotification('Erro ao carregar receita: ' + (error.message || 'Erro desconhecido'), 'error');
+            }
+        }
+
         // Inicialização
         if (supabase) {
             // Carrega dados
@@ -1250,7 +1424,7 @@
                 loadCustoMaoObra(),
                 loadCustoKwh(),
                 loadCustoGas()
-            ]).then(([ingredientes, embalagens, equipamentos]) => {
+            ]).then(async ([ingredientes, embalagens, equipamentos]) => {
                 ingredientesData = ingredientes;
                 embalagensData = embalagens;
                 equipamentosData = equipamentos;
@@ -1264,13 +1438,18 @@
                     custoGasPorKg: custoGasPorKg
                 });
 
-                // Adiciona primeiro card de cada tipo
-                const firstIngredient = createIngredientCard();
-                document.getElementById('ingredients-container').appendChild(firstIngredient);
-                setupCardEvents(firstIngredient);
+                // Se estamos em modo edição, carregar receita existente
+                if (editReceitaId) {
+                    await loadReceitaExistente(parseInt(editReceitaId));
+                } else {
+                    // Modo criação: adiciona primeiro card de cada tipo
+                    const firstIngredient = createIngredientCard();
+                    document.getElementById('ingredients-container').appendChild(firstIngredient);
+                    setupCardEvents(firstIngredient);
 
-                // Atualiza custos iniciais
-                updateCustosPreview();
+                    // Atualiza custos iniciais
+                    updateCustosPreview();
+                }
             });
         } else {
             showNotification('Supabase não configurado', 'error');

@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Receitas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
@@ -50,7 +52,49 @@
     <main class="max-w-6xl mx-auto pb-24 px-4">
         <!-- Grid -->
         <div id="receitasList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            <!-- Será preenchido -->
+            <!-- Loading Skeleton -->
+            <div
+                class="flex flex-col rounded-xl border border-[#3b5454] bg-background-dark/50 overflow-hidden animate-pulse">
+                <div class="aspect-video bg-slate-800"></div>
+                <div class="p-4 space-y-3">
+                    <div class="h-5 bg-slate-800 rounded w-3/4"></div>
+                    <div class="h-3 bg-slate-800 rounded w-1/2"></div>
+                    <div class="grid grid-cols-2 gap-2 pt-3">
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="flex flex-col rounded-xl border border-[#3b5454] bg-background-dark/50 overflow-hidden animate-pulse hidden md:flex">
+                <div class="aspect-video bg-slate-800"></div>
+                <div class="p-4 space-y-3">
+                    <div class="h-5 bg-slate-800 rounded w-3/4"></div>
+                    <div class="h-3 bg-slate-800 rounded w-1/2"></div>
+                    <div class="grid grid-cols-2 gap-2 pt-3">
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="flex flex-col rounded-xl border border-[#3b5454] bg-background-dark/50 overflow-hidden animate-pulse hidden lg:flex">
+                <div class="aspect-video bg-slate-800"></div>
+                <div class="p-4 space-y-3">
+                    <div class="h-5 bg-slate-800 rounded w-3/4"></div>
+                    <div class="h-3 bg-slate-800 rounded w-1/2"></div>
+                    <div class="grid grid-cols-2 gap-2 pt-3">
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                        <div class="h-16 bg-slate-800 rounded"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -64,6 +108,7 @@
 
     <script type="module">
         import { getSupabase } from './supabase-client.js';
+        import './presence-tracker.js';
 
         const supabase = getSupabase();
         let receitas = [];
@@ -76,68 +121,72 @@
             custoGasHora: 2.00
         };
 
-        // Carregar Tudo
+        // Carregar Tudo — queries em paralelo para máxima performance
         async function loadData() {
             try {
-                // 1. Carregar Configurações
-                const { data: configData } = await supabase.from('configuracoes').select('*');
-                if (configData) {
-                    configData.forEach(c => {
+                // FASE 1: Carregar configurações, insumos e receitas em PARALELO
+                const [configResult, insumosResult, receitasResult] = await Promise.all([
+                    supabase.from('configuracoes').select('chave, valor'),
+                    supabase.from('insumos')
+                        .select('id, custo_unitario, tipo')
+                        .eq('ativo', true),
+                    supabase.from('receitas')
+                        .select('id, nome, descricao, rendimento_unidades, tempo_preparo, imagem_url, created_at')
+                        .eq('ativo', true)
+                        .order('created_at', { ascending: false })
+                ]);
+
+                // Processar configurações
+                if (configResult.data) {
+                    configResult.data.forEach(c => {
                         if (c.chave === 'custo_mao_obra_hora') configs.custoMaoObraHora = parseFloat(c.valor) || 0;
                         if (c.chave === 'custo_kwh') configs.custoKwh = parseFloat(c.valor) || 0.85;
                         if (c.chave === 'custo_gas_hora') configs.custoGasHora = parseFloat(c.valor) || 2.00;
                     });
                 }
 
-                // 2. Carregar Insumos (para saber custo atual)
-                const { data: insumosData, error: insumosError } = await supabase
-                    .from('insumos')
-                    .select('id, nome, custo_unitario, unidade_medida, tipo')
-                    .eq('ativo', true);
-
-                if (insumosError) throw insumosError;
-
-                (insumosData || []).forEach(i => {
+                // Processar insumos
+                if (insumosResult.error) throw insumosResult.error;
+                (insumosResult.data || []).forEach(i => {
                     insumosMap[i.id] = i;
                 });
 
-                // 3. Carregar Receitas
-                const { data: recData, error: recError } = await supabase
-                    .from('receitas')
-                    .select('*')
-                    .eq('ativo', true)
-                    .order('created_at', { ascending: false });
+                // Processar receitas
+                if (receitasResult.error) throw receitasResult.error;
+                receitas = receitasResult.data || [];
 
-                if (recError) throw recError;
-                receitas = recData || [];
-
-                // 4. Carregar Relacionamento Receitas-Insumos
+                // FASE 2: Carregar receitas_insumos e produtos em PARALELO
+                // (só precisa rodar se existem receitas)
                 if (receitas.length > 0) {
-                    const { data: riData, error: riError } = await supabase
-                        .from('receitas_insumos')
-                        .select('*');
+                    const receitaIds = receitas.map(r => r.id);
 
-                    if (riError) throw riError;
+                    const [riResult, produtosResult] = await Promise.all([
+                        supabase.from('receitas_insumos')
+                            .select('receita_id, insumo_id, quantidade')
+                            .in('receita_id', receitaIds),
+                        supabase.from('produtos')
+                            .select('id, preco_base, receita_id, imagem_url')
+                            .in('receita_id', receitaIds)
+                    ]);
 
-                    (riData || []).forEach(ri => {
-                        if (!receitaInsumosMap[ri.receita_id]) {
-                            receitaInsumosMap[ri.receita_id] = [];
-                        }
-                        receitaInsumosMap[ri.receita_id].push(ri);
-                    });
-                }
+                    // Processar receitas_insumos
+                    if (!riResult.error && riResult.data) {
+                        riResult.data.forEach(ri => {
+                            if (!receitaInsumosMap[ri.receita_id]) {
+                                receitaInsumosMap[ri.receita_id] = [];
+                            }
+                            receitaInsumosMap[ri.receita_id].push(ri);
+                        });
+                    }
 
-                // 5. Carregar Produtos (para pegar preço base e imagem)
-                const { data: produtosData, error: prodError } = await supabase
-                    .from('produtos')
-                    .select('id, nome, preco_base, receita_id, imagem_url');
-
-                if (!prodError && produtosData) {
-                    produtosData.forEach(p => {
-                        if (p.receita_id) {
-                            produtosMap[p.receita_id] = p;
-                        }
-                    });
+                    // Processar produtos
+                    if (!produtosResult.error && produtosResult.data) {
+                        produtosResult.data.forEach(p => {
+                            if (p.receita_id) {
+                                produtosMap[p.receita_id] = p;
+                            }
+                        });
+                    }
                 }
 
                 renderReceitas();
@@ -226,7 +275,7 @@
                         <!-- Image -->
                         <div class="relative aspect-video bg-gradient-to-br ${gradiente} flex items-center justify-center">
                             ${imagemUrl ?
-                        `<img src="${imagemUrl}" class="w-full h-full object-cover" alt="${r.nome}" />` :
+                        `<img src="${imagemUrl}" class="w-full h-full object-cover" alt="${r.nome}" loading="lazy" />` :
                         `<span class="material-symbols-outlined text-white text-6xl opacity-50">restaurant</span>`
                     }
                         </div>
@@ -288,10 +337,11 @@
                                     </div>
                                 ` : `
                                     <!-- No product linked -->
-                                    <div class="bg-slate-800/50 rounded p-3 border border-slate-700">
+                                    <a href="adicionar-produto.html" class="block bg-slate-800/50 rounded p-3 border border-slate-700 hover:border-primary/40 hover:bg-slate-800/70 transition-all group">
                                         <p class="text-slate-400 text-xs text-center">Sem produto vinculado</p>
+                                        <p class="text-primary text-xs text-center mt-1 group-hover:underline">Clique aqui e crie seu produto</p>
                                         <p class="text-slate-500 text-[10px] text-center mt-1">Custo: R$ ${custoUnit.toFixed(2).replace('.', ',')}/un</p>
-                                    </div>
+                                    </a>
                                 `}
                             </div>
 
@@ -329,7 +379,7 @@
                 if (info.atingiu) {
                     const fab = document.querySelector('.fixed.bottom-6 button');
                     if (fab) {
-                        fab.onclick = function(e) {
+                        fab.onclick = function (e) {
                             e.preventDefault();
                             if (confirm('⭐ Limite de receitas atingido!\n\nNo plano Free você pode cadastrar até 5 receitas.\nDeseja fazer upgrade para Premium?')) {
                                 window.location.href = 'planos.html';

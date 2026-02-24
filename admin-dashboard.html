@@ -114,6 +114,46 @@
         .stat-card:hover {
             transform: translateY(-2px);
         }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.3);
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .online-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0F0F0F;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            min-width: 200px;
+            max-width: 280px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 60;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .stat-card-online:hover .online-tooltip {
+            display: block;
+        }
     </style>
 </head>
 
@@ -142,7 +182,28 @@
     <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <!-- Online Now -->
+            <div
+                class="stat-card stat-card-online relative bg-card-dark rounded-xl p-4 border border-success/20 md:col-span-1">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-success pulse-dot"></span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Online Agora</span>
+                </div>
+                <div class="flex items-baseline gap-1">
+                    <p id="statOnline" class="text-2xl font-bold text-success">0</p>
+                    <span class="text-[10px] text-gray-600">usuário(s)</span>
+                </div>
+                <!-- Tooltip com lista de usuários online -->
+                <div class="online-tooltip">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">Usuários Online</p>
+                    <div id="onlineUsersList" class="space-y-1.5">
+                        <p class="text-xs text-gray-600 italic">Carregando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total -->
             <div class="stat-card bg-card-dark rounded-xl p-4 border border-white/5">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="material-icons-round text-primary text-lg">people</span>
@@ -311,6 +372,89 @@
 
         const supabase = getSupabase();
         let editingUserId = null;
+        let presenceChannel = null;
+
+        /**
+         * Inicializa o monitoramento de presença (Realtime Presence)
+         */
+        function initPresenceMonitor() {
+            if (!supabase) return;
+
+            presenceChannel = supabase.channel('online-users', {
+                config: {
+                    presence: {
+                        key: 'admin-monitor-' + Date.now(),
+                    },
+                },
+            });
+
+            presenceChannel
+                .on('presence', { event: 'sync' }, () => {
+                    updateOnlineCount();
+                })
+                .on('presence', { event: 'join' }, () => {
+                    updateOnlineCount();
+                })
+                .on('presence', { event: 'leave' }, () => {
+                    updateOnlineCount();
+                })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        // Registrar o admin também como presente
+                        await presenceChannel.track({
+                            online_at: new Date().toISOString(),
+                            page: 'admin-dashboard.html'
+                        });
+                    }
+                });
+        }
+
+        /**
+         * Atualiza o contador de usuários online
+         */
+        function updateOnlineCount() {
+            if (!presenceChannel) return;
+
+            const state = presenceChannel.presenceState();
+            const usersMap = new Map();
+
+            // Agrupar por user_id real (ignorar chaves duplicadas)
+            for (const [key, presences] of Object.entries(state)) {
+                if (presences && presences.length > 0) {
+                    const p = presences[0];
+                    const userId = p.user_id || key;
+                    if (!usersMap.has(userId)) {
+                        usersMap.set(userId, p);
+                    }
+                }
+            }
+
+            const count = usersMap.size;
+
+            // Atualizar contador
+            const statEl = document.getElementById('statOnline');
+            statEl.textContent = count;
+
+            // Atualizar lista de tooltip
+            const listEl = document.getElementById('onlineUsersList');
+            if (count === 0) {
+                listEl.innerHTML = '<p class="text-xs text-gray-600 italic">Nenhum usuário online</p>';
+            } else {
+                listEl.innerHTML = Array.from(usersMap.values()).map(u => {
+                    const page = (u.page || 'desconhecida').replace('.html', '');
+                    const email = u.email || 'Usuário';
+                    return `
+                        <div class="flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success shrink-0"></span>
+                            <div class="min-w-0">
+                                <p class="text-xs text-white truncate">${email}</p>
+                                <p class="text-[10px] text-gray-600">📄 ${page}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
 
         // Proteger página — somente admin
         async function init() {
@@ -318,6 +462,10 @@
             if (!perfil) return;
 
             document.getElementById('adminName').textContent = perfil.nome || perfil.email;
+
+            // Iniciar monitoramento de presença
+            initPresenceMonitor();
+
             await carregarUsuarios();
         }
 

@@ -102,7 +102,7 @@
         async function loadProducoes() {
             try {
                 // Buscar produções
-                const { data: prodData, error: prodError } = await getAllRecords('producao');
+                const { data: prodData, error: prodError } = await getAllRecords('producoes');
                 if (prodError) throw prodError;
 
                 producoes = prodData || [];
@@ -136,7 +136,7 @@
             });
 
             // Total de unidades do mês
-            const totalUnidadesMes = prodMes.reduce((sum, p) => sum + (p.quantidade_produzida || 0), 0);
+            const totalUnidadesMes = prodMes.reduce((sum, p) => sum + (p.total_unidades || 0), 0);
 
             // Custo total do mês
             const custoTotalMes = prodMes.reduce((sum, p) => sum + parseFloat(p.custo_total || 0), 0);
@@ -176,7 +176,7 @@
                     <div class="text-right min-w-[90px]">Data</div>
                 </div>
                 ${sorted.map(prod => {
-                const receita = receitas[prod.receita_id] || { nome: 'Receita não encontrada', icone: 'help' };
+                const receita = receitas[prod.receita_id] || { nome: prod.nome_receita || 'Receita', icone: 'help' };
                 const dataObj = new Date(prod.data_producao);
                 const dataFormatada = dataObj.toLocaleDateString('pt-BR');
 
@@ -192,8 +192,8 @@
                                 </div>
                             </div>
                             <div class="text-center flex flex-col gap-0.5 min-w-[70px]">
-                                <span class="text-xs font-medium">${prod.quantidade_produzida} un</span>
-                                <span class="text-[10px] text-slate-400">R$ ${parseFloat(prod.custo_total || 0).toFixed(2)}</span>
+                                <span class="text-xs font-medium">${prod.total_unidades || 0} un</span>
+                                <span class="text-[10px] text-slate-400">${prod.quantidade_lotes || 1} lote${(prod.quantidade_lotes || 1) > 1 ? 's' : ''}</span>
                             </div>
                             <div class="flex flex-col items-end gap-0.5 min-w-[90px]">
                                 <span class="text-[10px] font-medium">${dataFormatada}</span>
@@ -215,7 +215,7 @@
             if (!confirm('Tem certeza que deseja excluir esta produção?')) return;
 
             try {
-                const { error } = await deleteRecord('producao', id);
+                const { error } = await deleteRecord('producoes', id);
                 if (error) throw error;
 
                 alert('✅ Produção excluída com sucesso!');

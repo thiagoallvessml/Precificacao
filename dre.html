@@ -113,6 +113,8 @@
         let despesas = [];
         let producoes = [];
         let categorias = {};
+        let receitas = {};
+        let produtos = {};
 
         // Inicializar selects
         function initSelects() {
@@ -163,13 +165,22 @@
                     return false;
                 });
 
-                // Carregar produções
-                const { data: prodData, error: prodError } = await getAllRecords('producao');
+                // Carregar produções (tabela correta: 'producoes')
+                const { data: prodData, error: prodError } = await getAllRecords('producoes');
                 if (prodError) throw prodError;
                 producoes = (prodData || []).filter(p => {
                     const dataProd = new Date(p.data_producao);
                     return dataProd >= dataInicio && dataProd <= dataFim;
                 });
+
+                // Carregar receitas e produtos para calcular CPV
+                const { data: recData } = await getAllRecords('receitas');
+                receitas = {};
+                (recData || []).forEach(r => { receitas[r.id] = r; });
+
+                const { data: pData } = await getAllRecords('produtos');
+                produtos = {};
+                (pData || []).forEach(p => { produtos[p.id] = p; });
 
                 // Carregar categorias
                 const { data: catData, error: catError } = await getAllRecords('categorias');
@@ -221,8 +232,21 @@
             // Receita líquida
             const receitaLiquida = receitaBruta - deducoes;
 
-            // CPV (Custo dos Produtos Vendidos) = custo de produção
-            const cpv = producoes.reduce((sum, p) => sum + parseFloat(p.custo_total || 0), 0);
+            // Calcular custo de cada lote (mesma lógica do producao.html)
+            function calcularCustoProd(prod) {
+                if (prod.custo_total && parseFloat(prod.custo_total) > 0)
+                    return parseFloat(prod.custo_total);
+                const rec = receitas[prod.receita_id];
+                if (rec && rec.custo_mao_obra > 0)
+                    return parseFloat(rec.custo_mao_obra) * (prod.quantidade_lotes || 1);
+                const prodAssoc = Object.values(produtos).find(p => p.receita_id === prod.receita_id);
+                if (prodAssoc && prodAssoc.preco_base > 0)
+                    return (prod.total_unidades || 0) * parseFloat(prodAssoc.preco_base) * 0.6;
+                return 0;
+            }
+
+            // CPV (Custo dos Produtos Vendidos) = soma do custo de todos os lotes no período
+            const cpv = producoes.reduce((sum, p) => sum + calcularCustoProd(p), 0);
 
             // Lucro bruto
             const lucroBruto = receitaLiquida - cpv;
@@ -321,7 +345,20 @@
                         </summary>
                         <div class="px-4 pb-4 space-y-3">
                             <div class="h-px bg-white/10 mb-3"></div>
-                            <p class="text-xs text-slate-500">${producoes.length} lotes de produção no período</p>
+                            <p class="text-xs text-slate-500 mb-3">${producoes.length} lote(s) de produção no período</p>
+                            ${producoes.length === 0
+                    ? '<p class="text-slate-600 text-sm">Nenhum lote registrado neste período.</p>'
+                    : producoes.map(prod => {
+                        const rec = receitas[prod.receita_id];
+                        const nome = rec ? rec.nome : (prod.receita_nome || 'Produção');
+                        const custo = calcularCustoProd(prod);
+                        const data = new Date(prod.data_producao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+                        return `<div class="flex justify-between items-center text-sm">
+                                        <span class="text-slate-400">${nome} <span class="text-slate-600 text-xs">(${prod.total_unidades || 0} un · ${data})</span></span>
+                                        <span class="text-slate-200 font-medium">R$ ${custo.toFixed(2).replace('.', ',')}</span>
+                                    </div>`;
+                    }).join('')
+                }
                         </div>
                     </details>
                 </div>

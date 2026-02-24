@@ -97,6 +97,7 @@
 
         let producoes = [];
         let receitas = {};
+        let produtos = {}; // id → produto (para custo via preco_base)
 
         // Carregar dados
         async function loadProducoes() {
@@ -104,23 +105,47 @@
                 // Buscar produções
                 const { data: prodData, error: prodError } = await getAllRecords('producoes');
                 if (prodError) throw prodError;
-
                 producoes = prodData || [];
 
-                // Buscar receitas para mostrar nomes
+                // Buscar receitas
                 const { data: recData, error: recError } = await getAllRecords('receitas');
                 if (recError) throw recError;
-
-                // Criar mapa de receitas
                 (recData || []).forEach(rec => {
                     receitas[rec.id] = rec;
                 });
+
+                // Buscar produtos (para calcular custo via preco_base)
+                const { data: pData } = await getAllRecords('produtos');
+                (pData || []).forEach(p => { produtos[p.id] = p; });
 
                 renderProducoes();
                 calcularStats();
             } catch (error) {
                 console.error('❌ Erro ao carregar produções:', error);
             }
+        }
+
+        // Calcula o custo de um lote de produção
+        function calcularCustoProd(prod) {
+            const receita = receitas[prod.receita_id];
+            const totalUnidades = prod.total_unidades || 0;
+
+            // 1ª opção: custo_unitario salvo diretamente na produção
+            if (prod.custo_total && prod.custo_total > 0) return prod.custo_total;
+
+            // 2ª opção: custo_mao_obra da receita * lotes (custo parcial)
+            if (receita && receita.custo_mao_obra > 0) {
+                return receita.custo_mao_obra * (prod.quantidade_lotes || 1);
+            }
+
+            // 3ª opção: preco_base do produto associado (via receita_id → produto.receita_id)
+            const produtoAssociado = Object.values(produtos).find(p => p.receita_id === prod.receita_id);
+            if (produtoAssociado && produtoAssociado.preco_base > 0) {
+                // Estima custo como 60% do preço de venda (margem típica)
+                return totalUnidades * parseFloat(produtoAssociado.preco_base) * 0.6;
+            }
+
+            return 0;
         }
 
         // Calcular estatísticas
@@ -138,8 +163,8 @@
             // Total de unidades do mês
             const totalUnidadesMes = prodMes.reduce((sum, p) => sum + (p.total_unidades || 0), 0);
 
-            // Custo total do mês
-            const custoTotalMes = prodMes.reduce((sum, p) => sum + parseFloat(p.custo_total || 0), 0);
+            // Custo total do mês (calculado dinamicamente)
+            const custoTotalMes = prodMes.reduce((sum, p) => sum + calcularCustoProd(p), 0);
 
             document.getElementById('statTotalLotes').textContent = producoes.length;
             document.getElementById('statProdMes').textContent = totalUnidadesMes;

@@ -32,3 +32,8 @@ Thumbs.db
 # Agent / AI
 .gemini/
 .agent/
+.vercel
+.env*.local
+
+# Local Netlify folder
+.netlify

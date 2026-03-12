@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dashboard do Afiliado - PrecificaX</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0befef",
+                        "primary-dark": "#09b3b3",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1E1E1E",
+                        "input-dark": "#1c2b2b",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: #0F0F0F;
+            color: #e2e8f0;
+            min-height: 100dvh;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .badge-processando {
+            background: rgba(234, 179, 8, 0.12);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, 0.25);
+        }
+
+        .badge-pago {
+            background: rgba(34, 197, 94, 0.12);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+
+        .badge-recusado {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .shimmer {
+            animation: shimmer 1.5s infinite;
+            background: linear-gradient(90deg, #1a2f2f 25%, #213838 50%, #1a2f2f 75%);
+            background-size: 200% 100%;
+            border-radius: 12px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0
+            }
+
+            100% {
+                background-position: -200% 0
+            }
+        }
+
+        .nav-active {
+            color: #0befef;
+        }
+
+        .nav-inactive {
+            color: #618a8a;
+        }
+
+        .hero-glow {
+            box-shadow: 0 0 40px rgba(11, 239, 239, 0.08);
+        }
+
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(11, 239, 239, 0.3);
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(11, 239, 239, 0.45);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col lg:pb-0 pb-28 overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="header"
+        class="flex items-center justify-between px-6 py-4 sticky top-0 z-20 border-b border-white/[0.06]"
+        style="background: rgba(15,15,15,0.96); backdrop-filter: blur(12px);">
+        <div class="flex items-center gap-3">
+            <!-- Avatar -->
+            <div class="relative">
+                <div id="avatarCircle"
+                    class="size-12 rounded-full flex items-center justify-center text-lg font-black text-background-dark border-2 border-primary"
+                    style="background: linear-gradient(135deg, #0befef, #09b3b3);">?</div>
+                <div class="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full border-2"
+                    style="border-color: #0F0F0F;"></div>
+            </div>
+            <div class="flex flex-col gap-0.5">
+                <h2 id="nomeAfiliado" class="text-base font-bold leading-tight">Olá, Parceiro!</h2>
+                <span id="badgeNivel"
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/15 text-primary text-[11px] font-semibold w-fit border border-primary/25">
+                    <span class="material-symbols-outlined text-[13px] filled">stars</span>
+                    Bronze
+                </span>
+            </div>
+        </div>
+        <!-- Desktop nav links -->
+        <nav class="hidden lg:flex items-center gap-1">
+            <span class="nav-active flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
+                style="background:rgba(11,239,239,0.1);">
+                <span class="material-symbols-outlined text-[18px] filled">dashboard</span> Dashboard
+            </span>
+            <button onclick="window.location.href='indique-ganhe.html'"
+                class="nav-inactive flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/5 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">person_add</span> Indicar
+            </button>
+            <button onclick="window.location.href='perfil.html'"
+                class="nav-inactive flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/5 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">person</span> Perfil
+            </button>
+        </nav>
+        <button onclick="logout()"
+            class="text-slate-400 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10">
+            <span class="material-symbols-outlined">logout</span>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 lg:p-6 w-full max-w-7xl mx-auto">
+
+        <!-- Desktop: 2 cols | Mobile: 1 col -->
+        <div class="flex flex-col lg:flex-row gap-5 lg:gap-6 items-start">
+
+            <!-- ══ COLUNA ESQUERDA ══════════════════════════════════════════ -->
+            <div class="flex flex-col gap-5 w-full lg:w-[380px] lg:shrink-0">
+
+                <!-- Hero Card -->
+                <div class="relative overflow-hidden rounded-2xl p-6 hero-glow border border-primary/15"
+                    style="background: linear-gradient(135deg, #1a2f2f, #0f2020);">
+                    <div
+                        class="absolute top-0 right-0 -mr-8 -mt-8 size-36 rounded-full bg-primary/10 blur-3xl pointer-events-none">
+                    </div>
+                    <div
+                        class="absolute bottom-0 left-0 -ml-6 -mb-6 size-24 rounded-full bg-primary/5 blur-2xl pointer-events-none">
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Ganho Total
+                            Acumulado</p>
+                        <div class="flex items-end gap-1 mb-1">
+                            <span class="text-slate-400 text-xl font-semibold">R$</span>
+                            <span id="ganhoTotal" class="text-4xl font-black text-primary tracking-tight">0,00</span>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-5">
+                            Saldo disponível: <span id="saldoDisponivel" class="text-white font-semibold">R$ 0,00</span>
+                        </p>
+                        <button onclick="solicitarSaque()"
+                            class="btn-glow w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-background-dark font-bold py-3.5 px-4 rounded-xl transition-all active:scale-95 text-sm">
+                            <span class="material-symbols-outlined text-xl">payments</span>
+                            Sacar Comissões
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Grid 2x2 -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-card-dark p-4 rounded-xl border border-green-500/15 flex flex-col gap-3">
+                        <div class="size-9 rounded-xl bg-green-500/15 text-green-400 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">attach_money</span>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Comissões Pagas
+                            </p>
+                            <p id="kpiPago" class="text-lg font-black text-green-400 mt-0.5">R$ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="bg-card-dark p-4 rounded-xl border border-primary/15 flex flex-col gap-3">
+                        <div class="size-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">group_add</span>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Indicações
+                                Ativas</p>
+                            <p id="kpiIndicacoes" class="text-lg font-black text-primary mt-0.5">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-card-dark p-4 rounded-xl border border-blue-500/15 flex flex-col gap-3">
+                        <div class="size-9 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">ads_click</span>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Conversões</p>
+                            <p id="kpiConversoes" class="text-lg font-black text-blue-400 mt-0.5">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-card-dark p-4 rounded-xl border border-red-500/15 flex flex-col gap-3">
+                        <div class="size-9 rounded-xl bg-red-500/15 text-red-400 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[20px]">block</span>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Cancelamentos
+                            </p>
+                            <p id="kpiCancelamentos" class="text-lg font-black text-red-400 mt-0.5">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Link de Indicação -->
+                <div class="bg-card-dark p-5 rounded-xl border border-white/[0.06]">
+                    <h3 class="text-white font-bold text-base mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">link</span>
+                        Seu Link de Indicação
+                    </h3>
+                    <div class="flex gap-2 mb-3">
+                        <div class="relative flex-1">
+                            <input id="linkAfiliadoInput" readonly type="text" value="Carregando..."
+                                class="w-full bg-input-dark border border-white/[0.08] text-slate-300 text-xs rounded-xl pl-3 pr-10 py-3 focus:ring-1 focus:ring-primary focus:outline-none font-mono" />
+                            <button onclick="copiarLink()"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-white p-1 transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">content_copy</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="compartilharLink()"
+                        class="w-full border border-primary/40 text-primary hover:bg-primary/10 font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm">
+                        <span class="material-symbols-outlined text-[18px]">share</span>
+                        Compartilhar Link
+                    </button>
+                </div>
+
+            </div><!-- /coluna esquerda -->
+
+            <!-- ══ COLUNA DIREITA: Histórico ════════════════════════════════ -->
+            <div class="flex flex-col gap-4 flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-white font-bold text-base lg:text-lg">Histórico de Comissões</h3>
+                    <button onclick="scrollToHistorico()" class="text-xs text-primary hover:underline font-medium">Ver
+                        tudo</button>
+                </div>
+                <div id="listaComissoes" class="space-y-3">
+                    <!-- Shimmer skeletons -->
+                    <div class="shimmer h-[72px] w-full"></div>
+                    <div class="shimmer h-[72px] w-full" style="opacity: 0.7;"></div>
+                    <div class="shimmer h-[72px] w-full" style="opacity: 0.4;"></div>
+                </div>
+            </div><!-- /coluna direita -->
+
+        </div><!-- /grid -->
+
+    </main>
+
+    <!-- Bottom Navigation (mobile only) -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around px-4 pt-3 pb-6"
+        style="background: rgba(15,15,15,0.97); border-top: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(12px);">
+        <button class="nav-active flex flex-col items-center gap-1">
+            <span class="material-symbols-outlined text-2xl filled">dashboard</span>
+            <span class="text-[10px] font-semibold">Dashboard</span>
+        </button>
+        <button onclick="window.location.href='indique-ganhe.html'"
+            class="nav-inactive flex flex-col items-center gap-1 hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-2xl">person_add</span>
+            <span class="text-[10px] font-semibold">Indicar</span>
+        </button>
+        <button onclick="scrollToHistorico()"
+            class="nav-inactive flex flex-col items-center gap-1 hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-2xl">history</span>
+            <span class="text-[10px] font-semibold">Histórico</span>
+        </button>
+        <button onclick="window.location.href='perfil.html'"
+            class="nav-inactive flex flex-col items-center gap-1 hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-2xl">person</span>
+            <span class="text-[10px] font-semibold">Perfil</span>
+        </button>
+    </nav>
+
+    <!-- Modal Saque -->
+    <div id="modalSaque" class="fixed inset-0 z-50 flex items-end hidden" style="background: rgba(0,0,0,0.75);">
+        <div class="w-full max-w-md mx-auto rounded-t-3xl p-6 space-y-4"
+            style="background: #1a2f2f; border-top: 1px solid rgba(11,239,239,0.2);">
+            <div class="w-12 h-1.5 rounded-full mx-auto mb-2" style="background: rgba(255,255,255,0.2);"></div>
+            <h3 class="text-lg font-bold text-center text-white">Solicitar Saque</h3>
+            <div class="rounded-2xl p-4" style="background: #0a1a1a;">
+                <p class="text-xs text-slate-400 mb-1">Saldo disponível</p>
+                <p id="modalSaldoVal" class="text-2xl font-black text-primary">R$ 0,00</p>
+            </div>
+            <div>
+                <label class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block">Chave PIX</label>
+                <input id="inputChavePix" placeholder="E-mail, CPF, telefone ou chave aleatória"
+                    class="w-full rounded-2xl px-4 py-3 text-sm text-white outline-none transition-all"
+                    style="background: #0a1a1a; border: 1px solid rgba(255,255,255,0.08);"
+                    onfocus="this.style.borderColor='#0befef'"
+                    onblur="this.style.borderColor='rgba(255,255,255,0.08)'" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="fecharModalSaque()"
+                    class="py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-95"
+                    style="border: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">Cancelar</button>
+                <button onclick="confirmarSaque()"
+                    class="py-3.5 rounded-2xl text-sm font-bold transition-all active:scale-95 btn-glow"
+                    style="background: #0befef; color: #0e1f1f;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden px-5 py-3 rounded-2xl text-sm font-semibold text-white shadow-xl flex items-center gap-2"
+        style="background: #1a2f2f; border: 1px solid rgba(11,239,239,0.3); min-width: 200px;">
+        <span id="toastIcon" class="material-symbols-outlined text-primary text-lg">check_circle</span>
+        <span id="toastMsg"></span>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        // Usa o MESMO cliente compartilhado pelo restante do app.
+        // createClient() cria instância isolada que não tem a sessão do login.
+        const supabase = getSupabase();
+
+        let userId = null;
+        let saldoAtual = 0;
+        let codigoIndicacao = '';
+        let linkAfiliado = '';
+
+        // ── INIT ──────────────────────────────────────────────────────────────
+        // getSession() lê do localStorage — sem chamada de rede, sem falso null.
+        async function init() {
+            if (!supabase) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Lê sessão do localStorage (síncrono, confiável)
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session || !session.user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            userId = session.user.id;
+            await carregarDados();
+        }
+
+        async function carregarDados() {
+
+            // Buscar perfil
+            const { data: perfil } = await supabase
+                .from('perfis_usuarios')
+                .select('nome, saldo_afiliado, chave_pix, codigo_indicacao, nivel_afiliado')
+                .eq('id', userId)
+                .single();
+
+            const nomeCompleto = perfil?.nome?.trim() || 'Parceiro';
+            const primeiroNome = nomeCompleto.split(' ')[0];
+
+            document.getElementById('nomeAfiliado').textContent = `Olá, ${primeiroNome}!`;
+
+            // Avatar com inicial
+            const avatarEl = document.getElementById('avatarCircle');
+            avatarEl.textContent = primeiroNome[0]?.toUpperCase() || '?';
+
+            // Nível
+            const nivel = perfil?.nivel_afiliado || 'bronze';
+            const nivelMap = { bronze: 'Bronze', prata: 'Prata', ouro: 'Ouro' };
+            const nivelLabel = nivelMap[nivel] || 'Bronze';
+            const nivelColors = {
+                bronze: { bg: 'rgba(205,127,50,0.15)', text: '#cd7f32', border: 'rgba(205,127,50,0.3)' },
+                prata: { bg: 'rgba(192,192,192,0.15)', text: '#c0c0c0', border: 'rgba(192,192,192,0.3)' },
+                ouro: { bg: 'rgba(255,215,0,0.15)', text: '#ffd700', border: 'rgba(255,215,0,0.3)' },
+            };
+            const cor = nivelColors[nivel] || nivelColors.bronze;
+            const badgeEl = document.getElementById('badgeNivel');
+            badgeEl.textContent = '';
+            badgeEl.style.background = cor.bg;
+            badgeEl.style.color = cor.text;
+            badgeEl.style.border = `1px solid ${cor.border}`;
+            const starIcon = document.createElement('span');
+            starIcon.className = 'material-symbols-outlined text-[13px] filled';
+            starIcon.textContent = 'stars';
+            badgeEl.appendChild(starIcon);
+            badgeEl.appendChild(document.createTextNode(' ' + nivelLabel));
+
+            saldoAtual = Number(perfil?.saldo_afiliado || 0);
+            codigoIndicacao = perfil?.codigo_indicacao || userId.substring(0, 8);
+
+            if (perfil?.chave_pix) document.getElementById('inputChavePix').value = perfil.chave_pix;
+
+            // Link de indicação
+            const base = window.location.origin;
+            linkAfiliado = `${base}/cadastro.html?ref=${codigoIndicacao}`;
+            document.getElementById('linkAfiliadoInput').value = linkAfiliado;
+
+            // ──────────────────────────────────────────────────────
+            // COMISSÕES: os pagamentos PIX ficam na tabela `indicacoes`
+            // vinculadas ao afiliado via cupons_afiliado.user_id
+            // ──────────────────────────────────────────────────────
+            console.log('🔍 Buscando cupons do afiliado:', userId);
+
+            // 1. Buscar todos os cupons do afiliado
+            const { data: cupons, error: cuponsErr } = await supabase
+                .from('cupons_afiliado')
+                .select('id, codigo')
+                .eq('user_id', userId);
+
+            console.log('🏷️ Cupons encontrados:', cupons, cuponsErr);
+
+            let lista = [];
+
+            if (cupons && cupons.length > 0) {
+                const cupomIds = cupons.map(c => c.id);
+
+                // 2. Buscar indicações (pagamentos) vinculadas a esses cupons
+                const { data: indicacoes, error: indErr } = await supabase
+                    .from('indicacoes')
+                    .select('*')
+                    .in('cupom_id', cupomIds)
+                    .order('created_at', { ascending: false });
+
+                console.log('📋 Indicações encontradas:', indicacoes, indErr);
+
+                // Normalizar: `comissao_paga` = afiliado recebeu; `status=ativo` = cliente pagou
+                lista = (indicacoes || []).map(ind => ({
+                    id: ind.id,
+                    valor: ind.valor_comissao || 0,
+                    // statusCliente: se o cliente pagou ou não
+                    statusCliente: ind.status === 'ativo' ? 'ativo'
+                        : ind.status === 'pendente' ? 'pendente'
+                            : ind.status === 'cancelado' ? 'cancelado'
+                                : 'pendente',
+                    // statusComissao: se o AFILIADO recebeu a comissão
+                    statusComissao: ind.comissao_paga === true ? 'pago' : 'pendente',
+                    // status unificado para os KPIs
+                    status: ind.comissao_paga === true ? 'pago'
+                        : ind.status === 'cancelado' ? 'cancelado'
+                            : ind.status === 'pendente' ? 'aguardando'
+                                : 'pendente',
+                    descricao: `${ind.nome_indicado || 'Cliente'} • Plano R$ ${Number(ind.valor_assinatura || 0).toFixed(2).replace('.', ',')}`,
+                    created_at: ind.data_indicacao || ind.created_at,
+                    pago_em: ind.data_pagamento_comissao || null,
+                }));
+            }
+
+            // Também buscar da comissoes_afiliado (caso existam lançamentos manuais)
+            const { data: comissoesManual } = await supabase
+                .from('comissoes_afiliado')
+                .select('*')
+                .eq('afiliado_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (comissoesManual && comissoesManual.length > 0) {
+                lista = [...lista, ...comissoesManual];
+                // Reordenar por data
+                lista.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+
+            const ganhoTotal = lista.reduce((a, c) => a + Number(c.valor || 0), 0);
+            const totalPago = lista.filter(c => c.status === 'pago').reduce((a, c) => a + Number(c.valor || 0), 0);
+            const conversoes = lista.filter(c => c.statusCliente === 'ativo' || c.status === 'pago').length;
+            const cancelamentos = lista.filter(c => c.status === 'cancelado').length;
+            const pendentes = lista.filter(c => c.status === 'pendente' || c.status === 'aguardando').length;
+
+            document.getElementById('ganhoTotal').textContent = fmt(ganhoTotal);
+            document.getElementById('saldoDisponivel').textContent = `R$ ${fmt(saldoAtual)}`;
+            document.getElementById('modalSaldoVal').textContent = `R$ ${fmt(saldoAtual)}`;
+            document.getElementById('kpiPago').textContent = `R$ ${fmt(totalPago)}`;
+            document.getElementById('kpiIndicacoes').textContent = pendentes;
+            document.getElementById('kpiConversoes').textContent = conversoes;
+            document.getElementById('kpiCancelamentos').textContent = cancelamentos;
+
+            document.getElementById('kpiConversoes').textContent = conversoes;
+            document.getElementById('kpiCancelamentos').textContent = cancelamentos;
+
+            renderComissoes(lista.slice(0, 10));
+        }
+
+        function fmt(v) {
+            return Number(v).toFixed(2).replace('.', ',');
+        }
+
+        // ── RENDER HISTÓRICO ─────────────────────────────────────────────────
+        function renderComissoes(lista) {
+            const container = document.getElementById('listaComissoes');
+            container.innerHTML = '';
+
+            if (!lista.length) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-500 bg-card-dark rounded-xl border border-white/5">
+                        <span class="material-symbols-outlined text-4xl block mb-2" style="color: #2a4444;">receipt_long</span>
+                        <p class="text-sm font-semibold">Nenhuma comissão ainda</p>
+                        <p class="text-xs mt-1 text-slate-600">Compartilhe seu link e comece a ganhar!</p>
+                    </div>`;
+                return;
+            }
+
+            lista.forEach(c => {
+                const valor = Number(c.valor || 0);
+                const data = c.created_at
+                    ? new Date(c.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+                    : '-';
+                const pagoEm = c.pago_em
+                    ? new Date(c.pago_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+                    : null;
+
+                // ── Badge do cliente (pagou a assinatura?) ──
+                const stCliente = {
+                    ativo: { label: 'Cliente pagou', cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', icon: 'check_circle' },
+                    pendente: { label: 'Aguardando pag.', cls: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', icon: 'hourglass_top' },
+                    cancelado: { label: 'Cancelado', cls: 'bg-red-500/10   text-red-400   border-red-500/20', icon: 'cancel' },
+                }[c.statusCliente || 'pendente'] || { label: c.statusCliente, cls: 'bg-white/5 text-slate-400 border-white/10', icon: 'info' };
+
+                // ── Badge da comissão (afiliado recebeu?) ──
+                const stComissao = c.statusComissao === 'pago'
+                    ? { label: 'Comissão recebida', cls: 'bg-primary/10 text-primary border-primary/20', icon: 'payments' }
+                    : { label: 'Comissão pendente', cls: 'bg-slate-500/10 text-slate-400 border-slate-500/20', icon: 'schedule' };
+
+                // Cor do ícone principal
+                const iconColor = c.statusComissao === 'pago' ? '#0befef'
+                    : c.statusCliente === 'cancelado' ? '#f87171'
+                        : '#facc15';
+
+                const iconName = c.statusComissao === 'pago' ? 'payments'
+                    : c.statusCliente === 'ativo' ? 'hourglass_top'
+                        : c.statusCliente === 'cancelado' ? 'cancel'
+                            : 'hourglass_top';
+
+                const opacity = c.statusCliente === 'cancelado' ? 'opacity-60' : '';
+                const valorStr = c.statusCliente === 'cancelado'
+                    ? `<p class="text-slate-400 font-bold text-sm line-through">R$ ${fmt(valor)}</p>`
+                    : `<p class="${c.statusComissao === 'pago' ? 'text-primary' : 'text-white'} font-bold text-sm">+ R$ ${fmt(valor)}</p>`;
+
+                const el = document.createElement('div');
+                el.className = `bg-[#1b2b2b] p-4 rounded-xl border border-white/[0.05] ${opacity}`;
+                el.innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3 flex-1 min-w-0">
+                            <div class="size-10 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                                style="background: ${iconColor}18; color: ${iconColor};">
+                                <span class="material-symbols-outlined text-[20px]">${iconName}</span>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-white font-semibold text-sm leading-tight truncate">${c.descricao || 'Comissão de indicação'}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">${data}${pagoEm ? ` • repasse em ${pagoEm}` : ''}</p>
+                                <!-- Dois badges: cliente + comissão -->
+                                <div class="flex flex-wrap gap-1.5 mt-2">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${stCliente.cls}">
+                                        <span class="material-symbols-outlined text-[11px]">${stCliente.icon}</span>
+                                        ${stCliente.label}
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${stComissao.cls}">
+                                        <span class="material-symbols-outlined text-[11px]">${stComissao.icon}</span>
+                                        ${stComissao.label}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            ${valorStr}
+                        </div>
+                    </div>`;
+                container.appendChild(el);
+            });
+        }
+
+        // ── SAQUE ────────────────────────────────────────────────────────────
+        window.solicitarSaque = function () {
+            if (saldoAtual <= 0) {
+                mostrarToast('💡 Saldo insuficiente para saque.', 'info');
+                return;
+            }
+            document.getElementById('modalSaque').classList.remove('hidden');
+        };
+
+        window.fecharModalSaque = function () {
+            document.getElementById('modalSaque').classList.add('hidden');
+        };
+
+        window.confirmarSaque = async function () {
+            const chave = document.getElementById('inputChavePix').value.trim();
+            if (!chave) { mostrarToast('⚠️ Informe sua chave PIX!', 'warning'); return; }
+
+            const { error } = await supabase.from('saques_afiliado').insert({
+                user_id: userId,
+                valor: saldoAtual,
+                chave_pix: chave,
+                status: 'pendente',
+            });
+
+            if (error) { mostrarToast('❌ Erro: ' + error.message, 'error'); return; }
+
+            await supabase.from('perfis_usuarios').update({ chave_pix: chave }).eq('id', userId);
+
+            fecharModalSaque();
+            mostrarToast('✅ Saque solicitado! Aguarde aprovação.', 'check_circle');
+        };
+
+        // ── LINK ─────────────────────────────────────────────────────────────
+        window.copiarLink = function () {
+            navigator.clipboard.writeText(linkAfiliado)
+                .then(() => mostrarToast('🔗 Link copiado!', 'content_copy'));
+        };
+
+        window.compartilharLink = function () {
+            if (navigator.share) {
+                navigator.share({ title: 'Junte-se ao PrecificaX!', url: linkAfiliado });
+            } else {
+                copiarLink();
+            }
+        };
+
+        window.scrollToHistorico = function () {
+            document.getElementById('listaComissoes')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        // ── LOGOUT ───────────────────────────────────────────────────────────
+        window.logout = async function () {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        };
+
+        // ── TOAST ────────────────────────────────────────────────────────────
+        function mostrarToast(msg, icon = 'check_circle') {
+            const t = document.getElementById('toast');
+            const iconEl = document.getElementById('toastIcon');
+            document.getElementById('toastMsg').textContent = msg;
+            iconEl.textContent = icon;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3000);
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modalSaque').addEventListener('click', function (e) {
+            if (e.target === this) fecharModalSaque();
+        });
+
+        init();
+    </script>
+
+</body>
+
+</html>

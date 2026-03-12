@@ -1,38 +1,65 @@
 /**
  * plan-limits.js
- * Módulo centralizado de limites do plano Free
- * 
- * Limites Free:
- * - Produtos: 7
- * - Receitas: 5
- * - Marketplaces: 1
- * - Vendas manuais: 30 (por mês)
+ * Limites por plano: basic, intermediario, avancado
  */
 
 import { getSupabase } from './supabase-client.js';
 
-const FREE_LIMITS = {
-    produtos: 3,
-    receitas: 2,
-    marketplaces: 1,
-    vendas: 30,  // por mês
-    // Limites de categorias por tipo
-    categorias_produtos: 2,
-    categorias_insumos: 2,
-    categorias_despesas: 3
+// Infinity = sem limite (todos os planos ilimitados)
+const LIMITES_POR_PLANO = {
+    basic: {
+        produtos: Infinity,
+        receitas: Infinity,
+        marketplaces: Infinity,
+        vendas: Infinity,
+        categorias_produtos: Infinity,
+        categorias_insumos: Infinity,
+        categorias_despesas: Infinity,
+    },
+    intermediario: {
+        produtos: Infinity,
+        receitas: Infinity,
+        marketplaces: Infinity,
+        vendas: Infinity,
+        categorias_produtos: Infinity,
+        categorias_insumos: Infinity,
+        categorias_despesas: Infinity,
+    },
+    avancado: {
+        produtos: Infinity,
+        receitas: Infinity,
+        marketplaces: Infinity,
+        vendas: Infinity,
+        categorias_produtos: Infinity,
+        categorias_insumos: Infinity,
+        categorias_despesas: Infinity,
+    },
+    // Legado
+    free: null, // usa basic
+    premium: null, // usa avancado
 };
 
 /**
+ * Retorna os limites do plano atual
+ * @param {string} plano
+ * @returns {object}
+ */
+function getLimites(plano) {
+    if (plano === 'free') return LIMITES_POR_PLANO.basic;
+    if (plano === 'premium') return LIMITES_POR_PLANO.avancado;
+    return LIMITES_POR_PLANO[plano] || LIMITES_POR_PLANO.basic;
+}
+
+/**
  * Busca o plano e info de trial do usuário logado
- * @returns {Promise<{plano: string, emTrial: boolean, diasRestantes: number, trialExpira: Date|null}>}
  */
 export async function getTrialInfo() {
     const supabase = getSupabase();
-    if (!supabase) return { plano: 'free', emTrial: false, diasRestantes: 0, trialExpira: null };
+    if (!supabase) return { plano: 'basic', emTrial: false, diasRestantes: 0, trialExpira: null };
 
     try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return { plano: 'free', emTrial: false, diasRestantes: 0, trialExpira: null };
+        if (!session) return { plano: 'basic', emTrial: false, diasRestantes: 0, trialExpira: null };
 
         const { data: perfil } = await supabase
             .from('perfis_usuarios')
@@ -40,7 +67,7 @@ export async function getTrialInfo() {
             .eq('id', session.user.id)
             .single();
 
-        const plano = perfil?.plano || 'free';
+        const plano = perfil?.plano || 'basic';
         const trialExpira = perfil?.trial_expires_at ? new Date(perfil.trial_expires_at) : null;
         const agora = new Date();
         const emTrial = trialExpira ? trialExpira > agora : false;
@@ -51,24 +78,35 @@ export async function getTrialInfo() {
         return { plano, emTrial, diasRestantes, trialExpira };
     } catch (e) {
         console.warn('plan-limits: erro ao buscar trial info:', e);
-        return { plano: 'free', emTrial: false, diasRestantes: 0, trialExpira: null };
+        return { plano: 'basic', emTrial: false, diasRestantes: 0, trialExpira: null };
     }
 }
 
 /**
- * Busca o plano do usuário logado
- * Retorna 'premium' se estiver no período de trial
- * @returns {Promise<string>} 'free' ou 'premium'
+ * Busca o plano efetivo do usuário (considera trial)
+ * @returns {Promise<string>} 'basic' | 'intermediario' | 'avancado'
  */
 export async function getUserPlan() {
     try {
-        const { plano, emTrial } = await getTrialInfo();
-        // Trial ativo = acesso premium completo
-        if (emTrial) return 'premium';
-        return plano;
+        const { plano, emTrial, trialExpira } = await getTrialInfo();
+
+        // Trial ativo = acesso avançado completo
+        if (emTrial) return 'avancado';
+
+        // Trial expirou sem pagamento:
+        // Só retorna 'free' (bloqueado) se o plano no banco ainda for 'free',
+        // significando que nunca houve assinatura.
+        // Se o plano for 'basic', 'intermediario', 'avancado', etc., o usuário pagou.
+        const trialJaExistiu = trialExpira !== null;
+        if (trialJaExistiu && !emTrial && plano === 'free') return 'free';
+
+        // Normalizar legado: 'premium' → 'avancado'
+        if (plano === 'premium') return 'avancado';
+
+        return plano || 'basic';
     } catch (e) {
         console.warn('plan-limits: erro ao buscar plano:', e);
-        return 'free';
+        return 'basic';
     }
 }
 
@@ -182,15 +220,14 @@ function injetarCSS() {
 
 /**
  * Verifica e mostra banner de limite para produtos
- * @param {HTMLElement} container - elemento onde inserir o banner
- * @returns {Promise<{atual: number, limite: number, atingiu: boolean}>}
  */
 export async function checkLimiteProdutos(container) {
     const plano = await getUserPlan();
-    if (plano === 'premium') return { atual: 0, limite: Infinity, atingiu: false };
+    const limites = getLimites(plano);
+    if (limites.produtos === Infinity) return { atual: 0, limite: Infinity, atingiu: false };
 
     const atual = await contarRegistros('produtos');
-    const limite = FREE_LIMITS.produtos;
+    const limite = limites.produtos;
 
     injetarCSS();
     const bannerHTML = criarBanner(atual, limite, 'Produtos cadastrados', 'icecream');
@@ -201,15 +238,14 @@ export async function checkLimiteProdutos(container) {
 
 /**
  * Verifica e mostra banner de limite para receitas
- * @param {HTMLElement} container
- * @returns {Promise<{atual: number, limite: number, atingiu: boolean}>}
  */
 export async function checkLimiteReceitas(container) {
     const plano = await getUserPlan();
-    if (plano === 'premium') return { atual: 0, limite: Infinity, atingiu: false };
+    const limites = getLimites(plano);
+    if (limites.receitas === Infinity) return { atual: 0, limite: Infinity, atingiu: false };
 
     const atual = await contarRegistros('receitas', { ativo: true });
-    const limite = FREE_LIMITS.receitas;
+    const limite = limites.receitas;
 
     injetarCSS();
     const bannerHTML = criarBanner(atual, limite, 'Receitas cadastradas', 'menu_book');
@@ -220,15 +256,14 @@ export async function checkLimiteReceitas(container) {
 
 /**
  * Verifica e mostra banner de limite para marketplaces
- * @param {HTMLElement} container
- * @returns {Promise<{atual: number, limite: number, atingiu: boolean}>}
  */
 export async function checkLimiteMarketplaces(container) {
     const plano = await getUserPlan();
-    if (plano === 'premium') return { atual: 0, limite: Infinity, atingiu: false };
+    const limites = getLimites(plano);
+    if (limites.marketplaces === Infinity) return { atual: 0, limite: Infinity, atingiu: false };
 
     const atual = await contarRegistros('categorias', { tipo: 'marketplace', ativo: true });
-    const limite = FREE_LIMITS.marketplaces;
+    const limite = limites.marketplaces;
 
     injetarCSS();
     const bannerHTML = criarBanner(atual, limite, 'Marketplace ativo', 'storefront');
@@ -239,15 +274,14 @@ export async function checkLimiteMarketplaces(container) {
 
 /**
  * Verifica e mostra banner de limite para vendas manuais (mensal)
- * @param {HTMLElement} container
- * @returns {Promise<{atual: number, limite: number, atingiu: boolean}>}
  */
 export async function checkLimiteVendas(container) {
     const plano = await getUserPlan();
-    if (plano === 'premium') return { atual: 0, limite: Infinity, atingiu: false };
+    const limites = getLimites(plano);
+    if (limites.vendas === Infinity) return { atual: 0, limite: Infinity, atingiu: false };
 
     const atual = await contarVendasMes();
-    const limite = FREE_LIMITS.vendas;
+    const limite = limites.vendas;
 
     const mesAtual = new Date().toLocaleDateString('pt-BR', { month: 'long' });
 
@@ -259,25 +293,27 @@ export async function checkLimiteVendas(container) {
 }
 
 /**
- * Retorna os limites do plano Free
+ * Retorna os limites do plano Free (agora retorna limites do plano atual)
+ * @deprecated Use getLimites(plano) diretamente
  */
 export function getFreeLimits() {
-    return { ...FREE_LIMITS };
+    return { ...LIMITES_POR_PLANO.basic };
 }
 
 /**
  * Verifica e mostra banner de limite para categorias por tipo
  * @param {string} tipo - 'produtos', 'insumos' ou 'despesas'
- * @param {HTMLElement} container - elemento onde inserir o banner
- * @returns {Promise<{atual: number, limite: number, atingiu: boolean}>}
+ * @param {HTMLElement} container
  */
 export async function checkLimiteCategorias(tipo, container) {
     const plano = await getUserPlan();
-    if (plano === 'premium') return { atual: 0, limite: Infinity, atingiu: false };
+    const limites = getLimites(plano);
 
     const limiteKey = `categorias_${tipo}`;
-    const limite = FREE_LIMITS[limiteKey];
-    if (!limite) return { atual: 0, limite: Infinity, atingiu: false };
+    const limite = limites[limiteKey];
+
+    // Sem limite para este plano
+    if (!limite || limite === Infinity) return { atual: 0, limite: Infinity, atingiu: false };
 
     const atual = await contarRegistros('categorias', { tipo: tipo, ativo: true });
 

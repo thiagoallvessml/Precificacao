@@ -18,7 +18,7 @@
                     colors: {
                         "primary": "#0befef",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                         "danger": "#ef4444"
                     },
                     fontFamily: {
@@ -126,7 +126,34 @@
                     </div>
                 </div>
                 <div>
-                    <label class="text-xs font-bold uppercase text-slate-500 mb-1 block">Categoria</label>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-xs font-bold uppercase text-slate-500">Categoria</label>
+                        <a href="categorias.html?tab=despesas"
+                            class="flex items-center gap-1 text-primary text-sm font-bold hover:text-primary/80 transition-colors active:scale-95">
+                            <span class="material-symbols-outlined text-sm">add_circle</span>
+                            Criar Categoria
+                        </a>
+                    </div>
+
+                    <!-- Aviso: Nenhuma categoria cadastrada -->
+                    <div id="avisoSemCategorias" class="hidden mb-3">
+                        <div class="flex gap-3 items-start bg-amber-500/10 border border-amber-500/40 rounded-xl p-3">
+                            <span
+                                class="material-symbols-outlined text-amber-400 text-xl mt-0.5 shrink-0">warning</span>
+                            <div class="flex-1">
+                                <p class="text-amber-300 font-semibold text-sm mb-1">Nenhuma categoria cadastrada!</p>
+                                <p class="text-amber-200/70 text-xs leading-relaxed mb-2">Você precisa cadastrar uma
+                                    categoria antes de adicionar uma despesa. Exemplos: <span
+                                        class="font-semibold">Aluguel, Contador, Combustível</span>.</p>
+                                <a href="categorias.html?tab=despesas"
+                                    class="inline-flex items-center gap-1 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs px-3 py-1.5 rounded-lg transition-all active:scale-95">
+                                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                                    Cadastrar Categoria
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <select id="inputCategoria"
                         class="w-full bg-slate-800 border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary">
                         <option value="">Carregando...</option>
@@ -185,9 +212,23 @@
 
                 // Preencher select
                 const select = document.getElementById('inputCategoria');
+                const avisoSemCategorias = document.getElementById('avisoSemCategorias');
                 const categsDespesas = (catData || []).filter(c => c.tipo === 'despesas' && c.ativo);
-                select.innerHTML = '<option value="">Selecione...</option>' +
-                    categsDespesas.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+
+                if (categsDespesas.length === 0) {
+                    // Mostrar aviso e desabilitar select
+                    avisoSemCategorias.classList.remove('hidden');
+                    select.disabled = true;
+                    select.innerHTML = '<option value="">Nenhuma categoria cadastrada</option>';
+                    select.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    // Esconder aviso e habilitar select
+                    avisoSemCategorias.classList.add('hidden');
+                    select.disabled = false;
+                    select.classList.remove('opacity-50', 'cursor-not-allowed');
+                    select.innerHTML = '<option value="">Selecione...</option>' +
+                        categsDespesas.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+                }
 
                 renderDespesas();
             } catch (error) {

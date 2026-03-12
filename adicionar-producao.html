@@ -211,17 +211,32 @@
         // CARREGAR RECEITAS DO SUPABASE
         // ========================
         async function carregarReceitas() {
+            const select = document.getElementById('recipeSelect');
             try {
-                const { data, error } = await getAllRecords('receitas');
+                // Usar supabase-client diretamente para ter controle total
+                const { getSupabase } = await import('./supabase-client.js');
+                const sb = getSupabase();
+
+                // Log diagnóstico
+                const { data: { session } } = await sb.auth.getSession();
+                console.log('🔍 User logado:', session?.user?.id || 'NENHUM (não logado!)');
+
+                const { data, error } = await sb
+                    .from('receitas')
+                    .select('id, nome, rendimento_unidades')
+                    .order('nome');
+
+                console.log('📋 Receitas retornadas:', data?.length ?? 0, '| Erro:', error?.message ?? 'nenhum');
+
                 if (error) throw error;
 
                 const receitas = data || [];
                 receitasMap = {};
                 receitas.forEach(r => { receitasMap[r.id] = r; });
 
-                const select = document.getElementById('recipeSelect');
                 if (receitas.length === 0) {
                     select.innerHTML = '<option value="">Nenhuma receita cadastrada</option>';
+                    console.warn('⚠️ Nenhuma receita encontrada. Verifique o RLS da tabela receitas no Supabase.');
                     return;
                 }
 
@@ -234,13 +249,24 @@
                         return `<option value="${r.id}" data-yield="${rendimento}">${label}</option>`;
                     }).join('');
 
+                // Pré-selecionar receita se vier da URL (?receita_id=xxx)
+                const params = new URLSearchParams(window.location.search);
+                const receitaIdParam = params.get('receita_id');
+                if (receitaIdParam) {
+                    const option = select.querySelector(`option[value="${receitaIdParam}"]`);
+                    if (option) {
+                        select.value = receitaIdParam;
+                        updateRecipe(); // dispara cálculo de unidades/lote
+                    }
+                }
+
                 console.log(`✅ ${receitas.length} receita(s) carregadas`);
             } catch (err) {
                 console.error('❌ Erro ao carregar receitas:', err);
-                document.getElementById('recipeSelect').innerHTML =
-                    '<option value="">Erro ao carregar receitas</option>';
+                select.innerHTML = `<option value="">Erro: ${err.message}</option>`;
             }
         }
+
 
         // ========================
         // ATUALIZAR RECEITA SELECIONADA
@@ -398,6 +424,19 @@
             btn.innerHTML = '<span class="material-symbols-outlined font-bold animate-spin">sync</span> Salvando...';
 
             try {
+                // 1. Importar supabase diretamente para operações mais avançadas
+                const { getSupabase } = await import('./supabase-client.js');
+                const supabase = getSupabase();
+
+                // 2. Buscar os insumos da receita
+                const { data: insumosReceita, error: errInsumos } = await supabase
+                    .from('receitas_insumos')
+                    .select('insumo_id, quantidade, insumos(id, nome, unidade_medida, estoque_atual, custo_unitario)')
+                    .eq('receita_id', receitaId);
+
+                if (errInsumos) console.warn('Aviso: não foi possível buscar insumos da receita:', errInsumos.message);
+
+                // 3. Registrar a produção
                 const producaoRecord = {
                     receita_id: receitaId,
                     nome_receita: receita ? receita.nome : select.options[select.selectedIndex].text,
@@ -407,8 +446,62 @@
                 };
 
                 const { error } = await insertRecord('producoes', producaoRecord);
-
                 if (error) throw error;
+
+                // 4. Descontar estoque e registrar movimentações para cada insumo
+                if (insumosReceita && insumosReceita.length > 0) {
+                    const agora = new Date().toISOString();
+                    const dataProducao = selectedDate.toISOString().split('T')[0];
+
+                    // Pegar user_id da sessão ativa
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const userId = session?.user?.id || null;
+
+                    for (const item of insumosReceita) {
+                        const insumo = item.insumos;
+                        if (!insumo) continue;
+
+                        const qtdUsada = (item.quantidade || 0) * currentQuantity;
+                        const estoqueAtual = parseFloat(insumo.estoque_atual) || 0;
+                        const novoEstoque = Math.max(0, estoqueAtual - qtdUsada);
+                        const custoUnit = parseFloat(insumo.custo_unitario) || 0;
+                        const custoTotal = qtdUsada * custoUnit;
+
+                        try {
+                            // 4a. Atualizar estoque do insumo
+                            const { error: errUpdate } = await supabase
+                                .from('insumos')
+                                .update({ estoque_atual: novoEstoque })
+                                .eq('id', insumo.id);
+
+                            if (errUpdate) console.warn(`⚠️ Erro ao atualizar estoque de ${insumo.nome}:`, errUpdate.message);
+
+                            // 4b. Registrar saída em movimentacoes_estoque (com user_id explícito)
+                            const { error: errMov } = await supabase
+                                .from('movimentacoes_estoque')
+                                .insert([{
+                                    user_id: userId,
+                                    insumo_id: insumo.id,
+                                    tipo: 'saida',
+                                    quantidade: qtdUsada,
+                                    estoque_atual: novoEstoque,
+                                    estoque_anterior: estoqueAtual,
+                                    estoque_posterior: novoEstoque,
+                                    custo_unitario: custoUnit,
+                                    custo_total: custoTotal,
+                                    motivo: `Produção: ${receita?.nome || 'Receita'} (${currentQuantity} lote${currentQuantity > 1 ? 's' : ''})`,
+                                    data_movimentacao: dataProducao,
+                                    created_at: agora
+                                }]);
+
+                            if (errMov) console.warn(`⚠️ Erro ao registrar movimentação de ${insumo.nome}:`, errMov.message);
+
+                        } catch (movErr) {
+                            console.warn(`⚠️ Erro inesperado ao movimentar ${insumo.nome}:`, movErr.message);
+                        }
+                    }
+                }
+
 
                 btn.innerHTML = '<span class="material-symbols-outlined font-bold">check</span> Registrado!';
                 btn.classList.add('bg-green-500', 'text-white');
@@ -425,6 +518,7 @@
                 btn.innerHTML = originalText;
             }
         };
+
 
         // ========================
         // INIT

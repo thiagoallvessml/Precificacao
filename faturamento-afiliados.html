@@ -20,7 +20,7 @@
                         "secondary-orange": "#f97316",
                         "background-light": "#f6f8f8",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                     },
                     fontFamily: {
                         "display": ["Work Sans", "sans-serif"]
@@ -581,8 +581,8 @@
                         total_comissoes: 0,
                         user_id: c.user_id || null,
                         nivel: perfil?.nivel_afiliado || 'bronze',
-                        comissao_recorrente: perfil?.comissao_recorrente ?? true,
-                        somente_primeira_venda: perfil?.somente_primeira_venda ?? false
+                        comissao_recorrente: perfil?.comissao_recorrente ?? false,
+                        somente_primeira_venda: perfil?.somente_primeira_venda ?? true
                     };
                 });
 
@@ -608,8 +608,8 @@
                                 total_comissoes: 0,
                                 user_id: a.id,
                                 nivel: a.nivel_afiliado || 'bronze',
-                                comissao_recorrente: a.comissao_recorrente ?? true,
-                                somente_primeira_venda: a.somente_primeira_venda ?? false
+                                comissao_recorrente: a.comissao_recorrente ?? false,
+                                somente_primeira_venda: a.somente_primeira_venda ?? true
                             };
                         }
                     });

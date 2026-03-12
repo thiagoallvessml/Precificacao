@@ -269,11 +269,16 @@
     <!-- Footer com Botão Salvar -->
     <div
         class="fixed bottom-0 left-0 right-0 p-4 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 z-50">
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-6xl mx-auto flex gap-3">
             <button id="saveButton"
-                class="w-full h-12 bg-primary text-background-dark font-semibold text-base rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+                class="flex-1 h-12 bg-primary text-background-dark font-semibold text-base rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined text-[22px]">save</span>
                 Salvar Receita
+            </button>
+            <button id="saveAndEntradaButton"
+                class="flex-1 h-12 bg-emerald-500 text-white font-semibold text-base rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-emerald-500/20">
+                <span class="material-symbols-outlined text-[22px]">add_box</span>
+                Salvar e Dar Entrada
             </button>
         </div>
     </div>
@@ -593,6 +598,29 @@
         }
 
         /**
+         * Helper: gera texto de conversão de quantidade para exibição
+         */
+        function getPreviewConversao(valor, unidade) {
+            const v = parseFloat(valor) || 0;
+            if (!v || v <= 0 || !unidade || unidade === 'un') return '';
+            if (unidade === 'g') {
+                if (v >= 1000) {
+                    const kg = v / 1000;
+                    return `${v.toLocaleString('pt-BR')} g = ${kg % 1 === 0 ? kg : parseFloat(kg.toFixed(3))} kg`;
+                }
+                return `${v.toLocaleString('pt-BR')} g`;
+            }
+            if (unidade === 'ml') {
+                if (v >= 1000) {
+                    const l = v / 1000;
+                    return `${v.toLocaleString('pt-BR')} ml = ${l % 1 === 0 ? l : parseFloat(l.toFixed(3))} L`;
+                }
+                return `${v.toLocaleString('pt-BR')} ml`;
+            }
+            return '';
+        }
+
+        /**
          * Cria card de ingrediente
          */
         function createIngredientCard() {
@@ -612,10 +640,50 @@
                     </div>
                 </div>
                 <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-white/5">
-                    <span class="custo-item text-xs font-medium text-primary">Custo: R$ 0,00</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="custo-item text-xs font-medium text-primary">Custo: R\$ 0,00</span>
+                        <span class="preview-conversao hidden text-[10px] text-slate-400 font-medium"></span>
+                        <span class="preview-preco-kg hidden text-[10px] font-semibold text-primary/70"></span>
+                    </div>
                     <button class="delete-btn text-rose-500"><span class="material-symbols-outlined text-lg">delete</span></button>
                 </div>
             `;
+
+            // Preview de conversão ao digitar quantidade
+            const qtdInput = card.querySelector('.quantidade-input');
+            const selIngr = card.querySelector('.ingrediente-select');
+            const prevConv = card.querySelector('.preview-conversao');
+            const prevKg = card.querySelector('.preview-preco-kg');
+
+            function atualizarPreview() {
+                const opt = selIngr.options[selIngr.selectedIndex];
+                const unidade = opt?.dataset?.unidade || '';
+                const custo = parseFloat(opt?.dataset?.custo) || 0;
+                const v = parseFloat(qtdInput.value) || 0;
+
+                // Conversao de unidade
+                const textoConv = getPreviewConversao(v, unidade);
+                if (textoConv) {
+                    prevConv.textContent = '| ' + textoConv;
+                    prevConv.classList.remove('hidden');
+                } else {
+                    prevConv.classList.add('hidden');
+                }
+
+                // Preco por kg ou L
+                if (custo > 0 && v > 0 && (unidade === 'g' || unidade === 'ml')) {
+                    const precoPorMil = custo * 1000;
+                    const unidadeGrande = unidade === 'g' ? 'kg' : 'L';
+                    prevKg.textContent = `= R$ ${precoPorMil.toFixed(2).replace('.', ',')}/${unidadeGrande}`;
+                    prevKg.classList.remove('hidden');
+                } else {
+                    prevKg.classList.add('hidden');
+                }
+            }
+
+            qtdInput.addEventListener('input', atualizarPreview);
+            selIngr.addEventListener('change', atualizarPreview);
+
             return card;
         }
 
@@ -639,10 +707,50 @@
                     </div>
                 </div>
                 <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-white/5">
-                    <span class="custo-item text-xs font-medium text-primary">Custo: R$ 0,00</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="custo-item text-xs font-medium text-primary">Custo: R\$ 0,00</span>
+                        <span class="preview-conversao hidden text-[10px] text-slate-400 font-medium"></span>
+                        <span class="preview-preco-kg hidden text-[10px] font-semibold text-primary/70"></span>
+                    </div>
                     <button class="delete-btn text-rose-500"><span class="material-symbols-outlined text-lg">delete</span></button>
                 </div>
             `;
+
+            // Preview de conversão ao digitar quantidade
+            const qtdInput = card.querySelector('.quantidade-input');
+            const selEmb = card.querySelector('.embalagem-select');
+            const prevConv = card.querySelector('.preview-conversao');
+            const prevKg = card.querySelector('.preview-preco-kg');
+
+            function atualizarPreview() {
+                const opt = selEmb.options[selEmb.selectedIndex];
+                const unidade = opt?.dataset?.unidade || '';
+                const custo = parseFloat(opt?.dataset?.custo) || 0;
+                const v = parseFloat(qtdInput.value) || 0;
+
+                // Conversao de unidade
+                const textoConv = getPreviewConversao(v, unidade);
+                if (textoConv) {
+                    prevConv.textContent = '| ' + textoConv;
+                    prevConv.classList.remove('hidden');
+                } else {
+                    prevConv.classList.add('hidden');
+                }
+
+                // Preco por kg ou L
+                if (custo > 0 && v > 0 && (unidade === 'g' || unidade === 'ml')) {
+                    const precoPorMil = custo * 1000;
+                    const unidadeGrande = unidade === 'g' ? 'kg' : 'L';
+                    prevKg.textContent = `= R$ ${precoPorMil.toFixed(2).replace('.', ',')}/${unidadeGrande}`;
+                    prevKg.classList.remove('hidden');
+                } else {
+                    prevKg.classList.add('hidden');
+                }
+            }
+
+            qtdInput.addEventListener('input', atualizarPreview);
+            selEmb.addEventListener('change', atualizarPreview);
+
             return card;
         }
 
@@ -1009,9 +1117,9 @@
         }
 
         /**
-         * Salva receita no Supabase
+         * Salva receita — modo pode ser 'save' ou 'save_and_entrada'
          */
-        async function saveReceita() {
+        async function saveReceita(redirectMode = 'save') {
             try {
                 // Validações
                 if (!nomeInput.value.trim()) {
@@ -1068,7 +1176,6 @@
                     if (!select || !select.value) return;
 
                     if (isGasVisible && consumoEntries.length > 0) {
-                        // Gas equipment: save each entry separately
                         consumoEntries.forEach(entry => {
                             const nivelSelect = entry.querySelector('.consumo-nivel-select');
                             const tempoInput = entry.querySelector('.consumo-tempo-input');
@@ -1095,6 +1202,7 @@
 
                 // Loading
                 saveButton.disabled = true;
+                saveAndEntradaButton.disabled = true;
                 saveButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Salvando...';
 
                 // Prepara dados da receita
@@ -1109,7 +1217,6 @@
                 let receitaId;
 
                 if (isEditMode && editReceitaId) {
-                    // === MODO EDIÇÃO: Atualizar receita existente ===
                     receitaId = parseInt(editReceitaId);
 
                     const { error: updateError } = await supabase
@@ -1119,7 +1226,6 @@
 
                     if (updateError) throw updateError;
 
-                    // Deletar todos os insumos antigos da receita
                     const { error: deleteError } = await supabase
                         .from('receitas_insumos')
                         .delete()
@@ -1128,7 +1234,6 @@
                     if (deleteError) throw deleteError;
 
                 } else {
-                    // === MODO CRIAÇÃO: Inserir nova receita ===
                     const { data: receita, error: receitaError } = await supabase
                         .from('receitas')
                         .insert([receitaData])
@@ -1174,7 +1279,7 @@
                     const equipamentosInsert = equipamentos.map(eq => ({
                         receita_id: receitaId,
                         insumo_id: eq.insumo_id,
-                        quantidade: eq.tempo_uso // Mapeia tempo_uso para quantidade
+                        quantidade: eq.tempo_uso
                     }));
 
                     const { error: equipamentosError } = await supabase
@@ -1184,17 +1289,22 @@
                     if (equipamentosError) throw equipamentosError;
                 }
 
-                showNotification(isEditMode ? 'Receita atualizada com sucesso!' : 'Receita salva com sucesso!', 'success');
+                showNotification(isEditMode ? 'Receita atualizada!' : 'Receita salva!', 'success');
 
                 setTimeout(() => {
-                    window.location.href = 'receitas.html';
-                }, 1000);
+                    if (redirectMode === 'save_and_entrada') {
+                        window.location.href = `adicionar-producao.html?receita_id=${receitaId}`;
+                    } else {
+                        window.location.href = 'receitas.html';
+                    }
+                }, 800);
 
             } catch (error) {
                 console.error('Erro ao salvar receita:', JSON.stringify(error, null, 2));
                 showNotification('Erro ao salvar receita: ' + (error.message || error.code || 'Erro desconhecido'), 'error');
             } finally {
                 saveButton.disabled = false;
+                saveAndEntradaButton.disabled = false;
                 saveButton.innerHTML = `<span class="material-symbols-outlined text-[22px]">save</span> ${isEditMode ? 'Atualizar' : 'Salvar'} Receita`;
             }
         }
@@ -1250,7 +1360,10 @@
             updateCustosPreview();
         });
         preparoInput.addEventListener('input', updateCustosPreview);
-        saveButton.addEventListener('click', saveReceita);
+        saveButton.addEventListener('click', () => saveReceita('save'));
+
+        const saveAndEntradaButton = document.getElementById('saveAndEntradaButton');
+        saveAndEntradaButton.addEventListener('click', () => saveReceita('save_and_entrada'));
 
         // Event delegation para atualizar custos quando houver mudanças nos cards
         document.addEventListener('input', (e) => {
@@ -1295,6 +1408,11 @@
                 document.title = 'Editar Receita';
                 saveButton.innerHTML = '<span class="material-symbols-outlined text-[22px]">save</span> Atualizar Receita';
 
+                // Ocultar botão "Salvar e Dar Entrada" no modo edição
+                saveAndEntradaButton.classList.add('hidden');
+                saveButton.classList.remove('flex-1');
+                saveButton.classList.add('w-full');
+
                 // Preencher campos básicos
                 nomeInput.value = receita.nome || '';
                 rendimentoInput.value = receita.rendimento_unidades || '';
@@ -1317,6 +1435,15 @@
                 document.getElementById('embalagens-container').innerHTML = '';
                 document.getElementById('equipamentos-container').innerHTML = '';
 
+                // Buscar tipo de cada insumo direto do banco para classificação correta
+                const insumoIds = receitaInsumos.map(ri => ri.insumo_id);
+                const { data: insumosInfo } = await supabase
+                    .from('insumos')
+                    .select('id, tipo')
+                    .in('id', insumoIds);
+                const tiposMap = {};
+                (insumosInfo || []).forEach(i => { tiposMap[i.id] = i.tipo; });
+
                 // Classificar insumos por tipo e criar cards
                 let hasIngrediente = false;
                 let hasEmbalagem = false;
@@ -1324,10 +1451,11 @@
 
                 if (receitaInsumos && receitaInsumos.length > 0) {
                     for (const ri of receitaInsumos) {
-                        // Encontrar o insumo nos dados carregados para saber o tipo
-                        const ingrediente = ingredientesData.find(i => i.id === ri.insumo_id);
-                        const embalagem = embalagensData.find(i => i.id === ri.insumo_id);
-                        const equipamento = equipamentosData.find(i => i.id === ri.insumo_id);
+                        // Usar tipo vindo direto do banco — sem risco de mistura
+                        const tipo = tiposMap[ri.insumo_id];
+                        const ingrediente = tipo === 'ingrediente' ? ingredientesData.find(i => i.id === ri.insumo_id) : null;
+                        const embalagem = tipo === 'embalagem' ? embalagensData.find(i => i.id === ri.insumo_id) : null;
+                        const equipamento = tipo === 'equipamento' ? equipamentosData.find(i => i.id === ri.insumo_id) : null;
 
                         if (ingrediente) {
                             hasIngrediente = true;

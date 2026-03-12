@@ -257,12 +257,15 @@
         const descontoPct = parseFloat(params.get('desconto_pct') || '0');
         const comissaoPct = parseFloat(params.get('comissao_pct') || '0');
         const valorDesconto = parseFloat(params.get('valor_desconto') || '0');
+        // Plano selecionado (basic | intermediario | avancado)
+        const planoSelecionado = params.get('plano') || 'avancado';
 
         // Estado
         let pixChargeId = null;
         let pollingInterval = null;
         let timerInterval = null;
         let timeLeft = 15 * 60; // 15 min
+        let pagamentoJaProcessado = false; // 🔒 flag anti-duplicata
 
         // Exibir valor
         document.getElementById('totalDisplay').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
@@ -271,6 +274,79 @@
             document.getElementById('discountMsg').textContent = `Cupom ${cupom} aplicado com sucesso`;
             document.getElementById('discountMsg').classList.remove('hidden');
         }
+
+        // ========================
+        // RECUPERAÇÃO AUTOMÁTICA
+        // Verifica se há pagamento anterior confirmado mas não processado
+        // ========================
+        async function tentarRecuperarPagamento() {
+            const savedChargeId = localStorage.getItem('pix_charge_id');
+            const savedPlano = localStorage.getItem('pix_plano');
+            if (!savedChargeId) return;
+
+            console.log('🔄 Verificando pagamento salvo:', savedChargeId);
+            try {
+                // Verificar status na AbacatePay
+                const resp = await fetch(`/api/pix-status?id=${savedChargeId}`);
+                const result = await resp.json();
+                const status = result.data?.status;
+                console.log('📡 Status do charge salvo:', status);
+
+                if (status === 'PAID' || status === 'paid' || status === 'RECEIVED') {
+                    console.log('💡 Pagamento confirmado mas não processado — recuperando...');
+
+                    // Buscar token do usuário logado
+                    let token = null;
+                    if (supabase) {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        token = session?.access_token;
+                    }
+                    if (!token) return;
+
+                    const recResp = await fetch('/api/recuperar-pagamento', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ charge_id: savedChargeId, plano: savedPlano }),
+                    });
+
+                    const recResult = await recResp.json();
+                    console.log('✅ Recuperação:', recResult);
+
+                    if (recResult.ok) {
+                        localStorage.removeItem('pix_charge_id');
+                        localStorage.removeItem('pix_plano');
+                        // Mostrar tela de confirmação
+                        if (!pagamentoJaProcessado) {
+                            pagamentoJaProcessado = true;
+                            const status = document.getElementById('waitingStatus');
+                            if (status) {
+                                status.innerHTML = `
+                                    <div class="flex flex-col items-center space-y-3 py-2">
+                                        <div class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border-2 border-emerald-500/30">
+                                            <span class="material-icons-round text-emerald-400 text-3xl">check_circle</span>
+                                        </div>
+                                        <p class="text-lg text-emerald-400 font-bold">Pagamento Confirmado! 🎉</p>
+                                        <p class="text-xs text-white/40">Seu plano já está ativo.</p>
+                                        <button onclick="window.location.href='index.html'"
+                                            class="mt-2 bg-primary text-background-dark px-8 py-3 rounded-xl font-bold hover:brightness-110 active:scale-[0.97] transition-all">
+                                            Ir para o App
+                                        </button>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('⚠️ Não foi possível recuperar pagamento anterior:', e.message);
+            }
+        }
+
+        // Executar recuperação ao carregar a página
+        tentarRecuperarPagamento();
 
         // ========================
         // CRIAR QR CODE PIX NA ABACATEPAY
@@ -290,12 +366,14 @@
                     cellphone: '11999999999',
                     taxId: '52998224725',
                 };
+                let currentUserId = null;
 
                 if (supabase) {
                     try {
                         const { data: { session } } = await supabase.auth.getSession();
                         if (session && session.user) {
                             customerData.email = session.user.email || customerData.email;
+                            currentUserId = session.user.id; // 👈 captura o user_id
                             const { data: perfil } = await supabase
                                 .from('configuracoes')
                                 .select('valor')
@@ -310,8 +388,15 @@
                 const pixPayload = {
                     amount: amountCentavos,
                     expiresIn: 900, // 15 minutos em segundos
-                    description: cupom ? `Premium - ${cupom}` : 'Plano Premium',
+                    description: `PrecificaX - Plano ${planoSelecionado}${cupom ? ` (cupom: ${cupom})` : ''}`,
                     customer: customerData,
+                    // Metadata para o webhook — inclui user_id para evitar busca por email
+                    metadata: {
+                        plano: planoSelecionado,
+                        user_id: currentUserId,
+                        email: customerData.email,
+                        cupom: cupom || null,
+                    },
                 };
 
                 console.log('🔍 Pix QR Code payload:', JSON.stringify(pixPayload));
@@ -336,6 +421,10 @@
 
                 const pixData = result.data;
                 pixChargeId = pixData.id;
+
+                // 💾 Salvar para recuperação automática em caso de falha
+                localStorage.setItem('pix_charge_id', pixChargeId);
+                localStorage.setItem('pix_plano', planoSelecionado);
 
                 // ---- Mostrar QR Code real (base64 da AbacatePay) ----
                 const qrImage = document.getElementById('qrImage');
@@ -444,30 +533,44 @@
         function iniciarPolling() {
             if (!pixChargeId) return;
 
-            // Verificar a cada 5 segundos
-            pollingInterval = setInterval(async () => {
-                try {
-                    const response = await fetch(`/api/pix-status?id=${pixChargeId}`, {
-                        method: 'GET',
-                    });
+            // Polling adaptativo:
+            // - Primeiros 2 min: verifica a cada 2s (Pix costuma confirmar em ~10-30s)
+            // - Após 2 min: aumenta para 4s para economizar requisições
+            let pollingCount = 0;
+            const FAST_INTERVAL = 2000;  // 2s
+            const SLOW_INTERVAL = 4000;  // 4s
+            const FAST_LIMIT = 60;       // 60 ticks × 2s = 2 min no modo rápido
 
+            async function verificarStatus() {
+                if (pagamentoJaProcessado) return;
+                try {
+                    const response = await fetch(`/api/pix-status?id=${pixChargeId}`, { method: 'GET' });
                     const result = await response.json();
-                    console.log('🔄 Polling status:', JSON.stringify(result));
+                    console.log('🔄 Polling status:', result.data?.status);
 
                     const status = result.data?.status;
 
                     if (status === 'PAID' || status === 'paid' || status === 'RECEIVED') {
-                        // PAGAMENTO CONFIRMADO!
-                        clearInterval(pollingInterval);
-                        await pagamentoConfirmado();
+                        clearTimeout(pollingInterval);
+                        if (!pagamentoJaProcessado) await pagamentoConfirmado();
+                        return;
                     } else if (status === 'EXPIRED' || status === 'expired') {
-                        clearInterval(pollingInterval);
+                        clearTimeout(pollingInterval);
                         expirarCobranca();
+                        return;
                     }
                 } catch (err) {
                     console.warn('Erro no polling:', err.message);
                 }
-            }, 5000);
+
+                // Reagendar próxima verificação
+                pollingCount++;
+                const nextInterval = pollingCount < FAST_LIMIT ? FAST_INTERVAL : SLOW_INTERVAL;
+                pollingInterval = setTimeout(verificarStatus, nextInterval);
+            }
+
+            // Iniciar primeira verificação após 2s
+            pollingInterval = setTimeout(verificarStatus, FAST_INTERVAL);
         }
 
         // ========================
@@ -475,50 +578,79 @@
         // ========================
 
         async function pagamentoConfirmado() {
+            // Proteção contra dupla execução — flag gerenciado AQUI
+            if (pagamentoJaProcessado) return;
+            pagamentoJaProcessado = true; // seta AGORA, antes de qualquer await
             clearInterval(timerInterval);
-            clearInterval(pollingInterval);
+            clearTimeout(pollingInterval);
 
-            // ======== ATIVAR PLANO PREMIUM NO SUPABASE ========
-            if (supabase) {
-                try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (session && session.user) {
-                        const { error } = await supabase
-                            .from('perfis_usuarios')
-                            .update({
-                                plano: 'premium',
-                                premium_inicio: new Date().toISOString(),
-                            })
-                            .eq('id', session.user.id);
-
-                        if (error) {
-                            console.error('❌ Erro ao ativar plano Premium:', error);
-                        } else {
-                            console.log('✅ Plano Premium ativado com sucesso!');
-                        }
-                    }
-                } catch (err) {
-                    console.error('❌ Erro ao ativar plano Premium:', err);
-                }
-            }
-
-            // Registrar indicação no Supabase (pagamento CONFIRMADO)
-            await registrarIndicacao(true);
-
-            const status = document.getElementById('waitingStatus');
-            status.innerHTML = `
+            // ✅ Mostrar sucesso NA TELA IMEDIATAMENTE — não esperar o Supabase
+            const statusEl = document.getElementById('waitingStatus');
+            statusEl.innerHTML = `
                 <div class="flex flex-col items-center space-y-3 py-2">
                     <div class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border-2 border-emerald-500/30">
                         <span class="material-icons-round text-emerald-400 text-3xl">check_circle</span>
                     </div>
                     <p class="text-lg text-emerald-400 font-bold">Pagamento Confirmado! 🎉</p>
-                    <p class="text-xs text-white/40">Seu plano Premium já está ativo.</p>
+                    <p class="text-xs text-white/40">Ativando seu plano...</p>
+                    <div class="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin mt-1"></div>
+                </div>
+            `;
+
+            // ======== ATIVAR PLANO NO SUPABASE (em background) ========
+            let planoAtivado = false;
+            if (supabase) {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session && session.user) {
+                        const planosValidos = ['basic', 'intermediario', 'avancado', 'premium'];
+                        const planoFinal = planosValidos.includes(planoSelecionado)
+                            ? planoSelecionado
+                            : 'avancado';
+
+                        const { error } = await supabase
+                            .from('perfis_usuarios')
+                            .update({
+                                plano: planoFinal,
+                                premium_inicio: new Date().toISOString(),
+                                ultimo_pagamento_id: pixChargeId || null,
+                                ultimo_pagamento_em: new Date().toISOString(),
+                            })
+                            .eq('id', session.user.id);
+
+                        if (error) {
+                            console.error('❌ Erro ao ativar plano:', error);
+                        } else {
+                            planoAtivado = true;
+                            console.log(`✅ Plano '${planoFinal}' ativado com sucesso!`);
+                        }
+                    }
+                } catch (err) {
+                    console.error('❌ Erro ao ativar plano:', err);
+                }
+            }
+
+            // 🧹 Limpar localStorage
+            localStorage.removeItem('pix_charge_id');
+            localStorage.removeItem('pix_plano');
+
+            // ✅ Atualizar UI com botão para ir ao app
+            statusEl.innerHTML = `
+                <div class="flex flex-col items-center space-y-3 py-2">
+                    <div class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center border-2 border-emerald-500/30">
+                        <span class="material-icons-round text-emerald-400 text-3xl">check_circle</span>
+                    </div>
+                    <p class="text-lg text-emerald-400 font-bold">Pagamento Confirmado! 🎉</p>
+                    <p class="text-xs text-white/40">Seu plano já está ativo.</p>
                     <button onclick="window.location.href='index.html'" 
                         class="mt-2 bg-primary text-background-dark px-8 py-3 rounded-xl font-bold hover:brightness-110 active:scale-[0.97] transition-all">
                         Ir para o App
                     </button>
                 </div>
             `;
+
+            // Registrar indicação em background (não bloqueia a UX)
+            registrarIndicacao(true).catch(e => console.warn('Indicação não registrada:', e));
         }
 
         function expirarCobranca() {
@@ -750,9 +882,10 @@
                     }
                 }
 
-                // Calcular comissão
-                const valorOriginal = total + valorDesconto;
-                let comissao = total * (comissaoPct / 100); // comissão sobre valor pago
+                // Calcular comissão — sempre 10% fixo sobre o valor pago
+                const valorOriginal = total + valorDesconto; // valor antes do desconto
+                const COMISSAO_PCT_FIXO = 10; // 10% fixo, independente do cupom
+                let comissao = total * (COMISSAO_PCT_FIXO / 100);
 
                 // Aplicar regras de ganho
                 if (isRenovacao) {
@@ -800,51 +933,80 @@
         // ========================
 
         window.jaPaguei = async function () {
-            const status = document.getElementById('waitingStatus');
-            status.innerHTML = `
+            if (pagamentoJaProcessado) return;
+
+            const statusEl = document.getElementById('waitingStatus');
+            statusEl.innerHTML = `
                 <div class="flex flex-col items-center space-y-3 py-2">
                     <div class="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                     <p class="text-sm text-primary font-medium">Verificando pagamento...</p>
                 </div>
             `;
 
-            // Se tem pixChargeId, verificar status real na AbacatePay
+            // 1️⃣ Tentar verificar diretamente na AbacatePay
             if (pixChargeId) {
                 try {
-                    const response = await fetch(`/api/pix-status?id=${pixChargeId}`, {
-                        method: 'GET',
-                    });
-
+                    const response = await fetch(`/api/pix-status?id=${pixChargeId}`, { method: 'GET' });
                     const result = await response.json();
                     const pixStatus = result.data?.status;
 
                     if (pixStatus === 'PAID' || pixStatus === 'paid' || pixStatus === 'RECEIVED') {
-                        await pagamentoConfirmado();
-                        return;
-                    } else {
-                        // Pagamento ainda não detectado
-                        status.innerHTML = `
-                            <div class="flex flex-col items-center space-y-3 py-2">
-                                <span class="material-icons-round text-amber-400 text-3xl">hourglass_top</span>
-                                <p class="text-sm text-amber-400 font-bold">Pagamento ainda não detectado</p>
-                                <p class="text-xs text-white/40">Aguarde alguns instantes e tente novamente.</p>
-                                <p class="text-xs text-white/30">A verificação automática continua em segundo plano.</p>
-                            </div>
-                        `;
+                        if (!pagamentoJaProcessado) await pagamentoConfirmado();
                         return;
                     }
                 } catch (err) {
-                    console.warn('Erro ao verificar status:', err);
+                    console.warn('Erro ao verificar status AbacatePay:', err);
                 }
+
+                // 2️⃣ Fallback: usar /api/recuperar-pagamento (usa service_role, mais robusto)
+                try {
+                    let token = null;
+                    if (supabase) {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        token = session?.access_token;
+                    }
+                    if (token) {
+                        const recResp = await fetch('/api/recuperar-pagamento', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ charge_id: pixChargeId, plano: planoSelecionado }),
+                        });
+                        const recResult = await recResp.json();
+                        console.log('🔁 recuperar-pagamento:', recResult);
+
+                        if (recResult.ok) {
+                            localStorage.removeItem('pix_charge_id');
+                            localStorage.removeItem('pix_plano');
+                            if (!pagamentoJaProcessado) await pagamentoConfirmado();
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Erro no recuperar-pagamento:', err);
+                }
+
+                // 3️⃣ Pagamento ainda não processado — mostrar botão de nova tentativa
+                statusEl.innerHTML = `
+                    <div class="flex flex-col items-center space-y-3 py-2">
+                        <span class="material-icons-round text-amber-400 text-3xl">hourglass_top</span>
+                        <p class="text-sm text-amber-400 font-bold">Pagamento ainda não detectado</p>
+                        <p class="text-xs text-white/40 text-center">O banco pode levar alguns segundos para confirmar.<br>Aguarde e tente novamente.</p>
+                        <button onclick="jaPaguei()"
+                            class="mt-1 bg-primary/10 border border-primary/30 text-primary px-6 py-2 rounded-xl text-sm font-bold hover:bg-primary/20 active:scale-[0.97] transition-all">
+                            Tentar novamente
+                        </button>
+                        <p class="text-[10px] text-white/20">A verificação automática continua em segundo plano</p>
+                    </div>
+                `;
+                return;
             }
 
-            // Fallback: sem AbacatePay — não podemos confirmar automaticamente
-            // Mostrar aviso para verificação manual pelo administrador
-            status.innerHTML = `
+            // Sem pixChargeId (modo fallback sem AbacatePay)
+            statusEl.innerHTML = `
                 <div class="flex flex-col items-center space-y-3 py-2">
                     <span class="material-icons-round text-amber-400 text-3xl">info</span>
                     <p class="text-sm text-amber-400 font-bold">Pagamento em verificação</p>
-                    <p class="text-xs text-white/40 text-center">Seu pagamento será confirmado em até 24h.<br>Se for urgente, entre em contato com o suporte.</p>
+                    <p class="text-xs text-white/40 text-center">Seu pagamento será confirmado em breve.<br>Se precisar de ajuda, entre em contato com o suporte.</p>
                     <button onclick="window.location.href='index.html'" 
                         class="mt-2 bg-white/10 text-white px-8 py-3 rounded-xl font-bold hover:bg-white/20 active:scale-[0.97] transition-all">
                         Voltar ao App

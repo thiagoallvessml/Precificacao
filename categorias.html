@@ -19,8 +19,8 @@
                         "primary": "#13ecec",
                         "background-light": "#f6f8f8",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
-                        "input-dark": "#1c1c27",
+                        "card-dark": "#1E1E1E",
+                        "input-dark": "#1E1E1E",
                     },
                     fontFamily: {
                         "display": ["Work Sans", "sans-serif"]
@@ -55,6 +55,10 @@
         .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
     </style>
 </head>
@@ -239,7 +243,7 @@
                     ? 'bg-primary text-background-dark shadow-lg shadow-primary/20'
                     : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'}"
                     title="${icon}">
-                    <span class="material-symbols-outlined text-xl">${icon}</span>
+                    <span class="material-symbols-outlined text-sm">${icon}</span>
                 </button>
             `).join('');
         }
@@ -260,7 +264,7 @@
                 categorias = data || [];
                 renderCategorias();
             } catch (error) {
-                console.error('❌ Erro ao carregar categorias:', error);
+                console.error('Erro ao carregar categorias:', error);
             }
         }
 
@@ -326,7 +330,6 @@
         window.switchTab = function (tab) {
             currentTab = tab;
 
-            // Update UI
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 const isActive = btn.dataset.tab === tab;
                 btn.className = `tab-btn border-b-2 px-4 py-3 whitespace-nowrap transition-colors ${isActive
@@ -336,12 +339,10 @@
                 btn.querySelector('p').className = `text-sm ${isActive ? 'font-bold' : 'font-semibold'}`;
             });
 
-            // Reset ícone selecionado para o primeiro da lista
             const icons = iconsByType[tab] || iconsByType.produtos;
             selectedIcon = icons[0];
             document.getElementById('inputIcone').value = selectedIcon;
 
-            // Mostrar/ocultar campo de taxa
             const campoTaxa = document.getElementById('campoTaxa');
             if (tab === 'marketplace') {
                 campoTaxa.classList.remove('hidden');
@@ -350,13 +351,9 @@
                 document.getElementById('inputTaxa').value = '';
             }
 
-            // Atualizar dica contextual
             atualizarDica(tab);
-
             renderCategorias();
             renderIconGrid();
-
-            // Checar limite de categorias para o tab atual
             checkCategoryLimit(tab);
         };
 
@@ -370,7 +367,6 @@
                     const { checkLimiteMarketplaces } = await import('./plan-limits.js');
                     currentLimitInfo = await checkLimiteMarketplaces(bannerContainer);
                 } else {
-                    // produtos, insumos, despesas
                     const { checkLimiteCategorias } = await import('./plan-limits.js');
                     currentLimitInfo = await checkLimiteCategorias(tab, bannerContainer);
                 }
@@ -383,7 +379,6 @@
         document.getElementById('formAddCategoria').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Checar limite de categorias
             if (currentLimitInfo.atingiu) {
                 const nomes = {
                     produtos: 'categorias de produtos',
@@ -391,15 +386,10 @@
                     insumos: 'categorias de insumos',
                     despesas: 'categorias de despesas'
                 };
-                const limites = {
-                    produtos: 2,
-                    marketplace: 1,
-                    insumos: 2,
-                    despesas: 3
-                };
+                const limites = { produtos: 2, marketplace: 1, insumos: 2, despesas: 3 };
                 const nomeTipo = nomes[currentTab] || 'categorias';
                 const limiteNum = limites[currentTab] || '?';
-                if (confirm(`⭐ Limite de ${nomeTipo} atingido!\n\nNo plano Free você pode ter até ${limiteNum} ${nomeTipo}.\nDeseja fazer upgrade para Premium?`)) {
+                if (confirm(`Limite de ${nomeTipo} atingido!\n\nDeseja fazer upgrade?`)) {
                     window.location.href = 'planos.html';
                 }
                 return;
@@ -414,7 +404,6 @@
                     ativo: true
                 };
 
-                // Adicionar taxa se for marketplace
                 if (currentTab === 'marketplace') {
                     const taxa = document.getElementById('inputTaxa').value;
                     novaCategoria.taxa_operacional = taxa ? parseFloat(taxa) : 0;
@@ -423,15 +412,14 @@
                 const { error } = await insertRecord('categorias', novaCategoria);
                 if (error) throw error;
 
-                alert('✅ Categoria adicionada com sucesso!');
+                alert('Categoria adicionada com sucesso!');
                 e.target.reset();
                 document.getElementById('inputTaxa').value = '';
                 await loadCategorias();
-                // Re-checar limite
                 checkCategoryLimit(currentTab);
             } catch (error) {
-                console.error('❌ Erro ao adicionar categoria:', error);
-                alert('❌ Erro: ' + error.message);
+                console.error('Erro ao adicionar categoria:', error);
+                alert('Erro: ' + error.message);
             }
         });
 
@@ -445,7 +433,6 @@
             document.getElementById('editIcone').value = cat.icone || '';
             document.getElementById('editDescricao').value = cat.descricao || '';
 
-            // Mostrar/preencher taxa se for marketplace
             const editCampoTaxa = document.getElementById('editCampoTaxa');
             if (cat.tipo === 'marketplace') {
                 editCampoTaxa.classList.remove('hidden');
@@ -458,7 +445,6 @@
             document.getElementById('modalEdit').classList.remove('hidden');
         };
 
-        // Fechar modal
         window.fecharModalEdit = function () {
             document.getElementById('modalEdit').classList.add('hidden');
         };
@@ -477,7 +463,6 @@
                     descricao: document.getElementById('editDescricao').value || null
                 };
 
-                // Atualizar taxa se for marketplace
                 if (categoria && categoria.tipo === 'marketplace') {
                     const taxa = document.getElementById('editTaxa').value;
                     updates.taxa_operacional = taxa ? parseFloat(taxa) : 0;
@@ -486,12 +471,12 @@
                 const { error } = await updateRecord('categorias', id, updates);
                 if (error) throw error;
 
-                alert('✅ Categoria atualizada!');
+                alert('Categoria atualizada!');
                 fecharModalEdit();
                 await loadCategorias();
             } catch (error) {
-                console.error('❌ Erro ao atualizar:', error);
-                alert('❌ Erro: ' + error.message);
+                console.error('Erro ao atualizar:', error);
+                alert('Erro: ' + error.message);
             }
         });
 
@@ -504,20 +489,27 @@
                 const { error } = await deleteRecord('categorias', id);
                 if (error) throw error;
 
-                alert('✅ Categoria excluída!');
+                alert('Categoria excluída!');
                 await loadCategorias();
-                // Re-checar limite após exclusão
                 await checkCategoryLimit(currentTab);
             } catch (error) {
-                console.error('❌ Erro ao deletar:', error);
-                alert('❌ Erro: ' + error.message);
+                console.error('Erro ao deletar:', error);
+                alert('Erro: ' + error.message);
             }
         };
 
         // Iniciar
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        const tabsValidas = ['produtos', 'marketplace', 'insumos', 'despesas'];
+
+        if (tabParam && tabsValidas.includes(tabParam)) {
+            currentTab = tabParam;
+        }
+
         loadCategorias();
         renderIconGrid();
-        checkCategoryLimit(currentTab); // Checar limite ao carregar
+        switchTab(currentTab);
     </script>
 </body>
 

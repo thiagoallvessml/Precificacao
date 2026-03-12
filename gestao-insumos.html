@@ -19,9 +19,9 @@
                         "primary": "#13ecec",
                         "alert": "#ef4444",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                         "input-bg": "#1e1e1e",
-                        "border-dark": "#2d4444",
+                        "border-dark": "#2A2A2A",
                     },
                     fontFamily: {
                         "display": ["Work Sans", "sans-serif"]
@@ -86,7 +86,7 @@
     <!-- Main Content -->
     <main class="pt-36 px-4 space-y-4">
         <!-- Cards de Resumo -->
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
             <!-- Total de Insumos -->
             <div class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border border-border-dark">
                 <div class="flex items-center gap-2 text-white/50">
@@ -120,23 +120,47 @@
                 <p id="valorTotal" class="text-2xl font-bold text-primary">R$ 0</p>
             </div>
 
-            <!-- Insumos Críticos -->
-            <div class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border-l-4 border-alert">
+            <!-- Insumos Atenção (clicável) -->
+            <div id="cardAtencao" onclick="filtrarPorStatus('atencao')" title="Clique para filtrar insumos em atenção"
+                class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border-l-4 border-amber-500 cursor-pointer hover:bg-amber-500/5 active:scale-[0.97] transition-all relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="material-symbols-outlined text-amber-500/40 text-4xl">filter_list</span>
+                </div>
+                <div class="flex items-center gap-2 text-amber-500/80">
+                    <span class="material-symbols-outlined text-base">error_outline</span>
+                    <p class="text-[10px] font-semibold uppercase tracking-wider">Atenção</p>
+                </div>
+                <p id="totalAtencao" class="text-2xl font-bold text-amber-400">0</p>
+                <p class="text-[9px] text-amber-500/60 font-medium">Clique para filtrar</p>
+            </div>
+
+            <!-- Insumos Críticos (clicável) -->
+            <div id="cardCriticos" onclick="filtrarPorStatus('critico')" title="Clique para filtrar insumos críticos"
+                class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border-l-4 border-alert cursor-pointer hover:bg-red-500/5 active:scale-[0.97] transition-all relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="material-symbols-outlined text-alert/40 text-4xl">filter_list</span>
+                </div>
                 <div class="flex items-center gap-2 text-alert/80">
                     <span class="material-symbols-outlined text-base">warning</span>
                     <p class="text-[10px] font-semibold uppercase tracking-wider">Críticos</p>
                 </div>
                 <p id="totalCriticos" class="text-2xl font-bold text-alert">0</p>
+                <p class="text-[9px] text-red-500/60 font-medium">Clique para filtrar</p>
             </div>
+        </div>
 
-            <!-- Custo Médio por Produção -->
-            <div class="flex flex-col gap-1.5 rounded-xl p-4 bg-card-dark border border-border-dark">
-                <div class="flex items-center gap-2 text-white/50">
-                    <span class="material-symbols-outlined text-base">calculate</span>
-                    <p class="text-[10px] font-semibold uppercase tracking-wider">Custo Médio</p>
-                </div>
-                <p id="custoMedio" class="text-2xl font-bold text-white">R$ 0</p>
-            </div>
+        <!-- Banner: filtro ativo -->
+        <div id="bannerFiltroAtivo"
+            class="hidden mb-4 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-3">
+            <span id="bannerFiltroIcone"
+                class="material-symbols-outlined text-amber-400 text-xl shrink-0">filter_list</span>
+            <p id="bannerFiltroTexto" class="text-amber-300 text-sm font-semibold flex-1">Mostrando insumos em atenção
+            </p>
+            <button onclick="limparFiltroStatus()"
+                class="text-amber-400 hover:text-amber-300 text-xs font-bold flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg px-3 py-1.5 transition-all">
+                <span class="material-symbols-outlined text-sm">close</span>
+                Limpar filtro
+            </button>
         </div>
 
         <!-- Status Message -->
@@ -359,18 +383,108 @@
             const qtdTotal = insumos.reduce((sum, i) => sum + parseFloat(i.estoque_atual || 0), 0);
             const valorTotal = insumos.reduce((sum, i) => sum + (parseFloat(i.estoque_atual || 0) * parseFloat(i.custo_unitario || 0)), 0);
             const criticos = insumos.filter(i => parseFloat(i.estoque_atual) <= parseFloat(i.estoque_minimo)).length;
-            const custoMedio = total > 0 ? valorTotal / total : 0;
+
+            // Calcular atenção (abaixo de 70% do max/ref, mas não crítico)
+            const atencao = insumos.filter(i => {
+                const atual = parseFloat(i.estoque_atual || 0);
+                const min = parseFloat(i.estoque_minimo || 0);
+                const max = parseFloat(i.estoque_maximo || 0);
+                const isCritico = atual <= min;
+                const ref = max > 0 ? max : (min || 1) * 2;
+                const pct = (atual / ref) * 100;
+                return !isCritico && pct < 70;
+            }).length;
 
             document.getElementById('totalInsumos').textContent = total;
             document.getElementById('qtdTotal').innerHTML = `${qtdTotal.toFixed(1)} <span class="text-sm font-normal text-white/50">un</span>`;
             document.getElementById('valorTotal').textContent = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
             document.getElementById('totalCriticos').textContent = criticos;
-            document.getElementById('custoMedio').textContent = `R$ ${truncar5(custoMedio).replace('.', ',')}`;
+            document.getElementById('totalAtencao').textContent = atencao;
+
+            // Destaque visual nos cards se > 0
+            const cardCriticos = document.getElementById('cardCriticos');
+            const cardAtencao = document.getElementById('cardAtencao');
+            if (criticos > 0) {
+                cardCriticos.classList.add('animate-pulse-subtle');
+            }
+            if (atencao > 0) {
+                cardAtencao.classList.add('animate-pulse-subtle');
+            }
         }
+
+        // Filtro por status
+        let filtroStatusAtivo = null;
+
+        window.filtrarPorStatus = function (status) {
+            // Toggle: se já ativo, limpa
+            if (filtroStatusAtivo === status) {
+                limparFiltroStatus();
+                return;
+            }
+
+            filtroStatusAtivo = status;
+            document.getElementById('searchInput').value = '';
+
+            if (status === 'critico') {
+                filteredInsumos = insumos.filter(i =>
+                    parseFloat(i.estoque_atual) <= parseFloat(i.estoque_minimo)
+                );
+                document.getElementById('bannerFiltroIcone').textContent = 'warning';
+                document.getElementById('bannerFiltroIcone').className = 'material-symbols-outlined text-red-400 text-xl shrink-0';
+                document.getElementById('bannerFiltroTexto').textContent = `Mostrando ${filteredInsumos.length} insumo(s) com estoque crítico`;
+                document.getElementById('bannerFiltroTexto').className = 'text-red-300 text-sm font-semibold flex-1';
+                document.getElementById('bannerFiltroAtivo').className = 'mb-4 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 flex items-center gap-3';
+
+                // Destacar card ativo
+                document.getElementById('cardCriticos').classList.add('ring-2', 'ring-alert', 'bg-red-500/10');
+                document.getElementById('cardAtencao').classList.remove('ring-2', 'ring-amber-500', 'bg-amber-500/10');
+            } else {
+                // atenção = abaixo de 70% mas não crítico
+                filteredInsumos = insumos.filter(i => {
+                    const atual = parseFloat(i.estoque_atual || 0);
+                    const min = parseFloat(i.estoque_minimo || 0);
+                    const max = parseFloat(i.estoque_maximo || 0);
+                    const isCritico = atual <= min;
+                    const ref = max > 0 ? max : (min || 1) * 2;
+                    const pct = (atual / ref) * 100;
+                    return !isCritico && pct < 70;
+                });
+                document.getElementById('bannerFiltroIcone').textContent = 'error_outline';
+                document.getElementById('bannerFiltroIcone').className = 'material-symbols-outlined text-amber-400 text-xl shrink-0';
+                document.getElementById('bannerFiltroTexto').textContent = `Mostrando ${filteredInsumos.length} insumo(s) com estoque em atenção`;
+                document.getElementById('bannerFiltroTexto').className = 'text-amber-300 text-sm font-semibold flex-1';
+                document.getElementById('bannerFiltroAtivo').className = 'mb-4 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-3';
+
+                // Destacar card ativo
+                document.getElementById('cardAtencao').classList.add('ring-2', 'ring-amber-500', 'bg-amber-500/10');
+                document.getElementById('cardCriticos').classList.remove('ring-2', 'ring-alert', 'bg-red-500/10');
+            }
+
+            renderInsumos();
+            // Scroll suave até a lista
+            setTimeout(() => document.getElementById('insumosContainer').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        };
+
+        window.limparFiltroStatus = function () {
+            filtroStatusAtivo = null;
+            filteredInsumos = insumos;
+            document.getElementById('bannerFiltroAtivo').className = 'hidden mb-4 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-3';
+            document.getElementById('cardCriticos').classList.remove('ring-2', 'ring-alert', 'bg-red-500/10');
+            document.getElementById('cardAtencao').classList.remove('ring-2', 'ring-amber-500', 'bg-amber-500/10');
+            document.getElementById('searchInput').value = '';
+            renderInsumos();
+        };
 
         // Busca
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase();
+            // Limpar filtro de status ao buscar
+            if (filtroStatusAtivo) {
+                filtroStatusAtivo = null;
+                document.getElementById('bannerFiltroAtivo').className = 'hidden mb-4 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-3';
+                document.getElementById('cardCriticos').classList.remove('ring-2', 'ring-alert', 'bg-red-500/10');
+                document.getElementById('cardAtencao').classList.remove('ring-2', 'ring-amber-500', 'bg-amber-500/10');
+            }
             filteredInsumos = insumos.filter(i =>
                 i.nome.toLowerCase().includes(query) ||
                 i.fornecedor?.toLowerCase().includes(query) ||

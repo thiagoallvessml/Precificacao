@@ -20,7 +20,7 @@
                         "primary": "#13ecec",
                         "background-light": "#f5f8f8",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                     },
                     fontFamily: {
                         "display": ["Work Sans", "sans-serif"]
@@ -168,7 +168,7 @@
                     </div>
                     <p class="text-gray-300 leading-relaxed text-sm">
                         Compartilhe seu código exclusivo. Seus amigos ganham
-                        <span id="heroDesconto" class="text-primary font-bold">10% de desconto</span> na primeira
+                        <span id="heroDesconto" class="text-primary font-bold">R$ 10,00 de desconto</span> na primeira
                         mensalidade
                         e você ganha <span id="heroComissao" class="text-primary font-bold">10% de comissão</span>!
                     </p>
@@ -299,76 +299,21 @@
                     </div>
                 </section>
 
-                <!-- Métricas -->
-                <section class="space-y-3">
-                    <h2 class="text-sm font-medium text-gray-400 px-1 uppercase tracking-widest">Seu Desempenho</h2>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-card-dark rounded-xl p-4 border border-white/5">
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                    <span class="material-icons-round text-primary text-lg">group</span>
-                                </div>
-                                <span class="text-[10px] text-gray-500 uppercase font-bold">Indicados</span>
-                            </div>
-                            <p id="totalIndicados" class="text-3xl font-black text-primary">
-                                <span class="skeleton inline-block h-9 w-10 rounded"></span>
-                            </p>
-                            <p class="text-[10px] text-gray-500 mt-1">pessoas convertidas</p>
-                        </div>
-                        <div class="bg-card-dark rounded-xl p-4 border border-white/5">
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center">
-                                    <span class="material-icons-round text-emerald-400 text-lg">payments</span>
-                                </div>
-                                <span class="text-[10px] text-gray-500 uppercase font-bold">Comissões</span>
-                            </div>
-                            <p id="totalComissoes" class="text-3xl font-black text-emerald-400">
-                                <span class="skeleton inline-block h-9 w-20 rounded"></span>
-                            </p>
-                            <p class="text-[10px] text-gray-500 mt-1">ganhos acumulados</p>
-                        </div>
-                    </div>
 
-                    <!-- Métricas extras -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <div
-                            class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
-                                    <span class="material-icons-round text-amber-400 text-lg">hourglass_top</span>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 uppercase font-bold">Pendentes</p>
-                                    <p id="totalPendentes" class="text-lg font-black text-amber-400">0</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                                    <span class="material-icons-round text-primary text-lg">analytics</span>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 uppercase font-bold">Conversão</p>
-                                    <p id="taxaConversao" class="text-lg font-black text-primary">-</p>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Atalho para painel completo -->
+                <a href="painel-afiliado.html"
+                    class="flex items-center gap-4 bg-primary/10 border border-primary/20 rounded-xl p-4 hover:bg-primary/15 transition-colors group">
+                    <div
+                        class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <span class="material-icons-round text-primary text-2xl">account_balance_wallet</span>
                     </div>
-                </section>
-
-                <!-- Histórico de Indicações -->
-                <section class="space-y-3">
-                    <div class="flex items-center justify-between px-1">
-                        <h2 class="text-sm font-medium text-gray-400 uppercase tracking-widest">Últimas Indicações</h2>
+                    <div class="flex-1">
+                        <p class="font-bold text-primary">Ver Meu Painel de Afiliado</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Ganhos, histórico de comissões e saque</p>
                     </div>
-                    <div id="listaIndicacoes" class="space-y-2">
-                        <!-- Skeleton loading -->
-                        <div class="skeleton h-16 rounded-xl"></div>
-                        <div class="skeleton h-16 rounded-xl"></div>
-                    </div>
-                </section>
+                    <span
+                        class="material-icons-round text-primary/50 group-hover:text-primary transition-colors">arrow_forward_ios</span>
+                </a>
 
                 <!-- Termos -->
                 <section class="pb-8">
@@ -626,7 +571,7 @@
                     // Atualizar hero
                     const heroDesconto = document.getElementById('heroDesconto');
                     const heroComissao = document.getElementById('heroComissao');
-                    if (heroDesconto) heroDesconto.textContent = `${cupomAtual.desconto_percentual}% de desconto`;
+                    if (heroDesconto) heroDesconto.textContent = `R$ ${parseFloat(cupomAtual.desconto_percentual || 10).toFixed(2).replace('.', ',')} de desconto`;
                     if (heroComissao) heroComissao.textContent = `${cupomAtual.comissao_percentual}% de comissão`;
 
                     console.log('🔍 [10] ✅ Código exibido:', cupomAtual.codigo);

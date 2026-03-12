@@ -21,7 +21,7 @@
                     colors: {
                         "primary": "#13ecec",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                         "danger": "#ff4d4d",
                         "success": "#22c55e"
                     },
@@ -105,19 +105,6 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        .role-option {
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .role-option.selected {
-            border-color: #13ecec;
-            background: rgba(19, 236, 236, 0.08);
-        }
-
-        .role-option:not(.selected):hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
 
         .password-strength {
             height: 3px;
@@ -219,41 +206,6 @@
                             <p class="text-xs text-gray-500 mt-1">Crie sua conta em poucos segundos</p>
                         </div>
 
-                        <!-- Role Selector -->
-                        <div>
-                            <label
-                                class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 mb-2 block">
-                                Tipo de Conta
-                            </label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <div id="opt-dono" onclick="selectRole('dono')"
-                                    class="role-option selected rounded-xl p-4 border border-white/10 flex items-center gap-4">
-                                    <div
-                                        class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                        <span class="material-icons-round text-primary">storefront</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h3 class="text-sm font-bold text-white">Dono do Negócio</h3>
-                                        <p class="text-[11px] text-gray-500">Gerencie produtos, receitas e vendas</p>
-                                    </div>
-                                    <span id="check-dono"
-                                        class="material-icons-round text-primary text-lg">check_circle</span>
-                                </div>
-                                <div id="opt-afiliado" onclick="selectRole('afiliado')"
-                                    class="role-option rounded-xl p-4 border border-white/10 flex items-center gap-4">
-                                    <div
-                                        class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                        <span class="material-icons-round text-primary">handshake</span>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h3 class="text-sm font-bold text-white">Afiliado</h3>
-                                        <p class="text-[11px] text-gray-500">Indique e ganhe comissões</p>
-                                    </div>
-                                    <span id="check-afiliado"
-                                        class="material-icons-round text-primary text-lg hidden">check_circle</span>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Grid de campos (2 colunas no desktop) -->
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -367,7 +319,7 @@
                             class="hidden bg-success/10 border border-success/20 rounded-xl p-4 text-center">
                             <span class="material-icons-round text-success text-3xl block mb-2">check_circle</span>
                             <h3 class="text-success font-bold text-sm mb-1">Conta criada com sucesso!</h3>
-                            <p class="text-gray-400 text-xs">Verifique seu e-mail para confirmar a conta.</p>
+                            <p class="text-gray-400 text-xs">Redirecionando para o login...</p>
                             <a href="login.html"
                                 class="inline-block mt-3 text-primary text-sm font-bold hover:underline">Ir
                                 para o Login →</a>
@@ -410,27 +362,6 @@
         import { getSupabase } from './supabase-client.js';
 
         const supabase = getSupabase();
-        let selectedRole = 'dono';
-
-        // Selecionar role
-        window.selectRole = function (role) {
-            selectedRole = role;
-            ['dono', 'afiliado'].forEach(r => {
-                const opt = document.getElementById(`opt-${r}`);
-                const check = document.getElementById(`check-${r}`);
-                if (r === role) {
-                    opt.classList.add('selected');
-                    check.classList.remove('hidden');
-                } else {
-                    opt.classList.remove('selected');
-                    check.classList.add('hidden');
-                }
-            });
-
-            // Mostrar/esconder campo de negócio
-            const fieldNegocio = document.getElementById('fieldNegocio');
-            fieldNegocio.style.display = role === 'dono' ? 'block' : 'none';
-        };
 
         // Toggle password
         window.togglePassword = function (inputId) {
@@ -490,7 +421,7 @@
             if (!email || !email.includes('@')) return showError('Informe um e-mail válido.');
             if (password.length < 6) return showError('A senha deve ter pelo menos 6 caracteres.');
             if (password !== passwordConfirm) return showError('As senhas não coincidem.');
-            if (selectedRole === 'dono' && !negocio) return showError('Informe o nome do seu negócio.');
+            if (!negocio) return showError('Informe o nome do seu negócio.');
 
             setLoading(true);
             hideError();
@@ -510,7 +441,7 @@
                         data: {
                             nome: nome,
                             full_name: nome,
-                            role: selectedRole,
+                            role: 'dono',
                             telefone: telefone,
                             nome_negocio: negocio
                         }
@@ -519,16 +450,68 @@
 
                 if (error) throw error;
 
-                // Atualizar perfil com dados extras
+                // Atualizar perfil com dados extras + trial de 7 dias
                 if (data.user) {
                     try {
+                        const trialExpira = new Date();
+                        trialExpira.setDate(trialExpira.getDate() + 7);
+
                         await supabase
                             .from('perfis_usuarios')
                             .update({
+                                nome: nome,
                                 telefone: telefone,
-                                nome_negocio: negocio
+                                nome_negocio: negocio,
+                                trial_expires_at: trialExpira.toISOString(),
+                                plano: 'free',
+                                comissao_recorrente: false,        // padrão: não recorrente
+                                somente_primeira_venda: true       // padrão: só 1ª venda
                             })
                             .eq('id', data.user.id);
+
+                        // Criar cupom de afiliado automaticamente para todo usuário
+                        const primeiroNome = nome.trim().split(/\s+/)[0];
+                        const codigoCupom = primeiroNome
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[^A-Za-z0-9]/g, '')
+                            .toUpperCase() + '10';
+
+                        // Verificar se cupom já existe (evitar duplicata)
+                        const { data: cupomExist } = await supabase
+                            .from('cupons_afiliado')
+                            .select('id')
+                            .eq('codigo', codigoCupom)
+                            .limit(1);
+
+                        if (!cupomExist || cupomExist.length === 0) {
+                            await supabase.from('cupons_afiliado').insert([{
+                                codigo: codigoCupom,
+                                desconto_percentual: 10,
+                                comissao_percentual: 10,
+                                ativo: true,
+                                user_id: data.user.id
+                            }]);
+                            console.log('✅ Cupom de afiliado criado:', codigoCupom);
+                        } else {
+                            // Gerar código único com sufixo numérico
+                            const codigoUnico = codigoCupom + Math.floor(Math.random() * 90 + 10);
+                            await supabase.from('cupons_afiliado').insert([{
+                                codigo: codigoUnico,
+                                desconto_percentual: 10,
+                                comissao_percentual: 10,
+                                ativo: true,
+                                user_id: data.user.id
+                            }]);
+                            console.log('✅ Cupom de afiliado criado (único):', codigoUnico);
+                        }
+
+                        // Salvar codigo_indicacao no perfil
+                        await supabase
+                            .from('perfis_usuarios')
+                            .update({ codigo_indicacao: codigoCupom })
+                            .eq('id', data.user.id);
+
                     } catch (e) {
                         console.warn('Não foi possível atualizar dados extras do perfil:', e);
                     }
@@ -565,6 +548,8 @@
         function showSuccess() {
             document.getElementById('successMessage').classList.remove('hidden');
             document.getElementById('btnCadastro').classList.add('hidden');
+            // Redirecionar para login após 2 segundos
+            setTimeout(() => { window.location.href = 'login.html'; }, 2000);
         }
 
         function setLoading(loading) {

@@ -30,6 +30,108 @@
         body {
             font-family: 'Work Sans', sans-serif;
         }
+
+        /* ========== TUTORIAL INTERATIVO ========== */
+        #tutorialOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9990;
+            pointer-events: none;
+        }
+
+        #tutorialOverlay.active {
+            pointer-events: all;
+        }
+
+        /* Máscara escura com buraco (criado via clip-path no JS) */
+        #tutorialMask {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            transition: clip-path 0.45s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* Borda brilhante em volta do elemento destacado */
+        #tutorialSpotlight {
+            position: absolute;
+            border: 2px solid #13ecec;
+            border-radius: 12px;
+            box-shadow: 0 0 0 4px rgba(19, 236, 236, 0.15), 0 0 30px rgba(19, 236, 236, 0.25);
+            transition: all 0.45s cubic-bezier(.4, 0, .2, 1);
+            pointer-events: none;
+            animation: tutPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes tutPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 4px rgba(19, 236, 236, 0.15), 0 0 20px rgba(19, 236, 236, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(19, 236, 236, 0.1), 0 0 40px rgba(19, 236, 236, 0.35);
+            }
+        }
+
+        /* Tooltip flutuante */
+        #tutorialTooltip {
+            position: absolute;
+            background: #0d2020;
+            border: 1px solid rgba(19, 236, 236, 0.35);
+            border-radius: 16px;
+            padding: 16px 18px;
+            max-width: 300px;
+            min-width: 240px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            transition: all 0.4s cubic-bezier(.4, 0, .2, 1);
+            z-index: 9995;
+        }
+
+        /* Cursor animado apontando pro campo */
+        #tutorialCursor {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            pointer-events: none;
+            z-index: 9996;
+            transition: all 0.5s cubic-bezier(.4, 0, .2, 1);
+            filter: drop-shadow(0 0 8px rgba(19, 236, 236, 0.8));
+        }
+
+        /* Barra de progresso */
+        #tutorialProgress {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 9997;
+        }
+
+        #tutorialProgressBar {
+            height: 100%;
+            background: linear-gradient(90deg, #13ecec, #00b8b8);
+            transition: width 0.4s ease;
+        }
+
+        /* Botão de abrir tutorial */
+        #btnTutorial {
+            animation: tutBtnPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes tutBtnPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(19, 236, 236, 0);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(19, 236, 236, 0.15);
+            }
+        }
     </style>
 </head>
 
@@ -41,7 +143,13 @@
                 class="text-white flex size-12 shrink-0 items-center justify-center cursor-pointer hover:bg-white/10 rounded-full transition-colors">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
-            <h1 class="text-white text-lg font-bold flex-1 text-center pr-12">Gestão de Equipamentos</h1>
+            <h1 class="text-white text-lg font-bold flex-1 text-center">Gestão de Equipamentos</h1>
+            <!-- Botão Tutorial -->
+            <button id="btnTutorial" onclick="iniciarTutorial()"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 border border-primary/30 text-primary text-xs font-bold hover:bg-primary/20 transition-all shrink-0">
+                <span class="material-symbols-outlined text-base">school</span>
+                <span class="hidden sm:inline">Tutorial</span>
+            </button>
         </div>
     </header>
 
@@ -76,7 +184,7 @@
             <!-- Form -->
             <section class="mt-8 px-4">
                 <div class="bg-white/5 rounded-xl border border-white/10 p-5 shadow-xl">
-                    <h2 class="text-white text-xl font-bold mb-6">Registrar Novo Equipamento</h2>
+                    <h2 id="secaoFormulario" class="text-white text-xl font-bold mb-6">Registrar Novo Equipamento</h2>
                     <form id="formEquipamento" class="space-y-5">
                         <div>
                             <label class="block text-[#9db9b9] text-xs font-semibold uppercase tracking-wider mb-2">Nome
@@ -261,6 +369,7 @@
         let custoKwh = 0.85; // Valor padrão
         let custoGasPorKg = 8.46; // Valor padrão (110/13)
         let editingId = null; // ID do equipamento sendo editado
+        let currentUserId = null; // user_id do usuário logado
 
         // PCI do GLP (Poder Calorífico Inferior) em Wh/kg
         // 1 kg de GLP ≈ 11.100 kcal, 1 kcal = 1,163 Wh → ≈ 12.907 Wh/kg
@@ -329,36 +438,45 @@
 
         // Calcular custo atual baseado nas configurações
         function calcularCustoAtual(equipamento) {
-            try {
-                if (equipamento.observacoes) {
-                    const dados = JSON.parse(equipamento.observacoes);
-
-                    if (dados.tipo_equipamento === 'eletrico' && dados.potencia_watts) {
-                        const potenciaKw = dados.potencia_watts / 1000;
-                        return potenciaKw * custoKwh;
-                    } else if (dados.tipo_equipamento === 'gas') {
-                        const consumoKgH = dados.consumo_gas_kgh || CONSUMO_GAS_PADRAO.medio;
-                        const bocas = dados.quantidade_bocas || 1;
-                        return (consumoKgH / bocas) * custoGasPorKg;
-                    }
-                }
-            } catch (e) {
-                // Se não conseguir parsear, retorna custo_unitario do banco
+            // A tabela equipamentos armazena tipo_equipamento e potencia_watts diretamente
+            if (equipamento.tipo_equipamento === 'eletrico' && equipamento.potencia_watts) {
+                const potenciaKw = equipamento.potencia_watts / 1000;
+                return potenciaKw * custoKwh;
+            } else if (equipamento.tipo_equipamento === 'gas') {
+                try {
+                    const dados = JSON.parse(equipamento.observacoes || '{}');
+                    const consumoKgH = dados.consumo_gas_kgh || CONSUMO_GAS_PADRAO.medio;
+                    const bocas = dados.quantidade_bocas || 1;
+                    return (consumoKgH / bocas) * custoGasPorKg;
+                } catch (e) { /* usa custo_hora */ }
             }
-
-            return equipamento.custo_unitario || 0;
+            return equipamento.custo_hora || 0;
         }
 
-        // Carregar equipamentos da tabela insumos
+        // Obter user_id do usuário logado
+        async function getCurrentUserId() {
+            if (currentUserId) return currentUserId;
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                currentUserId = session?.user?.id || null;
+            } catch (e) {
+                console.warn('Não foi possível obter user_id:', e);
+            }
+            return currentUserId;
+        }
+
+        // Carregar equipamentos da tabela equipamentos
         async function loadEquipamentos() {
             try {
                 console.log('🔍 Carregando equipamentos...');
 
+                // Garantir que temos o user_id
+                await getCurrentUserId();
+
                 const { data, error } = await supabase
-                    .from('insumos')
+                    .from('equipamentos')
                     .select('*')
-                    .eq('tipo', 'equipamento')
-                    .eq('ativo', true)
+                    .neq('status', 'inativo')
                     .order('nome');
 
                 if (error) throw error;
@@ -379,18 +497,18 @@
             if (equipamentos.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-12 px-4">
-                        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">category</span>
+                        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">precision_manufacturing</span>
                         <p class="text-slate-400">Nenhum equipamento cadastrado</p>
-                        <p class="text-slate-500 text-xs mt-2">Cadastre equipamentos em Gestão de Insumos</p>
+                        <p class="text-slate-500 text-xs mt-2">Use o formulário ao lado para cadastrar</p>
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = equipamentos.map(e => {
-                const emUso = e.estoque_atual > 0;
-                const statusClass = emUso ? 'text-green-400 bg-green-400/10' : 'text-slate-400 bg-slate-400/10';
-                const statusLabel = emUso ? 'Disponível' : 'Indisponível';
+                const ativo = e.status !== 'inativo';
+                const statusClass = ativo ? 'text-green-400 bg-green-400/10' : 'text-slate-400 bg-slate-400/10';
+                const statusLabel = e.status === 'ativo' ? 'Ativo' : e.status === 'manutencao' ? 'Manutenção' : 'Inativo';
 
                 // Recalcular custo baseado nas configurações atuais
                 const custoAtual = calcularCustoAtual(e);
@@ -399,12 +517,12 @@
                 let gasInfo = '';
                 try {
                     const dados = JSON.parse(e.observacoes || '{}');
-                    if (dados.tipo_equipamento === 'gas') {
+                    if (e.tipo_equipamento === 'gas') {
                         const bocas = dados.quantidade_bocas || 1;
                         const niveis = dados.niveis_consumo || [
-                            { nome: 'Baixo', valor: dados.consumo_gas_baixo || CONSUMO_GAS_PADRAO.baixo },
-                            { nome: 'Médio', valor: dados.consumo_gas_medio || CONSUMO_GAS_PADRAO.medio },
-                            { nome: 'Alto', valor: dados.consumo_gas_alto || CONSUMO_GAS_PADRAO.alto }
+                            { nome: 'Baixo', valor: CONSUMO_GAS_PADRAO.baixo },
+                            { nome: 'Médio', valor: CONSUMO_GAS_PADRAO.medio },
+                            { nome: 'Alto', valor: CONSUMO_GAS_PADRAO.alto }
                         ];
                         const niveisHtml = niveis.map(n => {
                             const porBoca = (n.valor / bocas).toFixed(4).replace('.', ',');
@@ -416,6 +534,8 @@
                                 <span class="text-white/20 text-[10px]">|</span>
                                 ${niveisHtml}
                             </div>`;
+                    } else if (e.tipo_equipamento === 'eletrico' && e.potencia_watts) {
+                        gasInfo = `<span class="text-[#9db9b9] text-[10px]">⚡ ${e.potencia_watts}W</span>`;
                     }
                 } catch (ex) { /* ignore */ }
 
@@ -423,12 +543,12 @@
                     <div class="flex items-center gap-4 bg-transparent px-4 min-h-[72px] py-3 justify-between">
                         <div class="flex items-center gap-3 flex-1 overflow-hidden">
                             <div class="text-primary flex items-center justify-center rounded-lg bg-primary/10 shrink-0 size-10">
-                                <span class="material-symbols-outlined text-[20px]">settings</span>
+                                <span class="material-symbols-outlined text-[20px]">${e.tipo_equipamento === 'eletrico' ? 'bolt' : e.tipo_equipamento === 'gas' ? 'local_fire_department' : 'settings'}</span>
                             </div>
                             <div class="flex flex-col justify-center overflow-hidden">
                                 <p class="text-white text-sm font-medium leading-tight truncate">${e.nome}</p>
                                 <p class="text-[#9db9b9] text-xs font-normal leading-normal truncate">
-                                    ${e.unidade_medida} • Custo: R$ ${custoAtual.toFixed(4)}/${e.unidade_medida}
+                                    R$ ${custoAtual.toFixed(4)}/hora
                                 </p>
                                 ${gasInfo}
                             </div>
@@ -451,29 +571,21 @@
 
         // Excluir equipamento (tornar global para onclick)
         window.excluirEquipamento = async function (id, nome) {
-            // Confirmação
             const confirmacao = confirm(`⚠️ Tem certeza que deseja excluir o equipamento "${nome}"?\n\nEsta ação não pode ser desfeita!`);
-
-            if (!confirmacao) {
-                return;
-            }
+            if (!confirmacao) return;
 
             try {
                 console.log(`🗑️ Excluindo equipamento ID: ${id}, Nome: ${nome}`);
 
-                // Delete do Supabase (soft delete - marca como inativo)
+                // Soft delete — marca como inativo na tabela equipamentos
                 const { error } = await supabase
-                    .from('insumos')
-                    .update({ ativo: false })
-                    .eq('id', id)
-                    .eq('tipo', 'equipamento');
+                    .from('equipamentos')
+                    .update({ status: 'inativo' })
+                    .eq('id', id);
 
                 if (error) throw error;
 
-                // Sucesso
                 alert(`✅ Equipamento "${nome}" excluído com sucesso!`);
-
-                // Recarrega lista
                 loadEquipamentos();
 
             } catch (error) {
@@ -492,15 +604,16 @@
             // Preencher campos do formulário
             document.getElementById('inputNome').value = equip.nome || '';
 
+            // Os campos principais agora estão diretamente na tabela equipamentos
             let dados = {};
             try { dados = JSON.parse(equip.observacoes || '{}'); } catch (e) { }
 
-            document.getElementById('inputDescricao').value = dados.descricao || '';
-            document.getElementById('inputTipoEquipamento').value = dados.tipo_equipamento || 'outro';
+            document.getElementById('inputDescricao').value = equip.descricao || dados.descricao || '';
+            document.getElementById('inputTipoEquipamento').value = equip.tipo_equipamento || dados.tipo_equipamento || 'manual';
             toggleCamposTipo();
 
-            if (dados.potencia_watts) {
-                document.getElementById('inputPotencia').value = dados.potencia_watts;
+            if (equip.potencia_watts || dados.potencia_watts) {
+                document.getElementById('inputPotencia').value = equip.potencia_watts || dados.potencia_watts;
             }
 
             // Restaurar níveis de consumo de gás
@@ -571,15 +684,15 @@
                 }
             }
 
-            // Valor de compra e vida útil
-            if (dados.valor_compra) {
-                document.getElementById('inputValor').value = dados.valor_compra;
+            // Valor de compra e vida útil — campos nativos da tabela equipamentos
+            if (equip.valor_compra || dados.valor_compra) {
+                document.getElementById('inputValor').value = equip.valor_compra || dados.valor_compra;
             }
-            if (dados.data_compra) {
-                document.getElementById('inputDataCompra').value = dados.data_compra;
+            if (equip.data_compra || dados.data_compra) {
+                document.getElementById('inputDataCompra').value = equip.data_compra || dados.data_compra;
             }
-            if (dados.vida_util_meses) {
-                document.getElementById('inputVidaUtil').value = dados.vida_util_meses;
+            if (equip.vida_util_meses || dados.vida_util_meses) {
+                document.getElementById('inputVidaUtil').value = equip.vida_util_meses || dados.vida_util_meses;
             }
 
             // Atualizar botão e mostrar cancelar
@@ -661,7 +774,7 @@
             }
         }
 
-        // Salvar ou Atualizar equipamento na tabela insumos
+        // Salvar ou Atualizar equipamento na tabela equipamentos
         document.getElementById('formEquipamento').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -731,45 +844,52 @@
                     });
                 }
 
-                const dadosAdicionais = {
-                    descricao: descricao || null,
-                    tipo_equipamento: tipoEquipamento,
-                    potencia_watts: potencia,
+                // Dados extras em JSON (níveis de consumo de gás, etc.)
+                const dadosExtras = {
                     niveis_consumo: niveisConsumo.length > 0 ? niveisConsumo : null,
                     unidade_consumo: tipoEquipamento === 'gas' ? unidadeConsumo : null,
                     niveis_consumo_watts: niveisConsumoOriginal,
                     consumo_gas_kgh: consumoParaCalculo,
                     quantidade_bocas: quantidadeBocas,
-                    valor_compra: valorCompra,
-                    data_compra: dataCompra,
-                    vida_util_meses: vidaUtil
                 };
 
+                // Garantir que temos o user_id antes de salvar
+                const uid = await getCurrentUserId();
+                if (!uid) {
+                    alert('Erro: usuário não autenticado. Faça login novamente.');
+                    return;
+                }
+
+                // Objeto mapeado para as colunas reais da tabela equipamentos
                 const equipamento = {
                     nome,
-                    tipo: 'equipamento',
-                    unidade_medida: unidadeMedida,
-                    estoque_atual: 1,  // Equipamento disponível
-                    estoque_minimo: 0,
-                    custo_unitario: parseFloat(custoUnitario.toFixed(4)),
-                    observacoes: JSON.stringify(dadosAdicionais),
-                    ativo: true
+                    descricao: descricao || null,
+                    tipo_equipamento: tipoEquipamento,
+                    potencia_watts: potencia,
+                    valor_compra: valorCompra || null,
+                    data_compra: dataCompra,
+                    vida_util_meses: vidaUtil || null,
+                    depreciacao_mensal: (valorCompra && vidaUtil) ? parseFloat((valorCompra / vidaUtil).toFixed(2)) : null,
+                    custo_hora: parseFloat(custoUnitario.toFixed(6)),
+                    status: 'ativo',
+                    observacoes: JSON.stringify(dadosExtras),
+                    user_id: uid,
                 };
 
-                console.log('📝 Salvando equipamento:', equipamento);
+                console.log('📝 Salvando equipamento na tabela equipamentos:', equipamento);
 
                 let result;
                 if (editingId) {
                     // ATUALIZAR equipamento existente
                     result = await supabase
-                        .from('insumos')
+                        .from('equipamentos')
                         .update(equipamento)
                         .eq('id', editingId)
                         .select();
                 } else {
                     // INSERIR novo equipamento
                     result = await supabase
-                        .from('insumos')
+                        .from('equipamentos')
                         .insert([equipamento])
                         .select();
                 }
@@ -921,6 +1041,336 @@
             toggleCamposTipo(); // Ajustar campos iniciais
         })();
     </script>
+
+    <!-- ========== TUTORIAL INTERATIVO ========== -->
+    <!-- Overlay container -->
+    <div id="tutorialOverlay">
+        <div id="tutorialMask" style="display:none"></div>
+        <div id="tutorialSpotlight" style="display:none"></div>
+        <div id="tutorialCursor" style="display:none">
+            <!-- SVG cursor estilizado -->
+            <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 2L4 22L9.5 16.5L13 24L16 22.5L12.5 15L20 15L4 2Z" fill="#13ecec" stroke="#0d2020"
+                    stroke-width="1.5" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <div id="tutorialTooltip" style="display:none">
+            <!-- Ícone do passo -->
+            <div class="flex items-start gap-3 mb-3">
+                <div id="tutStepIcon"
+                    class="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-primary text-base">info</span>
+                </div>
+                <div class="flex-1">
+                    <p id="tutStepLabel" class="text-primary text-[10px] font-bold uppercase tracking-wider mb-0.5"></p>
+                    <h3 id="tutStepTitle" class="text-white font-bold text-sm leading-snug"></h3>
+                </div>
+            </div>
+            <p id="tutStepDesc" class="text-slate-400 text-xs leading-relaxed mb-4"></p>
+
+            <!-- Navegação -->
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex gap-1" id="tutDots"></div>
+                <div class="flex gap-2">
+                    <button id="tutBtnPrev" onclick="tutPrev()"
+                        class="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 text-xs font-semibold hover:bg-white/5 transition-all">
+                        ← Anterior
+                    </button>
+                    <button id="tutBtnNext" onclick="tutNext()"
+                        class="px-4 py-1.5 rounded-lg bg-primary text-background-dark text-xs font-bold hover:brightness-110 transition-all">
+                        Próximo →
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Barra de progresso -->
+        <div id="tutorialProgress" style="display:none">
+            <div id="tutorialProgressBar" style="width:0%"></div>
+        </div>
+    </div>
+
+    <!-- Banner de boas vindas ao tutorial -->
+    <div id="tutorialWelcome"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        style="display:none!important">
+        <div class="bg-[#0d2020] border border-primary/30 rounded-2xl p-8 max-w-sm mx-4 text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-primary text-3xl">school</span>
+            </div>
+            <h2 class="text-white text-xl font-bold mb-2">Tutorial de Cadastro</h2>
+            <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+                Vou te guiar pelo cadastro de equipamentos passo a passo,<br>
+                destacando cada campo na tela real. 🎯
+            </p>
+            <div class="flex gap-3">
+                <button onclick="fecharTutorialWelcome()"
+                    class="flex-1 py-3 rounded-xl border border-white/10 text-slate-400 text-sm font-semibold hover:bg-white/5 transition-all">
+                    Agora não
+                </button>
+                <button onclick="comecarTutorial()"
+                    class="flex-1 py-3 rounded-xl bg-primary text-background-dark text-sm font-bold hover:brightness-110 transition-all">
+                    Começar! 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  TUTORIAL INTERATIVO - Equipamentos
+        // ============================================================
+        const TUTORIAL_STEPS = [
+            {
+                icon: 'edit',
+                label: 'Passo 1 de 9',
+                title: 'Nome do Equipamento',
+                desc: 'Digite o nome do seu equipamento. Seja específico! Ex: "Freezer Vertical 300L", "Fogão Industrial 4 Bocas". Esse nome aparecerá nos relatórios de custo.',
+                selector: '#inputNome',
+                scroll: true,
+                tooltipPos: 'bottom',
+            },
+            {
+                icon: 'description',
+                label: 'Passo 2 de 9',
+                title: 'Descrição (Opcional)',
+                desc: 'Adicione detalhes extras como modelo, número de série, fornecedor ou qualquer observação relevante sobre o equipamento.',
+                selector: '#inputDescricao',
+                scroll: true,
+                tooltipPos: 'bottom',
+            },
+            {
+                icon: 'category',
+                label: 'Passo 3 de 9',
+                title: 'Tipo de Equipamento',
+                desc: '⚡ Elétrico: freezers, batedeiras, seladora etc. 🔥 A Gás: fogão, chapa a gás etc. 🔧 Manual: facas, espátulas, formas. O tipo determina como o custo por hora é calculado.',
+                selector: '#inputTipoEquipamento',
+                scroll: true,
+                tooltipPos: 'bottom',
+            },
+            {
+                icon: 'bolt',
+                label: 'Passo 4 de 9',
+                title: 'Potência em Watts',
+                desc: 'Informe a potência em Watts. Você geralmente encontra essa informação na etiqueta do equipamento ou no manual. Ex: Freezer 150W, Batedeira 300W. Usada para calcular o custo de energia elétrica.',
+                selector: '#campoPotencia',
+                scroll: true,
+                tooltipPos: 'bottom',
+            },
+            {
+                icon: 'price_change',
+                label: 'Passo 5 de 9',
+                title: 'Valor de Compra',
+                desc: 'Quanto você pagou pelo equipamento? Esse valor é usado para calcular a depreciação mensal — ou seja, quanto do custo do equipamento é "gasto" a cada mês de uso.',
+                selector: '#inputValor',
+                scroll: true,
+                tooltipPos: 'top',
+            },
+            {
+                icon: 'calendar_today',
+                label: 'Passo 6 de 9',
+                title: 'Data de Compra',
+                desc: 'Informe quando o equipamento foi adquirido. Esse dado registra o histórico e pode ser usado para controle de garantia e vida útil.',
+                selector: '#inputDataCompra',
+                scroll: true,
+                tooltipPos: 'top',
+            },
+            {
+                icon: 'timelapse',
+                label: 'Passo 7 de 9',
+                title: 'Vida Útil (meses)',
+                desc: 'Por quantos meses você estima que este equipamento vai durar? Ex: Freezer = 120 meses (10 anos). Isso divide o custo de compra ao longo da vida útil para calcular a depreciação por hora.',
+                selector: '#inputVidaUtil',
+                scroll: true,
+                tooltipPos: 'top',
+            },
+            {
+                icon: 'save',
+                label: 'Passo 8 de 9',
+                title: 'Salvar o Equipamento',
+                desc: 'Com todos os campos preenchidos, clique aqui para salvar! O sistema calculará automaticamente o custo por hora do equipamento e ele aparecerá na lista ao lado.',
+                selector: '#btnSubmitEquipamento',
+                scroll: true,
+                tooltipPos: 'top',
+            },
+            {
+                icon: 'checklist',
+                label: 'Passo 9 de 9',
+                title: 'Lista de Equipamentos',
+                desc: 'Aqui ficam todos os seus equipamentos cadastrados! Você pode editar ✏️ ou excluir 🗑️ qualquer um. O custo por hora calculado é usado automaticamente nas suas receitas.',
+                selector: '#equipamentosList',
+                scroll: true,
+                tooltipPos: 'right',
+            },
+        ];
+
+        let tutStep = 0;
+        let tutActive = false;
+        let tutScrollOk = false;
+
+        function iniciarTutorial() {
+            const welcome = document.getElementById('tutorialWelcome');
+            welcome.style.setProperty('display', 'flex', 'important');
+        }
+        function fecharTutorialWelcome() {
+            document.getElementById('tutorialWelcome').style.setProperty('display', 'none', 'important');
+        }
+        function comecarTutorial() {
+            fecharTutorialWelcome();
+            tutStep = 0;
+            tutActive = true;
+            const overlay = document.getElementById('tutorialOverlay');
+            overlay.classList.add('active');
+            document.getElementById('tutorialMask').style.display = 'block';
+            document.getElementById('tutorialProgress').style.display = 'block';
+            renderTutStep();
+        }
+        function encerrarTutorial() {
+            tutActive = false;
+            const overlay = document.getElementById('tutorialOverlay');
+            overlay.classList.remove('active');
+            document.getElementById('tutorialMask').style.display = 'none';
+            document.getElementById('tutorialSpotlight').style.display = 'none';
+            document.getElementById('tutorialTooltip').style.display = 'none';
+            document.getElementById('tutorialCursor').style.display = 'none';
+            document.getElementById('tutorialMask').style.clipPath = '';
+            document.getElementById('tutorialProgress').style.display = 'none';
+        }
+        function tutNext() {
+            if (tutStep >= TUTORIAL_STEPS.length - 1) { encerrarTutorial(); showTutorialConcluido(); return; }
+            tutStep++;
+            renderTutStep();
+        }
+        function tutPrev() {
+            if (tutStep <= 0) return;
+            tutStep--;
+            renderTutStep();
+        }
+
+        function renderTutStep() {
+            const step = TUTORIAL_STEPS[tutStep];
+            const el = document.querySelector(step.selector);
+            if (!el) { tutNext(); return; }
+
+            // Scroll suave para o elemento
+            if (step.scroll) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            setTimeout(() => posicionarTutorial(step, el), 350);
+        }
+
+        function posicionarTutorial(step, el) {
+            const pad = 10;
+            const rect = el.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            // Spotlight border
+            const spotlight = document.getElementById('tutorialSpotlight');
+            spotlight.style.display = 'block';
+            spotlight.style.left = (rect.left - pad) + 'px';
+            spotlight.style.top = (rect.top - pad) + 'px';
+            spotlight.style.width = (rect.width + pad * 2) + 'px';
+            spotlight.style.height = (rect.height + pad * 2) + 'px';
+
+            // Máscara com buraco via clip-path (polygon)
+            const mask = document.getElementById('tutorialMask');
+            const x1 = rect.left - pad, y1 = rect.top - pad;
+            const x2 = rect.right + pad, y2 = rect.bottom + pad;
+            mask.style.clipPath = `polygon(
+            0% 0%, 100% 0%, 100% 100%, 0% 100%,
+            0% ${y1}px, ${x1}px ${y1}px, ${x1}px ${y2}px, ${x2}px ${y2}px,
+            ${x2}px ${y1}px, 0% ${y1}px
+        )`;
+
+            // Cursor animado
+            const cursor = document.getElementById('tutorialCursor');
+            cursor.style.display = 'block';
+            cursor.style.left = (rect.left + rect.width / 2 - 14) + 'px';
+            cursor.style.top = (rect.top - 30) + 'px';
+
+            // Tooltip posição
+            const tooltip = document.getElementById('tutorialTooltip');
+            tooltip.style.display = 'block';
+
+            // Definir conteúdo
+            document.getElementById('tutStepIcon').innerHTML = `<span class="material-symbols-outlined text-primary text-base">${step.icon}</span>`;
+            document.getElementById('tutStepLabel').textContent = step.label;
+            document.getElementById('tutStepTitle').textContent = step.title;
+            document.getElementById('tutStepDesc').textContent = step.desc;
+
+            // Dots de progresso
+            const dots = document.getElementById('tutDots');
+            dots.innerHTML = TUTORIAL_STEPS.map((_, i) =>
+                `<span class="inline-block rounded-full transition-all ${i === tutStep ? 'w-4 h-2 bg-primary' : 'w-2 h-2 bg-white/20'
+                }"></span>`
+            ).join('');
+
+            // Prev button
+            document.getElementById('tutBtnPrev').style.display = tutStep === 0 ? 'none' : '';
+
+            // Último passo
+            const isLast = tutStep === TUTORIAL_STEPS.length - 1;
+            document.getElementById('tutBtnNext').textContent = isLast ? '✅ Concluir' : 'Próximo →';
+
+            // Posicionar tooltip inteligentemente
+            const tooltipW = 300, tooltipH = 220;
+            let tx, ty;
+            const margin = 20;
+
+            // Tentar abaixo
+            if (rect.bottom + tooltipH + margin < vh) {
+                ty = rect.bottom + pad + margin;
+                tx = Math.min(Math.max(rect.left, margin), vw - tooltipW - margin);
+            }
+            // Tentar acima
+            else if (rect.top - tooltipH - margin > 0) {
+                ty = rect.top - pad - tooltipH - margin;
+                tx = Math.min(Math.max(rect.left, margin), vw - tooltipW - margin);
+            }
+            // Tentar à direita
+            else if (rect.right + tooltipW + margin < vw) {
+                tx = rect.right + pad + margin;
+                ty = Math.max(rect.top, margin);
+            }
+            // Fallback: centro superior
+            else {
+                tx = (vw - tooltipW) / 2;
+                ty = margin + 60;
+            }
+
+            tooltip.style.left = tx + 'px';
+            tooltip.style.top = ty + 'px';
+
+            // Barra de progresso
+            const pct = ((tutStep + 1) / TUTORIAL_STEPS.length * 100).toFixed(0);
+            document.getElementById('tutorialProgressBar').style.width = pct + '%';
+        }
+
+        function showTutorialConcluido() {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0d2020,#112929);border:1px solid rgba(19,236,236,0.4);color:white;font-weight:700;font-size:14px;padding:16px 24px;border-radius:16px;z-index:9999;display:flex;align-items:center;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5);';
+            toast.innerHTML = `<span style="font-size:28px">🎉</span><div><p style="color:#13ecec;font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">Tutorial concluído!</p><p style="font-size:13px;font-weight:500;color:#cbd5e1;">Agora você já sabe como cadastrar equipamentos.</p></div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Fechar ao pressionar ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && tutActive) encerrarTutorial();
+            if (e.key === 'ArrowRight' && tutActive) tutNext();
+            if (e.key === 'ArrowLeft' && tutActive) tutPrev();
+        });
+
+        // Reposicionar ao redimensionar
+        window.addEventListener('resize', () => {
+            if (!tutActive) return;
+            const step = TUTORIAL_STEPS[tutStep];
+            const el = document.querySelector(step.selector);
+            if (el) posicionarTutorial(step, el);
+        });
+    </script>
+
 </body>
 
 </html>

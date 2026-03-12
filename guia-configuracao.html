@@ -21,7 +21,7 @@
                         "primary": "#13ecec",
                         "background-light": "#f6f8f8",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                     },
                     fontFamily: {
                         "display": ["Work Sans", "sans-serif"]
@@ -110,39 +110,16 @@
 
             <!-- Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <!-- Step 1: Equipamentos -->
-                <div id="step-equipamentos" onclick="window.location.href='equipamentos.html'"
-                    class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.05s">
-                    <div
-                        class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
-                        <span class="material-symbols-outlined">kitchen</span>
-                    </div>
-                    <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">1. Equipamentos
-                        </p>
-                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Cadastre seus freezers e
-                            ferramentas de produção.</p>
-                    </div>
-                    <div id="badge-equipamentos" class="shrink-0">
-                        <div
-                            class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                            <span
-                                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pendente</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Configurações -->
+                <!-- Step 1: Configurações -->
                 <div id="step-configuracoes" onclick="window.location.href='configuracoes.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.08s">
+                    style="animation-delay: 0.05s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">settings</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">2.
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">1.
                             Configurações
                         </p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Custos fixos, mão de obra e
@@ -157,21 +134,21 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Insumos -->
-                <div id="step-insumos" onclick="window.location.href='gerenciar-insumos.html'"
+                <!-- Step 2: Equipamentos -->
+                <div id="step-equipamentos" onclick="window.location.href='equipamentos.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.12s">
+                    style="animation-delay: 0.08s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
-                        <span class="material-symbols-outlined">inventory_2</span>
+                        <span class="material-symbols-outlined">kitchen</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">3. Cadastrar
-                            Insumo</p>
-                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Leite, açúcar, frutas e
-                            embalagens.</p>
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">2. Equipamentos
+                        </p>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Cadastre seus freezers e
+                            ferramentas de produção.</p>
                     </div>
-                    <div id="badge-insumos" class="shrink-0">
+                    <div id="badge-equipamentos" class="shrink-0">
                         <div
                             class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                             <span
@@ -180,16 +157,16 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Categorias -->
+                <!-- Step 3: Categorias -->
                 <div id="step-categorias" onclick="window.location.href='categorias.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.18s">
+                    style="animation-delay: 0.12s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">category</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">4. Categorias
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">3. Categorias
                         </p>
                         <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Organize em Gourmet,
                             Alcoólicos ou Fruta.</p>
@@ -203,20 +180,43 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Despesas -->
-                <div id="step-despesas" onclick="window.location.href='despesas.html'"
+                <!-- Step 4: Cadastrar Insumo -->
+                <div id="step-insumos" onclick="window.location.href='gerenciar-insumos.html'"
+                    class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    style="animation-delay: 0.18s">
+                    <div
+                        class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                    </div>
+                    <div class="flex flex-col flex-1">
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">4. Cadastrar
+                            Insumo</p>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Leite, açúcar, frutas e
+                            embalagens.</p>
+                    </div>
+                    <div id="badge-insumos" class="shrink-0">
+                        <div
+                            class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            <span
+                                class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pendente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Receitas -->
+                <div id="step-receitas" onclick="window.location.href='adicionar-receita.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
                     style="animation-delay: 0.24s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
-                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                        <span class="material-symbols-outlined">menu_book</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">5. Despesas</p>
-                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Luz, água, aluguel e
-                            marketing.</p>
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">5. Receitas</p>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Vincule os insumos e
+                            quantidades a cada produto.</p>
                     </div>
-                    <div id="badge-despesas" class="shrink-0">
+                    <div id="badge-receitas" class="shrink-0">
                         <div
                             class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                             <span
@@ -228,7 +228,7 @@
                 <!-- Step 6: Produtos -->
                 <div id="step-produtos" onclick="window.location.href='adicionar-produto.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    style="animation-delay: 0.3s">
+                    style="animation-delay: 0.30s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
                         <span class="material-symbols-outlined">icecream</span>
@@ -247,20 +247,21 @@
                     </div>
                 </div>
 
-                <!-- Step 7: Receitas -->
-                <div id="step-receitas" onclick="window.location.href='adicionar-receita.html'"
+                <!-- Step 7: Precificação -->
+                <div id="step-precificacao" onclick="window.location.href='precificacao.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
                     style="animation-delay: 0.36s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
-                        <span class="material-symbols-outlined">menu_book</span>
+                        <span class="material-symbols-outlined">sell</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">7. Receitas</p>
-                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Vincule os insumos e
-                            quantidades a cada produto.</p>
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">7. Precificação
+                        </p>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Defina preços ideais para
+                            cada canal.</p>
                     </div>
-                    <div id="badge-receitas" class="shrink-0">
+                    <div id="badge-precificacao" class="shrink-0">
                         <div
                             class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                             <span
@@ -269,21 +270,20 @@
                     </div>
                 </div>
 
-                <!-- Step 8: Precificação -->
-                <div id="step-precificacao" onclick="window.location.href='precificacao.html'"
+                <!-- Step 8: Despesas -->
+                <div id="step-despesas" onclick="window.location.href='despesas.html'"
                     class="step-card group flex items-center gap-4 bg-white dark:bg-card-dark p-4 rounded-xl border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md transition-all cursor-pointer"
                     style="animation-delay: 0.42s">
                     <div
                         class="flex items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 size-12">
-                        <span class="material-symbols-outlined">sell</span>
+                        <span class="material-symbols-outlined">account_balance_wallet</span>
                     </div>
                     <div class="flex flex-col flex-1">
-                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">8. Precificação
-                        </p>
-                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Defina preços ideais para
-                            cada canal.</p>
+                        <p class="text-slate-900 dark:text-white text-base font-semibold leading-normal">8. Despesas</p>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-snug">Luz, água, aluguel e
+                            marketing.</p>
                     </div>
-                    <div id="badge-precificacao" class="shrink-0">
+                    <div id="badge-despesas" class="shrink-0">
                         <div
                             class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                             <span
@@ -321,12 +321,12 @@
         const steps = [
             { key: 'equipamentos', tabela: 'equipamentos' },
             { key: 'configuracoes', tabela: 'configuracoes' },
-            { key: 'insumos', tabela: 'insumos' },
             { key: 'categorias', tabela: 'categorias' },
-            { key: 'despesas', tabela: 'despesas' },
-            { key: 'produtos', tabela: 'produtos' },
+            { key: 'insumos', tabela: 'insumos' },
             { key: 'receitas', tabela: 'receitas' },
+            { key: 'produtos', tabela: 'produtos' },
             { key: 'precificacao', tabela: 'precos_marketplace' },
+            { key: 'despesas', tabela: 'despesas' },
         ];
 
         // Marca um passo como concluído (OK)
@@ -387,21 +387,33 @@
             const sb = getSupabase();
             if (!sb) return;
 
+            // Garantir sessão ativa
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) return;
+            const userId = session.user.id;
+
             let concluidos = 0;
             const total = steps.length;
 
             for (const step of steps) {
                 try {
-                    const { count, error } = await sb
+                    // Tenta buscar ao menos 1 registro da tabela
+                    const { data, error } = await sb
                         .from(step.tabela)
-                        .select('id', { count: 'exact', head: true });
+                        .select('*')
+                        .limit(1);
 
-                    if (!error && count > 0) {
+                    if (error) {
+                        console.warn(`[guia] Erro na tabela "${step.tabela}":`, error.message);
+                        continue;
+                    }
+
+                    if (data && data.length > 0) {
                         marcarOK(step.key);
                         concluidos++;
                     }
                 } catch (e) {
-                    console.warn(`Erro ao verificar ${step.key}:`, e);
+                    console.warn(`[guia] Exceção ao verificar ${step.key}:`, e);
                 }
             }
 

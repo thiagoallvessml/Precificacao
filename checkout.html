@@ -251,17 +251,30 @@
         let cupomData = null; // dados do cupom do Supabase
         let metodoPagamento = 'pix';
 
-        // Ler parâmetros da URL (plano e billing)
+        // Ler parâmetros da URL
         const params = new URLSearchParams(window.location.search);
-        const billing = params.get('billing') || 'mensal';
+        const plano = params.get('plano') || 'avancado';
+        const cupomParam = params.get('cupom') || '';
 
-        if (billing === 'anual') {
-            precoBase = 383.04;
-            document.getElementById('planName').textContent = 'Plano Premium Anual';
-            document.getElementById('planPrice').textContent = 'R$ 383,04';
-            document.getElementById('planPeriod').textContent = 'cobrado anualmente';
-            document.getElementById('subtotal').textContent = 'R$ 383,04';
-            document.getElementById('totalValue').textContent = 'R$ 383,04';
+        // Mapa de planos
+        const planosMap = {
+            basic: { nome: 'Plano Basic', preco: 19.90, label: 'R$ 19,90' },
+            intermediario: { nome: 'Plano Intermediário', preco: 29.90, label: 'R$ 29,90' },
+            avancado: { nome: 'Plano Avançado', preco: 39.90, label: 'R$ 39,90' },
+        };
+
+        const planoInfo = planosMap[plano] || planosMap['avancado'];
+        precoBase = planoInfo.preco;
+
+        document.getElementById('planName').textContent = planoInfo.nome;
+        document.getElementById('planPrice').textContent = planoInfo.label;
+        document.getElementById('planPeriod').textContent = 'cobrado mensalmente';
+        document.getElementById('subtotal').textContent = planoInfo.label;
+        document.getElementById('totalValue').textContent = planoInfo.label;
+
+        // Pré-preencher cupom se veio da página de planos
+        if (cupomParam) {
+            document.getElementById('couponInput').value = cupomParam;
         }
 
         // Aplicar cupom — busca no Supabase
@@ -289,8 +302,19 @@
             try {
                 let cupomEncontrado = null;
 
-                if (supabase) {
-                    // Buscar cupom no Supabase (case-insensitive, sem exigir user_id)
+                // Cupom fixo da plataforma (não depende de banco)
+                if (code === 'PRECIFICA10') {
+                    cupomEncontrado = {
+                        codigo: 'PRECIFICA10',
+                        desconto_percentual: 10,
+                        comissao_percentual: 0,
+                        ativo: true,
+                        id: null
+                    };
+                }
+
+                if (!cupomEncontrado && supabase) {
+                    // Buscar cupom no Supabase (case-insensitive)
                     const { data, error } = await supabase
                         .from('cupons_afiliado')
                         .select('*')
@@ -298,17 +322,17 @@
                         .eq('ativo', true)
                         .maybeSingle();
 
-                    console.log('🔍 Busca cupom:', code, '→', data, error);
+                    console.log('🔍 Busca cupom ativo:', code, '→', data, error);
 
                     if (!error && data) {
                         cupomEncontrado = data;
                     }
 
-                    // Se não encontrou com ativo=true, tentar sem filtro de ativo
+                    // Se não encontrou com ativo=true, verificar se existe mas está inativo
                     if (!cupomEncontrado) {
                         const { data: dataAny, error: errAny } = await supabase
                             .from('cupons_afiliado')
-                            .select('*')
+                            .select('id, codigo, ativo')
                             .ilike('codigo', code)
                             .maybeSingle();
 
@@ -331,8 +355,7 @@
                 }
 
                 if (cupomEncontrado) {
-                    const percentual = cupomEncontrado.desconto_percentual;
-                    desconto = precoBase * (percentual / 100);
+                    desconto = 10.00; // Desconto fixo de R$ 10,00 independente do plano
                     cupomAplicado = true;
                     cupomData = cupomEncontrado;
 
@@ -347,15 +370,15 @@
                     feedback.innerHTML = `
                         <div class="coupon-success flex items-center gap-2 px-1">
                             <span class="material-icons-round text-primary text-sm">check_circle</span>
-                            <p class="text-primary text-sm font-medium">Cupom aplicado! ${percentual}% de desconto</p>
-                            <span class="ml-auto text-primary text-sm font-bold">- R$ ${desconto.toFixed(2).replace('.', ',')}</span>
+                            <p class="text-primary text-sm font-medium">Cupom aplicado! R$ 10,00 de desconto</p>
+                            <span class="ml-auto text-primary text-sm font-bold">- R$ 10,00</span>
                         </div>
                     `;
                     feedback.classList.remove('hidden');
 
                     // Atualizar resumo
-                    document.getElementById('discountLabel').textContent = `Desconto (${percentual}%)`;
-                    document.getElementById('discountValue').textContent = `- R$ ${desconto.toFixed(2).replace('.', ',')}`;
+                    document.getElementById('discountLabel').textContent = `Desconto (cupom)`;
+                    document.getElementById('discountValue').textContent = `- R$ 10,00`;
                     document.getElementById('discountRow').classList.remove('hidden');
 
                     atualizarTotal();
@@ -365,7 +388,7 @@
                     feedback.innerHTML = `
                         <div class="flex items-center gap-2 px-1 text-red-400 text-sm">
                             <span class="material-icons-round text-sm">error</span>
-                            <p class="font-medium">Cupom inválido ou expirado</p>
+                            <p class="font-medium">Cupom não encontrado ou inválido</p>
                         </div>
                     `;
                     feedback.classList.remove('hidden');
@@ -383,6 +406,7 @@
                 feedback.classList.remove('hidden');
             }
         };
+
 
         // Remover cupom
         window.removerCupom = function () {
@@ -412,10 +436,10 @@
             document.getElementById('totalValue').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
         }
 
-        // Confirmar pagamento — passa dados do cupom para a página Pix
+        // Confirmar pagamento — passa dados do cupom e plano para a página Pix
         window.confirmarPagamento = function () {
             const total = (precoBase - desconto).toFixed(2);
-            let url = `pix-pagamento.html?total=${total}`;
+            let url = `pix-pagamento.html?total=${total}&plano=${encodeURIComponent(plano)}`;
 
             if (cupomAplicado && cupomData) {
                 url += `&cupom=${encodeURIComponent(cupomData.codigo)}`;

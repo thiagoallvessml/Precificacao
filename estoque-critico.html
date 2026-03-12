@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Estoque Crítico - Geladinhos Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#13ecec", "background-dark": "#0F0F0F" },
+                    fontFamily: { "display": ["Work Sans", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background-color: #0F0F0F;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(19, 236, 236, 0.1);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-header px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.history.back()" class="p-1 hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <span class="material-symbols-outlined text-primary text-3xl">warning</span>
+            <h1 class="text-xl font-bold tracking-tight">Estoque Crítico</h1>
+        </div>
+        <button onclick="loadData()"
+            class="p-2 rounded-full bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 transition-colors">
+            <span class="material-symbols-outlined">refresh</span>
+        </button>
+    </header>
+
+    <main class="flex-1 pb-24">
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 flex flex-col gap-1">
+                <div class="flex items-center justify-between text-slate-400 mb-1">
+                    <span class="text-xs font-medium">Insumos Críticos</span>
+                    <span class="material-symbols-outlined text-primary text-base">inventory_2</span>
+                </div>
+                <span id="totalInsumos" class="text-3xl font-bold">—</span>
+                <p class="text-xs text-slate-500">Abaixo do mínimo</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 flex flex-col gap-1">
+                <div class="flex items-center justify-between text-slate-400 mb-1">
+                    <span class="text-xs font-medium">Produtos Críticos</span>
+                    <span class="material-symbols-outlined text-primary text-base">icecream</span>
+                </div>
+                <span id="totalProdutos" class="text-3xl font-bold">—</span>
+                <p class="text-xs text-slate-500">Estoque baixo ou zerado</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 flex flex-col gap-1">
+                <div class="flex items-center justify-between text-slate-400 mb-1">
+                    <span class="text-xs font-medium">Custo de Reposição</span>
+                    <span class="material-symbols-outlined text-primary text-base">payments</span>
+                </div>
+                <span id="custoReposicao" class="text-2xl font-bold">R$ —</span>
+                <p class="text-xs text-slate-500">Insumos para normalizar</p>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 flex flex-col gap-1">
+                <div class="flex items-center justify-between text-slate-400 mb-1">
+                    <span class="text-xs font-medium">Zerados</span>
+                    <span class="material-symbols-outlined text-primary text-base">trending_down</span>
+                </div>
+                <span id="itensZerados" class="text-3xl font-bold text-red-400">—</span>
+                <p class="text-xs text-slate-500">Insumos + produtos = 0</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="px-4 py-2 overflow-x-auto">
+            <div class="flex gap-2 bg-slate-900/80 p-1 rounded-lg w-max">
+                <button onclick="setFiltro('todos')" id="btn-todos"
+                    class="px-4 py-2 rounded-md bg-primary text-slate-900 font-bold text-sm">Todos</button>
+                <button onclick="setFiltro('ingrediente')" id="btn-ingrediente"
+                    class="px-4 py-2 rounded-md text-slate-400 font-medium text-sm hover:bg-slate-800">Ingredientes</button>
+                <button onclick="setFiltro('embalagem')" id="btn-embalagem"
+                    class="px-4 py-2 rounded-md text-slate-400 font-medium text-sm hover:bg-slate-800">Embalagens</button>
+                <button onclick="setFiltro('produto')" id="btn-produto"
+                    class="px-4 py-2 rounded-md text-slate-400 font-medium text-sm hover:bg-slate-800">Produtos
+                    Prontos</button>
+            </div>
+        </div>
+
+        <!-- Items List -->
+        <div class="p-4 flex flex-col gap-4">
+            <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-widest px-1">Ações Recomendadas</h2>
+            <div id="listContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="col-span-4 flex flex-col items-center justify-center py-16 text-slate-500 gap-3">
+                    <span class="material-symbols-outlined text-5xl animate-spin">sync</span>
+                    <p class="text-sm">Carregando...</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#0F0F0F] border-t border-slate-800 px-6 py-2 pb-6">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <a class="flex flex-col items-center gap-1 text-slate-500 hover:text-primary transition-colors"
+                href="index.html">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-[10px] font-medium uppercase tracking-tighter">Início</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-primary" href="gestao-insumos.html">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">inventory_2</span>
+                <span class="text-[10px] font-medium uppercase tracking-tighter">Insumos</span>
+            </a>
+            <a href="adicionar-producao.html"
+                class="bg-primary p-3 rounded-full -mt-10 shadow-lg shadow-primary/20 border-4 border-[#0F0F0F]">
+                <span class="material-symbols-outlined text-slate-900 font-bold">add</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-500 hover:text-primary transition-colors"
+                href="producao-dashboard.html">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="text-[10px] font-medium uppercase tracking-tighter">Dashboard</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-500 hover:text-primary transition-colors"
+                href="configuracoes.html">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-[10px] font-medium uppercase tracking-tighter">Ajustes</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        const supabase = getSupabase();
+
+        const fmt = v => `R$ ${parseFloat(v).toFixed(2).replace('.', ',')}`;
+
+        let todosItens = []; // insumos críticos + produtos críticos
+        let filtroAtivo = 'todos';
+
+        // ─── FILTRO ───────────────────────────────────────────────────────────────
+        window.setFiltro = function (tipo) {
+            filtroAtivo = tipo;
+            ['todos', 'ingrediente', 'embalagem', 'produto'].forEach(t => {
+                const btn = document.getElementById('btn-' + t);
+                if (!btn) return;
+                btn.className = t === tipo
+                    ? 'px-4 py-2 rounded-md bg-primary text-slate-900 font-bold text-sm'
+                    : 'px-4 py-2 rounded-md text-slate-400 font-medium text-sm hover:bg-slate-800';
+            });
+            renderList();
+        };
+
+        // ─── RENDER ───────────────────────────────────────────────────────────────
+        function renderList() {
+            const container = document.getElementById('listContainer');
+            container.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4';
+
+            const itens = filtroAtivo === 'todos'
+                ? todosItens
+                : todosItens.filter(i => i._categoria === filtroAtivo);
+
+            if (itens.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-4 flex flex-col items-center justify-center py-16 gap-3">
+                        <span class="material-symbols-outlined text-5xl text-green-500">check_circle</span>
+                        <p class="text-sm font-medium text-green-400">Nenhum item crítico nessa categoria!</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = itens.map(i => {
+                const isProduto = i._categoria === 'produto';
+
+                if (isProduto) {
+                    // Card de produto pronto
+                    const qtd = i._qtdEstoque;
+                    const minimo = 10; // limite de "baixo" para produto
+                    const pct = qtd === 0 ? 0 : Math.min(Math.round((qtd / minimo) * 100), 100);
+                    const cor = qtd === 0 ? 'red-600' : 'orange-500';
+                    const badge = qtd === 0
+                        ? `<span class="inline-flex items-center rounded-full bg-red-600/10 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-600/20">Zerado</span>`
+                        : `<span class="inline-flex items-center rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400 ring-1 ring-inset ring-orange-500/20">Estoque Baixo</span>`;
+                    const imgTag = i.imagem_url
+                        ? `<img src="${i.imagem_url}" class="w-12 h-12 rounded-lg object-cover shrink-0"/>`
+                        : `<div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined">icecream</span></div>`;
+                    const receitaParam = i.receita_id ? `?receita_id=${i.receita_id}` : '';
+
+                    return `
+                        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                            <div class="p-4 flex items-start justify-between border-b border-slate-800">
+                                <div class="flex gap-3">
+                                    ${imgTag}
+                                    <div>
+                                        <h3 class="font-bold text-base leading-tight">${i.nome}</h3>
+                                        <p class="text-xs text-slate-400">Produto pronto</p>
+                                        <div class="mt-1">${badge}</div>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0 ml-2">
+                                    <p class="text-xs text-slate-400">Em estoque</p>
+                                    <p class="text-lg font-bold text-${cor}">${qtd} un</p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-slate-900/40">
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-slate-400">Atual: ${qtd} un</span>
+                                        <span class="text-slate-400">Mínimo recomendado: 10 un</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-2">
+                                        <div class="bg-${cor} h-2 rounded-full" style="width: ${pct}%"></div>
+                                    </div>
+                                </div>
+                                <div class="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-sm">precision_manufacturing</span>
+                                        <span class="text-sm font-medium">Produzir mais unidades</span>
+                                    </div>
+                                    <a href="adicionar-producao.html${receitaParam}" class="text-primary text-xs font-bold uppercase tracking-wider hover:underline">Produzir</a>
+                                </div>
+                            </div>
+                        </div>`;
+                } else {
+                    // Card de insumo
+                    const atual = parseFloat(i.estoque_atual) || 0;
+                    const minimo = parseFloat(i.estoque_minimo) || 1;
+                    const pct = Math.min(Math.round((atual / minimo) * 100), 100);
+                    const isCrit = pct <= 30 || atual === 0;
+                    const cor = atual === 0 ? 'red-600' : isCrit ? 'red-500' : 'orange-500';
+                    const badge = atual === 0
+                        ? `<span class="inline-flex items-center rounded-full bg-red-600/10 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-600/20">Zerado</span>`
+                        : isCrit
+                            ? `<span class="inline-flex items-center rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-500/20">Crítico</span>`
+                            : `<span class="inline-flex items-center rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-400 ring-1 ring-inset ring-orange-500/20">Atenção</span>`;
+                    const qtdRepor = Math.max(minimo - atual, 0);
+                    const custoRepor = qtdRepor * (parseFloat(i.custo_unitario) || 0);
+                    const icon = (i.tipo || '').toLowerCase() === 'embalagem' ? 'package_2' : 'opacity';
+
+                    return `
+                        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                            <div class="p-4 flex items-start justify-between border-b border-slate-800">
+                                <div class="flex gap-3">
+                                    <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-primary shrink-0">
+                                        <span class="material-symbols-outlined">${icon}</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-base leading-tight">${i.nome}</h3>
+                                        <p class="text-xs text-slate-400 capitalize">${i.tipo || 'insumo'}</p>
+                                        <div class="mt-1">${badge}</div>
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0 ml-2">
+                                    <p class="text-xs text-slate-400">Nível</p>
+                                    <p class="text-lg font-bold text-${cor}">${pct}%</p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-slate-900/40">
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-slate-400">Atual: ${atual} ${i.unidade_medida || 'un'}</span>
+                                        <span class="text-slate-400">Mínimo: ${minimo} ${i.unidade_medida || 'un'}</span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 rounded-full h-2">
+                                        <div class="bg-${cor} h-2 rounded-full" style="width: ${pct}%"></div>
+                                    </div>
+                                </div>
+                                <div class="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-sm">shopping_cart_checkout</span>
+                                        <span class="text-sm font-medium">Repor: ${qtdRepor.toFixed(2)} ${i.unidade_medida || 'un'} (${fmt(custoRepor)})</span>
+                                    </div>
+                                    <a href="gestao-insumos.html" class="text-primary text-xs font-bold uppercase tracking-wider hover:underline">Ver Estoque</a>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            }).join('');
+        }
+
+        // ─── LOAD DATA ────────────────────────────────────────────────────────────
+        window.loadData = async function () {
+            try {
+                // 1. Insumos críticos
+                const { data: insumosRaw, error: errI } = await supabase
+                    .from('insumos')
+                    .select('id, nome, tipo, estoque_atual, estoque_minimo, custo_unitario, unidade_medida')
+                    .eq('ativo', true)
+                    .order('nome');
+                if (errI) console.error('Erro insumos:', errI);
+
+                const insumos = (insumosRaw || [])
+                    .filter(i => (i.estoque_minimo || 0) > 0 && i.estoque_atual <= i.estoque_minimo)
+                    .map(i => ({ ...i, _categoria: (i.tipo || 'ingrediente').toLowerCase() }));
+
+                // 2. Produtos prontos (estoque calculado = produzido - vendido)
+                const [{ data: produtosRaw }, { data: producoesRaw }, { data: pedidoItensRaw }] = await Promise.all([
+                    supabase.from('produtos').select('id, nome, receita_id, imagem_url, preco_base').eq('disponivel', true),
+                    supabase.from('producoes').select('receita_id, nome_receita, total_unidades'),
+                    supabase.from('pedido_itens').select('produto_id, quantidade'),
+                ]);
+
+                const produtos = produtosRaw || [];
+                const producoes = producoesRaw || [];
+                const pedidoItens = pedidoItensRaw || [];
+
+                // Mapa receita_id → produto
+                const receitaParaProduto = {};
+                produtos.forEach(p => { if (p.receita_id) receitaParaProduto[p.receita_id] = p; });
+
+                // Calcular estoque por produto
+                const estoque = {};
+                produtos.forEach(p => { estoque[p.id] = 0; });
+                producoes.forEach(prod => {
+                    const p = receitaParaProduto[prod.receita_id];
+                    if (p) estoque[p.id] = (estoque[p.id] || 0) + (prod.total_unidades || 0);
+                });
+                pedidoItens.forEach(item => {
+                    if (item.produto_id && estoque[item.produto_id] !== undefined) {
+                        estoque[item.produto_id] = Math.max(0, estoque[item.produto_id] - (item.quantidade || 0));
+                    }
+                });
+
+                // Filtra produtos com estoque baixo (≤10) ou zerado
+                const LIMITE_BAIXO = 10;
+                const produtosCriticos = produtos
+                    .filter(p => estoque[p.id] <= LIMITE_BAIXO)
+                    .map(p => ({ ...p, _categoria: 'produto', _qtdEstoque: estoque[p.id] || 0 }))
+                    .sort((a, b) => a._qtdEstoque - b._qtdEstoque);
+
+                // ─── Juntar todos, ordenados pelo nível (mais crítico primeiro)
+                todosItens = [
+                    ...insumos.sort((a, b) => {
+                        const rA = (a.estoque_atual || 0) / (a.estoque_minimo || 1);
+                        const rB = (b.estoque_atual || 0) / (b.estoque_minimo || 1);
+                        return rA - rB;
+                    }),
+                    ...produtosCriticos,
+                ];
+
+                // ─── Stats
+                document.getElementById('totalInsumos').textContent = insumos.length;
+                document.getElementById('totalProdutos').textContent = produtosCriticos.length;
+
+                const custoTotal = insumos.reduce((s, i) => {
+                    const repor = Math.max((i.estoque_minimo || 0) - (i.estoque_atual || 0), 0);
+                    return s + repor * (parseFloat(i.custo_unitario) || 0);
+                }, 0);
+                document.getElementById('custoReposicao').textContent = fmt(custoTotal);
+
+                const zerados = todosItens.filter(i =>
+                    (i._categoria === 'produto' ? i._qtdEstoque : (i.estoque_atual || 0)) === 0
+                ).length;
+                document.getElementById('itensZerados').textContent = zerados;
+
+                renderList();
+
+            } catch (err) {
+                console.error('❌ Erro:', err);
+                document.getElementById('listContainer').innerHTML = `
+                    <div class="col-span-4 text-center py-12 text-red-400">
+                        <span class="material-symbols-outlined text-4xl">error</span>
+                        <p class="mt-2 text-sm">Erro ao carregar dados: ${err.message}</p>
+                    </div>`;
+            }
+        };
+
+        loadData();
+    </script>
+
+</body>
+
+</html>

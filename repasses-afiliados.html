@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Repasses Financeiros - PrecificaX Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1E1E1E",
+                        "accent-orange": "#fb923c",
+                    },
+                    fontFamily: { "display": ["Work Sans", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-header {
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .tab-active {
+            background: #13ecec;
+            color: #0F0F0F;
+        }
+
+        .tab-inactive {
+            color: #94a3b8;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark text-slate-100 min-h-screen font-display pb-32">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-header px-5 py-4 flex items-center justify-between">
+        <button onclick="window.location.href='index.html'"
+            class="p-2 -ml-2 hover:bg-white/10 rounded-full transition-colors">
+            <span class="material-icons-round text-primary">arrow_back_ios_new</span>
+        </button>
+        <h1 class="text-lg font-bold tracking-tight">Repasses Financeiros</h1>
+        <button onclick="mudarTab('historico')" class="p-2 hover:bg-white/10 rounded-full transition-colors"
+            title="Ver histórico">
+            <span class="material-symbols-outlined text-primary">history_edu</span>
+        </button>
+    </header>
+
+    <main class="px-5 pt-5 space-y-5">
+
+        <!-- KPIs -->
+        <section class="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+            <div class="flex-none w-44 p-4 rounded-xl bg-card-dark border border-accent-orange/20">
+                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-1">Total Pendente</p>
+                <p id="kpiPendente" class="text-xl font-bold text-accent-orange">R$ 0,00</p>
+                <div class="mt-1.5 flex items-center text-[10px] text-accent-orange/70 gap-1">
+                    <span class="material-symbols-outlined text-sm">pending_actions</span>
+                    <span id="kpiQtdAfiliados">0 afiliados</span>
+                </div>
+            </div>
+            <div class="flex-none w-44 p-4 rounded-xl bg-card-dark border border-primary/20">
+                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-1">Total Pago (Mês)</p>
+                <p id="kpiPagoMes" class="text-xl font-bold text-primary">R$ 0,00</p>
+                <div class="mt-1.5 flex items-center text-[10px] text-primary/70 gap-1">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    <span>Este mês</span>
+                </div>
+            </div>
+            <div class="flex-none w-44 p-4 rounded-xl bg-card-dark border border-blue-400/20">
+                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider mb-1">Comissão Média</p>
+                <p id="kpiComissaoMedia" class="text-xl font-bold text-blue-400">R$ 0,00</p>
+                <div class="mt-1.5 flex items-center text-[10px] text-blue-400/70 gap-1">
+                    <span class="material-symbols-outlined text-sm">analytics</span>
+                    <span>por afiliado</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <div class="bg-card-dark p-1 rounded-xl flex gap-1">
+            <button id="tabAguardando" onclick="mudarTab('aguardando')"
+                class="flex-1 py-2 text-sm font-semibold rounded-lg transition-all tab-active">
+                Aguardando
+            </button>
+            <button id="tabHistorico" onclick="mudarTab('historico')"
+                class="flex-1 py-2 text-sm font-semibold rounded-lg transition-all tab-inactive">
+                Histórico
+            </button>
+        </div>
+
+        <!-- ===== ABA: AGUARDANDO ===== -->
+        <section id="secaoAguardando">
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">
+                Pendentes de Liberação (<span id="totalPendentes">0</span>)
+            </h2>
+            <div id="listaRepasses" class="space-y-4">
+                <div id="loadingRepasses" class="text-center py-16 text-slate-500">
+                    <span class="material-symbols-outlined text-5xl block mb-3">hourglass_empty</span>
+                    Carregando...
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ABA: HISTÓRICO ===== -->
+        <section id="secaoHistorico" class="hidden">
+            <h2 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Repasses Realizados</h2>
+            <div id="listaHistorico" class="space-y-3">
+                <div id="loadingHistorico" class="text-center py-16 text-slate-500">
+                    <span class="material-symbols-outlined text-5xl block mb-3">hourglass_empty</span>
+                    Carregando...
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de confirmação -->
+    <div id="modalRepasse" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end hidden">
+        <div class="w-full bg-card-dark rounded-t-3xl p-6 space-y-5 border-t border-primary/20">
+            <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-2"></div>
+            <h3 class="text-lg font-bold text-center">Confirmar Repasse</h3>
+            <div class="bg-background-dark/60 rounded-xl p-4 space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Afiliado</span>
+                    <span id="modalNome" class="font-semibold">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Valor</span>
+                    <span id="modalValor" class="font-bold text-primary text-base">-</span>
+                </div>
+                <div class="flex justify-between text-sm items-center">
+                    <span class="text-slate-400">Chave Pix</span>
+                    <span id="modalChavePix" class="font-mono text-xs max-w-[180px] truncate">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Tipo</span>
+                    <select id="modalTipoPix"
+                        class="bg-background-dark border border-white/10 rounded-lg px-3 py-1 text-sm text-white outline-none focus:border-primary">
+                        <option value="email">E-mail</option>
+                        <option value="cpf">CPF</option>
+                        <option value="cnpj">CNPJ</option>
+                        <option value="phone">Telefone</option>
+                        <option value="random">Chave Aleatória</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="fecharModal()"
+                    class="py-3.5 rounded-xl border border-white/10 text-sm font-semibold hover:bg-white/5 transition-all active:scale-95">
+                    Cancelar
+                </button>
+                <button id="btnConfirmarRepasse" onclick="confirmarRepasse()"
+                    class="py-3.5 rounded-xl bg-primary text-background-dark text-sm font-bold hover:brightness-110 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">payments</span>
+                    Enviar Pix
+                </button>
+            </div>
+            <p class="text-[10px] text-slate-500 text-center">
+                O Pix será enviado automaticamente via AbacatePay
+            </p>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+        class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-card-dark border border-primary/20 text-white text-sm px-5 py-3 rounded-2xl shadow-xl hidden z-50 flex items-center gap-2 whitespace-nowrap">
+        <span id="toastIcon" class="material-icons-round text-primary text-lg">check_circle</span>
+        <span id="toastMsg"></span>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+        const supabase = getSupabase();
+
+        let repassePendente = null; // dados do repasse sendo confirmado
+        let listaPendentes = [];
+
+        await carregarDados();
+
+        // ── TABS ────────────────────────────────────────────────────────────
+        window.mudarTab = function (tab) {
+            document.getElementById('secaoAguardando').classList.toggle('hidden', tab !== 'aguardando');
+            document.getElementById('secaoHistorico').classList.toggle('hidden', tab !== 'historico');
+            document.getElementById('tabAguardando').className = `flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${tab === 'aguardando' ? 'tab-active' : 'tab-inactive'}`;
+            document.getElementById('tabHistorico').className = `flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${tab === 'historico' ? 'tab-active' : 'tab-inactive'}`;
+        };
+
+        // ── CARREGAR DADOS ───────────────────────────────────────────────────
+        async function carregarDados() {
+            if (!supabase) return;
+
+            // Pendentes
+            const { data: pendentes } = await supabase
+                .from('saques_afiliado')
+                .select('*')
+                .eq('status', 'pendente')
+                .order('created_at', { ascending: false });
+
+            // Buscar perfis dos afiliados dos saques pendentes
+            const userIdsPendentes = [...new Set((pendentes || []).map(s => s.user_id).filter(Boolean))];
+            let perfisPendentes = {};
+            if (userIdsPendentes.length) {
+                const { data: ps } = await supabase
+                    .from('perfis_usuarios')
+                    .select('id, nome, chave_pix')
+                    .in('id', userIdsPendentes);
+                (ps || []).forEach(p => { perfisPendentes[p.id] = p; });
+            }
+
+            document.getElementById('loadingRepasses')?.remove();
+            listaPendentes = (pendentes || []).map(s => ({
+                id: s.id,
+                userId: s.user_id,
+                nome: perfisPendentes[s.user_id]?.nome || 'Afiliado',
+                chavePix: perfisPendentes[s.user_id]?.chave_pix || s.chave_pix || '-',
+                valor: Number(s.valor || 0),
+            }));
+
+            const totalPendente = listaPendentes.reduce((acc, s) => acc + s.valor, 0);
+            const media = listaPendentes.length > 0 ? totalPendente / listaPendentes.length : 0;
+            document.getElementById('kpiPendente').textContent = `R$ ${totalPendente.toFixed(2).replace('.', ',')}`;
+            document.getElementById('kpiQtdAfiliados').textContent = `${listaPendentes.length} afiliado(s)`;
+            document.getElementById('kpiComissaoMedia').textContent = `R$ ${media.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalPendentes').textContent = listaPendentes.length;
+            renderPendentes(listaPendentes);
+
+            // Histórico do mês
+            const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0, 0, 0, 0);
+            const { data: historico } = await supabase
+                .from('saques_afiliado')
+                .select('*')
+                .eq('status', 'pago')
+                .gte('pago_em', inicioMes.toISOString())
+                .order('pago_em', { ascending: false });
+
+            // Buscar perfis dos afiliados do histórico
+            const userIdsHistorico = [...new Set((historico || []).map(s => s.user_id).filter(Boolean))];
+            let perfisHistorico = {};
+            if (userIdsHistorico.length) {
+                const { data: ph } = await supabase
+                    .from('perfis_usuarios')
+                    .select('id, nome')
+                    .in('id', userIdsHistorico);
+                (ph || []).forEach(p => { perfisHistorico[p.id] = p; });
+            }
+
+            // Enriquecer histórico com nome
+            const historicoComNome = (historico || []).map(s => ({
+                ...s,
+                nome_afiliado: perfisHistorico[s.user_id]?.nome || 'Afiliado',
+            }));
+
+            document.getElementById('loadingHistorico')?.remove();
+            const totalMes = historicoComNome.reduce((acc, s) => acc + Number(s.valor || 0), 0);
+            document.getElementById('kpiPagoMes').textContent = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
+            renderHistorico(historicoComNome);
+        }
+
+        // ── RENDER PENDENTES ────────────────────────────────────────────────
+        function renderPendentes(lista) {
+            const container = document.getElementById('listaRepasses');
+            container.innerHTML = '';
+            if (!lista.length) {
+                container.innerHTML = `<div class="text-center py-16 text-slate-500">
+                    <span class="material-symbols-outlined text-5xl block mb-3">check_circle</span>
+                    <p class="font-semibold">Nenhum repasse pendente</p>
+                    <p class="text-xs mt-1 text-slate-600">Tudo em dia!</p>
+                </div>`;
+                return;
+            }
+            lista.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'bg-card-dark rounded-xl p-5 border border-white/5 shadow-xl';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-primary font-bold text-lg shrink-0">
+                            ${(s.nome || 'A')[0].toUpperCase()}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-slate-100">${s.nome}</h3>
+                            <p class="text-xs text-slate-400 truncate">${s.chavePix !== '-' ? s.chavePix : 'Chave PIX não cadastrada'}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-[10px] text-slate-400">Acumulado</p>
+                            <p class="text-lg font-bold text-primary">R$ ${s.valor.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                    </div>
+                    <div class="bg-background-dark/60 rounded-lg p-3 flex items-center justify-between border border-white/5 mb-4">
+                        <div class="overflow-hidden">
+                            <p class="text-[10px] uppercase text-slate-500 font-bold mb-0.5">Chave Pix</p>
+                            <p class="text-sm font-mono text-slate-200 truncate">${s.chavePix}</p>
+                        </div>
+                        <button onclick="copiarPix('${s.chavePix}')"
+                            class="text-primary p-2 hover:bg-primary/10 rounded-full transition-colors">
+                            <span class="material-symbols-outlined text-xl">content_copy</span>
+                        </button>
+                    </div>
+                    <button onclick="abrirModal(${JSON.stringify(s).replace(/"/g, '&quot;')})"
+                        class="w-full bg-primary hover:brightness-110 text-background-dark font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+                        <span class="material-symbols-outlined">payments</span>
+                        Confirmar Repasse
+                    </button>`;
+                container.appendChild(card);
+            });
+        }
+
+        // ── RENDER HISTÓRICO ─────────────────────────────────────────────────
+        function renderHistorico(lista) {
+            const container = document.getElementById('listaHistorico');
+            container.innerHTML = '';
+            if (!lista.length) {
+                container.innerHTML = `<div class="text-center py-16 text-slate-500">
+                    <span class="material-symbols-outlined text-5xl block mb-3">history</span>
+                    <p class="font-semibold">Nenhum repasse este mês</p>
+                </div>`;
+                return;
+            }
+            lista.forEach(s => {
+                const data = s.pago_em ? new Date(s.pago_em).toLocaleDateString('pt-BR') : '-';
+                const card = document.createElement('div');
+                card.className = 'bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3';
+                card.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center text-green-400 shrink-0">
+                        <span class="material-symbols-outlined text-lg">check_circle</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-white">${s.nome_afiliado || 'Afiliado'}</p>
+                        <p class="text-xs text-slate-500">Pago em ${data}</p>
+                    </div>
+                    <p class="text-base font-bold text-green-400 shrink-0">R$ ${Number(s.valor).toFixed(2).replace('.', ',')}</p>`;
+                container.appendChild(card);
+            });
+        }
+
+        // ── MODAL ──────────────────────────────────────────────────────────
+        window.abrirModal = function (saque) {
+            repassePendente = typeof saque === 'string' ? JSON.parse(saque) : saque;
+            document.getElementById('modalNome').textContent = repassePendente.nome;
+            document.getElementById('modalValor').textContent = `R$ ${repassePendente.valor.toFixed(2).replace('.', ',')}`;
+            document.getElementById('modalChavePix').textContent = repassePendente.chavePix;
+
+            // Tentar detectar tipo da chave automaticamente
+            const chave = repassePendente.chavePix;
+            const sel = document.getElementById('modalTipoPix');
+            if (chave.includes('@')) sel.value = 'email';
+            else if (/^\d{11}$/.test(chave.replace(/\D/g, ''))) sel.value = 'cpf';
+            else if (/^\d{14}$/.test(chave.replace(/\D/g, ''))) sel.value = 'cnpj';
+            else if (chave.startsWith('+') || /^\(\d{2}\)/.test(chave)) sel.value = 'phone';
+            else sel.value = 'random';
+
+            document.getElementById('modalRepasse').classList.remove('hidden');
+        };
+
+        window.fecharModal = function () {
+            document.getElementById('modalRepasse').classList.add('hidden');
+            repassePendente = null;
+        };
+
+        // ── CONFIRMAR REPASSE (Pix Automático com fallback manual) ─────────
+        window.confirmarRepasse = async function () {
+            if (!repassePendente) return;
+
+            const btn = document.getElementById('btnConfirmarRepasse');
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg> Enviando...`;
+
+            const tipoPix = document.getElementById('modalTipoPix').value;
+            const agora = new Date().toISOString();
+
+            try {
+                // 1. Tentar enviar Pix automático via AbacatePay
+                let pixAutomaticoOk = false;
+                try {
+                    const response = await fetch('/api/pix-repasse', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            valor: repassePendente.valor,
+                            chavePix: repassePendente.chavePix,
+                            tipoPix,
+                            nome: repassePendente.nome,
+                            descricao: `Repasse afiliado PrecificaX - ${repassePendente.nome}`,
+                        }),
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        pixAutomaticoOk = true;
+                    } else {
+                        console.warn('⚠️ Pix automático falhou:', result.error || response.status);
+                    }
+                } catch (pixErr) {
+                    console.warn('⚠️ API Pix indisponível:', pixErr.message);
+                }
+
+                // 2. Se Pix automático falhou, perguntar se quer marcar manualmente
+                if (!pixAutomaticoOk) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span class="material-symbols-outlined text-lg">payments</span> Enviar Pix`;
+
+                    const confirmar = confirm(
+                        `⚠️ Pix automático indisponível.\n\n` +
+                        `Chave Pix: ${repassePendente.chavePix}\n` +
+                        `Valor: R$ ${repassePendente.valor.toFixed(2).replace('.', ',')}\n\n` +
+                        `Você já realizou o Pix manualmente?\n` +
+                        `Clique OK para registrar como pago.`
+                    );
+                    if (!confirmar) return;
+                }
+
+                // 3. Atualizar status do saque como pago
+                await supabase.from('saques_afiliado').update({
+                    status: 'pago',
+                    pago_em: agora,
+                }).eq('id', repassePendente.id);
+
+                // 4. Marcar comissões do afiliado como pagas
+                await supabase.from('comissoes_afiliado')
+                    .update({ status: 'pago', pago_em: agora })
+                    .eq('afiliado_id', repassePendente.userId)
+                    .eq('status', 'pendente');
+
+                // 5. Zerar saldo do afiliado
+                await supabase.from('perfis_usuarios')
+                    .update({ saldo_afiliado: 0 })
+                    .eq('id', repassePendente.userId);
+
+                fecharModal();
+                mostrarToast(`✅ Repasse de ${repassePendente.nome} registrado!`, 'check_circle');
+
+                // Atualizar lista local e KPIs
+                listaPendentes = listaPendentes.filter(s => s.id !== repassePendente.id);
+                renderPendentes(listaPendentes);
+                document.getElementById('totalPendentes').textContent = listaPendentes.length;
+                const totalPendente = listaPendentes.reduce((acc, s) => acc + s.valor, 0);
+                document.getElementById('kpiPendente').textContent = `R$ ${totalPendente.toFixed(2).replace('.', ',')}`;
+                document.getElementById('kpiQtdAfiliados').textContent = `${listaPendentes.length} afiliado(s)`;
+
+                // Recarregar histórico
+                const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0, 0, 0, 0);
+                const { data: historicoAtual } = await supabase
+                    .from('saques_afiliado')
+                    .select('*')
+                    .eq('status', 'pago')
+                    .gte('pago_em', inicioMes.toISOString())
+                    .order('pago_em', { ascending: false });
+                const totalMes = (historicoAtual || []).reduce((acc, s) => acc + Number(s.valor || 0), 0);
+                document.getElementById('kpiPagoMes').textContent = `R$ ${totalMes.toFixed(2).replace('.', ',')}`;
+                renderHistorico(historicoAtual || []);
+
+            } catch (err) {
+                console.error('Erro no repasse:', err);
+                mostrarToast(`❌ ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="material-symbols-outlined text-lg">payments</span> Enviar Pix`;
+            }
+        };
+
+
+        // ── UTILITÁRIOS ─────────────────────────────────────────────────────
+        window.copiarPix = function (chave) {
+            navigator.clipboard.writeText(chave).then(() => mostrarToast('Chave PIX copiada!', 'content_copy'));
+        };
+
+        function mostrarToast(msg, icon = 'check_circle') {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            document.getElementById('toastIcon').textContent = icon;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 4000);
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modalRepasse').addEventListener('click', function (e) {
+            if (e.target === this) fecharModal();
+        });
+    </script>
+</body>
+
+</html>

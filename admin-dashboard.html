@@ -21,7 +21,7 @@
                     colors: {
                         "primary": "#13ecec",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                         "danger": "#ff4d4d",
                         "success": "#22c55e",
                         "warning": "#f59e0b"
@@ -88,6 +88,24 @@
             border-radius: 6px;
         }
 
+        .plan-basic {
+            background: rgba(148, 163, 184, 0.15);
+            color: #94a3b8;
+        }
+
+        .plan-intermediario {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.08);
+        }
+
+        .plan-avancado {
+            background: rgba(12, 237, 237, 0.15);
+            color: #0ceded;
+            box-shadow: 0 0 8px rgba(12, 237, 237, 0.1);
+        }
+
+        /* legado — mantido por compatibilidade */
         .plan-free {
             background: rgba(148, 163, 184, 0.15);
             color: #94a3b8;
@@ -96,7 +114,6 @@
         .plan-premium {
             background: rgba(12, 237, 237, 0.15);
             color: #0ceded;
-            box-shadow: 0 0 8px rgba(12, 237, 237, 0.1);
         }
 
         .user-row {
@@ -184,11 +201,13 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
             <!-- Online Now -->
-            <div
-                class="stat-card stat-card-online relative bg-card-dark rounded-xl p-4 border border-success/20 md:col-span-1">
+            <a href="analytics-admin.html"
+                class="stat-card stat-card-online relative bg-card-dark rounded-xl p-4 border border-success/20 md:col-span-1 group hover:border-success/50 transition-colors block">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-success pulse-dot"></span>
                     <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Online Agora</span>
+                    <span
+                        class="ml-auto material-icons-round text-gray-600 group-hover:text-success transition-colors text-sm">bar_chart</span>
                 </div>
                 <div class="flex items-baseline gap-1">
                     <p id="statOnline" class="text-2xl font-bold text-success">0</p>
@@ -201,7 +220,7 @@
                         <p class="text-xs text-gray-600 italic">Carregando...</p>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Total -->
             <div class="stat-card bg-card-dark rounded-xl p-4 border border-white/5">
@@ -301,6 +320,11 @@
 
         <!-- Quick Actions -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <a href="analytics-admin.html"
+                class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3 hover:border-primary/30 transition-colors">
+                <span class="material-icons-round text-primary text-xl">bar_chart</span>
+                <span class="text-sm font-semibold text-white">Analytics</span>
+            </a>
             <a href="index.html"
                 class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3 hover:border-primary/30 transition-colors">
                 <span class="material-icons-round text-primary text-xl">dashboard</span>
@@ -320,6 +344,11 @@
                 class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3 hover:border-[#fb923c]/30 transition-colors">
                 <span class="material-icons-round text-[#fb923c] text-xl">payments</span>
                 <span class="text-sm font-semibold text-white">Repasse Afiliado</span>
+            </a>
+            <a href="admin-feedbacks.html"
+                class="bg-card-dark rounded-xl p-4 border border-indigo-500/20 flex items-center gap-3 hover:border-indigo-500/40 transition-colors">
+                <span class="material-icons-round text-indigo-400 text-xl">chat_bubble</span>
+                <span class="text-sm font-semibold text-white">Feedbacks</span>
             </a>
             <button onclick="fazerLogout()"
                 class="bg-card-dark rounded-xl p-4 border border-white/5 flex items-center gap-3 hover:border-danger/30 transition-colors text-left">
@@ -355,8 +384,10 @@
                 <label class="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-1 block">Plano</label>
                 <select id="newPlanoSelect"
                     class="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-primary">
-                    <option value="free">Free</option>
-                    <option value="premium">⭐ Premium</option>
+                    <option value="free">⚪ Free</option>
+                    <option value="basic">🔵 Básico</option>
+                    <option value="intermediario">🟡 Intermediário</option>
+                    <option value="avancado">⭐ Avançado</option>
                 </select>
             </div>
             <button onclick="salvarRole()"
@@ -474,18 +505,44 @@
             if (!supabase) return;
 
             const filter = document.getElementById('filterRole').value;
-            let query = supabase.from('perfis_usuarios').select('*').order('created_at', { ascending: false });
 
-            if (filter) {
-                query = query.eq('role', filter);
+            let data, error;
+
+            // Tentar via RPC (SECURITY DEFINER — bypassa RLS)
+            const rpcResult = await supabase.rpc('admin_listar_usuarios', {
+                p_role: filter || null
+            });
+
+            if (rpcResult.error) {
+                console.warn('RPC admin_listar_usuarios falhou, tentando select direto:', rpcResult.error.message);
+
+                // Fallback: select direto (funciona se RLS não estiver ativo ou admin tiver permissão)
+                let query = supabase.from('perfis_usuarios').select('*').order('created_at', { ascending: false });
+                if (filter) query = query.eq('role', filter);
+                const fallback = await query;
+                data = fallback.data;
+                error = fallback.error;
+            } else {
+                data = rpcResult.data;
+                error = null;
             }
-
-            const { data, error } = await query;
 
             if (error) {
                 console.error('Erro ao carregar usuários:', error);
+                document.getElementById('usersTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="8" class="p-8 text-center">
+                            <p class="text-danger text-sm font-semibold mb-2">❌ Erro ao carregar usuários</p>
+                            <p class="text-gray-600 text-xs">${error.message}</p>
+                            <p class="text-gray-600 text-xs mt-2">Execute <strong>fix-admin-listar-usuarios.sql</strong> no Supabase SQL Editor</p>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
+
+            data = data || [];
+
 
             // Stats
             const total = data.length;
@@ -526,10 +583,18 @@
                 const premiumInfo = calcPremiumTrial(u.created_at);
 
                 // Plano do usuário
-                const plano = u.plano || 'free';
+                const plano = u.plano || 'basic';
                 const planoClass = `plan-${plano}`;
-                const planoLabel = plano === 'premium' ? '⭐ Premium' : 'Free';
-                const planoIcon = plano === 'premium' ? 'star' : 'remove_circle_outline';
+                const planoLabels = {
+                    basic: '🔵 Básico',
+                    intermediario: '🟡 Intermediário',
+                    avancado: '⭐ Avançado',
+                    // legado
+                    free: 'Free',
+                    premium: '⭐ Premium'
+                };
+                const planoLabel = planoLabels[plano] || plano;
+                const planoIcon = plano === 'avancado' || plano === 'premium' ? 'star' : 'remove_circle_outline';
 
                 return `
                     <tr class="user-row border-b border-white/5">
@@ -607,28 +672,64 @@
 
             const newRole = document.getElementById('newRoleSelect').value;
             const newPlano = document.getElementById('newPlanoSelect').value;
+            const btnSalvar = document.querySelector('#modalRole button[onclick="salvarRole()"]');
 
-            const updateData = { role: newRole, plano: newPlano };
-
-            // Se mudou para premium, gravar data de início
-            if (newPlano === 'premium') {
-                updateData.premium_inicio = new Date().toISOString();
-            } else {
-                updateData.premium_inicio = null;
+            // Visual feedback
+            if (btnSalvar) {
+                btnSalvar.disabled = true;
+                btnSalvar.textContent = 'Salvando...';
             }
 
-            const { error } = await supabase
-                .from('perfis_usuarios')
-                .update(updateData)
-                .eq('id', editingUserId);
+            try {
+                // Usar RPC admin_atualizar_usuario (SECURITY DEFINER = bypassa RLS)
+                const { data, error: rpcError } = await supabase.rpc('admin_atualizar_usuario', {
+                    p_user_id: editingUserId,
+                    p_role: newRole,
+                    p_plano: newPlano
+                });
 
-            if (error) {
-                alert('Erro ao salvar: ' + error.message);
-                return;
+                if (rpcError) {
+                    // Fallback: tentar update direto (caso a RPC ainda não exista)
+                    console.warn('RPC falhou, tentando update direto:', rpcError.message);
+
+                    const updateData = { role: newRole, plano: newPlano };
+                    if (newPlano === 'avancado' || newPlano === 'premium') {
+                        updateData.premium_inicio = new Date().toISOString();
+                    } else {
+                        updateData.premium_inicio = null;
+                    }
+
+                    const { error: updateError } = await supabase
+                        .from('perfis_usuarios')
+                        .update(updateData)
+                        .eq('id', editingUserId);
+
+                    if (updateError) {
+                        alert(
+                            '❌ Erro ao salvar!\n\n' +
+                            'Motivo: ' + updateError.message + '\n\n' +
+                            'SOLUÇÃO: Execute o arquivo "fix-admin-update-plano.sql" no Supabase SQL Editor.'
+                        );
+                        return;
+                    }
+                }
+
+                fecharModal();
+                await carregarUsuarios();
+
+                // Toast de sucesso
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#13ecec;color:#0F0F0F;font-weight:700;font-size:13px;padding:12px 20px;border-radius:12px;z-index:9999;animation:fadeInBanner 0.3s ease';
+                toast.textContent = '✅ Usuário atualizado com sucesso!';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+
+            } finally {
+                if (btnSalvar) {
+                    btnSalvar.disabled = false;
+                    btnSalvar.textContent = 'Salvar Alterações';
+                }
             }
-
-            fecharModal();
-            await carregarUsuarios();
         };
 
         // Logout

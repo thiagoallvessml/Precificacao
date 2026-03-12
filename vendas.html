@@ -6,6 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Registro de Vendas</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -18,13 +19,11 @@
                     colors: {
                         "primary": "#0befef",
                         "cta": "#13ecec",
-                        "background-light": "#f5f8f8",
                         "background-dark": "#0F0F0F",
                         "surface-dark": "#1A1A1A",
+                        "card-dark": "#1e1e1e",
                     },
-                    fontFamily: {
-                        "display": ["Work Sans", "sans-serif"]
-                    },
+                    fontFamily: { "display": ["Work Sans", "sans-serif"] },
                 },
             },
         }
@@ -42,442 +41,922 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Badge de quantidade no carrinho */
+        .cart-badge {
+            animation: pop 0.2s ease;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.6);
+            }
+
+            70% {
+                transform: scale(1.3);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Modal backdrop */
+        .modal-backdrop {
+            backdrop-filter: blur(6px);
+        }
+
+        /* Pill de quantidade no produto */
+        .qty-pill {
+            transition: all 0.15s ease;
+        }
+
+        /* Produto card hover */
+        .product-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .product-card:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 
-<body class="bg-background-dark text-white font-display antialiased">
-    <!-- Header Section -->
-    <header class="sticky top-0 z-40 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
-        <div class="flex items-center px-4 py-4 justify-between max-w-7xl mx-auto">
+<body class="bg-background-dark text-white font-display antialiased min-h-screen">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="sticky top-0 z-40 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
+        <div class="flex items-center px-4 py-3 justify-between max-w-7xl mx-auto gap-3">
+            <!-- Voltar -->
             <button onclick="window.location.href='index.html'"
-                class="text-white flex size-10 items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                class="flex size-9 items-center justify-center hover:bg-white/10 rounded-full transition-colors shrink-0">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 class="text-white text-lg font-bold flex-1 text-center">Registro de Venda</h2>
-            <div class="flex w-10 items-center justify-end">
-                <button onclick="limparCarrinho()"
-                    class="flex items-center justify-center rounded-xl h-10 w-10 text-white hover:bg-white/10 transition-colors">
-                    <span class="material-symbols-outlined">delete_sweep</span>
-                </button>
-            </div>
+            <!-- Título -->
+            <h2 class="text-white text-base font-bold flex-1 text-center">Registro de Venda</h2>
+            <!-- Carrinho -->
+            <button id="btnAbrirCarrinho"
+                class="relative flex size-9 items-center justify-center hover:bg-white/10 rounded-full transition-colors shrink-0"
+                onclick="abrirCarrinho()">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                <span id="cartBadge"
+                    class="cart-badge absolute -top-0.5 -right-0.5 bg-cta text-background-dark text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
         </div>
-        <!-- Channel Selector -->
-        <div id="marketplacesList" class="flex gap-3 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
-            <!-- Será preenchido dinamicamente -->
+
+        <!-- Categorias / Marketplace -->
+        <div id="marketplacesList" class="flex gap-2 px-4 pb-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
+            <!-- preenchido dinamicamente -->
         </div>
     </header>
 
-    <main class="pb-60 max-w-7xl mx-auto">
-        <!-- Product List -->
-        <div id="produtosList" class="flex flex-col gap-1 px-2 mt-2">
-            <!-- Será preenchido dinamicamente -->
+    <!-- ==================== MAIN ==================== -->
+    <main class="max-w-7xl mx-auto px-3 pt-4 pb-32">
+        <!-- Barra de busca -->
+        <div class="relative mb-4">
+            <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl pointer-events-none">search</span>
+            <input id="inputBusca" type="text" placeholder="Buscar produto..." oninput="filtrarProdutos()"
+                class="w-full h-11 bg-surface-dark border border-white/10 rounded-xl pl-10 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all" />
+        </div>
+
+        <!-- Grid de produtos -->
+        <div id="produtosList" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <!-- preenchido dinamicamente -->
         </div>
     </main>
 
-    <!-- Fixed Checkout Footer -->
-    <footer
-        class="fixed bottom-0 left-0 right-0 bg-surface-dark border-t border-white/10 pt-3 pb-6 px-4 rounded-t-2xl shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-50">
-        <div class="max-w-7xl mx-auto">
-            <!-- Totals Summary -->
-            <div class="grid grid-cols-3 gap-3 mb-3 text-center">
-                <div class="flex items-center justify-center gap-1.5">
-                    <span class="text-white/40 text-[8px] uppercase font-semibold tracking-wider">Itens:</span>
-                    <span id="totalItens" class="text-white text-base font-bold">0</span>
-                </div>
-                <div class="flex items-center justify-center gap-1.5 border-x border-white/10">
-                    <span class="text-white/40 text-[8px] uppercase font-semibold tracking-wider">Total:</span>
-                    <span id="totalValor" class="text-white text-base font-bold">R$ 0,00</span>
-                </div>
-                <div class="flex items-center justify-center gap-1.5">
-                    <span class="text-primary text-[8px] uppercase font-semibold tracking-wider">Qtd:</span>
-                    <span id="totalQtd" class="text-primary text-base font-bold">0</span>
-                </div>
+    <!-- ==================== BOTTOM BAR (quando há itens) ==================== -->
+    <div id="bottomBar"
+        class="hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-dark border-t border-white/10 px-4 pt-3 pb-6 shadow-[0_-8px_30px_rgba(0,0,0,0.6)]">
+        <div class="max-w-7xl mx-auto flex items-center gap-3">
+            <div class="flex-1">
+                <p class="text-xs text-slate-400 font-medium">Total do carrinho</p>
+                <p id="barTotal" class="text-lg font-bold text-primary">R$ 0,00</p>
             </div>
-
-            <!-- Main Action Button -->
-            <button onclick="finalizarVenda()"
-                class="w-full bg-cta hover:bg-cta/90 text-background-dark h-12 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-[0.98]">
-                <span class="material-symbols-outlined text-[18px]">check_circle</span>
-                FINALIZAR VENDA
+            <button onclick="abrirCarrinho()"
+                class="flex items-center gap-2 bg-cta hover:bg-cta/90 text-background-dark font-bold text-sm h-11 px-5 rounded-xl transition-all active:scale-[0.97]">
+                <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+                Ver Carrinho
+                <span id="barQtd"
+                    class="bg-background-dark/30 text-background-dark text-xs font-black w-5 h-5 rounded-full flex items-center justify-center">0</span>
             </button>
         </div>
-    </footer>
+    </div>
 
+    <!-- ==================== MODAL CARRINHO ==================== -->
+    <div id="modalCarrinho"
+        class="hidden fixed inset-0 z-50 modal-backdrop bg-black/60 flex items-end lg:items-center justify-center">
+        <div
+            class="bg-surface-dark w-full max-w-lg rounded-t-3xl lg:rounded-2xl border border-white/10 shadow-2xl max-h-[88vh] flex flex-col">
+            <!-- Header do modal -->
+            <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/10 shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                    <h3 class="text-lg font-bold">Carrinho</h3>
+                </div>
+                <button onclick="fecharCarrinho()"
+                    class="size-8 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Items -->
+            <div id="cartItems" class="flex-1 overflow-y-auto px-5 py-4 space-y-3"></div>
+
+            <!-- Footer do modal -->
+            <div class="px-5 pt-3 pb-6 border-t border-white/10 shrink-0 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-slate-400">Total</span>
+                    <span id="cartTotal" class="text-2xl font-black text-primary">R$ 0,00</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="limparCarrinho()"
+                        class="h-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">delete_sweep</span>
+                        Limpar
+                    </button>
+                    <button onclick="abrirPagamento()"
+                        class="h-11 bg-cta hover:bg-cta/90 text-background-dark font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-[0.97]">
+                        <span class="material-symbols-outlined text-base">check_circle</span>
+                        Finalizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL PAGAMENTO ==================== -->
+    <div id="modalPagamento"
+        class="hidden fixed inset-0 z-50 modal-backdrop bg-black/70 flex items-end lg:items-center justify-center">
+        <div class="bg-surface-dark w-full max-w-md rounded-t-3xl lg:rounded-2xl border border-white/10 shadow-2xl">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">payments</span>
+                    <h3 class="text-lg font-bold">Forma de Pagamento</h3>
+                </div>
+                <button onclick="fecharPagamento()"
+                    class="size-8 flex items-center justify-center hover:bg-white/10 rounded-full">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="px-5 pb-6 pt-4 space-y-4">
+                <!-- Total -->
+                <div
+                    class="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 flex items-center justify-between">
+                    <span class="text-sm text-slate-300">Total a pagar</span>
+                    <span id="pagTotalValor" class="text-2xl font-black text-primary">R$ 0,00</span>
+                </div>
+
+                <!-- Opções de pagamento -->
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">Selecione</p>
+                    <div class="grid grid-cols-2 gap-2" id="paymentOptions">
+                        <button onclick="selecionarPagamento('pix')" data-method="pix"
+                            class="pay-btn flex flex-col items-center justify-center gap-1.5 h-20 rounded-xl border-2 border-white/10 bg-white/5 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                            <span class="material-symbols-outlined text-2xl text-slate-300">qr_code_2</span>
+                            <span class="text-sm font-semibold">Pix</span>
+                        </button>
+                        <button onclick="selecionarPagamento('dinheiro')" data-method="dinheiro"
+                            class="pay-btn flex flex-col items-center justify-center gap-1.5 h-20 rounded-xl border-2 border-white/10 bg-white/5 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                            <span class="material-symbols-outlined text-2xl text-slate-300">payments</span>
+                            <span class="text-sm font-semibold">Dinheiro</span>
+                        </button>
+                        <button onclick="selecionarPagamento('debito')" data-method="debito"
+                            class="pay-btn flex flex-col items-center justify-center gap-1.5 h-20 rounded-xl border-2 border-white/10 bg-white/5 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                            <span class="material-symbols-outlined text-2xl text-slate-300">credit_card</span>
+                            <span class="text-sm font-semibold">Débito</span>
+                        </button>
+                        <button onclick="selecionarPagamento('credito')" data-method="credito"
+                            class="pay-btn flex flex-col items-center justify-center gap-1.5 h-20 rounded-xl border-2 border-white/10 bg-white/5 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                            <span class="material-symbols-outlined text-2xl text-slate-300">credit_score</span>
+                            <span class="text-sm font-semibold">Crédito</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Campo troco (apenas para dinheiro) -->
+                <div id="trocoSection" class="hidden space-y-2">
+                    <label class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Valor recebido (para
+                        troco)</label>
+                    <input id="inputRecebido" type="number" step="0.01" min="0" placeholder="Ex: 50,00"
+                        oninput="calcularTroco()"
+                        class="w-full h-12 bg-card-dark border border-white/10 rounded-xl px-4 text-white text-lg font-bold focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                    <div id="trocoResultado"
+                        class="hidden flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
+                        <span class="text-sm text-emerald-300">Troco</span>
+                        <span id="trocoValor" class="text-xl font-black text-emerald-400">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Botão confirmar -->
+                <button id="btnConfirmarPagamento" onclick="confirmarVenda()"
+                    class="w-full h-12 bg-cta hover:bg-cta/90 text-background-dark font-black text-base rounded-xl transition-all active:scale-[0.97] flex items-center justify-center gap-2 opacity-50 cursor-not-allowed"
+                    disabled>
+                    <span class="material-symbols-outlined">check_circle</span>
+                    Confirmar Venda
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL QR CODE PIX ==================== -->
+    <div id="modalQRPix"
+        class="hidden fixed inset-0 z-[60] modal-backdrop bg-black/80 flex items-end lg:items-center justify-center">
+        <div class="bg-surface-dark w-full max-w-sm rounded-t-3xl lg:rounded-2xl border border-white/10 shadow-2xl">
+            <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">qr_code_2</span>
+                    <h3 class="text-lg font-bold">Pagar com Pix</h3>
+                </div>
+                <button onclick="fecharQRPix()"
+                    class="size-8 flex items-center justify-center hover:bg-white/10 rounded-full">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="px-5 pb-6 pt-5 space-y-4">
+                <!-- Valor -->
+                <div
+                    class="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-xl px-4 py-3">
+                    <span class="text-sm text-slate-300">Total a pagar</span>
+                    <span id="qrTotalValor" class="text-2xl font-black text-primary">R$ 0,00</span>
+                </div>
+                <!-- QR Code -->
+                <div class="flex flex-col items-center gap-3">
+                    <div id="qrCodeContainer"
+                        class="bg-white p-3 rounded-2xl shadow-lg flex items-center justify-center">
+                        <!-- QR Code gerado aqui -->
+                    </div>
+                    <p class="text-xs text-slate-400 text-center">Escaneie o QR Code com o app do seu banco</p>
+                </div>
+                <!-- Pix Copia e Cola -->
+                <div class="space-y-1">
+                    <label class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Pix Copia e
+                        Cola</label>
+                    <div class="flex gap-2">
+                        <input id="pixCopiaCola" readonly
+                            class="flex-1 text-[10px] bg-card-dark border border-white/10 rounded-xl px-3 py-2 text-slate-300 font-mono truncate focus:outline-none" />
+                        <button onclick="copiarPix()"
+                            class="h-10 w-10 shrink-0 bg-primary/20 hover:bg-primary/30 text-primary rounded-xl flex items-center justify-center transition-all">
+                            <span class="material-symbols-outlined text-base">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Sem chave cadastrada -->
+                <div id="pixSemChave" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3">
+                    <p class="text-amber-300 text-sm font-semibold">Chave Pix não cadastrada</p>
+                    <p class="text-amber-200/70 text-xs mt-1">Cadastre sua chave Pix em <a href="perfil.html"
+                            class="underline">Perfil</a>.</p>
+                </div>
+                <!-- Botão confirmar -->
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="fecharQRPix()"
+                        class="h-11 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-sm rounded-xl transition-all">
+                        Cancelar
+                    </button>
+                    <button onclick="confirmarVendaFinal()"
+                        class="h-11 bg-cta hover:bg-cta/90 text-background-dark font-black text-sm rounded-xl transition-all active:scale-[0.97] flex items-center justify-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">check_circle</span>
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPT ==================== -->
     <script type="module">
-        import { getAllRecords, insertRecord } from './supabase-utils.js';
+        import { getAllRecords, insertRecord, getCurrentUser } from './supabase-utils.js';
 
+        // Estado global
         let produtos = [];
+        let produtosFiltrados = [];
         let marketplaces = [];
-        let precosMarketplace = {}; // { produto_id:{ marketplace_id: preco } }
-        let carrinho = {}; // { produto_id: { produto, quantidade, preco } }
+        let precosMarketplace = {};
+        let carrinho = {};
         let marketplaceSelecionado = null;
-        let estoqueMap = {}; // { produto_id: quantidade_disponivel }
+        let estoqueMap = {};
+        let metodoPagamento = null;
+        let perfilUsuario = null;
 
-        // ========================
-        // CALCULAR ESTOQUE
-        // produzido (por receita_id) - vendido (por produto_id)
-        // ========================
+        // =====================
+        // CARREGAR DADOS
+        // =====================
         async function calcularEstoque() {
-            try {
-                // 1. Buscar todas as produções
-                const { data: producoes, error: prodErr } = await getAllRecords('producoes');
-                if (prodErr) console.warn('Erro ao buscar produções:', prodErr);
+            const { data: producoes } = await getAllRecords('producoes');
+            const { data: itensVendidos } = await getAllRecords('pedido_itens');
 
-                // 2. Buscar todos os itens vendidos
-                const { data: itensVendidos, error: itensErr } = await getAllRecords('pedido_itens');
-                if (itensErr) console.warn('Erro ao buscar itens vendidos:', itensErr);
+            const produzidoPorReceita = {};
+            (producoes || []).forEach(p => {
+                if (!p.receita_id) return;
+                produzidoPorReceita[p.receita_id] = (produzidoPorReceita[p.receita_id] || 0) + (p.total_unidades || 0);
+            });
 
-                // 3. Somar produção por receita_id
-                const produzidoPorReceita = {};
-                (producoes || []).forEach(p => {
-                    const rid = p.receita_id;
-                    if (!rid) return;
-                    produzidoPorReceita[rid] = (produzidoPorReceita[rid] || 0) + (p.total_unidades || 0);
-                });
+            const vendidoPorProduto = {};
+            (itensVendidos || []).forEach(item => {
+                if (!item.produto_id) return;
+                vendidoPorProduto[item.produto_id] = (vendidoPorProduto[item.produto_id] || 0) + (item.quantidade || 0);
+            });
 
-                // 4. Somar vendido por produto_id
-                const vendidoPorProduto = {};
-                (itensVendidos || []).forEach(item => {
-                    const pid = item.produto_id;
-                    if (!pid) return;
-                    vendidoPorProduto[pid] = (vendidoPorProduto[pid] || 0) + (item.quantidade || 0);
-                });
-
-                // 5. Para cada produto, estoque = produzido(receita) - vendido(produto)
-                estoqueMap = {};
-                produtos.forEach(prod => {
-                    const receitaId = prod.receita_id;
-                    const totalProduzido = receitaId ? (produzidoPorReceita[receitaId] || 0) : 0;
-                    const totalVendido = vendidoPorProduto[prod.id] || 0;
-                    estoqueMap[prod.id] = Math.max(0, totalProduzido - totalVendido);
-                });
-
-                console.log('📊 Estoque calculado:', estoqueMap);
-            } catch (err) {
-                console.error('❌ Erro ao calcular estoque:', err);
-            }
+            estoqueMap = {};
+            produtos.forEach(prod => {
+                const totalProduzido = prod.receita_id ? (produzidoPorReceita[prod.receita_id] || 0) : 0;
+                const totalVendido = vendidoPorProduto[prod.id] || 0;
+                estoqueMap[prod.id] = Math.max(0, totalProduzido - totalVendido);
+            });
         }
 
-        // Carregar dados
+        // =====================
+        // PIX — PAYLOAD EMV
+        // =====================
+        function gerarPixPayload(chave, nome, cidade, valor) {
+            function emv(id, valor) {
+                const len = String(valor.length).padStart(2, '0');
+                return `${id}${len}${valor}`;
+            }
+            function crc16(str) {
+                let crc = 0xFFFF;
+                for (let i = 0; i < str.length; i++) {
+                    crc ^= str.charCodeAt(i) << 8;
+                    for (let j = 0; j < 8; j++) {
+                        crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+                    }
+                }
+                return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+            }
+
+            // Normaliza strings (remove acentos e limita tamanho)
+            const norm = (s, max) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9 ]/g, '').substring(0, max).trim();
+
+            const gui = emv('00', 'BR.GOV.BCB.PIX') + emv('01', chave);
+            const merchantAccount = emv('26', gui);
+            const amount = valor > 0 ? emv('54', valor.toFixed(2)) : '';
+            const nomeNorm = norm(nome || 'Comerciante', 25);
+            const cidadeNorm = norm(cidade || 'Brasil', 15);
+            const txid = emv('05', '***');
+            const addData = emv('62', txid);
+
+            const payload =
+                emv('00', '01') +
+                emv('01', '12') +   // 12 = dinâmico, use 11 para estático sem valor
+                merchantAccount +
+                emv('52', '0000') +
+                emv('53', '986') +
+                amount +
+                emv('58', 'BR') +
+                emv('59', nomeNorm) +
+                emv('60', cidadeNorm) +
+                addData +
+                '6304';
+
+            return payload + crc16(payload);
+        }
+
         async function loadDados() {
             try {
-                // Carregar produtos
-                const { data: prodData, error: prodError } = await getAllRecords('produtos');
-                if (prodError) throw prodError;
-                produtos = (prodData || []).filter(p => p.disponivel);
-
-                // Carregar marketplaces (categorias do tipo marketplace)
-                const { data: catData, error: catError } = await getAllRecords('categorias');
-                if (catError) throw catError;
-                marketplaces = (catData || []).filter(c => c.tipo === 'marketplace' && c.ativo);
-
-                // Carregar preços por marketplace
-                const { data: precosData, error: precosError } = await getAllRecords('precos_marketplace');
-
-                if (!precosError && precosData) {
-                    precosData.forEach(p => {
-                        if (!precosMarketplace[p.produto_id]) {
-                            precosMarketplace[p.produto_id] = {};
-                        }
-                        const marketplaceId = p.categoria_marketplace_id || p.marketplace_id;
-                        precosMarketplace[p.produto_id][marketplaceId] = p.preco;
-                    });
+                // Carregar perfil do usuário (chave_pix, nome_negocio)
+                const user = await getCurrentUser();
+                if (user) {
+                    const { data: perfil } = await getAllRecords('perfis_usuarios');
+                    perfilUsuario = (perfil || []).find(p => p.id === user.id) || null;
                 }
 
-                // Calcular estoque real
+                const { data: prodData, error } = await getAllRecords('produtos');
+                if (error) throw error;
+                produtos = (prodData || []).filter(p => p.disponivel);
+
+                const { data: catData } = await getAllRecords('categorias');
+                marketplaces = (catData || []).filter(c => c.tipo === 'marketplace' && c.ativo);
+
+                const { data: precosData } = await getAllRecords('precos_marketplace');
+                (precosData || []).forEach(p => {
+                    if (!precosMarketplace[p.produto_id]) precosMarketplace[p.produto_id] = {};
+                    const mid = p.categoria_marketplace_id || p.marketplace_id;
+                    precosMarketplace[p.produto_id][mid] = p.preco;
+                });
+
                 await calcularEstoque();
 
-                // Filtrar para mostrar somente produtos com estoque > 0
                 produtos = produtos.filter(p => (estoqueMap[p.id] || 0) > 0);
+                produtosFiltrados = [...produtos];
 
                 renderMarketplaces();
                 renderProdutos();
-            } catch (error) {
-                console.error('❌ Erro ao carregar dados:', error);
+            } catch (err) {
+                console.error('Erro ao carregar:', err);
             }
         }
 
-        // Renderizar marketplaces
+        // =====================
+        // MARKETPLACES
+        // =====================
         function renderMarketplaces() {
             const container = document.getElementById('marketplacesList');
 
             if (marketplaces.length === 0) {
-                marketplaceSelecionado = null;
                 container.innerHTML = `
-                    <div class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-primary text-background-dark px-4 font-bold border-2 border-primary">
-                        <span class="material-symbols-outlined text-[20px]">store</span>
-                        <p class="text-sm">Venda Direta</p>
-                    </div>
-                `;
+                    <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 w-full">
+                        <span class="material-symbols-outlined text-amber-400 text-lg">warning</span>
+                        <p class="text-amber-300 text-xs font-medium">Nenhum marketplace cadastrado.
+                        <a href="categorias.html?tab=marketplace" class="underline">Cadastrar</a></p>
+                    </div>`;
                 return;
             }
 
-            if (!marketplaceSelecionado && marketplaces.length > 0) {
-                marketplaceSelecionado = marketplaces[0].id;
-            }
+            if (!marketplaceSelecionado) marketplaceSelecionado = marketplaces[0].id;
 
             container.innerHTML = marketplaces.map(mkt => {
                 const isActive = mkt.id === marketplaceSelecionado;
                 return `
-                    <div onclick="selecionarMarketplace(${mkt.id})"
-                        class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl px-4 border-2 cursor-pointer transition-all ${isActive
-                        ? 'bg-primary text-background-dark border-primary font-bold'
-                        : 'bg-surface-dark border-white/10 text-white font-medium hover:bg-white/5'
-                    }">
-                        <span class="material-symbols-outlined text-[20px]">storefront</span>
-                        <p class="text-sm">${mkt.nome}</p>
-                    </div>
-                `;
-            }).join('');
+                    <button onclick="selecionarMarketplace(${mkt.id})"
+                        class="flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 border-2 cursor-pointer transition-all text-sm font-semibold
+                        ${isActive ? 'bg-primary text-background-dark border-primary' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}">
+                        <span class="material-symbols-outlined text-[16px]">storefront</span>
+                        ${mkt.nome}
+                    </button>`;
+            }).join('') + `
+                <a href="categorias.html?tab=marketplace"
+                    class="flex h-9 shrink-0 items-center gap-1 rounded-xl px-3 border border-dashed border-primary/40 text-primary text-sm font-semibold hover:bg-primary/10 transition-colors whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                    Criar
+                </a>`;
         }
 
-        // Selecionar marketplace
         window.selecionarMarketplace = function (id) {
             marketplaceSelecionado = id;
-
-            Object.keys(carrinho).forEach(produtoId => {
-                if (precosMarketplace[produtoId]?.[marketplaceSelecionado]) {
-                    const novoPreco = parseFloat(precosMarketplace[produtoId][marketplaceSelecionado]);
-                    carrinho[produtoId].preco = novoPreco;
+            // Atualizar preços no carrinho
+            Object.keys(carrinho).forEach(pid => {
+                if (precosMarketplace[pid]?.[id]) {
+                    carrinho[pid].preco = parseFloat(precosMarketplace[pid][id]);
                 } else {
-                    delete carrinho[produtoId];
+                    delete carrinho[pid];
                 }
             });
-
             renderMarketplaces();
             renderProdutos();
-            atualizarTotais();
+            atualizarBar();
         };
 
-        // Renderizar produtos
+        // =====================
+        // PRODUTOS
+        // =====================
         function renderProdutos() {
             const container = document.getElementById('produtosList');
+            const lista = produtosFiltrados;
 
-            if (produtos.length === 0) {
+            if (!lista.length) {
                 container.innerHTML = `
-                    <div class="text-center py-12 text-slate-400">
-                        <span class="material-symbols-outlined text-6xl mb-4 opacity-30">icecream</span>
-                        <p class="text-lg font-semibold mb-1">Nenhum produto em estoque</p>
-                        <p class="text-sm text-slate-500">Registre uma produção primeiro em<br><strong>Produção → Nova Produção</strong></p>
-                    </div>
-                `;
+                    <div class="col-span-full text-center py-16 text-slate-400">
+                        <span class="material-symbols-outlined text-6xl mb-3 opacity-30 block">icecream</span>
+                        <p class="text-base font-semibold">Nenhum produto disponível</p>
+                        <p class="text-sm text-slate-500 mt-1">Registre uma produção primeiro</p>
+                    </div>`;
                 return;
             }
 
-            container.innerHTML = produtos.map(prod => {
-                let preco = null;
-                let temPreco = false;
+            container.innerHTML = lista.map(prod => {
                 const estoque = estoqueMap[prod.id] || 0;
+                const qtdCarrinho = carrinho[prod.id]?.quantidade || 0;
+                const estoqueRestante = estoque - qtdCarrinho;
+                const preco = precosMarketplace[prod.id]?.[marketplaceSelecionado];
+                const temPreco = preco != null;
 
-                if (marketplaceSelecionado && precosMarketplace[prod.id]?.[marketplaceSelecionado]) {
-                    preco = parseFloat(precosMarketplace[prod.id][marketplaceSelecionado]);
-                    temPreco = true;
-                }
+                const estoqueCor = estoqueRestante <= 0
+                    ? 'text-red-400 border-red-500/20 bg-red-500/10'
+                    : estoqueRestante <= 5
+                        ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10'
+                        : 'text-green-400 border-green-500/20 bg-green-500/10';
 
-                const qtd = carrinho[prod.id]?.quantidade || 0;
-                const estoqueRestante = estoque - qtd;
-
-                // Cor do badge de estoque
-                let estoqueBadgeClass = 'bg-green-500/10 text-green-400 border-green-500/20';
-                if (estoqueRestante <= 0) {
-                    estoqueBadgeClass = 'bg-red-500/10 text-red-400 border-red-500/20';
-                } else if (estoqueRestante <= 5) {
-                    estoqueBadgeClass = 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-                }
+                const imgHtml = prod.imagem_url
+                    ? `<div class="w-full aspect-square bg-cover bg-center rounded-xl mb-3 border border-white/10" style="background-image:url('${prod.imagem_url}')"></div>`
+                    : `<div class="w-full aspect-square rounded-xl mb-3 border border-white/10 bg-white/5 flex items-center justify-center">
+                         <span class="material-symbols-outlined text-4xl text-slate-500">icecream</span>
+                       </div>`;
 
                 return `
-                    <div class="flex items-center gap-4 bg-transparent px-2 min-h-[88px] py-3 justify-between border-b border-white/5">
-                        <div class="flex items-center gap-4">
-                            ${prod.imagem_url
-                        ? `<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-16 border border-white/10" style="background-image: url('${prod.imagem_url}');"></div>`
-                        : `<div class="flex items-center justify-center aspect-square rounded-lg size-16 border border-white/10 bg-white/5">
-                                     <span class="material-symbols-outlined text-slate-400">icecream</span>
-                                   </div>`
+                    <div class="product-card bg-card-dark rounded-2xl border border-white/10 p-3 flex flex-col">
+                        ${imgHtml}
+                        <p class="text-sm font-semibold leading-tight line-clamp-2 flex-1">${prod.nome}</p>
+                        ${temPreco
+                        ? `<p class="text-primary font-black text-base mt-1">R$ ${parseFloat(preco).toFixed(2).replace('.', ',')}</p>`
+                        : `<p class="text-red-400 text-xs font-medium mt-1">Sem preço</p>`
                     }
-                            <div class="flex flex-col justify-center">
-                                <p class="text-white text-base font-semibold leading-tight line-clamp-1">${prod.nome}</p>
-                                ${temPreco ? `
-                                    <p class="text-primary text-sm font-bold leading-normal mt-1">R$ ${preco.toFixed(2).replace('.', ',')}</p>
-                                ` : `
-                                    <p class="text-red-400 text-xs font-medium leading-normal mt-1">Sem preço configurado</p>
-                                `}
-                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${estoqueBadgeClass} border uppercase mt-1 w-fit">
-                                    <span class="material-symbols-outlined text-[12px]">inventory_2</span>
-                                    ${estoqueRestante} em estoque
-                                </span>
-                            </div>
-                        </div>
-                        <div class="shrink-0">
-                            ${temPreco ? `
-                                <div class="flex items-center gap-3 text-white">
-                                    <button onclick="alterarQtd(${prod.id}, -1)"
-                                        class="text-lg font-bold flex h-8 w-8 items-center justify-center rounded-lg bg-surface-dark border border-white/10 text-white/60 active:scale-95 transition-transform">
-                                        -
-                                    </button>
-                                    <span class="text-base font-bold w-6 text-center">${qtd}</span>
-                                    <button onclick="alterarQtd(${prod.id}, 1)"
-                                        class="text-lg font-bold flex h-8 w-8 items-center justify-center rounded-lg ${estoqueRestante <= 0 ? 'bg-white/10 text-white/30 cursor-not-allowed' : 'bg-primary text-background-dark'} active:scale-95 transition-transform">
-                                        +
-                                    </button>
-                                </div>
-                            ` : `
-                                <div class="text-white/30 text-xs text-center px-2 w-24">
-                                    <span class="material-symbols-outlined text-2xl">block</span>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                `;
+                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold border uppercase mt-2 w-fit ${estoqueCor}">
+                            <span class="material-symbols-outlined text-[10px]">inventory_2</span>
+                            ${estoqueRestante} restante${estoqueRestante !== 1 ? 's' : ''}
+                        </span>
+                        ${temPreco && estoqueRestante > 0 ? `
+                            <div class="mt-3">
+                                ${qtdCarrinho === 0 ? `
+                                    <button onclick="adicionarAoCarrinho(${prod.id})"
+                                        class="w-full h-9 bg-primary hover:bg-primary/90 text-background-dark font-bold text-xs rounded-xl flex items-center justify-center gap-1 transition-all active:scale-95">
+                                        <span class="material-symbols-outlined text-base">add_shopping_cart</span>
+                                        Adicionar
+                                    </button>` : `
+                                    <div class="flex items-center justify-between gap-2">
+                                        <button onclick="alterarQtd(${prod.id}, -1)"
+                                            class="flex size-9 items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 font-bold text-lg transition-all active:scale-95">
+                                            <span class="material-symbols-outlined text-base">remove</span>
+                                        </button>
+                                        <span class="text-base font-black text-primary">${qtdCarrinho}</span>
+                                        <button onclick="alterarQtd(${prod.id}, 1)" ${estoqueRestante <= 0 ? 'disabled' : ''}
+                                            class="flex size-9 items-center justify-center rounded-xl ${estoqueRestante <= 0 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-primary hover:bg-primary/90 text-background-dark'} font-bold transition-all active:scale-95">
+                                            <span class="material-symbols-outlined text-base">add</span>
+                                        </button>
+                                    </div>`
+                        }
+                            </div>` : `
+                            <div class="mt-3 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10">
+                                <span class="material-symbols-outlined text-white/20">block</span>
+                            </div>`
+                    }
+                    </div>`;
             }).join('');
         }
 
-        // Alterar quantidade no carrinho
+        window.filtrarProdutos = function () {
+            const q = document.getElementById('inputBusca').value.toLowerCase().trim();
+            produtosFiltrados = q ? produtos.filter(p => p.nome.toLowerCase().includes(q)) : [...produtos];
+            renderProdutos();
+        };
+
+        // =====================
+        // CARRINHO
+        // =====================
+        window.adicionarAoCarrinho = function (produtoId) {
+            alterarQtd(produtoId, 1);
+        };
+
         window.alterarQtd = function (produtoId, delta) {
             const produto = produtos.find(p => p.id === produtoId);
             if (!produto) return;
-
             if (!marketplaceSelecionado || !precosMarketplace[produtoId]?.[marketplaceSelecionado]) {
-                alert('❌ Este produto não tem preço configurado para este marketplace!\n\nConfigure em: Adicionar Produto → Precificação');
+                alert('❌ Produto sem preço configurado para este canal de venda.');
                 return;
             }
-
             const qtdAtual = carrinho[produtoId]?.quantidade || 0;
             const estoque = estoqueMap[produtoId] || 0;
             let novaQtd = qtdAtual + delta;
 
-            // Limitar ao estoque disponível
             if (novaQtd > estoque) {
-                alert(`⚠️ Estoque insuficiente!\n\nDisponível: ${estoque} unidades\nNo carrinho: ${qtdAtual}`);
+                alert(`⚠️ Estoque insuficiente!\n\nDisponível: ${estoque} un`);
                 return;
             }
-
             novaQtd = Math.max(0, novaQtd);
 
             if (novaQtd === 0) {
                 delete carrinho[produtoId];
             } else {
-                const preco = parseFloat(precosMarketplace[produtoId][marketplaceSelecionado]);
                 carrinho[produtoId] = {
                     produto,
                     quantidade: novaQtd,
-                    preco: preco
+                    preco: parseFloat(precosMarketplace[produtoId][marketplaceSelecionado])
                 };
             }
 
-            atualizarTotais();
+            atualizarBar();
             renderProdutos();
+
+            // Atualizar carrinho se estiver aberto
+            if (!document.getElementById('modalCarrinho').classList.contains('hidden')) {
+                renderCartItems();
+            }
         };
 
-        // Atualizar totais
-        function atualizarTotais() {
-            const itens = Object.keys(carrinho).length;
-            const qtdTotal = Object.values(carrinho).reduce((sum, item) => sum + item.quantidade, 0);
-            const valorTotal = Object.values(carrinho).reduce((sum, item) => sum + (item.quantidade * item.preco), 0);
-
-            document.getElementById('totalItens').textContent = itens;
-            document.getElementById('totalQtd').textContent = qtdTotal;
-            document.getElementById('totalValor').textContent = `R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+        function totalCarrinho() {
+            return Object.values(carrinho).reduce((s, i) => s + i.quantidade * i.preco, 0);
         }
 
-        // Limpar carrinho
+        function qtdTotalCarrinho() {
+            return Object.values(carrinho).reduce((s, i) => s + i.quantidade, 0);
+        }
+
+        function atualizarBar() {
+            const qtd = qtdTotalCarrinho();
+            const total = totalCarrinho();
+            const badge = document.getElementById('cartBadge');
+            const bar = document.getElementById('bottomBar');
+
+            badge.textContent = qtd;
+            badge.classList.toggle('hidden', qtd === 0);
+
+            document.getElementById('barTotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            document.getElementById('barQtd').textContent = qtd;
+
+            bar.classList.toggle('hidden', qtd === 0);
+        }
+
+        window.abrirCarrinho = function () {
+            renderCartItems();
+            document.getElementById('modalCarrinho').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.fecharCarrinho = function () {
+            document.getElementById('modalCarrinho').classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItems');
+            const itens = Object.values(carrinho);
+            const total = totalCarrinho();
+
+            document.getElementById('cartTotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            if (!itens.length) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-400">
+                        <span class="material-symbols-outlined text-5xl opacity-30 block mb-2">shopping_cart</span>
+                        <p class="text-sm">Carrinho vazio</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = itens.map(item => `
+                <div class="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+                    ${item.produto.imagem_url
+                    ? `<img src="${item.produto.imagem_url}" class="size-12 rounded-lg object-cover border border-white/10 shrink-0" />`
+                    : `<div class="size-12 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
+                               <span class="material-symbols-outlined text-slate-400 text-xl">icecream</span>
+                           </div>`
+                }
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold line-clamp-1">${item.produto.nome}</p>
+                        <p class="text-primary text-xs font-bold">R$ ${item.preco.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="alterarQtd(${item.produto.id}, -1)"
+                            class="size-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-all">
+                            <span class="material-symbols-outlined text-sm">remove</span>
+                        </button>
+                        <span class="text-sm font-black w-5 text-center">${item.quantidade}</span>
+                        <button onclick="alterarQtd(${item.produto.id}, 1)"
+                            class="size-7 flex items-center justify-center rounded-lg bg-primary/20 hover:bg-primary/30 text-primary transition-all">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                        </button>
+                    </div>
+                    <p class="text-xs font-bold text-white/60 w-14 text-right shrink-0">
+                        R$ ${(item.quantidade * item.preco).toFixed(2).replace('.', ',')}
+                    </p>
+                </div>`).join('');
+        }
+
         window.limparCarrinho = function () {
             if (!confirm('Limpar todos os itens do carrinho?')) return;
             carrinho = {};
-            atualizarTotais();
+            atualizarBar();
             renderProdutos();
+            renderCartItems();
         };
 
-        // Finalizar venda
-        window.finalizarVenda = async function () {
-            if (Object.keys(carrinho).length === 0) {
-                alert('❌ Adicione produtos ao carrinho primeiro!');
+        // =====================
+        // PAGAMENTO
+        // =====================
+        window.abrirPagamento = function () {
+            fecharCarrinho();
+            metodoPagamento = null;
+            document.getElementById('pagTotalValor').textContent =
+                `R$ ${totalCarrinho().toFixed(2).replace('.', ',')}`;
+            // Reset botões
+            document.querySelectorAll('.pay-btn').forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary/10', 'text-primary');
+                b.classList.add('border-white/10', 'bg-white/5');
+                b.querySelector('span.material-symbols-outlined').classList.remove('text-primary');
+                b.querySelector('span.material-symbols-outlined').classList.add('text-slate-300');
+            });
+            document.getElementById('trocoSection').classList.add('hidden');
+            document.getElementById('trocoResultado').classList.add('hidden');
+            document.getElementById('inputRecebido').value = '';
+            const btnConfirmar = document.getElementById('btnConfirmarPagamento');
+            btnConfirmar.disabled = true;
+            btnConfirmar.classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('modalPagamento').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.fecharPagamento = function () {
+            document.getElementById('modalPagamento').classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        window.selecionarPagamento = function (metodo) {
+            metodoPagamento = metodo;
+
+            // Visual dos botões
+            document.querySelectorAll('.pay-btn').forEach(b => {
+                const isActive = b.dataset.method === metodo;
+                b.classList.toggle('border-primary', isActive);
+                b.classList.toggle('bg-primary/10', isActive);
+                b.classList.toggle('border-white/10', !isActive);
+                b.classList.toggle('bg-white/5', !isActive);
+                const icon = b.querySelector('span.material-symbols-outlined');
+                icon.classList.toggle('text-primary', isActive);
+                icon.classList.toggle('text-slate-300', !isActive);
+            });
+
+            // Troco (dinheiro) ou QR Code (pix)
+            const trocoSection = document.getElementById('trocoSection');
+            if (metodo === 'dinheiro') {
+                trocoSection.classList.remove('hidden');
+            } else {
+                trocoSection.classList.add('hidden');
+                document.getElementById('trocoResultado').classList.add('hidden');
+            }
+
+            // Habilitar confirmar
+            const btnConfirmar = document.getElementById('btnConfirmarPagamento');
+            btnConfirmar.disabled = false;
+            btnConfirmar.classList.remove('opacity-50', 'cursor-not-allowed');
+        };
+
+        // =====================
+        // QR CODE PIX
+        // =====================
+        window.abrirQRPix = function () {
+            const total = totalCarrinho();
+            const chave = perfilUsuario?.chave_pix || '';
+            const nome = perfilUsuario?.nome_negocio || perfilUsuario?.nome || 'Comerciante';
+            const cidade = 'Brasil';
+
+            document.getElementById('qrTotalValor').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            const semChave = document.getElementById('pixSemChave');
+            const qrContainer = document.getElementById('qrCodeContainer');
+            const pixInput = document.getElementById('pixCopiaCola');
+
+            if (!chave) {
+                semChave.classList.remove('hidden');
+                qrContainer.classList.add('hidden');
+                pixInput.parentElement.parentElement.classList.add('hidden');
+            } else {
+                semChave.classList.add('hidden');
+                qrContainer.classList.remove('hidden');
+                pixInput.parentElement.parentElement.classList.remove('hidden');
+
+                const payload = gerarPixPayload(chave, nome, cidade, total);
+                pixInput.value = payload;
+
+                // Limpar QR anterior
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: payload,
+                    width: 220,
+                    height: 220,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+
+            document.getElementById('modalQRPix').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.fecharQRPix = function () {
+            document.getElementById('modalQRPix').classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        window.copiarPix = function () {
+            const val = document.getElementById('pixCopiaCola').value;
+            navigator.clipboard.writeText(val).then(() => {
+                const btn = document.querySelector('[onclick="copiarPix()"]');
+                const icon = btn.querySelector('span');
+                icon.textContent = 'check';
+                setTimeout(() => { icon.textContent = 'content_copy'; }, 2000);
+            });
+        };
+
+        // Confirmar após QR Code
+        window.confirmarVendaFinal = async function () {
+            fecharQRPix();
+            await _salvarVenda();
+        };
+
+        window.calcularTroco = function () {
+            const total = totalCarrinho();
+            const recebido = parseFloat(document.getElementById('inputRecebido').value) || 0;
+            const troco = recebido - total;
+            const el = document.getElementById('trocoResultado');
+            if (recebido > 0) {
+                el.classList.remove('hidden');
+                document.getElementById('trocoValor').textContent =
+                    troco >= 0
+                        ? `R$ ${troco.toFixed(2).replace('.', ',')}`
+                        : `⚠️ Faltam R$ ${Math.abs(troco).toFixed(2).replace('.', ',')}`;
+                document.getElementById('trocoValor').className =
+                    troco >= 0
+                        ? 'text-xl font-black text-emerald-400'
+                        : 'text-xl font-black text-red-400';
+            } else {
+                el.classList.add('hidden');
+            }
+        };
+
+        // Salvar venda no banco (usado por Pix e outros métodos)
+        async function _salvarVenda() {
+            const nomeMetodo = {
+                pix: 'Pix',
+                dinheiro: 'Dinheiro',
+                debito: 'Cartão de Débito',
+                credito: 'Cartão de Crédito'
+            };
+            const itens = Object.values(carrinho);
+            const subtotal = itens.reduce((s, i) => s + i.quantidade * i.preco, 0);
+            const numeroPedido = `VND-${Date.now()}`;
+
+            const pedido = {
+                numero_pedido: numeroPedido,
+                categoria_marketplace_id: marketplaceSelecionado,
+                status: 'entregue',
+                valor_subtotal: subtotal,
+                valor_desconto: 0,
+                valor_taxa_entrega: 0,
+                valor_total: subtotal,
+                metodo_pagamento: nomeMetodo[metodoPagamento],
+                data_pedido: new Date().toISOString()
+            };
+
+            const { data: pedidoData, error: pedidoError } = await insertRecord('pedidos', pedido);
+            if (pedidoError) throw pedidoError;
+
+            const pedidoCriado = Array.isArray(pedidoData) ? pedidoData[0] : pedidoData;
+            if (!pedidoCriado?.id) throw new Error('Pedido criado mas ID não retornado.');
+
+            for (const item of itens) {
+                await insertRecord('pedido_itens', {
+                    pedido_id: pedidoCriado.id,
+                    produto_id: item.produto.id,
+                    produto_nome: item.produto.nome,
+                    quantidade: item.quantidade,
+                    preco_unitario: item.preco,
+                    preco_total: item.quantidade * item.preco
+                });
+            }
+
+            fecharPagamento();
+            alert(`✅ Venda registrada!\n\nPedido: ${numeroPedido}\nTotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\nPagamento: ${nomeMetodo[metodoPagamento]}`);
+
+            carrinho = {};
+            atualizarBar();
+            await loadDados();
+        }
+
+        window.confirmarVenda = async function () {
+            if (!metodoPagamento) return;
+            if (Object.keys(carrinho).length === 0) return;
+
+            // Pix: abrir QR Code primeiro
+            if (metodoPagamento === 'pix') {
+                fecharPagamento();
+                abrirQRPix();
                 return;
             }
 
             try {
-                const itens = Object.values(carrinho);
-                const subtotal = itens.reduce((sum, item) => sum + (item.quantidade * item.preco), 0);
-
-                const numeroPedido = `VND-${Date.now()}`;
-
-                const pedido = {
-                    numero_pedido: numeroPedido,
-                    categoria_marketplace_id: marketplaceSelecionado,
-                    status: 'entregue',
-                    valor_subtotal: subtotal,
-                    valor_desconto: 0,
-                    valor_taxa_entrega: 0,
-                    valor_total: subtotal,
-                    metodo_pagamento: 'Não informado',
-                    data_pedido: new Date().toISOString()
-                };
-
-                const { data: pedidoData, error: pedidoError } = await insertRecord('pedidos', pedido);
-                if (pedidoError) throw pedidoError;
-
-                const pedidoCriado = Array.isArray(pedidoData) ? pedidoData[0] : pedidoData;
-
-                if (!pedidoCriado || !pedidoCriado.id) {
-                    throw new Error('Pedido foi criado mas ID não foi retornado. Verifique RLS da tabela pedidos.');
-                }
-
-                for (const item of itens) {
-                    const pedidoItem = {
-                        pedido_id: pedidoCriado.id,
-                        produto_id: item.produto.id,
-                        produto_nome: item.produto.nome,
-                        quantidade: item.quantidade,
-                        preco_unitario: item.preco,
-                        preco_total: item.quantidade * item.preco
-                    };
-
-                    const { error: itemError } = await insertRecord('pedido_itens', pedidoItem);
-                    if (itemError) throw itemError;
-                }
-
-                alert(`✅ Venda registrada com sucesso!\n\nPedido: ${numeroPedido}\nTotal: R$ ${subtotal.toFixed(2)}`);
-
-                // Recarregar dados (recalcular estoque)
-                carrinho = {};
-                atualizarTotais();
-                await loadDados();
-
-            } catch (error) {
-                console.error('❌ Erro ao finalizar venda:', error);
-                alert('❌ Erro ao registrar venda: ' + error.message);
+                await _salvarVenda();
+            } catch (err) {
+                console.error('Erro ao finalizar venda:', err);
+                alert('❌ Erro: ' + err.message);
             }
         };
 
-        let vendasLimitInfo = { atingiu: false };
-
-        // Iniciar
-        loadDados();
+        // Fechar modais ao clicar no backdrop
+        document.getElementById('modalCarrinho').addEventListener('click', function (e) {
+            if (e.target === this) fecharCarrinho();
+        });
+        document.getElementById('modalPagamento').addEventListener('click', function (e) {
+            if (e.target === this) fecharPagamento();
+        });
 
         // Verificar limites do plano
+        let vendasLimitInfo = { atingiu: false };
         (async () => {
             try {
                 const { checkLimiteVendas } = await import('./plan-limits.js');
                 const bannerContainer = document.createElement('div');
-                bannerContainer.className = 'px-2 pb-1 mt-1';
+                bannerContainer.className = 'px-3 pb-1 mt-1';
                 document.querySelector('main').prepend(bannerContainer);
-
                 vendasLimitInfo = await checkLimiteVendas(bannerContainer);
-            } catch (e) {
-                console.warn('plan-limits não disponível:', e);
-            }
+            } catch (e) { console.warn('plan-limits não disponível:', e); }
         })();
 
-        // Override finalizarVenda para checar limite
-        const _finalizarVendaOriginal = window.finalizarVenda;
-        window.finalizarVenda = async function () {
+        const _confirmarOriginal = window.confirmarVenda;
+        window.confirmarVenda = async function () {
             if (vendasLimitInfo.atingiu) {
-                if (confirm('⭐ Limite de vendas manuais atingido!\n\nNo plano Free você pode registrar até 30 vendas por mês.\nDeseja fazer upgrade para Premium?')) {
+                if (confirm('⭐ Limite de vendas atingido!\n\nDeseja fazer upgrade para Premium?')) {
                     window.location.href = 'planos.html';
                 }
                 return;
             }
-            return _finalizarVendaOriginal();
+            return _confirmarOriginal();
         };
+
+        // Iniciar
+        loadDados();
     </script>
 </body>
 

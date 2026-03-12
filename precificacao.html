@@ -20,7 +20,7 @@
                         "accent-cyan": "#13ecec",
                         "accent-orange": "#f59e0b",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                     },
                     fontFamily: {
                         "display": ["Work Sans", "sans-serif"]
@@ -49,12 +49,16 @@
     <!-- Top Navigation Bar -->
     <div class="sticky top-0 z-50 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
         <div class="flex items-center p-4 pb-2 justify-between max-w-7xl mx-auto">
-            <button onclick="window.location.href='index.html'"
+            <button onclick="voltarComAviso()"
                 class="text-white flex size-12 shrink-0 items-center justify-start hover:bg-white/10 rounded-full transition-colors">
                 <span class="material-symbols-outlined cursor-pointer">arrow_back</span>
             </button>
             <h2 class="text-white text-lg font-bold flex-1 text-center">Precificação por Marketplace</h2>
-            <div class="flex w-12"></div>
+            <button onclick="salvarPrecos()"
+                class="flex items-center gap-1.5 bg-primary text-background-dark font-bold text-sm px-4 py-2 rounded-xl shadow-[0_4px_15px_rgb(11,239,239,0.25)] hover:bg-primary/90 active:scale-95 transition-all shrink-0">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                Salvar
+            </button>
         </div>
         <!-- Channel Selector -->
         <div id="marketplacesList" class="flex gap-3 p-4 overflow-x-auto custom-scrollbar max-w-7xl mx-auto">
@@ -75,18 +79,11 @@
         </div>
 
         <!-- Product List -->
-        <div id="produtosList" class="flex flex-col gap-4 p-4">
+        <div id="produtosList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
             <!-- Cards serão inseridos aqui -->
         </div>
 
-        <!-- Botão Salvar -->
-        <div class="p-4 pb-8">
-            <button onclick="salvarPrecos()"
-                class="w-full mx-auto flex items-center justify-center gap-2 bg-primary text-background-dark font-bold text-base h-14 rounded-2xl shadow-[0_8px_30px_rgb(11,239,239,0.3)] active:scale-95 transition-transform hover:bg-primary/90">
-                <span class="material-symbols-outlined">save</span>
-                Salvar Alterações
-            </button>
-        </div>
+
     </main>
 
     <script type="module">
@@ -97,28 +94,95 @@
         let precosMarketplace = [];
         let marketplaceSelecionado = null;
         let precosPorProduto = {}; // { produto_id: preco_digitado }
+        // Thresholds de margem (carregados das configuracoes)
+        let MARGEM_BAIXA = 20;
+        let MARGEM_RAZOAVEL = 40;
+        let MARGEM_EXCELENTE = 60;
 
         // Carregar dados
         async function loadDados() {
             try {
-                // Carregar produtos
-                const { data: prodData, error: prodError } = await getAllRecords('produtos');
+                // ─── Todas as requisições em PARALELO (antes eram 8 sequenciais!) ───
+                const [
+                    { data: configData },
+                    { data: prodData, error: prodError },
+                    { data: catData, error: catError },
+                    { data: precoData, error: precoError },
+                    { data: receitasData },
+                    { data: riData },
+                    { data: insumosData },
+                ] = await Promise.all([
+                    getAllRecords('configuracoes'),
+                    getAllRecords('produtos'),
+                    getAllRecords('categorias'),
+                    getAllRecords('precos_marketplace'),
+                    getAllRecords('receitas'),
+                    getAllRecords('receitas_insumos'),
+                    getAllRecords('insumos'),
+                ]);
+
                 if (prodError) throw prodError;
+                if (catError) throw catError;
+                if (precoError) throw precoError;
+
+                // Configurações
+                let custoMaoObraHora = 25.00;
+                (configData || []).forEach(c => {
+                    if (c.chave === 'margem_baixa') MARGEM_BAIXA = parseFloat(c.valor) || 20;
+                    if (c.chave === 'margem_razoavel') MARGEM_RAZOAVEL = parseFloat(c.valor) || 40;
+                    if (c.chave === 'margem_excelente') MARGEM_EXCELENTE = parseFloat(c.valor) || 60;
+                    if (c.chave === 'custo_mao_obra_hora') custoMaoObraHora = parseFloat(c.valor) || 25.00;
+                });
+
+                // Produtos
                 produtos = (prodData || []).filter(p => p.disponivel);
 
-                // Carregar categorias de marketplace
-                const { data: catData, error: catError } = await getAllRecords('categorias');
-                if (catError) throw catError;
-
-                // Filtrar apenas categorias ativas do tipo marketplace
+                // Marketplaces
                 marketplaces = (catData || []).filter(cat => cat.tipo === 'marketplace' && cat.ativo);
 
-                console.log('✅ Marketplaces carregados:', marketplaces);
-
-                // Carregar preços existentes
-                const { data: precoData, error: precoError } = await getAllRecords('precos_marketplace');
-                if (precoError) throw precoError;
+                // Preços salvos
                 precosMarketplace = precoData || [];
+
+                // ── Calcular custo por receita ────────────────────────────────────
+                const receitasMap = {};
+                (receitasData || []).forEach(r => { receitasMap[r.id] = r; });
+
+                const insumosMap = {};
+                (insumosData || []).forEach(i => { insumosMap[i.id] = i; });
+
+                const receitaIds = [...new Set(produtos.map(p => p.receita_id).filter(Boolean))];
+                const custoPorReceita = {};
+
+                receitaIds.forEach(rid => {
+                    const receita = receitasMap[rid];
+                    if (!receita) return;
+
+                    const itens = (riData || []).filter(ri => ri.receita_id === rid);
+                    let custoIngredientes = 0, custoEmbalagens = 0, custoEquipamentos = 0;
+
+                    itens.forEach(ri => {
+                        const insumo = insumosMap[ri.insumo_id];
+                        if (!insumo) return;
+                        const qtd = parseFloat(ri.quantidade || 0);
+                        const cu = parseFloat(insumo.custo_unitario || 0);
+                        if (insumo.tipo === 'ingrediente') custoIngredientes += qtd * cu;
+                        else if (insumo.tipo === 'embalagem') custoEmbalagens += qtd * cu;
+                        else if (insumo.tipo === 'equipamento') custoEquipamentos += (qtd / 60) * cu;
+                    });
+
+                    const custoMaoObra = (parseFloat(receita.tempo_preparo || 0) / 60) * custoMaoObraHora;
+                    const custoTotal = custoIngredientes + custoEmbalagens + custoEquipamentos + custoMaoObra;
+                    const rendimento = parseInt(receita.rendimento_unidades || 1);
+                    custoPorReceita[rid] = custoTotal / rendimento;
+                });
+
+                // Enriquecer produtos com custo real
+                produtos = produtos.map(p => ({
+                    ...p,
+                    custo_real: p.receita_id && custoPorReceita[p.receita_id] != null
+                        ? custoPorReceita[p.receita_id]
+                        : parseFloat(p.preco_base || 0),
+                }));
 
                 // Selecionar primeiro marketplace por padrão
                 if (marketplaces.length > 0 && !marketplaceSelecionado) {
@@ -139,7 +203,21 @@
             const container = document.getElementById('marketplacesList');
 
             if (marketplaces.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-sm">Nenhum marketplace cadastrado</p>`;
+                marketplaceSelecionado = null;
+                container.innerHTML = `
+                    <div class="flex gap-3 items-start bg-amber-500/10 border border-amber-500/40 rounded-xl p-4 w-full">
+                        <span class="material-symbols-outlined text-amber-400 text-2xl mt-0.5 shrink-0">warning</span>
+                        <div class="flex-1">
+                            <p class="text-amber-300 font-semibold text-sm mb-1">Nenhuma categoria de Marketplace cadastrada!</p>
+                            <p class="text-amber-200/70 text-xs leading-relaxed mb-3">Você precisa cadastrar um canal de venda antes de registrar uma precificação. Exemplos: <span class="font-semibold">WhatsApp, iFood, Balcão, Porta de Casa</span>.<br>Se você vende na Porta de casa, ou pelo WhatsApp mas não tem custo para enviar o produto você pode colocar 0%</p>
+                            <a href="categorias.html?tab=marketplace"
+                                class="inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs px-3 py-2 rounded-lg transition-all active:scale-95">
+                                <span class="material-symbols-outlined text-sm">add_circle</span>
+                                Cadastrar Marketplace
+                            </a>
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
@@ -158,6 +236,15 @@
                     </div>
                 `;
             }).join('');
+
+            // Botão "Criar Categoria" sempre ao final
+            container.innerHTML += `
+                <a href="categorias.html?tab=marketplace"
+                    class="flex h-10 shrink-0 items-center justify-center gap-x-1.5 rounded-full px-4 border border-dashed border-primary/50 text-primary text-sm font-bold hover:bg-primary/10 transition-colors whitespace-nowrap">
+                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    Criar Categoria
+                </a>
+            `;
         }
 
         // Selecionar marketplace
@@ -219,8 +306,8 @@
             document.getElementById('totalProdutos').textContent = `${produtos.length} itens`;
 
             container.innerHTML = produtos.map(prod => {
-                const precoBase = parseFloat(prod.preco_base || 0);
-                const precoSugerido = calcularPrecoSugerido(precoBase, taxa);
+                const custoReal = parseFloat(prod.custo_real ?? prod.preco_base ?? 0);
+                const precoSugerido = calcularPrecoSugerido(custoReal, taxa);
 
                 // Buscar preço salvo para este produto/marketplace
                 const precoSalvo = precosMarketplace.find(p => p.produto_id === prod.id && p.categoria_marketplace_id === marketplaceSelecionado);
@@ -228,8 +315,9 @@
 
                 // Calcular lucro e margem
                 const custoComTaxa = precoAtual * (taxa / 100);
-                const lucro = precoAtual - precoBase - custoComTaxa;
-                const margem = precoBase > 0 ? (lucro / precoAtual) * 100 : 0;
+                const lucro = precoAtual - custoReal - custoComTaxa;
+                const margem = precoAtual > 0 ? (lucro / precoAtual) * 100 : 0;
+                const temReceita = !!prod.receita_id;
 
                 return `
                     <div class="flex flex-col gap-4 rounded-2xl bg-card-dark p-4 border border-white/5 shadow-xl">
@@ -244,12 +332,17 @@
                                 <div class="flex flex-col gap-0.5">
                                     <h4 class="text-white text-lg font-bold">${prod.nome}</h4>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-white/50 text-xs font-medium uppercase">Preço Base</span>
-                                        <span class="text-white/80 text-sm font-bold">R$ ${precoBase.toFixed(2)}</span>
+                                        <span class="text-white/40 text-[10px] font-medium uppercase">Custo unit.</span>
+                                        <span class="text-white/60 text-xs font-semibold">R$ ${custoReal.toFixed(2)}</span>
+                                        ${temReceita
+                        ? `<span class="text-emerald-500/70 text-[9px] font-bold uppercase">📋 receita</span>`
+                        : `<span class="text-amber-500/60 text-[9px]" title="Produto sem receita — usando preço base como custo">⚠️ sem receita</span>`
+                    }
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-accent-cyan/50 text-xs font-medium uppercase">Sugestão Canal</span>
-                                        <span class="text-accent-cyan text-sm font-bold">R$ ${precoSugerido.toFixed(2)}</span>
+                                        <span class="text-rose-400/80 text-xs font-bold uppercase">Lucro Zero</span>
+                                        <span class="text-rose-300 text-sm font-bold" title="Custo + Taxas do marketplace — sem lucro">R$ ${precoSugerido.toFixed(2)}</span>
+                                        <span class="text-white/30 text-[10px]">= custo + taxa</span>
                                     </div>
                                 </div>
                             </div>
@@ -272,8 +365,13 @@
                                     <span class="text-accent-cyan text-sm font-bold">R$ ${lucro.toFixed(2)}</span>
                                 </div>
                                 <div class="flex items-center justify-between px-1">
-                                    <span class="text-white/50 text-[10px] font-bold uppercase">Margem</span>
-                                    <span class="bg-accent-cyan/20 text-accent-cyan px-2 py-0.5 rounded text-[11px] font-bold">${margem.toFixed(1)}%</span>
+                                <span class="text-white/50 text-[10px] font-bold uppercase">Margem</span>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-bold ${margem >= MARGEM_EXCELENTE
+                        ? 'bg-green-500/20 text-green-400'
+                        : margem >= MARGEM_RAZOAVEL
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-red-500/20 text-red-400'
+                    }">${margem.toFixed(1)}%</span>
                                 </div>
                             </div>
                         </div>
@@ -285,8 +383,26 @@
         // Atualizar preço no objeto temporário
         window.atualizarPreco = function (produtoId, valor) {
             precosPorProduto[produtoId] = parseFloat(valor) || 0;
+            temAlteracoes = true;
             renderProdutos();
         };
+
+        // ─── GUARD: alterações não salvas ────────────────────────────────────
+        let temAlteracoes = false;
+
+        window.voltarComAviso = function () {
+            if (temAlteracoes && Object.keys(precosPorProduto).length > 0) {
+                if (!confirm('⚠️ Você tem alterações não salvas.\nSair sem salvar?')) return;
+            }
+            window.location.href = 'index.html';
+        };
+
+        window.addEventListener('beforeunload', e => {
+            if (temAlteracoes && Object.keys(precosPorProduto).length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
 
         // Salvar preços
         window.salvarPrecos = async function () {
@@ -325,6 +441,7 @@
 
                 alert('✅ Preços salvos com sucesso!');
                 precosPorProduto = {};
+                temAlteracoes = false;
                 await loadDados(); // Recarregar
             } catch (error) {
                 console.error('❌ Erro ao salvar:', error);

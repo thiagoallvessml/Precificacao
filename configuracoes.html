@@ -65,140 +65,286 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-4 pb-32">
-        <!-- Grid Container for Desktop -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6">
-            <!-- SECTION 1: GÁS -->
-            <section class="mt-6">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="material-symbols-outlined text-primary">local_fire_department</span>
-                    <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Configurações de Gás</h2>
-                </div>
-                <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4">
-                    <div class="flex gap-4">
-                        <label class="flex flex-col flex-1">
-                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Peso Botijão (kg)</p>
-                            <input id="peso_gas"
-                                class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
-                                placeholder="13" type="number" step="0.01" min="0" />
-                        </label>
-                        <label class="flex flex-col flex-1">
-                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Preço (R$)</p>
-                            <input id="preco_gas"
-                                class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
-                                placeholder="110.00" type="number" step="0.01" min="0" />
-                        </label>
-                    </div>
-                </div>
-            </section>
+        <!-- Layout Desktop: 2 colunas -->
+        <div class="md:grid md:grid-cols-2 md:gap-8 md:items-start mt-6">
 
-            <!-- SECTION 2: ENERGIA -->
-            <section class="mt-8">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="material-symbols-outlined text-primary">bolt</span>
-                    <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Configurações de Energia
-                    </h2>
-                </div>
-                <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4">
-                    <label class="flex flex-col">
-                        <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Custo por kWh (R$)</p>
-                        <input id="custo_kwh"
-                            class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
-                            placeholder="0.85" step="0.01" type="number" min="0" />
-                    </label>
-                    <!-- Tip Card -->
-                    <div class="flex gap-3 bg-primary/10 dark:bg-primary/5 p-4 rounded-lg border border-primary/20">
-                        <span class="material-symbols-outlined text-primary text-xl shrink-0">receipt_long</span>
-                        <p class="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
-                            O kWh você pode consultar na sua conta de luz, normalmente é a soma dos dois custos de
-                            tarifa
-                            Aneel (Energia + Distribuição).
-                        </p>
-                    </div>
-                </div>
-            </section>
+            <!-- ══ COLUNA ESQUERDA: Gás + Energia + Metas de Margem ══ -->
+            <div class="space-y-6">
 
-            <!-- SECTION 3: MÃO DE OBRA -->
-            <section class="mt-8">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="material-symbols-outlined text-primary">engineering</span>
-                    <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Preço e Mão de Obra</h2>
-                </div>
-                <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-5">
-                    <!-- Calculadora de Salário -->
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="material-symbols-outlined text-primary/70 text-lg">calculate</span>
-                            <p class="text-gray-600 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
-                                Calculadora de Custo/Hora</p>
+                <!-- SECTION 1: GÁS -->
+                <section>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary">local_fire_department</span>
+                        <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Configurações de Gás
+                        </h2>
+                    </div>
+                    <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4">
+                        <div class="flex gap-4">
+                            <label class="flex flex-col flex-1">
+                                <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Peso Botijão (kg)
+                                </p>
+                                <input id="peso_gas"
+                                    class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
+                                    placeholder="13" type="number" step="0.01" min="0" />
+                            </label>
+                            <label class="flex flex-col flex-1">
+                                <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Preço (R$)</p>
+                                <input id="preco_gas"
+                                    class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
+                                    placeholder="110.00" type="number" step="0.01" min="0" />
+                            </label>
                         </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: ENERGIA -->
+                <section>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary">bolt</span>
+                        <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Configurações de
+                            Energia</h2>
+                    </div>
+                    <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4">
                         <label class="flex flex-col">
-                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Salário Mensal (R$)</p>
-                            <div class="relative">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
-                                <input id="salario_mensal"
-                                    class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 pl-12 pr-4 text-base focus:outline-none"
-                                    placeholder="1500.00" type="number" step="0.01" min="0" />
-                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Custo por kWh (R$)</p>
+                            <input id="custo_kwh"
+                                class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-4 text-base focus:outline-none"
+                                placeholder="0.85" step="0.01" type="number" min="0" />
                         </label>
-
-                        <!-- Resultado do cálculo -->
-                        <div id="resultadoCalculo"
-                            class="hidden bg-primary/10 dark:bg-primary/5 border border-primary/20 rounded-xl p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-primary/70 text-[10px] font-semibold uppercase tracking-widest mb-1">
-                                        Valor Calculado da Hora</p>
-                                    <div class="flex items-baseline gap-1">
-                                        <span class="text-primary text-sm font-bold">R$</span>
-                                        <span id="valorCalculado" class="text-primary text-2xl font-bold">0,00</span>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <p
-                                        class="text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">
-                                        Base de cálculo</p>
-                                    <p class="text-gray-400 dark:text-gray-500 text-xs">220 horas/mês</p>
-                                </div>
-                            </div>
-                            <button type="button" id="btnUsarCalculado"
-                                class="w-full mt-3 bg-primary/20 hover:bg-primary/30 text-primary font-semibold text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 active:scale-[0.98]">
-                                <span class="material-symbols-outlined text-base">arrow_downward</span>
-                                Usar este valor como Hora Trabalhada
-                            </button>
-                        </div>
-
-                        <!-- Dica -->
                         <div class="flex gap-3 bg-primary/10 dark:bg-primary/5 p-4 rounded-lg border border-primary/20">
-                            <span class="material-symbols-outlined text-primary text-xl shrink-0">info</span>
+                            <span class="material-symbols-outlined text-primary text-xl shrink-0">receipt_long</span>
                             <p class="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
-                                Fórmula: Salário ÷ <strong>220 horas mensais</strong> (padrão CLT: 44h/semana).
+                                O kWh você pode consultar na sua conta de luz, normalmente é a soma dos dois custos de
+                                tarifa Aneel (Energia + Distribuição).
                             </p>
                         </div>
                     </div>
+                </section>
 
-                    <!-- Divisor -->
-                    <div class="flex items-center gap-3">
-                        <div class="flex-1 h-px bg-gray-200 dark:bg-[#3b5454]"></div>
-                        <span
-                            class="text-gray-400 dark:text-gray-500 text-xs font-medium uppercase tracking-wider">Valor
-                            Final</span>
-                        <div class="flex-1 h-px bg-gray-200 dark:bg-[#3b5454]"></div>
+                <!-- SECTION 4: METAS DE MARGEM -->
+                <section>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary">trending_up</span>
+                        <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Metas de Margem</h2>
                     </div>
 
-                    <!-- Input do valor da hora (pode ser editado manualmente ou preenchido pela calculadora) -->
-                    <label class="flex flex-col">
-                        <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Valor da Hora Trabalhada
-                            (R$/hora)</p>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">R$</span>
-                            <input id="custo_mao_obra"
-                                class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 pl-12 pr-4 text-base focus:outline-none"
-                                placeholder="25.00" type="number" step="0.01" min="0" />
+                    <!-- Sub-bloco: Precificação -->
+                    <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4 mb-4">
+                        <div class="flex items-center gap-2 pb-1 border-b border-gray-100 dark:border-[#3b5454]">
+                            <span class="material-symbols-outlined text-primary text-lg">sell</span>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm font-bold uppercase tracking-wider">
+                                Precificação</p>
                         </div>
-                    </label>
-                </div>
-            </section>
-        </div> <!-- End Grid Container -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="flex flex-col">
+                                <div
+                                    class="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1.5 mb-2">
+                                    <span class="material-symbols-outlined text-red-400 text-sm">arrow_downward</span>
+                                    <span class="text-red-400 text-xs font-bold">Baixa</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs font-medium pb-2">Abaixo de:</p>
+                                <div class="relative">
+                                    <input id="margem_baixa"
+                                        class="form-input w-full rounded-lg border border-red-300/50 dark:border-red-700/50 bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-3 pr-8 text-base focus:outline-none"
+                                        placeholder="20" type="number" step="1" min="0" max="100" />
+                                    <span
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">%</span>
+                                </div>
+                            </label>
+                            <label class="flex flex-col">
+                                <div
+                                    class="flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-2 py-1.5 mb-2">
+                                    <span class="material-symbols-outlined text-yellow-400 text-sm">remove</span>
+                                    <span class="text-yellow-400 text-xs font-bold">Razoável</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs font-medium pb-2">Abaixo de:</p>
+                                <div class="relative">
+                                    <input id="margem_razoavel"
+                                        class="form-input w-full rounded-lg border border-yellow-300/50 dark:border-yellow-700/50 bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-3 pr-8 text-base focus:outline-none"
+                                        placeholder="40" type="number" step="1" min="0" max="100" />
+                                    <span
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">%</span>
+                                </div>
+                            </label>
+                            <label class="flex flex-col">
+                                <div
+                                    class="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-lg px-2 py-1.5 mb-2">
+                                    <span class="material-symbols-outlined text-green-400 text-sm">arrow_upward</span>
+                                    <span class="text-green-400 text-xs font-bold">Excelente</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs font-medium pb-2">A partir de:</p>
+                                <div class="relative">
+                                    <input id="margem_excelente"
+                                        class="form-input w-full rounded-lg border border-green-300/50 dark:border-green-700/50 bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-3 pr-8 text-base focus:outline-none"
+                                        placeholder="60" type="number" step="1" min="0" max="100" />
+                                    <span
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">%</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sub-bloco: Combos -->
+                    <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-4">
+                        <div class="flex items-center gap-2 pb-1 border-b border-gray-100 dark:border-[#3b5454]">
+                            <span class="material-symbols-outlined text-primary text-lg">extension</span>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm font-bold uppercase tracking-wider">
+                                Combos</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="flex flex-col">
+                                <div
+                                    class="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 rounded-lg px-2 py-1.5 mb-2">
+                                    <span class="material-symbols-outlined text-red-400 text-sm">arrow_downward</span>
+                                    <span class="text-red-400 text-xs font-bold">Baixa</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs font-medium pb-2">Abaixo de:</p>
+                                <div class="relative">
+                                    <input id="margem_baixa_combos"
+                                        class="form-input w-full rounded-lg border border-red-300/50 dark:border-red-700/50 bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-3 pr-8 text-base focus:outline-none"
+                                        placeholder="15" type="number" step="1" min="0" max="100" />
+                                    <span
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">%</span>
+                                </div>
+                            </label>
+                            <label class="flex flex-col">
+                                <div
+                                    class="flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-2 py-1.5 mb-2">
+                                    <span class="material-symbols-outlined text-yellow-400 text-sm">remove</span>
+                                    <span class="text-yellow-400 text-xs font-bold">Razoável</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs font-medium pb-2">Abaixo de:</p>
+                                <div class="relative">
+                                    <input id="margem_razoavel_combos"
+                                        class="form-input w-full rounded-lg border border-yellow-300/50 dark:border-yellow-700/50 bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-3 pr-8 text-base focus:outline-none"
+                                        placeholder="30" type="number" step="1" min="0" max="100" />
+                                    <span
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">%</span>
+                                </div>
+                            </label>
+                            <label class="flex flex-col">
+                                <div
+                                    class="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-lg px-2 py-1.5 mb-2">
+                                    <span class="material-symbols-outlined text-green-400 text-sm">arrow_upward</span>
+                                    <span class="text-green-400 text-xs font-bold">Excelente</span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-xs font-medium pb-2">A partir de:</p>
+                                <div class="relative">
+                                    <input id="margem_excelente_combos"
+                                        class="form-input w-full rounded-lg border border-green-300/50 dark:border-green-700/50 bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 px-3 pr-8 text-base focus:outline-none"
+                                        placeholder="45" type="number" step="1" min="0" max="100" />
+                                    <span
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">%</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="flex gap-3 bg-primary/10 dark:bg-primary/5 p-4 rounded-lg border border-primary/20">
+                            <span class="material-symbols-outlined text-primary text-xl shrink-0">info</span>
+                            <p class="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
+                                As metas de <strong>Precificação</strong> são usadas nos produtos individuais. As de
+                                <strong>Combos</strong> são usadas nos cards de combos.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+            <!-- fim coluna esquerda -->
+
+            <!-- ══ COLUNA DIREITA: Mão de Obra ══ -->
+            <div class="mt-6 md:mt-0">
+                <!-- SECTION 3: MÃO DE OBRA -->
+                <section>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary">engineering</span>
+                        <h2 class="text-gray-900 dark:text-white text-xl font-bold tracking-tight">Preço e Mão de Obra
+                        </h2>
+                    </div>
+                    <div class="bg-white dark:bg-[#1c2727] p-5 rounded-xl ios-shadow space-y-5">
+                        <!-- Calculadora de Salário -->
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="material-symbols-outlined text-primary/70 text-lg">calculate</span>
+                                <p
+                                    class="text-gray-600 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                                    Calculadora de Custo/Hora</p>
+                            </div>
+                            <label class="flex flex-col">
+                                <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Salário Mensal (R$)
+                                </p>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">R$</span>
+                                    <input id="salario_mensal"
+                                        class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 pl-12 pr-4 text-base focus:outline-none"
+                                        placeholder="1500.00" type="number" step="0.01" min="0" />
+                                </div>
+                            </label>
+
+                            <!-- Resultado do cálculo -->
+                            <div id="resultadoCalculo"
+                                class="hidden bg-primary/10 dark:bg-primary/5 border border-primary/20 rounded-xl p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p
+                                            class="text-primary/70 text-[10px] font-semibold uppercase tracking-widest mb-1">
+                                            Valor Calculado da Hora</p>
+                                        <div class="flex items-baseline gap-1">
+                                            <span class="text-primary text-sm font-bold">R$</span>
+                                            <span id="valorCalculado"
+                                                class="text-primary text-2xl font-bold">0,00</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p
+                                            class="text-gray-500 dark:text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">
+                                            Base de cálculo</p>
+                                        <p class="text-gray-400 dark:text-gray-500 text-xs">220 horas/mês</p>
+                                    </div>
+                                </div>
+                                <button type="button" id="btnUsarCalculado"
+                                    class="w-full mt-3 bg-primary/20 hover:bg-primary/30 text-primary font-semibold text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 active:scale-[0.98]">
+                                    <span class="material-symbols-outlined text-base">arrow_downward</span>
+                                    Usar este valor como Hora Trabalhada
+                                </button>
+                            </div>
+
+                            <!-- Dica -->
+                            <div
+                                class="flex gap-3 bg-primary/10 dark:bg-primary/5 p-4 rounded-lg border border-primary/20">
+                                <span class="material-symbols-outlined text-primary text-xl shrink-0">info</span>
+                                <p class="text-sm text-gray-800 dark:text-gray-200 italic leading-relaxed">
+                                    Fórmula: Salário ÷ <strong>220 horas mensais</strong> (padrão CLT: 44h/semana).
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Divisor -->
+                        <div class="flex items-center gap-3">
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-[#3b5454]"></div>
+                            <span
+                                class="text-gray-400 dark:text-gray-500 text-xs font-medium uppercase tracking-wider">Valor
+                                Final</span>
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-[#3b5454]"></div>
+                        </div>
+
+                        <!-- Input do valor da hora -->
+                        <label class="flex flex-col">
+                            <p class="text-gray-700 dark:text-gray-300 text-sm font-medium pb-2">Valor da Hora
+                                Trabalhada (R$/hora)</p>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">R$</span>
+                                <input id="custo_mao_obra"
+                                    class="form-input w-full rounded-lg border border-gray-200 dark:border-[#3b5454] bg-gray-50 dark:bg-[#0F0F0F] text-gray-900 dark:text-white h-12 pl-12 pr-4 text-base focus:outline-none"
+                                    placeholder="25.00" type="number" step="0.01" min="0" />
+                            </div>
+                        </label>
+                    </div>
+                </section>
+            </div>
+            <!-- fim coluna direita -->
+
+        </div> <!-- End Layout Container -->
     </main>
 
     <div
@@ -273,7 +419,15 @@
             PRECO_GAS: 'preco_botijao_gas',
             CUSTO_KWH: 'custo_kwh',
             MAO_OBRA: 'custo_mao_obra_hora',
-            SALARIO_MENSAL: 'salario_mensal'
+            SALARIO_MENSAL: 'salario_mensal',
+            // Precificação
+            MARGEM_BAIXA: 'margem_baixa',
+            MARGEM_RAZOAVEL: 'margem_razoavel',
+            MARGEM_EXCELENTE: 'margem_excelente',
+            // Combos
+            MARGEM_BAIXA_COMBOS: 'margem_baixa_combos',
+            MARGEM_RAZOAVEL_COMBOS: 'margem_razoavel_combos',
+            MARGEM_EXCELENTE_COMBOS: 'margem_excelente_combos'
         };
 
         /**
@@ -374,6 +528,22 @@
                     salarioMensalInput.value = salarioMensal.valor;
                 }
 
+                // Metas de margem - Precificação
+                const margemBaixa = await getConfigValue(CONFIG_KEYS.MARGEM_BAIXA);
+                if (margemBaixa) document.getElementById('margem_baixa').value = margemBaixa.valor;
+                const margemRazoavel = await getConfigValue(CONFIG_KEYS.MARGEM_RAZOAVEL);
+                if (margemRazoavel) document.getElementById('margem_razoavel').value = margemRazoavel.valor;
+                const margemExcelente = await getConfigValue(CONFIG_KEYS.MARGEM_EXCELENTE);
+                if (margemExcelente) document.getElementById('margem_excelente').value = margemExcelente.valor;
+
+                // Metas de margem - Combos
+                const margemBaixaCombos = await getConfigValue(CONFIG_KEYS.MARGEM_BAIXA_COMBOS);
+                if (margemBaixaCombos) document.getElementById('margem_baixa_combos').value = margemBaixaCombos.valor;
+                const margemRazoavelCombos = await getConfigValue(CONFIG_KEYS.MARGEM_RAZOAVEL_COMBOS);
+                if (margemRazoavelCombos) document.getElementById('margem_razoavel_combos').value = margemRazoavelCombos.valor;
+                const margemExcelenteCombos = await getConfigValue(CONFIG_KEYS.MARGEM_EXCELENTE_COMBOS);
+                if (margemExcelenteCombos) document.getElementById('margem_excelente_combos').value = margemExcelenteCombos.valor;
+
                 // Recalcular se salário existe
                 calcularCustoHora();
 
@@ -451,6 +621,22 @@
                         'financeiro'
                     );
                 }
+
+                // Metas de margem - Precificação
+                const margemBaixaVal = parseFloat(document.getElementById('margem_baixa').value);
+                const margemRazoavelVal = parseFloat(document.getElementById('margem_razoavel').value);
+                const margemExcelenteVal = parseFloat(document.getElementById('margem_excelente').value);
+                if (!isNaN(margemBaixaVal)) await saveConfigValue(CONFIG_KEYS.MARGEM_BAIXA, margemBaixaVal, 'Threshold de margem baixa - Precificação', 'financeiro');
+                if (!isNaN(margemRazoavelVal)) await saveConfigValue(CONFIG_KEYS.MARGEM_RAZOAVEL, margemRazoavelVal, 'Threshold de margem razoável - Precificação', 'financeiro');
+                if (!isNaN(margemExcelenteVal)) await saveConfigValue(CONFIG_KEYS.MARGEM_EXCELENTE, margemExcelenteVal, 'Threshold de margem excelente - Precificação', 'financeiro');
+
+                // Metas de margem - Combos
+                const margemBaixaCombosVal = parseFloat(document.getElementById('margem_baixa_combos').value);
+                const margemRazoavelCombosVal = parseFloat(document.getElementById('margem_razoavel_combos').value);
+                const margemExcelenteCombosVal = parseFloat(document.getElementById('margem_excelente_combos').value);
+                if (!isNaN(margemBaixaCombosVal)) await saveConfigValue(CONFIG_KEYS.MARGEM_BAIXA_COMBOS, margemBaixaCombosVal, 'Threshold de margem baixa - Combos', 'financeiro');
+                if (!isNaN(margemRazoavelCombosVal)) await saveConfigValue(CONFIG_KEYS.MARGEM_RAZOAVEL_COMBOS, margemRazoavelCombosVal, 'Threshold de margem razoável - Combos', 'financeiro');
+                if (!isNaN(margemExcelenteCombosVal)) await saveConfigValue(CONFIG_KEYS.MARGEM_EXCELENTE_COMBOS, margemExcelenteCombosVal, 'Threshold de margem excelente - Combos', 'financeiro');
 
                 console.log('✅ Todas as configurações salvas com sucesso!');
                 showNotification('Configurações salvas com sucesso!', 'success');

@@ -50,6 +50,49 @@
     </header>
 
     <main class="max-w-6xl mx-auto pb-24 px-4">
+        <!-- Card de Médias -->
+        <div id="mediasCard" class="hidden mt-6 p-5 rounded-2xl bg-slate-900 border border-white/10 shadow-xl">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">bar_chart</span>
+                <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400">Médias das Receitas</h3>
+                <span id="mediasQtd" class="ml-auto text-xs text-slate-500"></span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
+                    <p class="text-blue-400 text-xs uppercase font-bold mb-0.5">Preço Total Médio</p>
+                    <p id="med-preco-total" class="text-blue-400 font-bold text-base">R$ 0,00</p>
+                </div>
+                <div class="bg-blue-500/5 rounded-xl p-3 border border-blue-500/10">
+                    <p class="text-blue-300 text-xs uppercase font-bold mb-0.5">Preço Unit. Médio</p>
+                    <p id="med-preco-unit" class="text-blue-300 font-bold text-base">R$ 0,00</p>
+                </div>
+                <div class="bg-slate-700/30 rounded-xl p-3 border border-slate-600/20">
+                    <p class="text-slate-300 text-xs uppercase font-bold mb-0.5">Custo Total Médio</p>
+                    <p id="med-custo-total" class="text-slate-300 font-bold text-base">R$ 0,00</p>
+                </div>
+                <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                    <p class="text-slate-400 text-xs uppercase font-bold mb-0.5">Custo Unit. Médio</p>
+                    <p id="med-custo-unit" class="text-white font-bold text-base">R$ 0,00</p>
+                </div>
+                <div class="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
+                    <p class="text-green-400 text-xs uppercase font-bold mb-0.5">Lucro Total Médio</p>
+                    <p id="med-lucro-total" class="text-green-400 font-bold text-base">R$ 0,00</p>
+                </div>
+                <div class="bg-primary/10 rounded-xl p-3 border border-primary/20">
+                    <p class="text-primary text-xs uppercase font-bold mb-0.5">Lucro Unit. Médio</p>
+                    <p id="med-lucro-unit" class="text-primary font-bold text-base">R$ 0,00</p>
+                </div>
+                <div class="bg-yellow-500/10 rounded-xl p-3 border border-yellow-500/20">
+                    <p class="text-yellow-400 text-xs uppercase font-bold mb-0.5">Margem Média</p>
+                    <p id="med-margem" class="text-yellow-400 font-bold text-base">0%</p>
+                </div>
+                <div class="bg-purple-500/10 rounded-xl p-3 border border-purple-500/20">
+                    <p class="text-purple-400 text-xs uppercase font-bold mb-0.5">Markup Médio</p>
+                    <p id="med-markup" class="text-purple-400 font-bold text-base">0x</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Grid -->
         <div id="receitasList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             <!-- Loading Skeleton -->
@@ -226,6 +269,69 @@
             return custoTotal;
         }
 
+        // Calcular e renderizar médias
+        function renderMedias() {
+            const receitasComProduto = receitas.filter(r => produtosMap[r.id]);
+            const n = receitasComProduto.length;
+            if (n === 0) return;
+
+            let somaPrecoTotal = 0, somaPrecoUnit = 0;
+            let somaCustoTotal = 0, somaCustoUnit = 0;
+            let somaLucroTotal = 0, somaLucroUnit = 0;
+            let somaMargem = 0, somaMarkup = 0;
+            let contMargem = 0, contMarkup = 0;
+
+            receitasComProduto.forEach(r => {
+                const custoTotal = calcularCustoReceita(r);
+                const rendimento = r.rendimento_unidades || 1;
+                const custoUnit = custoTotal / rendimento;
+                const produto = produtosMap[r.id];
+                const precoBase = parseFloat(produto.preco_base) || 0;
+                const precoTotal = precoBase * rendimento;
+                const lucroUnit = precoBase - custoUnit;
+                const lucroTotal = lucroUnit * rendimento;
+                const margem = precoBase > 0 ? (lucroUnit / precoBase) * 100 : null;
+                const markup = custoUnit > 0 ? precoBase / custoUnit : null;
+
+                somaPrecoTotal += precoTotal;
+                somaPrecoUnit += precoBase;
+                somaCustoTotal += custoTotal;
+                somaCustoUnit += custoUnit;
+                somaLucroTotal += lucroTotal;
+                somaLucroUnit += lucroUnit;
+                if (margem !== null) { somaMargem += margem; contMargem++; }
+                if (markup !== null) { somaMarkup += markup; contMarkup++; }
+            });
+
+            const fmt = v => `R$ ${(v / n).toFixed(2).replace('.', ',')}`;
+            const medMargem = contMargem > 0 ? (somaMargem / contMargem).toFixed(1) : 0;
+            const medMarkup = contMarkup > 0 ? (somaMarkup / contMarkup).toFixed(2) : 0;
+
+            document.getElementById('med-preco-total').textContent = fmt(somaPrecoTotal);
+            document.getElementById('med-preco-unit').textContent = fmt(somaPrecoUnit);
+            document.getElementById('med-custo-total').textContent = fmt(somaCustoTotal);
+            document.getElementById('med-custo-unit').textContent = fmt(somaCustoUnit);
+
+            const lucroTotalEl = document.getElementById('med-lucro-total');
+            lucroTotalEl.textContent = fmt(somaLucroTotal);
+            lucroTotalEl.className = `${somaLucroTotal < 0 ? 'text-red-400' : 'text-green-400'} font-bold text-base`;
+
+            const lucroUnitEl = document.getElementById('med-lucro-unit');
+            lucroUnitEl.textContent = fmt(somaLucroUnit);
+            lucroUnitEl.className = `${somaLucroUnit < 0 ? 'text-red-400' : 'text-primary'} font-bold text-base`;
+
+            const margemEl = document.getElementById('med-margem');
+            margemEl.textContent = `${medMargem}%`;
+            margemEl.className = `${medMargem < 0 ? 'text-red-400' : 'text-yellow-400'} font-bold text-base`;
+
+            const markupEl = document.getElementById('med-markup');
+            markupEl.textContent = `${medMarkup}x`;
+            markupEl.className = `${medMarkup < 1 ? 'text-red-400' : 'text-purple-400'} font-bold text-base`;
+
+            document.getElementById('mediasQtd').textContent = `${n} receita${n !== 1 ? 's' : ''} com produto`;
+            document.getElementById('mediasCard').classList.remove('hidden');
+        }
+
         // Renderizar
         function renderReceitas() {
             const container = document.getElementById('receitasList');
@@ -243,6 +349,8 @@
                 `;
                 return;
             }
+
+            renderMedias();
 
             container.innerHTML = receitas.map(r => {
                 const custoTotal = calcularCustoReceita(r);
@@ -304,35 +412,39 @@
                             <!-- Financial Summary -->
                             <div class="pt-3 border-t border-white/10 space-y-2">
                                 ${produto ? `
-                                    <!-- Grid with metrics -->
+                                    <!-- Grid with metrics: Preço Total, Preço Unit., Custo Total, Custo Unit., Lucro Total, Lucro Unit., Margem, Markup -->
                                     <div class="grid grid-cols-2 gap-2 text-xs">
                                         <div class="bg-blue-500/10 rounded p-2 border border-blue-500/20">
-                                            <p class="text-blue-400 text-xs md:text-base uppercase font-bold mb-0.5">Preço Total</p>
-                                            <p class="text-blue-400 font-bold text-sm md:text-lg">R$ ${precoTotal.toFixed(2).replace('.', ',')}</p>
+                                            <p class="text-blue-400 text-xs uppercase font-bold mb-0.5">Preço Total</p>
+                                            <p class="text-blue-400 font-bold text-base">R$ ${precoTotal.toFixed(2).replace('.', ',')}</p>
+                                        </div>
+                                        <div class="bg-blue-500/5 rounded p-2 border border-blue-500/10">
+                                            <p class="text-blue-300 text-xs uppercase font-bold mb-0.5">Preço Unit.</p>
+                                            <p class="text-blue-300 font-bold text-base">R$ ${precoBase.toFixed(2).replace('.', ',')}</p>
                                         </div>
                                         <div class="bg-slate-700/30 rounded p-2 border border-slate-600/20">
-                                            <p class="text-slate-300 text-xs md:text-base uppercase font-bold mb-0.5">Custo Total</p>
-                                            <p class="text-slate-300 font-bold text-sm md:text-lg">R$ ${custoTotal.toFixed(2).replace('.', ',')}</p>
+                                            <p class="text-slate-300 text-xs uppercase font-bold mb-0.5">Custo Total</p>
+                                            <p class="text-slate-300 font-bold text-base">R$ ${custoTotal.toFixed(2).replace('.', ',')}</p>
                                         </div>
                                         <div class="bg-white/5 rounded p-2 border border-white/5">
-                                            <p class="text-slate-400 text-xs md:text-base uppercase font-bold mb-0.5">Custo Unit.</p>
-                                            <p class="text-white font-bold text-sm md:text-lg">R$ ${custoUnit.toFixed(2).replace('.', ',')}</p>
+                                            <p class="text-slate-400 text-xs uppercase font-bold mb-0.5">Custo Unit.</p>
+                                            <p class="text-white font-bold text-base">R$ ${custoUnit.toFixed(2).replace('.', ',')}</p>
                                         </div>
                                         <div class="bg-green-500/10 rounded p-2 border border-green-500/20">
-                                            <p class="text-green-400 text-xs md:text-base uppercase font-bold mb-0.5">Lucro Total</p>
-                                            <p class="${lucroTotal < 0 ? 'text-red-400' : 'text-green-400'} font-bold text-sm md:text-lg">R$ ${lucroTotal.toFixed(2).replace('.', ',')}</p>
+                                            <p class="text-green-400 text-xs uppercase font-bold mb-0.5">Lucro Total</p>
+                                            <p class="${lucroTotal < 0 ? 'text-red-400' : 'text-green-400'} font-bold text-base">R$ ${lucroTotal.toFixed(2).replace('.', ',')}</p>
                                         </div>
                                         <div class="bg-primary/10 rounded p-2 border border-primary/20">
-                                            <p class="text-primary text-xs md:text-base uppercase font-bold mb-0.5">Lucro Unit.</p>
-                                            <p class="${lucroUnit < 0 ? 'text-red-400' : 'text-primary'} font-bold text-sm md:text-lg">R$ ${lucroUnit.toFixed(2).replace('.', ',')}</p>
+                                            <p class="text-primary text-xs uppercase font-bold mb-0.5">Lucro Unit.</p>
+                                            <p class="${lucroUnit < 0 ? 'text-red-400' : 'text-primary'} font-bold text-base">R$ ${lucroUnit.toFixed(2).replace('.', ',')}</p>
                                         </div>
                                         <div class="bg-yellow-500/10 rounded p-2 border border-yellow-500/20">
-                                            <p class="text-yellow-400 text-xs md:text-base uppercase font-bold mb-0.5">Margem</p>
-                                            <p class="${margem < 0 ? 'text-red-400' : 'text-yellow-400'} font-bold text-sm md:text-lg">${margem}%</p>
+                                            <p class="text-yellow-400 text-xs uppercase font-bold mb-0.5">Margem</p>
+                                            <p class="${margem < 0 ? 'text-red-400' : 'text-yellow-400'} font-bold text-base">${margem}%</p>
                                         </div>
                                         <div class="bg-purple-500/10 rounded p-2 border border-purple-500/20">
-                                            <p class="text-purple-400 text-xs md:text-base uppercase font-bold mb-0.5">Markup</p>
-                                            <p class="${markup < 1 ? 'text-red-400' : 'text-purple-400'} font-bold text-sm md:text-lg">${markup}x</p>
+                                            <p class="text-purple-400 text-xs uppercase font-bold mb-0.5">Markup</p>
+                                            <p class="${markup < 1 ? 'text-red-400' : 'text-purple-400'} font-bold text-base">${markup}x</p>
                                         </div>
                                     </div>
                                 ` : `

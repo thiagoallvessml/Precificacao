@@ -18,11 +18,8 @@
                 extend: {
                     colors: {
                         "primary": "#0ceded",
-                        "background-light": "#f5f8f8",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a1a1a",
-                        "card-free": "#141e1e",
-                        "card-premium": "#0d1f1f",
+                        "card-dark": "#141414",
                     },
                     fontFamily: {
                         "display": ["Work Sans"]
@@ -38,6 +35,26 @@
         }
     </script>
     <style>
+        .celebration-gradient {
+            background: linear-gradient(135deg, #0ceded 0%, #0aabab 100%);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease both;
+        }
+
         body {
             font-family: 'Work Sans', sans-serif;
             -webkit-tap-highlight-color: transparent;
@@ -51,21 +68,38 @@
             border-bottom: 1px solid rgba(12, 237, 237, 0.08);
         }
 
-        .premium-glow {
-            box-shadow: 0 0 30px rgba(12, 237, 237, 0.12), 0 0 60px rgba(12, 237, 237, 0.05);
+        /* Card glow por plano */
+        .glow-basic {
+            box-shadow: 0 0 28px rgba(99, 179, 237, 0.08);
         }
 
-        .premium-glow-pulse {
+        .glow-inter {
+            box-shadow: 0 0 28px rgba(154, 117, 234, 0.12);
+            animation: glowInterPulse 4s ease-in-out infinite alternate;
+        }
+
+        .glow-avancado {
+            box-shadow: 0 0 28px rgba(12, 237, 237, 0.12);
             animation: glowPulse 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowInterPulse {
+            0% {
+                box-shadow: 0 0 20px rgba(154, 117, 234, 0.08);
+            }
+
+            100% {
+                box-shadow: 0 0 40px rgba(154, 117, 234, 0.2);
+            }
         }
 
         @keyframes glowPulse {
             0% {
-                box-shadow: 0 0 20px rgba(12, 237, 237, 0.1), 0 0 40px rgba(12, 237, 237, 0.03);
+                box-shadow: 0 0 20px rgba(12, 237, 237, 0.08);
             }
 
             100% {
-                box-shadow: 0 0 35px rgba(12, 237, 237, 0.2), 0 0 70px rgba(12, 237, 237, 0.08);
+                box-shadow: 0 0 40px rgba(12, 237, 237, 0.2);
             }
         }
 
@@ -99,32 +133,65 @@
         }
 
         .feature-check:hover {
-            transform: translateX(4px);
+            transform: translateX(3px);
         }
 
-        .toggle-active {
-            background: #0ceded;
-            color: #0F0F0F;
+        /* Cupom */
+        .coupon-input:focus {
+            outline: none;
+            border-color: rgba(12, 237, 237, 0.6);
+            box-shadow: 0 0 0 2px rgba(12, 237, 237, 0.1);
         }
 
-        .toggle-inactive {
-            background: transparent;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .price-strike {
+        .price-old {
             position: relative;
+            display: inline-block;
         }
 
-        .price-strike::after {
+        .price-old::after {
             content: '';
             position: absolute;
-            left: -4px;
-            right: -4px;
+            left: -2px;
+            right: -2px;
             top: 50%;
             height: 2px;
             background: #ef4444;
-            transform: rotate(-8deg);
+            transform: rotate(-6deg);
+        }
+
+        /* Plan badge colors */
+        .badge-basic {
+            background: rgba(99, 179, 237, 0.15);
+            color: #63b3ed;
+            border: 1px solid rgba(99, 179, 237, 0.3);
+        }
+
+        .badge-inter {
+            background: rgba(154, 117, 234, 0.15);
+            color: #b794f4;
+            border: 1px solid rgba(154, 117, 234, 0.3);
+        }
+
+        .badge-avancado {
+            background: rgba(12, 237, 237, 0.15);
+            color: #0ceded;
+            border: 1px solid rgba(12, 237, 237, 0.3);
+        }
+
+        .check-basic {
+            color: #63b3ed;
+        }
+
+        .check-inter {
+            color: #b794f4;
+        }
+
+        .check-avancado {
+            color: #0ceded;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
         }
     </style>
 </head>
@@ -140,196 +207,445 @@
         <div class="w-10"></div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-6 pt-6 pb-12">
-        <!-- Hero -->
-        <section class="flex flex-col items-center text-center mb-10">
-            <div class="relative mb-6">
-                <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150"></div>
-                <div class="relative bg-primary/10 p-5 rounded-full border border-primary/20">
-                    <span class="material-icons-round text-primary text-6xl">icecream</span>
+    <!-- ===== TELA ASSINANTE (oculta por padr�o) ===== -->
+    <div id="telaAssinante" class="hidden max-w-5xl mx-auto px-4 pt-6 pb-16 fade-in">
+
+        <!-- Layout: 1 col mobile / 2 col desktop -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+            <!-- COLUNA ESQUERDA: Celebra��o + Detalhes da assinatura -->
+            <div class="flex flex-col gap-6">
+
+                <header
+                    class="celebration-gradient rounded-2xl p-8 text-black text-center relative overflow-hidden shadow-lg shadow-primary/20">
+                    <div class="absolute -top-4 -right-4 opacity-20">
+                        <span class="material-icons-round text-9xl">auto_awesome</span>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="bg-black/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5">
+                            <span class="material-icons-round text-5xl">workspace_premium</span>
+                        </div>
+                        <h1 class="text-3xl font-black leading-tight tracking-tight mb-2">Meus Parab�ns! ??</h1>
+                        <p id="assinantePlanoNome" class="text-xl font-bold opacity-90">Plano Ativo</p>
+                    </div>
+                </header>
+
+                <section class="bg-[#141414] rounded-2xl p-6 border border-white/5">
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Sua Assinatura</h2>
+                        <span id="badgeStatus"
+                            class="bg-primary/20 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-primary/30">Ativo</span>
+                    </div>
+                    <!-- Banner cancelamento agendado -->
+                    <div id="bannerCancelamento"
+                        class="hidden mb-4 bg-orange-500/10 border border-orange-500/30 rounded-xl p-3 flex items-start gap-3">
+                        <span class="material-icons-round text-orange-400 text-xl shrink-0 mt-0.5">schedule</span>
+                        <div>
+                            <p class="text-orange-300 text-sm font-bold">Cancelamento agendado</p>
+                            <p id="bannerCancelamentoTexto" class="text-orange-400/80 text-xs mt-0.5 leading-relaxed">
+                                Seu acesso ser� encerrado ao fim do per�odo pago.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center py-3 border-b border-white/5">
+                            <span class="text-slate-400 text-sm">In�cio da Assinatura</span>
+                            <span id="assinanteInicio" class="text-white font-semibold">�</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-white/5">
+                            <span id="labelRenovacao" class="text-slate-400 text-sm">Pr�xima Renova��o</span>
+                            <span id="assinanteRenovacao" class="text-white font-semibold">�</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3">
+                            <span class="text-slate-400 text-sm">M�todo de Pagamento</span>
+                            <div class="flex items-center gap-2">
+                                <span class="material-icons-round text-sm text-slate-400">pix</span>
+                                <span class="text-white font-semibold">PIX</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- COLUNA DIREITA: Benef�cios + A��es -->
+            <div class="flex flex-col gap-6 lg:sticky lg:top-24">
+
+                <section>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 px-1">Benef�cios Ativos
+                    </h3>
+                    <div id="assinanteBeneficios" class="grid grid-cols-1 gap-3"></div>
+                </section>
+
+                <footer class="space-y-3">
+                    <!-- Bot�o Renova��o / Upgrade -->
+                    <button onclick="verPlanos()"
+                        class="w-full py-4 bg-primary hover:bg-primary/90 text-black font-black rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                        <span class="material-icons-round">event_repeat</span>
+                        Renova��o / Upgrade de Plano
+                    </button>
+
+                    <!-- Bot�o Cancelar Assinatura -->
+                    <button onclick="document.getElementById('modalCancelar').classList.remove('hidden')"
+                        class="w-full py-3.5 bg-red-500/10 hover:bg-red-500/15 border border-red-500/30 text-red-400 font-bold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                        <span class="material-icons-round text-lg">cancel</span>
+                        Cancelar Assinatura
+                    </button>
+
+                    <p class="text-slate-600 text-[11px] text-center px-6 leading-relaxed">
+                        Ao cancelar, voc� mant�m o acesso at� o final do per�odo pago.
+                    </p>
+                </footer>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Cancelar Assinatura -->
+    <div id="modalCancelar"
+        class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+        onclick="if(event.target===this) this.classList.add('hidden')">
+        <div class="bg-[#1a1a1a] border border-red-500/20 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                    <span class="material-icons-round text-red-400 text-2xl">warning</span>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold text-base">Cancelar Assinatura?</h3>
+                    <p class="text-slate-400 text-xs mt-0.5">Voc� manter� o acesso at� o fim do per�odo pago.</p>
                 </div>
             </div>
-            <h2 class="text-3xl font-bold tracking-tight mb-2">Escolha o seu Plano</h2>
-            <p class="text-slate-400 text-sm max-w-sm">Desbloqueie o potencial máximo da sua gestão de geladinhos</p>
-        </section>
-
-        <!-- Billing Toggle -->
-        <div class="flex items-center justify-center mb-8">
-            <div class="bg-white/5 border border-white/10 p-1 rounded-full flex">
-                <button id="btnMensal" onclick="toggleBilling('mensal')"
-                    class="toggle-active px-5 py-2 rounded-full text-sm font-bold transition-all">
-                    Mensal
+            <div class="bg-red-500/5 border border-red-500/15 rounded-xl p-4 space-y-2">
+                <p class="text-sm text-slate-300">Ao cancelar:</p>
+                <ul class="space-y-1.5 text-xs text-slate-400">
+                    <li class="flex items-center gap-2"><span
+                            class="material-icons-round text-red-400 text-sm">close</span> Renova��o autom�tica ser�
+                        desativada</li>
+                    <li class="flex items-center gap-2"><span
+                            class="material-icons-round text-yellow-400 text-sm">info</span> Acesso mantido at� o fim do
+                        ciclo atual</li>
+                    <li class="flex items-center gap-2"><span
+                            class="material-icons-round text-slate-500 text-sm">lock</span> Funcionalidades do plano
+                        bloqueadas ap�s o prazo</li>
+                </ul>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('modalCancelar').classList.add('hidden')"
+                    class="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-xl transition-all text-sm">
+                    Manter Plano
                 </button>
-                <button id="btnAnual" onclick="toggleBilling('anual')"
-                    class="toggle-inactive px-5 py-2 rounded-full text-sm font-bold transition-all">
-                    Anual
-                    <span class="text-[10px] ml-1 text-emerald-400 font-black">-20%</span>
+                <button onclick="confirmarCancelamento()"
+                    class="flex-1 py-3 bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-400 font-bold rounded-xl transition-all text-sm"
+                    id="btnConfirmarCancelamento">
+                    Sim, Cancelar
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Plans -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-            <!-- FREE Plan -->
-            <section class="bg-card-free border border-white/5 p-6 rounded-2xl relative overflow-hidden flex flex-col">
-                <div class="flex justify-between items-start mb-5">
-                    <div>
-                        <h3 class="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase">Plano</h3>
-                        <h4 class="text-2xl font-bold text-white">FREE</h4>
-                    </div>
+    <!-- Loading inicial -->
+    <div id="loadingPlano" class="flex flex-col items-center justify-center min-h-[60vh]">
+        <div class="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+        <p class="text-slate-500 text-sm">Carregando...</p>
+    </div>
+
+    <main id="telaPlanos" class="hidden max-w-6xl mx-auto px-4 pt-6 pb-16">
+
+        <!-- Hero -->
+        <section class="flex flex-col items-center text-center mb-8">
+            <div class="relative mb-5">
+                <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150"></div>
+                <div class="relative bg-primary/10 p-5 rounded-full border border-primary/20">
+                    <span class="material-icons-round text-primary text-5xl">rocket_launch</span>
+                </div>
+            </div>
+            <h2 class="text-3xl font-bold tracking-tight mb-2">Escolha o seu Plano</h2>
+            <p class="text-slate-400 text-sm max-w-sm">Desbloqueie o potencial m�ximo da sua gest�o com o PrecificaX</p>
+        </section>
+
+
+        <!-- Plans Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+
+            <!-- BASIC Plan -->
+            <section id="card-basic"
+                class="bg-[#111820] border border-blue-500/20 p-6 rounded-2xl relative overflow-hidden flex flex-col glow-basic transition-all duration-500">
+
+                <div class="mb-5">
                     <span
-                        class="text-slate-500 bg-white/5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/5">
-                        Básico
-                    </span>
-                </div>
-
-                <div class="mb-6">
-                    <div class="flex items-baseline gap-1">
-                        <span class="text-3xl font-black text-white">R$ 0</span>
-                        <span class="text-slate-500 text-sm font-medium">/ grátis</span>
+                        class="badge-basic text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block mb-3">Basic</span>
+                    <h3 class="text-2xl font-black text-white">Basic</h3>
+                    <p class="text-slate-500 text-xs mt-1">Ideal para quem est� come�ando</p>
+                    <div class="mt-4 flex items-baseline gap-2 flex-wrap">
+                        <span id="basicPriceOld" class="text-slate-500 text-base font-medium price-old hidden">R$
+                            19,90</span>
+                        <span id="basicPriceMain" class="text-4xl font-black text-white">R$ 19,90</span>
+                        <span class="text-slate-500 text-sm font-medium">/ m�s</span>
                     </div>
+                    <p id="basicDiscount" class="text-emerald-400 text-xs font-bold mt-1 hidden">??? Cupom aplicado! R$
+                        10,00 de desconto</p>
                 </div>
 
-                <ul class="space-y-3.5 mb-8">
-                    <li class="feature-check flex items-center gap-3 text-slate-400 text-sm">
-                        <span class="material-icons-round text-slate-600 text-lg">check_circle</span>
-                        <span>Controle de Estoque</span>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-blue-400/70 mb-3">M�dulos inclu�dos</p>
+                <ul class="space-y-2.5 mb-6 flex-1">
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Insumos
                     </li>
-                    <li class="feature-check flex items-center gap-3 text-slate-400 text-sm">
-                        <span class="material-icons-round text-slate-600 text-lg">check_circle</span>
-                        <span>Cadastro de até 7 Produtos</span>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Categorias
                     </li>
-                    <li class="feature-check flex items-center gap-3 text-slate-400 text-sm">
-                        <span class="material-icons-round text-slate-600 text-lg">check_circle</span>
-                        <span>1 Marketplace Ativo</span>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Vendas
                     </li>
-                    <li class="feature-check flex items-center gap-3 text-slate-400 text-sm">
-                        <span class="material-icons-round text-slate-600 text-lg">check_circle</span>
-                        <span>Até 5 Receitas</span>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Precifica��o
                     </li>
-                    <li class="feature-check flex items-center gap-3 text-slate-400 text-sm">
-                        <span class="material-icons-round text-slate-600 text-lg">check_circle</span>
-                        <span>Registro de Venda Manual (até 30)</span>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Equipamentos
                     </li>
-                    <li class="feature-check flex items-center gap-3 text-slate-600 text-sm">
-                        <span class="material-icons-round text-slate-700 text-lg">cancel</span>
-                        <span class="line-through">DRE Completo</span>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Receitas
                     </li>
-                    <li class="feature-check flex items-center gap-3 text-slate-600 text-sm">
-                        <span class="material-icons-round text-slate-700 text-lg">cancel</span>
-                        <span class="line-through">Relatórios Avançados</span>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Configura��es
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Produtos
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Indique e Ganhe
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Planos
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-basic text-base">check_circle</span>Meu Perfil
+                    </li>
+                    <!-- Locked -->
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Estoque Avan�ado</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Produ��o</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Financeiro &amp; Despesas</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Pedidos</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Combos</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">DRE Completo</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Relat�rios Avan�ados</span>
                     </li>
                 </ul>
 
-                <div class="flex-1"></div>
-                <button
-                    class="w-full py-3.5 bg-white/5 text-slate-500 font-bold rounded-xl cursor-not-allowed border border-white/5"
-                    disabled>
-                    <span class="flex items-center justify-center gap-2">
-                        <span class="material-icons-round text-lg">check</span>
-                        Plano Atual
-                    </span>
+                <button onclick="assinar('basic')"
+                    class="cta-btn w-full py-4 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/40 text-blue-300 font-bold text-base rounded-xl transition-all flex items-center justify-center gap-2">
+                    <span class="material-icons-round text-lg">rocket_launch</span>
+                    Assinar Basic
                 </button>
+                <p class="text-center text-[11px] text-slate-600 mt-2">7 dias de teste gr�tis</p>
             </section>
 
-            <!-- PREMIUM Plan -->
-            <section
-                class="bg-card-premium border-2 border-primary/60 p-6 rounded-2xl relative overflow-hidden premium-glow-pulse flex flex-col">
-                <!-- Shine Effect -->
+            <!-- INTERMEDI�RIO Plan -->
+            <section id="card-inter"
+                class="bg-[#130e1f] border-2 border-purple-500/50 p-6 rounded-2xl relative overflow-hidden flex flex-col glow-inter transition-all duration-500">
+                <div class="absolute inset-0 pointer-events-none"
+                    style="background: linear-gradient(105deg, transparent 40%, rgba(154,117,234,0.03) 50%, transparent 60%); background-size: 200% 100%; animation: shine 5s ease-in-out infinite;">
+                </div>
+
+                <!-- Badge Melhor Valor -->
+                <div class="absolute top-0 right-0 bg-purple-500 px-4 py-1.5 rounded-bl-xl">
+                    <span class="text-[10px] font-black text-white uppercase tracking-wide flex items-center gap-1">
+                        <span class="material-icons-round text-sm">star</span>
+                        Mais Popular
+                    </span>
+                </div>
+
+                <div class="mb-5">
+                    <span
+                        class="badge-inter text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block mb-3">Intermedi�rio</span>
+                    <h3 class="text-2xl font-black text-white">Intermedi�rio</h3>
+                    <p class="text-slate-500 text-xs mt-1">Para quem quer crescer com controle</p>
+                    <div class="mt-4 flex items-baseline gap-2 flex-wrap">
+                        <span id="interPriceOld" class="text-slate-500 text-base font-medium price-old hidden">R$
+                            29,90</span>
+                        <span id="interPriceMain" class="text-4xl font-black text-white">R$ 29,90</span>
+                        <span class="text-slate-500 text-sm font-medium">/ m�s</span>
+                    </div>
+                    <p id="interDiscount" class="text-emerald-400 text-xs font-bold mt-1 hidden">??? Cupom aplicado! R$
+                        10,00 de desconto</p>
+                </div>
+
+                <p class="text-[10px] font-bold uppercase tracking-widest text-purple-400/70 mb-3">Tudo do Basic +</p>
+                <ul class="space-y-2.5 mb-6 flex-1">
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Insumos
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Categorias
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Vendas
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Precifica��o
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Equipamentos
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Receitas
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Configura��es
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Produtos
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Indique e Ganhe
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-inter text-base">verified</span>Planos &amp; Perfil
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-purple-300">
+                        <span class="material-icons-round check-inter text-base">add_circle</span>Estoque Avan�ado
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-purple-300">
+                        <span class="material-icons-round check-inter text-base">add_circle</span>Produ��o
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-purple-300">
+                        <span class="material-icons-round check-inter text-base">add_circle</span>Financeiro &amp;
+                        Despesas
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-purple-300">
+                        <span class="material-icons-round check-inter text-base">add_circle</span>Pedidos
+                    </li>
+                    <!-- Locked -->
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Combos</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">DRE Completo</span>
+                    </li>
+                    <li class="flex items-center gap-2.5 text-sm text-slate-600">
+                        <span class="material-icons-round text-slate-700 text-base">lock</span><span
+                            class="line-through">Relat�rios Avan�ados</span>
+                    </li>
+                </ul>
+
+                <button onclick="assinar('intermediario')"
+                    class="cta-btn w-full py-4 bg-purple-500 hover:bg-purple-400 text-white font-black text-base rounded-xl transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2">
+                    <span class="material-icons-round text-lg">rocket_launch</span>
+                    Assinar Intermedi�rio
+                </button>
+                <p class="text-center text-[11px] text-slate-500 mt-2">7 dias de teste gr�tis � Cancele quando quiser
+                </p>
+            </section>
+
+            <!-- AVAN�ADO Plan -->
+            <section id="card-avancado"
+                class="bg-[#0d1f1f] border-2 border-primary/50 p-6 rounded-2xl relative overflow-hidden flex flex-col glow-avancado transition-all duration-500">
                 <div class="absolute inset-0 shine-effect pointer-events-none"></div>
+                <div
+                    class="absolute -bottom-16 -right-16 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none">
+                </div>
 
                 <!-- Badge -->
                 <div class="absolute top-0 right-0 bg-primary px-4 py-1.5 rounded-bl-xl">
                     <span class="text-[10px] font-black text-black uppercase tracking-wide flex items-center gap-1">
-                        <span class="material-icons-round text-sm">star</span>
-                        Melhor Valor
+                        <span class="material-icons-round text-sm">workspace_premium</span>
+                        Completo
                     </span>
                 </div>
 
-                <!-- Decorative blob -->
-                <div
-                    class="absolute -bottom-20 -right-20 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none">
-                </div>
-
-                <div class="relative z-10">
-                    <div class="mb-6">
-                        <h3 class="text-[10px] font-bold tracking-[0.2em] text-primary/60 uppercase">Plano</h3>
-                        <h4 class="text-2xl font-bold text-white">PREMIUM</h4>
-                        <div class="mt-4 flex items-baseline gap-2">
-                            <span id="priceBefore" class="text-lg text-slate-500 font-medium price-strike hidden">R$
-                                478,80</span>
-                            <span id="priceMain" class="text-4xl font-black text-white">R$ 39,90</span>
-                            <span id="pricePeriod" class="text-slate-400 text-sm font-medium">/ mês</span>
-                        </div>
-                        <p id="priceSavings" class="text-emerald-400 text-xs font-bold mt-1 hidden">
-                            Economia de R$ 95,76 por ano!
-                        </p>
+                <div class="relative z-10 mb-5">
+                    <span
+                        class="badge-avancado text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full inline-block mb-3">Avan�ado</span>
+                    <h3 class="text-2xl font-black text-white">Avan�ado</h3>
+                    <p class="text-slate-500 text-xs mt-1">Acesso completo a tudo</p>
+                    <div class="mt-4 flex items-baseline gap-2 flex-wrap">
+                        <span id="avancadoPriceOld" class="text-slate-500 text-base font-medium price-old hidden">R$
+                            39,90</span>
+                        <span id="avancadoPriceMain" class="text-4xl font-black text-white">R$ 39,90</span>
+                        <span class="text-slate-500 text-sm font-medium">/ m�s</span>
                     </div>
-
-                    <ul class="space-y-4 mb-8">
-                        <li class="feature-check flex items-start gap-3 text-sm">
-                            <span class="material-icons-round text-primary text-xl mt-0.5">verified</span>
-                            <div>
-                                <span class="font-semibold text-white">Tudo do Free +</span>
-                                <p class="text-xs text-slate-400 mt-0.5">Todas funcionalidades básicas incluídas</p>
-                            </div>
-                        </li>
-                        <li class="feature-check flex items-start gap-3 text-sm">
-                            <span class="material-icons-round text-primary text-xl mt-0.5">verified</span>
-                            <div>
-                                <span class="font-semibold text-white">Receitas Ilimitadas</span>
-                                <p class="text-xs text-slate-400 mt-0.5">Crie sem limites de receitas</p>
-                            </div>
-                        </li>
-                        <li class="feature-check flex items-start gap-3 text-sm">
-                            <span class="material-icons-round text-primary text-xl mt-0.5">verified</span>
-                            <div>
-                                <span class="font-semibold text-white">DRE Completo</span>
-                                <p class="text-xs text-slate-400 mt-0.5">Visão financeira profissional detalhada</p>
-                            </div>
-                        </li>
-                        <li class="feature-check flex items-start gap-3 text-sm">
-                            <span class="material-icons-round text-primary text-xl mt-0.5">verified</span>
-                            <div>
-                                <span class="font-semibold text-white">Gestão Multi-Marketplace</span>
-                                <p class="text-xs text-slate-400 mt-0.5">iFood, Uber Eats, Rappi e muito mais</p>
-                            </div>
-                        </li>
-                        <li class="feature-check flex items-start gap-3 text-sm">
-                            <span class="material-icons-round text-primary text-xl mt-0.5">verified</span>
-                            <div>
-                                <span class="font-semibold text-white">Inteligência de Compras</span>
-                                <p class="text-xs text-slate-400 mt-0.5">Sugestões de Lead Time e MOQ automáticas</p>
-                            </div>
-                        </li>
-                        <li class="feature-check flex items-start gap-3 text-sm">
-                            <span class="material-icons-round text-primary text-xl mt-0.5">verified</span>
-                            <div>
-                                <span class="font-semibold text-white">Relatórios Avançados</span>
-                                <p class="text-xs text-slate-400 mt-0.5">Analytics detalhado de vendas e produção</p>
-                            </div>
-                        </li>
-                        <li class="feature-check flex items-start gap-3 text-sm">
-                            <span class="material-icons-round text-primary text-xl mt-0.5">verified</span>
-                            <div>
-                                <span class="font-semibold text-white">Suporte Prioritário</span>
-                                <p class="text-xs text-slate-400 mt-0.5">Atendimento em até 2h úteis</p>
-                            </div>
-                        </li>
-                    </ul>
-
-                    <div class="flex-1"></div>
-                    <button onclick="assinarPremium()"
-                        class="cta-btn w-full py-4 bg-primary hover:brightness-110 text-black font-black text-lg rounded-xl transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2">
-                        <span class="material-icons-round">rocket_launch</span>
-                        ASSINAR AGORA
-                    </button>
-
-                    <p class="text-center text-[11px] text-slate-500 mt-3">
-                        7 dias de teste grátis • Cancele quando quiser
+                    <p id="avancadoDiscount" class="text-emerald-400 text-xs font-bold mt-1 hidden">??? Cupom aplicado!
                     </p>
                 </div>
+
+                <p class="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-3 relative z-10">Acesso
+                    Total � Tudo inclu�do</p>
+                <ul class="space-y-2.5 mb-6 flex-1 relative z-10">
+                    <li class="feature-check flex items-center gap-2.5 text-sm text-slate-300">
+                        <span class="material-icons-round check-avancado text-base">verified</span>Tudo do Intermedi�rio
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-primary">
+                        <span class="material-icons-round check-avancado text-base">add_circle</span>Combos
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-primary">
+                        <span class="material-icons-round check-avancado text-base">add_circle</span>DRE Completo
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-primary">
+                        <span class="material-icons-round check-avancado text-base">add_circle</span>Relat�rios
+                        Avan�ados
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-primary">
+                        <span class="material-icons-round check-avancado text-base">add_circle</span>Suporte Priorit�rio
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-primary">
+                        <span class="material-icons-round check-avancado text-base">add_circle</span>Multi-Marketplace
+                        Ilimitado
+                    </li>
+                    <li class="feature-check flex items-center gap-2.5 text-sm font-semibold text-primary">
+                        <span class="material-icons-round check-avancado text-base">add_circle</span>Analytics de Vendas
+                    </li>
+                </ul>
+
+                <button onclick="assinar('avancado')"
+                    class="cta-btn relative z-10 w-full py-4 bg-primary hover:brightness-110 text-black font-black text-base rounded-xl transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2">
+                    <span class="material-icons-round text-lg">workspace_premium</span>
+                    Assinar Avan�ado
+                </button>
+                <p class="text-center text-[11px] text-slate-500 mt-2 relative z-10">7 dias de teste gr�tis � Cancele
+                    quando quiser</p>
             </section>
+        </div>
+
+        <!-- Cupom de Desconto -->
+        <section class="mt-8 max-w-sm mx-auto">
+            <p class="text-slate-400 text-xs font-semibold uppercase tracking-widest text-center mb-3">Tem um cupom de
+                desconto?</p>
+            <div class="flex gap-2">
+                <input id="couponInput" type="text" placeholder="Ex: PRECIFICA10"
+                    class="coupon-input flex-1 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold uppercase tracking-wider placeholder:font-normal placeholder:normal-case placeholder:tracking-normal"
+                    autocomplete="off" />
+                <button onclick="aplicarCupom()"
+                    class="bg-primary/10 hover:bg-primary/20 text-primary font-bold px-5 py-3 rounded-xl text-sm transition-colors active:scale-95 whitespace-nowrap">
+                    Aplicar
+                </button>
+            </div>
+            <p id="couponMsg" class="hidden mt-2 text-xs font-semibold text-center rounded-lg py-2 px-3"></p>
+        </section>
+
+        <!-- Comparison table hint -->
+        <div class="mt-6 text-center">
+            <p class="text-slate-600 text-xs">Todos os planos incluem 7 dias de teste gr�tis e podem ser cancelados a
+                qualquer momento.</p>
         </div>
 
         <!-- FAQ Section -->
@@ -340,13 +656,13 @@
                 <details class="group bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
                     <summary
                         class="flex items-center justify-between p-4 cursor-pointer list-none text-sm font-medium text-white">
-                        Posso testar o Premium antes de pagar?
+                        Posso trocar de plano depois?
                         <span
                             class="material-icons-round text-slate-500 group-open:rotate-180 transition-transform text-lg">expand_more</span>
                     </summary>
                     <div class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">
-                        Sim! Você tem 7 dias de teste grátis com acesso completo a todas as funcionalidades Premium. Se
-                        não gostar, é só cancelar antes do término.
+                        Sim! Voc� pode fazer upgrade ou downgrade do seu plano a qualquer momento. A diferen�a �
+                        calculada proporcionalmente.
                     </div>
                 </details>
 
@@ -358,41 +674,27 @@
                             class="material-icons-round text-slate-500 group-open:rotate-180 transition-transform text-lg">expand_more</span>
                     </summary>
                     <div class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">
-                        Você pode cancelar a qualquer momento nas Configurações do app. Ao cancelar, você mantém o
-                        acesso Premium até o final do período pago.
+                        Voc� pode cancelar a qualquer momento nas Configura��es do app. Ao cancelar, voc� mant�m o
+                        acesso at� o final do per�odo pago.
                     </div>
                 </details>
 
                 <details class="group bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
                     <summary
                         class="flex items-center justify-between p-4 cursor-pointer list-none text-sm font-medium text-white">
-                        Perco meus dados se voltar ao Free?
+                        Quais formas de pagamento s�o aceitas?
                         <span
                             class="material-icons-round text-slate-500 group-open:rotate-180 transition-transform text-lg">expand_more</span>
                     </summary>
                     <div class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">
-                        Não! Seus dados permanecem salvos. Apenas funcionalidades exclusivas Premium ficam bloqueadas,
-                        mas tudo que você cadastrou continua acessível.
-                    </div>
-                </details>
-
-                <details class="group bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
-                    <summary
-                        class="flex items-center justify-between p-4 cursor-pointer list-none text-sm font-medium text-white">
-                        Quais formas de pagamento são aceitas?
-                        <span
-                            class="material-icons-round text-slate-500 group-open:rotate-180 transition-transform text-lg">expand_more</span>
-                    </summary>
-                    <div class="px-4 pb-4 text-sm text-slate-400 leading-relaxed">
-                        Aceitamos cartão de crédito, PIX e boleto bancário. No plano anual via PIX, o pagamento é feito
-                        em parcela única com 20% de desconto.
+                        Aceitamos cart�o de cr�dito e PIX. O pagamento � feito de forma segura e autom�tica.
                     </div>
                 </details>
             </div>
         </section>
 
         <!-- Social Proof -->
-        <section class="mt-10">
+        <section class="mt-8">
             <div class="bg-primary/5 border border-primary/10 rounded-2xl p-5 relative overflow-hidden">
                 <div
                     class="absolute top-0 right-0 -mr-10 -mt-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none">
@@ -414,7 +716,7 @@
                     </div>
                     <div>
                         <p class="text-white font-bold text-sm">+1.200 empreendedores</p>
-                        <p class="text-slate-400 text-xs">já utilizam o Premium</p>
+                        <p class="text-slate-400 text-xs">j� utilizam o PrecificaX</p>
                     </div>
                 </div>
             </div>
@@ -423,12 +725,12 @@
         <!-- Footer -->
         <footer class="mt-10 text-center space-y-4 pb-8">
             <p class="text-slate-600 text-[11px] leading-relaxed px-4">
-                A renovação é automática ao final de cada período. Você pode cancelar sua assinatura a qualquer momento
-                através das configurações da sua conta.
+                A renova��o � autom�tica ao final de cada per�odo. Voc� pode cancelar sua assinatura a qualquer momento
+                atrav�s das configura��es da sua conta.
             </p>
             <div class="flex justify-center gap-6 text-xs font-semibold text-slate-500">
                 <a class="hover:text-primary transition-colors cursor-pointer">Termos de Uso</a>
-                <span class="text-slate-700">•</span>
+                <span class="text-slate-700">�</span>
                 <a class="hover:text-primary transition-colors cursor-pointer">Privacidade</a>
             </div>
             <div class="flex justify-center items-center gap-2 text-slate-600 text-[10px]">
@@ -438,45 +740,382 @@
         </footer>
     </main>
 
-    <script>
-        let billingCycle = 'mensal';
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
 
-        function toggleBilling(cycle) {
-            billingCycle = cycle;
+        const supabase = getSupabase();
+        let planoAtual = 'avancado';
+        window.planoAtual = planoAtual;
 
-            const btnMensal = document.getElementById('btnMensal');
-            const btnAnual = document.getElementById('btnAnual');
-            const priceMain = document.getElementById('priceMain');
-            const pricePeriod = document.getElementById('pricePeriod');
-            const priceBefore = document.getElementById('priceBefore');
-            const priceSavings = document.getElementById('priceSavings');
+        // Mapa de benef�cios por plano
+        const beneficiosPorPlano = {
+            basic: [
+                { icon: 'storefront', titulo: 'Insumos & Categorias', desc: 'Controle seus ingredientes e categorias' },
+                { icon: 'sell', titulo: 'Vendas & Precifica��o', desc: 'Calcule pre�os e registre vendas' },
+                { icon: 'restaurant', titulo: 'Receitas & Produtos', desc: 'Gerencie suas receitas e produtos' },
+                { icon: 'settings', titulo: 'Configura��es & Perfil', desc: 'Personalize sua conta' },
+            ],
+            intermediario: [
+                { icon: 'inventory', titulo: 'Tudo do Basic', desc: 'Acesso completo ao plano Basic' },
+                { icon: 'warehouse', titulo: 'Estoque Avan�ado', desc: 'Controle completo de estoque' },
+                { icon: 'factory', titulo: 'Produ��o', desc: 'Gerencie lotes de produ��o' },
+                { icon: 'account_balance', titulo: 'Financeiro & Despesas', desc: 'Controle de caixa e despesas' },
+                { icon: 'receipt_long', titulo: 'Pedidos', desc: 'Gest�o completa de pedidos' },
+            ],
+            avancado: [
+                { icon: 'workspace_premium', titulo: 'Tudo do Intermedi�rio', desc: 'Acesso completo ao plano Intermedi�rio' },
+                { icon: 'layers', titulo: 'Combos', desc: 'Monte combos de produtos' },
+                { icon: 'bar_chart', titulo: 'DRE Completo', desc: 'Demonstra��o de resultado financeiro' },
+                { icon: 'analytics', titulo: 'Relat�rios Avan�ados', desc: 'Analytics detalhado de vendas' },
+                { icon: 'support_agent', titulo: 'Suporte Priorit�rio', desc: 'Atendimento em at� 2h �teis' },
+                { icon: 'storefront', titulo: 'Multi-Marketplace Ilimitado', desc: 'iFood, Uber Eats, Rappi e mais' },
+            ],
+            premium: [
+                { icon: 'workspace_premium', titulo: 'Tudo do Intermedi�rio', desc: 'Acesso completo ao plano Intermedi�rio' },
+                { icon: 'layers', titulo: 'Combos', desc: 'Monte combos de produtos' },
+                { icon: 'bar_chart', titulo: 'DRE Completo', desc: 'Demonstra��o de resultado financeiro' },
+                { icon: 'analytics', titulo: 'Relat�rios Avan�ados', desc: 'Analytics detalhado de vendas' },
+                { icon: 'support_agent', titulo: 'Suporte Priorit�rio', desc: 'Atendimento em at� 2h �teis' },
+            ],
+        };
 
-            if (cycle === 'mensal') {
-                btnMensal.className = 'toggle-active px-5 py-2 rounded-full text-sm font-bold transition-all';
-                btnAnual.className = 'toggle-inactive px-5 py-2 rounded-full text-sm font-bold transition-all';
-                priceMain.textContent = 'R$ 39,90';
-                pricePeriod.textContent = '/ mês';
-                priceBefore.classList.add('hidden');
-                priceSavings.classList.add('hidden');
-            } else {
-                btnAnual.className = 'toggle-active px-5 py-2 rounded-full text-sm font-bold transition-all';
-                btnMensal.className = 'toggle-inactive px-5 py-2 rounded-full text-sm font-bold transition-all';
-                priceMain.textContent = 'R$ 383,04';
-                pricePeriod.textContent = '/ ano';
-                priceBefore.classList.remove('hidden');
-                priceSavings.classList.remove('hidden');
-            }
+        const nomesPlano = {
+            basic: 'Plano Basic',
+            intermediario: 'Plano Intermedi�rio',
+            avancado: 'Plano Avan�ado',
+            premium: 'Plano Premium',
+        };
 
-            // Animate price change
-            priceMain.style.transform = 'scale(1.05)';
-            priceMain.style.transition = 'transform 0.2s ease';
-            setTimeout(() => {
-                priceMain.style.transform = 'scale(1)';
-            }, 200);
+        function formatarData(isoStr) {
+            if (!isoStr) return '�';
+            const d = new Date(isoStr);
+            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
-        function assinarPremium() {
-            window.location.href = `checkout.html?billing=${billingCycle}`;
+        function proximaRenovacao(isoStr) {
+            if (!isoStr) return '�';
+            const d = new Date(isoStr);
+            // 7 dias de trial gratuito + 1 m�s de assinatura
+            d.setDate(d.getDate() + 7);   // +7 dias de trial
+            d.setMonth(d.getMonth() + 1); // +1 m�s pago
+            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function renderizarBeneficios(plano) {
+            const lista = beneficiosPorPlano[plano] || beneficiosPorPlano['avancado'];
+            const container = document.getElementById('assinanteBeneficios');
+            container.innerHTML = lista.map(b => `
+                <div class="bg-white/5 p-4 rounded-xl flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="material-icons-round text-primary text-xl">${b.icon}</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-white">${b.titulo}</p>
+                        <p class="text-xs text-slate-400">${b.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function verificarPlano() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.user) return;
+
+                const { data: perfil } = await supabase
+                    .from('perfis_usuarios')
+                    .select('plano, premium_inicio, cancelamento_agendado, premium_expira_em, trial_expires_at')
+                    .eq('id', session.user.id)
+                    .single();
+
+                const planoAtivado = perfil?.plano;
+                const planosAtivos = ['basic', 'intermediario', 'avancado', 'premium'];
+                const cancelAgendado = perfil?.cancelamento_agendado === true;
+                const expiraEm = perfil?.premium_expira_em;
+
+                // Detectar trial ativo: plano 'free' e trial_expires_at no futuro
+                const trialExpira = perfil?.trial_expires_at ? new Date(perfil.trial_expires_at) : null;
+                const emTrial = trialExpira && trialExpira > new Date() && (planoAtivado === 'free' || planoAtivado === null);
+                const diasTrial = emTrial
+                    ? Math.ceil((trialExpira - new Date()) / (1000 * 60 * 60 * 24))
+                    : 0;
+
+                // Se cancelamento agendado e ja expirou, tratar como free
+                const jaExpirou = expiraEm && new Date(expiraEm) < new Date();
+
+                // Usuário em trial ? mostrar tela de planos + banner trial
+                if (emTrial) {
+                    document.getElementById('loadingPlano').classList.add('hidden');
+                    document.getElementById('telaPlanos').classList.remove('hidden');
+
+                    // Inserir banner de trial no topo
+                    const main = document.querySelector('main');
+                    const bannerTrial = document.createElement('div');
+                    bannerTrial.className = 'bg-primary/10 border border-primary/30 rounded-2xl p-4 mb-6 flex items-center gap-3';
+                    bannerTrial.innerHTML = `
+                        <span class="material-icons-round text-primary text-2xl">hourglass_top</span>
+                        <div>
+                            <p class="text-white font-bold text-sm">?? Voc� est� no per�odo de teste gratuito!</p>
+                            <p class="text-slate-400 text-xs mt-0.5">
+                                Restam <strong class="text-primary">${diasTrial} dia${diasTrial !== 1 ? 's' : ''}</strong> de trial.
+                                Assine um plano para continuar ap�s o per�odo gratuito.
+                            </p>
+                        </div>
+                    `;
+                    if (main && main.firstChild) {
+                        main.insertBefore(bannerTrial, main.firstChild);
+                    }
+                    return;
+                }
+
+                if (planoAtivado && planosAtivos.includes(planoAtivado) && !jaExpirou) {
+                    planoAtual = planoAtivado;
+                    window.planoAtual = planoAtual;
+
+                    document.getElementById('assinantePlanoNome').textContent =
+                        'Agora voc� � ' + (nomesPlano[planoAtivado] || 'Premium') + '!';
+                    document.getElementById('assinanteInicio').textContent =
+                        formatarData(perfil.premium_inicio);
+
+                    if (cancelAgendado && expiraEm) {
+                        // Mostrar data de expira��o e banner de aviso
+                        const dataFmt = new Date(expiraEm).toLocaleDateString('pt-BR', {
+                            day: '2-digit', month: 'long', year: 'numeric'
+                        });
+                        document.getElementById('assinanteRenovacao').textContent = dataFmt;
+                        document.getElementById('labelRenovacao').textContent = 'Acesso at�';
+
+                        const banner = document.getElementById('bannerCancelamento');
+                        const bannerTexto = document.getElementById('bannerCancelamentoTexto');
+                        bannerTexto.textContent = `Seu acesso continua ativo at� ${dataFmt}. Ap�s essa data, o plano ser� encerrado automaticamente.`;
+                        banner.classList.remove('hidden');
+                        banner.classList.add('flex');
+
+                        const badgeStatus = document.getElementById('badgeStatus');
+                        badgeStatus.textContent = 'Cancelamento Agendado';
+                        badgeStatus.className = 'bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-orange-500/30';
+
+                        // Esconder bot�o de cancelar (j� foi cancelado)
+                        const btnCancelar = document.querySelector('button[onclick*="modalCancelar"]');
+                        if (btnCancelar) btnCancelar.classList.add('hidden');
+                    } else {
+                        document.getElementById('assinanteRenovacao').textContent =
+                            proximaRenovacao(perfil.premium_inicio);
+                    }
+
+                    renderizarBeneficios(planoAtivado);
+
+                    document.getElementById('loadingPlano').classList.add('hidden');
+                    document.getElementById('telaAssinante').classList.remove('hidden');
+                } else {
+                    // Se expirou ou sem plano ativo: limpar e mostrar selecao
+                    if (jaExpirou) {
+                        // Atualizar banco: definir como free
+                        await supabase.from('perfis_usuarios').update({
+                            plano: 'free',
+                            premium_inicio: null,
+                            cancelamento_agendado: false,
+                            premium_expira_em: null,
+                        }).eq('id', session.user.id);
+                    }
+                    document.getElementById('loadingPlano').classList.add('hidden');
+                    document.getElementById('telaPlanos').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.warn('N�o foi poss�vel verificar o plano:', e);
+                document.getElementById('loadingPlano').classList.add('hidden');
+                document.getElementById('telaPlanos').classList.remove('hidden');
+            }
+        }
+
+        verificarPlano();
+
+        // Mostrar tela de planos para renova��o/upgrade
+        window.verPlanos = function () {
+            document.getElementById('telaAssinante').classList.add('hidden');
+            document.getElementById('telaPlanos').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Cancelar assinatura
+        window.confirmarCancelamento = async function () {
+            const btn = document.getElementById('btnConfirmarCancelamento');
+            btn.textContent = 'Cancelando...';
+            btn.disabled = true;
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.user) throw new Error('Sess�o expirada');
+
+                // Buscar a data de renova��o atual para definir o prazo de expira��o
+                const { data: perfil } = await supabase
+                    .from('perfis_usuarios')
+                    .select('premium_inicio')
+                    .eq('id', session.user.id)
+                    .single();
+
+                // Calcular data de expira��o (1 m�s + 7 dias trial desde o in�cio)
+                let expiraEm = null;
+                if (perfil?.premium_inicio) {
+                    const inicio = new Date(perfil.premium_inicio);
+                    inicio.setDate(inicio.getDate() + 7);   // +7 dias trial
+                    inicio.setMonth(inicio.getMonth() + 1); // +1 m�s pago
+                    expiraEm = inicio.toISOString();
+                } else {
+                    // Fallback: 30 dias a partir de hoje
+                    const fallback = new Date();
+                    fallback.setDate(fallback.getDate() + 30);
+                    expiraEm = fallback.toISOString();
+                }
+
+                // N�o remover o plano � apenas marcar cancela��o agendada
+                const { error } = await supabase
+                    .from('perfis_usuarios')
+                    .update({
+                        cancelamento_agendado: true,
+                        premium_expira_em: expiraEm,
+                    })
+                    .eq('id', session.user.id);
+
+                if (error) throw error;
+
+                document.getElementById('modalCancelar').classList.add('hidden');
+
+                const dataFmt = new Date(expiraEm).toLocaleDateString('pt-BR', {
+                    day: '2-digit', month: 'long', year: 'numeric'
+                });
+
+                // Atualizar UI sem recarregar: mostrar banner de cancelamento agendado
+                const banner = document.getElementById('bannerCancelamento');
+                const bannerTexto = document.getElementById('bannerCancelamentoTexto');
+                const badgeStatus = document.getElementById('badgeStatus');
+                const labelRenovacao = document.getElementById('labelRenovacao');
+                const btnCancelar = document.querySelector('button[onclick*="modalCancelar"]');
+
+                if (banner) {
+                    bannerTexto.textContent = `Seu acesso continua ativo at� ${dataFmt}. Ap�s essa data, o plano ser� encerrado automaticamente.`;
+                    banner.classList.remove('hidden');
+                    banner.classList.add('flex');
+                }
+                if (badgeStatus) {
+                    badgeStatus.textContent = 'Cancelamento Agendado';
+                    badgeStatus.className = 'bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border border-orange-500/30';
+                }
+                if (labelRenovacao) labelRenovacao.textContent = 'Acesso at�';
+                document.getElementById('assinanteRenovacao').textContent = dataFmt;
+                if (btnCancelar) btnCancelar.classList.add('hidden');
+
+            } catch (e) {
+                console.error('Erro ao cancelar:', e);
+                alert('? Erro ao cancelar assinatura. Tente novamente.');
+                btn.textContent = 'Sim, Cancelar';
+                btn.disabled = false;
+            }
+        };
+    </script>
+
+    <script>
+        // Pre�os base
+        const precos = {
+            basic: { normal: 19.90, comCupom: 9.90 },
+            intermediario: { normal: 29.90, comCupom: 19.90 },
+            avancado: { normal: 39.90, comCupom: 29.90 },
+        };
+
+        let cupomAtivo = false;
+
+        // O plano inter j� mostra pre�o com cupom por padr�o (conforme solicitado)
+        // Ao carregar, mostrar pre�os padr�o (sem cupom)
+        atualizarPrecos(false);
+
+        function atualizarPrecos(cupom) {
+            cupomAtivo = cupom;
+
+            // BASIC
+            const bMain = document.getElementById('basicPriceMain');
+            const bOld = document.getElementById('basicPriceOld');
+            const bDisc = document.getElementById('basicDiscount');
+            if (cupom) {
+                bOld.classList.remove('hidden');
+                bMain.textContent = 'R$ 9,90';
+                bDisc.classList.remove('hidden');
+            } else {
+                bOld.classList.add('hidden');
+                bMain.textContent = 'R$ 19,90';
+                bDisc.classList.add('hidden');
+            }
+
+            // INTERMEDI�RIO
+            const iMain = document.getElementById('interPriceMain');
+            const iOld = document.getElementById('interPriceOld');
+            const iDisc = document.getElementById('interDiscount');
+            if (cupom) {
+                iOld.classList.remove('hidden');
+                iMain.textContent = 'R$ 19,90';
+                iDisc.classList.remove('hidden');
+                iDisc.textContent = '??? Cupom aplicado! R$ 10,00 de desconto';
+            } else {
+                iOld.classList.add('hidden');
+                iMain.textContent = 'R$ 29,90';
+                iDisc.classList.add('hidden');
+            }
+
+            // AVAN�ADO
+            const aMain = document.getElementById('avancadoPriceMain');
+            const aOld = document.getElementById('avancadoPriceOld');
+            const aDisc = document.getElementById('avancadoDiscount');
+            if (cupom) {
+                aOld.classList.remove('hidden');
+                aMain.textContent = 'R$ 29,90';
+                aDisc.classList.remove('hidden');
+                aDisc.textContent = '??? Cupom aplicado! R$ 10,00 de desconto';
+            } else {
+                aOld.classList.add('hidden');
+                aMain.textContent = 'R$ 39,90';
+                aDisc.classList.add('hidden');
+            }
+        }
+
+        function aplicarCupom() {
+            const input = document.getElementById('couponInput');
+            const msg = document.getElementById('couponMsg');
+            const codigo = input.value.trim().toUpperCase();
+
+            if (codigo === 'PRECIFICA10') {
+                msg.className = 'mt-2 text-xs font-semibold text-center rounded-lg py-2 px-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400';
+                msg.textContent = '? Cupom aplicado! R$ 10,00 de desconto em todos os planos';
+                msg.classList.remove('hidden');
+                atualizarPrecos(true);
+
+                // highlight cards
+                document.getElementById('card-basic').classList.add('ring-2', 'ring-emerald-500/30');
+                document.getElementById('card-inter').classList.add('ring-2', 'ring-emerald-500/30');
+                document.getElementById('card-avancado').classList.add('ring-2', 'ring-emerald-500/30');
+            } else if (codigo === '') {
+                msg.className = 'mt-2 text-xs font-semibold text-center rounded-lg py-2 px-3 bg-red-500/10 border border-red-500/30 text-red-400';
+                msg.textContent = '?? Digite um cupom v�lido';
+                msg.classList.remove('hidden');
+            } else {
+                msg.className = 'mt-2 text-xs font-semibold text-center rounded-lg py-2 px-3 bg-red-500/10 border border-red-500/30 text-red-400';
+                msg.textContent = '? Cupom inv�lido ou expirado';
+                msg.classList.remove('hidden');
+                atualizarPrecos(false);
+            }
+
+            setTimeout(() => msg.classList.add('hidden'), 5000);
+        }
+
+        // Enter no campo de cupom
+        document.getElementById('couponInput')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') aplicarCupom();
+        });
+
+        function assinar(plano) {
+            const params = new URLSearchParams({
+                plano,
+                cupom: cupomAtivo ? 'PRECIFICA10' : ''
+            });
+            window.location.href = `checkout.html?${params.toString()}`;
         }
     </script>
 </body>

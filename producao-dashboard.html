@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dashboard de Produção - Geladinhos Gourmet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1E1E1E",
+                    },
+                    fontFamily: { "display": ["Work Sans"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+
+    <!-- Header -->
+    <header
+        class="sticky top-0 z-50 flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-4 border-b border-primary/10 justify-between">
+        <div class="flex items-center gap-3">
+            <button onclick="window.history.back()" class="p-1 hover:bg-white/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <span class="material-symbols-outlined text-primary text-3xl">icecream</span>
+            <h1 class="text-xl font-bold tracking-tight">Dashboard <span class="text-primary">Produção</span></h1>
+        </div>
+        <button onclick="window.location.href='adicionar-producao.html'"
+            class="flex items-center gap-2 bg-primary text-background-dark px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition-all text-sm">
+            <span class="material-symbols-outlined text-sm">add</span>
+            Nova Produção
+        </button>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 space-y-6">
+
+        <!-- Top Alerts (estoque baixo) -->
+        <div id="alertsContainer" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+        <!-- Highlight Card -->
+        <div
+            class="relative overflow-hidden rounded-xl p-8 bg-gradient-to-br from-primary to-teal-600 text-slate-900 shadow-xl shadow-primary/20">
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <p class="text-slate-900/70 font-semibold uppercase tracking-wider text-xs">Desempenho Financeiro
+                    </p>
+                    <h2 class="text-3xl font-bold mt-1">💸 Receita Gerada Hoje</h2>
+                    <p id="hlData" class="text-slate-900/60 text-xs mt-1"></p>
+                </div>
+                <div class="text-right">
+                    <p id="hlReceita" class="text-5xl font-black">R$ 0,00</p>
+                    <p id="hlComparativo" class="text-sm font-medium opacity-80">calculando...</p>
+                </div>
+            </div>
+            <div class="absolute -right-8 -bottom-8 opacity-20">
+                <span class="material-symbols-outlined text-[180px] leading-none">payments</span>
+            </div>
+        </div>
+
+        <!-- Main Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="bg-card-dark p-4 rounded-xl border border-primary/5">
+                <p class="text-slate-400 text-sm font-medium">Produção Hoje</p>
+                <p class="text-2xl font-bold text-white mt-1"><span id="prodHoje">0</span> <span
+                        class="text-xs text-primary font-normal">un</span></p>
+            </div>
+            <div class="bg-card-dark p-4 rounded-xl border border-primary/5">
+                <p class="text-slate-400 text-sm font-medium">Produção Mês</p>
+                <p class="text-2xl font-bold text-white mt-1"><span id="prodMes">0</span> <span
+                        class="text-xs text-primary font-normal">un</span></p>
+            </div>
+            <div class="bg-card-dark p-4 rounded-xl border border-primary/5">
+                <p class="text-slate-400 text-sm font-medium">Custo Hoje</p>
+                <p id="custoHoje" class="text-2xl font-bold text-white mt-1">R$ 0,00</p>
+            </div>
+            <div class="bg-card-dark p-4 rounded-xl border border-primary/5">
+                <p class="text-slate-400 text-sm font-medium">Custo Unit.</p>
+                <p id="custoUnit" class="text-2xl font-bold text-white mt-1">R$ 0,00</p>
+            </div>
+            <div class="bg-card-dark p-4 rounded-xl border border-primary/5">
+                <p class="text-slate-400 text-sm font-medium">Receita Mês</p>
+                <p id="receitaMes" class="text-2xl font-bold text-emerald-400 mt-1">R$ 0,00</p>
+            </div>
+            <div class="bg-card-dark p-4 rounded-xl border border-primary/5">
+                <p class="text-slate-400 text-sm font-medium">Lucro Mês</p>
+                <p id="lucroMes" class="text-2xl font-bold text-primary mt-1">R$ 0,00</p>
+            </div>
+        </div>
+
+        <!-- Middle Row: 3 Equal Columns -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- Produção Semanal (bar chart dinâmico) → clicável para producao.html -->
+            <div class="bg-card-dark rounded-xl p-6 border border-primary/5 cursor-pointer hover:border-primary/30 hover:bg-[#1c2f2f] transition-all group"
+                onclick="window.location.href='producao.html'">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">bar_chart</span>
+                        Produção dos Últimos 7 Dias
+                    </h3>
+                    <span class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors text-sm">arrow_forward</span>
+                </div>
+                <div id="chartSemanal" class="flex items-end justify-between h-40 gap-2 px-2">
+                    <!-- gerado via JS -->
+                </div>
+            </div>
+
+            <!-- Consumo de Ingredientes → clicável para ingredientes-mais-usados.html -->
+            <div class="bg-card-dark rounded-xl p-6 border border-primary/5 cursor-pointer hover:border-primary/30 hover:bg-[#1c2f2f] transition-all group"
+                onclick="window.location.href='ingredientes-mais-usados.html'">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">shopping_basket</span>
+                        Ingredientes Mais Usados
+                    </h3>
+                    <span
+                        class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors text-sm">arrow_forward</span>
+                </div>
+                <div id="ingredientesList" class="space-y-4">
+                    <p class="text-slate-500 text-xs italic">Carregando...</p>
+                </div>
+            </div>
+
+            <!-- Estoque Crítico → clicável para estoque-critico.html -->
+            <div class="bg-card-dark rounded-xl p-6 border border-primary/5 cursor-pointer hover:border-red-400/30 hover:bg-[#1f3030] transition-all group"
+                onclick="window.location.href='estoque-critico.html'">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">inventory_2</span>
+                        Estoque Crítico
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span id="qtdCriticos" class="bg-red-500/20 px-2 py-1 rounded text-red-400 text-xs font-bold">0
+                            itens</span>
+                        <span
+                            class="material-symbols-outlined text-slate-500 group-hover:text-primary transition-colors text-sm">arrow_forward</span>
+                    </div>
+                </div>
+                <div id="estoqueList" class="space-y-3">
+                    <p class="text-slate-500 text-xs italic">Carregando...</p>
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Rentabilidade por Produto (full width) -->
+        <div class="bg-card-dark rounded-xl p-6 border border-primary/5">
+            <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">trending_up</span>
+                Rentabilidade por Produto
+            </h3>
+            <div id="rentabilidadeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p class="text-slate-500 text-xs italic col-span-full">Carregando...</p>
+            </div>
+        </div>
+
+    </main>
+
+
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+        const hoje = new Date();
+        // Usa data LOCAL (evita bug UTC-3: new Date('2026-03-10') vira 9 em BR)
+        const pad = n => String(n).padStart(2, '0');
+        const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`;
+        const anoMes = { year: hoje.getFullYear(), month: hoje.getMonth() };
+
+        // Últimos 7 dias usando data local
+        const dias7 = Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(hoje);
+            d.setDate(d.getDate() - (6 - i));
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        });
+
+        const fmt = v => `R$ ${v.toFixed(2).replace('.', ',')}`;
+
+        // ─── CARREGAR DADOS ───────────────────────────────────────────────────────
+        async function loadDashboard() {
+            try {
+                // 1. Todas as produções (filtramos por mês no JS para evitar problema de formato de data)
+                const { data: _pmAll, error: _pmErr } = await supabase
+                    .from('producoes')
+                    .select('id, receita_id, nome_receita, data_producao, total_unidades, quantidade_lotes')
+                    .order('data_producao', { ascending: false });
+
+                if (_pmErr) console.error('❌ Erro producoes:', _pmErr);
+                const todasProducoes = _pmAll || [];
+
+                // Filtrar por mês atual no JS (compatível com qualquer formato de data)
+                const producoesMes = todasProducoes.filter(p => {
+                    if (!p.data_producao) return false;
+                    const d = new Date(p.data_producao);
+                    return d.getFullYear() === hoje.getFullYear() && d.getMonth() === hoje.getMonth();
+                });
+
+                console.log(`📊 Total produções: ${todasProducoes.length}, Mês atual: ${producoesMes.length}`);
+
+                // 2. Produtos (preço base por receita)
+                const { data: _prod } = await supabase
+                    .from('produtos')
+                    .select('id, receita_id, preco_base, nome, imagem_url');
+                const produtos = _prod || [];
+
+                const produtosPorReceita = {};
+                produtos.forEach(p => { if (p.receita_id) produtosPorReceita[p.receita_id] = p; });
+
+                // 3. Receitas (nome)
+                const { data: _rec } = await supabase
+                    .from('receitas')
+                    .select('id, nome, rendimento_unidades');
+                const receitas = _rec || [];
+
+                const receitasMap = {};
+                receitas.forEach(r => { receitasMap[r.id] = r; });
+
+                // 4. Insumos (estoque)
+                const { data: _ins } = await supabase
+                    .from('insumos')
+                    .select('id, nome, tipo, estoque_atual, estoque_minimo, custo_unitario, unidade_medida')
+                    .eq('ativo', true);
+                const insumos = _ins || [];
+
+                // 5a. receitas_insumos do mês (para consumo de ingredientes)
+                const receitaIdsNoMes = [...new Set(producoesMes.map(p => p.receita_id).filter(Boolean))];
+                let receitasInsumos = [];
+                if (receitaIdsNoMes.length > 0) {
+                    const { data: _ri } = await supabase
+                        .from('receitas_insumos')
+                        .select('receita_id, insumo_id, quantidade')
+                        .in('receita_id', receitaIdsNoMes);
+                    receitasInsumos = _ri || [];
+                }
+
+                // 5b. receitas_insumos de TODAS as receitas (para custo na rentabilidade)
+                const todosReceitaIds = receitas.map(r => r.id).filter(Boolean);
+                let todosReceitasInsumos = [];
+                if (todosReceitaIds.length > 0) {
+                    const { data: _riAll } = await supabase
+                        .from('receitas_insumos')
+                        .select('receita_id, insumo_id, quantidade')
+                        .in('receita_id', todosReceitaIds);
+                    todosReceitasInsumos = _riAll || [];
+                }
+
+                // ─── PROCESSAR ─────────────────────────────────────────────────────
+                renderAlertas(insumos);
+                renderStats(producoesMes, produtosPorReceita, receitasMap, todosReceitasInsumos, insumos);
+                renderChart(todasProducoes);
+                renderIngredientes(producoesMes, receitasInsumos, insumos, receitasMap);
+                renderEstoqueCritico(insumos);
+                renderRentabilidade(receitas, produtosPorReceita, insumos, todosReceitasInsumos);
+
+            } catch (err) {
+                console.error('❌ Erro no dashboard:', err);
+            }
+        }
+
+        // ─── ALERTAS (estoque mínimo) ─────────────────────────────────────────────
+        function renderAlertas(insumos) {
+            const criticos = insumos.filter(i => i.estoque_minimo > 0 && i.estoque_atual <= i.estoque_minimo);
+            if (criticos.length === 0) return;
+
+            const container = document.getElementById('alertsContainer');
+            container.classList.remove('hidden');
+            container.className = 'grid grid-cols-1 md:grid-cols-' + Math.min(criticos.length, 3) + ' gap-4';
+
+            container.innerHTML = criticos.slice(0, 3).map(i => `
+                <div class="flex items-center gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                    <span class="material-symbols-outlined text-sm">warning</span>
+                    <span>${i.nome} — estoque baixo (${i.estoque_atual} ${i.unidade_medida || 'un'})</span>
+                </div>
+            `).join('');
+        }
+
+        // ─── STATS ────────────────────────────────────────────────────────────────
+        // Calcula custo de uma produção via insumos × quantidade
+        function calcCustoProducao(prod, riList, insumosMap) {
+            const ri = riList.filter(r => r.receita_id === prod.receita_id);
+            const lotes = prod.quantidade_lotes || 1;
+            return ri.reduce((sum, r) => {
+                const ins = insumosMap[r.insumo_id];
+                return sum + (ins ? (ins.custo_unitario || 0) * (parseFloat(r.quantidade) || 0) * lotes : 0);
+            }, 0);
+        }
+
+        function renderStats(producoesMes, produtosPorReceita, receitasMap, riList, insumosArr) {
+            const insumosMap = {};
+            insumosArr.forEach(i => { insumosMap[i.id] = i; });
+
+            // Compara string YYYY-MM-DD diretamente — evita bug de timezone
+            const isHoje = p => (p.data_producao || '').split('T')[0] === hojeStr;
+            const prodHojeArr = producoesMes.filter(isHoje);
+            const prodHoje = prodHojeArr.reduce((s, p) => s + (p.total_unidades || 0), 0);
+            const prodMes = producoesMes.reduce((s, p) => s + (p.total_unidades || 0), 0);
+            const custoHoje = prodHojeArr.reduce((s, p) => s + calcCustoProducao(p, riList, insumosMap), 0);
+            const custoMes = producoesMes.reduce((s, p) => s + calcCustoProducao(p, riList, insumosMap), 0);
+            const custoUnit = prodHoje > 0 ? custoHoje / prodHoje : 0;
+
+            // Receita gerada = unidades × preco_base
+            let receitaHoje = 0, receitaMes = 0;
+            producoesMes.forEach(p => {
+                const produto = produtosPorReceita[p.receita_id];
+                const preco = produto ? parseFloat(produto.preco_base) || 0 : 0;
+                const unids = p.total_unidades || 0;
+                const valor = preco * unids;
+                if ((p.data_producao || '').split('T')[0] === hojeStr) receitaHoje += valor;
+                receitaMes += valor;
+            });
+
+            const lucroMes = receitaMes - custoMes;
+
+            document.getElementById('prodHoje').textContent = prodHoje.toLocaleString('pt-BR');
+            document.getElementById('prodMes').textContent = prodMes.toLocaleString('pt-BR');
+            document.getElementById('custoHoje').textContent = fmt(custoHoje);
+            document.getElementById('custoUnit').textContent = fmt(custoUnit);
+            document.getElementById('receitaMes').textContent = fmt(receitaMes);
+            document.getElementById('lucroMes').textContent = fmt(lucroMes);
+            if (lucroMes < 0) document.getElementById('lucroMes').classList.replace('text-primary', 'text-red-400');
+
+            // Highlight
+            const dataHoje = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+            document.getElementById('hlReceita').textContent = fmt(receitaHoje);
+            document.getElementById('hlData').textContent = dataHoje.charAt(0).toUpperCase() + dataHoje.slice(1);
+            document.getElementById('hlComparativo').textContent = prodHoje > 0
+                ? `${prodHoje} unidades produzidas hoje`
+                : 'Nenhuma produção registrada hoje';
+        }
+
+        // ─── GRÁFICO 7 DIAS ──────────────────────────────────────────────────────
+        function renderChart(todasProducoes) {
+            const porDia = {};
+            dias7.forEach(d => { porDia[d] = 0; });
+            todasProducoes.forEach(p => {
+                // Normaliza data para YYYY-MM-DD (remove possível parte de hora)
+                const dStr = (p.data_producao || '').split('T')[0];
+                if (porDia[dStr] !== undefined) {
+                    porDia[dStr] += p.total_unidades || 0;
+                }
+            });
+            console.log('📊 Gráfico 7 dias:', porDia);
+
+            const maxVal = Math.max(...Object.values(porDia), 1);
+            const MAX_PX = 120; // altura máxima das barras em pixels
+            const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+            document.getElementById('chartSemanal').innerHTML = dias7.map(d => {
+                const dt = new Date(d + 'T12:00:00');
+                const val = porDia[d];
+                const px = Math.max(Math.round((val / maxVal) * MAX_PX), val > 0 ? 4 : 2);
+                const nome = diasSemana[dt.getDay()];
+                const ehHoje = d === hojeStr;
+                return `
+                    <div class="flex flex-col-reverse items-center flex-1 gap-1">
+                        <span class="text-[10px] ${ehHoje ? 'text-primary font-bold' : 'text-slate-400'}">${nome}</span>
+                        <div class="relative group cursor-default w-full ${ehHoje ? 'bg-primary' : 'bg-primary/30'} rounded-t-sm" style="height:${px}px">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">${val > 0 ? val + ' un' : ''}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ─── INGREDIENTES MAIS USADOS ─────────────────────────────────────────────
+        function renderIngredientes(producoesMes, receitasInsumos, insumos, receitasMap) {
+            const insumosMap = {};
+            insumos.forEach(i => { insumosMap[i.id] = i; });
+
+            // mapa: insumo_id → qtd total consumida
+            const consumo = {};
+            producoesMes.forEach(p => {
+                const riDaReceita = receitasInsumos.filter(r => r.receita_id === p.receita_id);
+                const lotes = p.quantidade_lotes || 1;
+                riDaReceita.forEach(ri => {
+                    if (ri.insumo_id) {
+                        consumo[ri.insumo_id] = (consumo[ri.insumo_id] || 0) + ((parseFloat(ri.quantidade) || 0) * lotes);
+                    }
+                });
+            });
+
+            const sorted = Object.entries(consumo)
+                .map(([id, qtd]) => ({ insumo: insumosMap[id], qtd }))
+                .filter(x => x.insumo && x.insumo.tipo === 'ingrediente')
+                .sort((a, b) => b.qtd - a.qtd)
+                .slice(0, 3);
+
+            const container = document.getElementById('ingredientesList');
+            if (sorted.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-xs italic">Nenhum consumo registrado no mês</p>';
+                return;
+            }
+
+            const icons = ['opacity', 'grain', 'nutrition'];
+            container.innerHTML = sorted.map((x, i) => {
+                const custo = x.qtd * (x.insumo.custo_unitario || 0);
+                return `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-sm text-primary">${icons[i] || 'category'}</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">${x.insumo.nome}</p>
+                                <p class="text-xs text-slate-400">${x.qtd.toFixed(2)} ${x.insumo.unidade_medida || ''} consumidos</p>
+                            </div>
+                        </div>
+                        <p class="font-bold text-red-400">${fmt(custo)}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ─── ESTOQUE CRÍTICO ─────────────────────────────────────────────────────
+        function renderEstoqueCritico(insumos) {
+            const criticos = insumos
+                .filter(i => i.estoque_minimo > 0 && i.estoque_atual <= i.estoque_minimo)
+                .sort((a, b) => (a.estoque_atual / a.estoque_minimo) - (b.estoque_atual / b.estoque_minimo));
+
+            document.getElementById('qtdCriticos').textContent = `${criticos.length} iten${criticos.length !== 1 ? 's' : ''}`;
+            document.getElementById('qtdCriticos').className = criticos.length > 0
+                ? 'bg-red-500/20 px-2 py-1 rounded text-red-400 text-xs font-bold'
+                : 'bg-green-500/20 px-2 py-1 rounded text-green-400 text-xs font-bold';
+
+            const container = document.getElementById('estoqueList');
+            if (criticos.length === 0) {
+                container.innerHTML = '<p class="text-green-400 text-xs flex items-center gap-1"><span class="material-symbols-outlined text-sm">check_circle</span> Todos os estoques estão OK!</p>';
+                return;
+            }
+
+            container.innerHTML = criticos.slice(0, 4).map(i => `
+                <div class="flex justify-between text-sm py-2 border-b border-white/5">
+                    <span class="text-slate-400 truncate">${i.nome}</span>
+                    <span class="font-bold text-red-400 shrink-0 ml-2">${i.estoque_atual} ${i.unidade_medida || 'un'}</span>
+                </div>
+            `).join('') + (criticos.length > 4 ? `<p class="text-xs text-slate-500 pt-2">+ ${criticos.length - 4} outros itens críticos</p>` : '');
+        }
+
+        // ─── RENTABILIDADE POR PRODUTO ────────────────────────────────────────────
+        function renderRentabilidade(receitas, produtosPorReceita, insumos, receitasInsumos) {
+            const insumosMap = {};
+            insumos.forEach(i => { insumosMap[i.id] = i; });
+
+            const grid = document.getElementById('rentabilidadeGrid');
+            const comProduto = receitas.filter(r => produtosPorReceita[r.id]);
+
+            if (comProduto.length === 0) {
+                grid.innerHTML = '<p class="text-slate-500 text-xs italic col-span-full">Nenhum produto vinculado às receitas.</p>';
+                return;
+            }
+
+            grid.innerHTML = comProduto.map((receita, idx) => {
+                const produto = produtosPorReceita[receita.id];
+                const precoBase = parseFloat(produto.preco_base) || 0;
+
+                // Custo unitário via insumos da receita
+                const riDaReceita = receitasInsumos.filter(ri => ri.receita_id === receita.id);
+                const custoInsumos = riDaReceita.reduce((sum, ri) => {
+                    const insumo = insumosMap[ri.insumo_id];
+                    return sum + (insumo ? (insumo.custo_unitario || 0) * (parseFloat(ri.quantidade) || 0) : 0);
+                }, 0);
+                const rendimento = receita.rendimento_unidades || 1;
+                const custoUnit = custoInsumos / rendimento;
+                const lucroUnit = precoBase - custoUnit;
+                const margem = precoBase > 0 ? ((lucroUnit / precoBase) * 100).toFixed(0) : 0;
+
+                const isBest = idx === 0;
+                const imagemUrl = produto.imagem_url;
+
+                return `
+                    <div class="p-5 bg-background-dark rounded-xl border-l-4 ${lucroUnit >= 0 ? 'border-primary' : 'border-red-500'}">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center gap-2">
+                                ${imagemUrl
+                        ? `<img src="${imagemUrl}" class="w-8 h-8 rounded object-cover" />`
+                        : `<span class="material-symbols-outlined text-primary text-base">icecream</span>`}
+                                <h4 class="font-bold text-lg leading-tight">${produto.nome || receita.nome}</h4>
+                            </div>
+                            ${isBest ? '<span class="text-xs font-bold text-primary uppercase shrink-0">Destaque</span>' : ''}
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-center">
+                            <div>
+                                <p class="text-[10px] uppercase text-slate-500 font-bold">Custo</p>
+                                <p class="text-base font-bold">${fmt(custoUnit)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase text-slate-500 font-bold">Venda</p>
+                                <p class="text-base font-bold">${fmt(precoBase)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase text-primary font-bold">Lucro</p>
+                                <p class="text-base font-bold ${lucroUnit >= 0 ? 'text-primary' : 'text-red-400'}">${fmt(lucroUnit)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase text-yellow-400 font-bold">Margem</p>
+                                <p class="text-base font-bold ${margem >= 0 ? 'text-yellow-400' : 'text-red-400'}">${margem}%</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Iniciar
+        if (supabase) {
+            loadDashboard();
+        } else {
+            console.error('Supabase não inicializado');
+        }
+    </script>
+
+</body>
+
+</html>

@@ -110,7 +110,36 @@
                     <!-- Categoria -->
                     <div class="px-4 py-3">
                         <label class="flex flex-col w-full">
-                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Categoria</p>
+                            <div class="flex items-center justify-between pb-2 ml-1">
+                                <p class="text-white text-sm font-bold leading-normal">Categoria</p>
+                                <a href="categorias.html?tab=produtos"
+                                    class="flex items-center gap-1 text-primary text-sm font-bold hover:text-primary/80 transition-colors active:scale-95">
+                                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                                    Criar Categoria
+                                </a>
+                            </div>
+
+                            <!-- Aviso: Nenhuma categoria cadastrada -->
+                            <div id="avisoSemCategorias" class="hidden mb-3">
+                                <div
+                                    class="flex gap-3 items-start bg-amber-500/10 border border-amber-500/40 rounded-xl p-4">
+                                    <span
+                                        class="material-symbols-outlined text-amber-400 text-2xl mt-0.5 shrink-0">warning</span>
+                                    <div class="flex-1">
+                                        <p class="text-amber-300 font-semibold text-sm mb-1">Nenhuma categoria
+                                            cadastrada!</p>
+                                        <p class="text-amber-200/70 text-xs leading-relaxed mb-3">Você precisa cadastrar
+                                            uma categoria antes de adicionar um Produto. Exemplos: <span
+                                                class="font-semibold">Gourmet, Premium, Alcoólicos</span>.</p>
+                                        <a href="categorias.html?tab=produtos"
+                                            class="inline-flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs px-3 py-2 rounded-lg transition-all active:scale-95">
+                                            <span class="material-symbols-outlined text-sm">add_circle</span>
+                                            Cadastrar Categoria
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="relative">
                                 <select id="categoriaSelect"
                                     class="appearance-none form-input flex w-full rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3b3b54] bg-charcoal-dark h-14 px-4 text-base font-normal leading-normal cursor-pointer">
@@ -178,7 +207,8 @@
                     <!-- Preço -->
                     <div class="px-4 py-3">
                         <label class="flex flex-col w-full">
-                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Preço Base</p>
+                            <p class="text-white text-sm font-bold leading-normal pb-2 ml-1">Preço Base para Venda
+                                Direta</p>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">R$</span>
                                 <input id="precoInput"
@@ -186,6 +216,83 @@
                                     placeholder="0,00" type="number" step="0.01" min="0" />
                             </div>
                         </label>
+                    </div>
+
+                    <!-- Preview de Precificação -->
+                    <div id="previewPrecificacao" class="hidden px-4 pb-2">
+                        <div class="bg-charcoal-dark border border-[#3b3b54] rounded-2xl p-4 space-y-3">
+                            <p class="text-gray-400 text-[10px] uppercase font-bold tracking-widest mb-1">Preview de
+                                Lucro</p>
+
+                            <!-- Custo Unit. -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-gray-500 text-base">receipt_long</span>
+                                    <span class="text-gray-400 text-sm">Custo Unit. da Receita</span>
+                                </div>
+                                <span id="pvCusto" class="text-white text-sm font-bold">R$ —</span>
+                            </div>
+
+                            <!-- Separador -->
+                            <div class="border-t border-[#3b3b54]"></div>
+
+                            <!-- Preços Mínimos Sugeridos -->
+                            <p class="text-gray-500 text-[10px] uppercase font-bold tracking-wider">Preço Mínimo (Lucro
+                                Zero)</p>
+                            <div class="space-y-2">
+                                <!-- Sem taxa -->
+                                <div class="flex items-center justify-between bg-white/5 rounded-xl px-3 py-2">
+                                    <div>
+                                        <p class="text-gray-400 text-xs">Venda Direta</p>
+                                        <p id="pvMinDireto" class="text-white font-bold text-sm">R$ —</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Separador -->
+                            <div class="border-t border-[#3b3b54]"></div>
+
+                            <div id="pvLucroSection">
+                                <!-- Lucro Bruto (sem taxa) -->
+                                <p class="text-gray-500 text-[10px] uppercase font-bold tracking-wider">Venda Direta</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-base"
+                                            id="pvLucroIcon">trending_up</span>
+                                        <span class="text-sm" id="pvLucroLabel">Lucro Bruto</span>
+                                    </div>
+                                    <span id="pvLucro" class="text-sm font-bold">R$ —</span>
+                                </div>
+                                <div class="flex items-center justify-between -mt-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-base"
+                                            id="pvMargemIcon">percent</span>
+                                        <span class="text-sm" id="pvMargemLabel">Margem</span>
+                                    </div>
+                                    <span id="pvMargem" class="text-sm font-bold">—%</span>
+                                </div>
+
+                                <!-- Barra bruta -->
+                                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                    <div id="pvBarraMargem" class="h-full rounded-full transition-all duration-300"
+                                        style="width:0%"></div>
+                                </div>
+
+                                <!-- Marketplaces automáticos -->
+                                <div id="pvMktList" class="space-y-2"></div>
+
+                                <!-- Aviso sem marketplace -->
+                                <div id="pvMktAviso" class="hidden">
+                                    <a href="categorias.html?tab=marketplace"
+                                        class="flex items-center gap-2 text-xs text-amber-400 hover:text-amber-300 transition-colors">
+                                        <span class="material-symbols-outlined text-sm">add_circle</span>
+                                        Nenhum marketplace cadastrado. Clique para cadastrar.
+                                    </a>
+                                </div>
+                            </div><!-- /pvLucroSection -->
+
+                            <p id="pvDica" class="text-[10px] text-gray-500 mt-1 text-center italic"></p>
+                        </div>
                     </div>
                 </section>
 
@@ -278,7 +385,7 @@
             try {
                 const { data, error } = await supabase
                     .from('receitas')
-                    .select('id, nome')
+                    .select('id, nome, rendimento_unidades, tempo_preparo')
                     .eq('ativo', true)
                     .order('nome');
 
@@ -291,16 +398,86 @@
                     return;
                 }
 
+                // Guardar dados da receita para usar no preview
                 data.forEach(receita => {
                     const option = document.createElement('option');
                     option.value = receita.id;
                     option.textContent = receita.nome;
+                    option.dataset.rendimento = receita.rendimento_unidades || 1;
+                    option.dataset.tempo = receita.tempo_preparo || 0;
                     receitaSelect.appendChild(option);
                 });
 
             } catch (error) {
                 console.error('Erro ao carregar receitas:', error);
                 receitaSelect.innerHTML = '<option disabled>Erro ao carregar receitas</option>';
+            }
+        }
+
+        // Cache de custos calculados por receita
+        const custoCacheReceita = {};
+
+        async function calcularCustoReceita(receitaId, rendimento, tempoPreparo) {
+            if (custoCacheReceita[receitaId] !== undefined) return custoCacheReceita[receitaId];
+
+            try {
+                // Buscar configurações de mão de obra
+                let custoMaoObraHora = 0;
+                const { data: cfgData } = await supabase
+                    .from('configuracoes')
+                    .select('chave, valor')
+                    .in('chave', ['custo_mao_obra_hora']);
+                if (cfgData) {
+                    cfgData.forEach(c => {
+                        if (c.chave === 'custo_mao_obra_hora') custoMaoObraHora = parseFloat(c.valor) || 0;
+                    });
+                }
+
+                // Buscar insumos da receita
+                const { data: riData } = await supabase
+                    .from('receitas_insumos')
+                    .select('insumo_id, quantidade')
+                    .eq('receita_id', receitaId);
+
+                if (!riData || riData.length === 0) {
+                    // Só mão de obra
+                    const custoMO = ((tempoPreparo || 0) / 60) * custoMaoObraHora;
+                    const custoUnit = custoMO / (rendimento || 1);
+                    custoCacheReceita[receitaId] = custoUnit;
+                    return custoUnit;
+                }
+
+                const insumosIds = riData.map(r => r.insumo_id);
+                const { data: insumosData } = await supabase
+                    .from('insumos')
+                    .select('id, custo_unitario, tipo')
+                    .in('id', insumosIds);
+
+                const insumosMap = {};
+                (insumosData || []).forEach(i => insumosMap[i.id] = i);
+
+                let custoTotal = 0;
+                riData.forEach(ri => {
+                    const insumo = insumosMap[ri.insumo_id];
+                    if (!insumo) return;
+                    const qtd = parseFloat(ri.quantidade) || 0;
+                    if (insumo.tipo === 'equipamento') {
+                        custoTotal += (insumo.custo_unitario || 0) * (qtd / 60);
+                    } else {
+                        custoTotal += (insumo.custo_unitario || 0) * qtd;
+                    }
+                });
+
+                // Mão de obra
+                custoTotal += ((tempoPreparo || 0) / 60) * custoMaoObraHora;
+
+                const custoUnit = custoTotal / (rendimento || 1);
+                custoCacheReceita[receitaId] = custoUnit;
+                return custoUnit;
+
+            } catch (e) {
+                console.warn('Erro ao calcular custo da receita:', e);
+                return null;
             }
         }
 
@@ -320,10 +497,21 @@
 
                 categoriaSelect.innerHTML = '<option disabled selected value="">Selecione uma categoria</option>';
 
+                const avisoSemCategorias = document.getElementById('avisoSemCategorias');
+
                 if (!data || data.length === 0) {
-                    categoriaSelect.innerHTML += '<option disabled>Nenhuma categoria cadastrada</option>';
+                    // Mostrar aviso e desabilitar select
+                    avisoSemCategorias.classList.remove('hidden');
+                    categoriaSelect.disabled = true;
+                    categoriaSelect.innerHTML = '<option disabled selected value="">Nenhuma categoria cadastrada</option>';
+                    categoriaSelect.classList.add('opacity-50', 'cursor-not-allowed');
                     return;
                 }
+
+                // Esconder aviso e habilitar select
+                avisoSemCategorias.classList.add('hidden');
+                categoriaSelect.disabled = false;
+                categoriaSelect.classList.remove('opacity-50', 'cursor-not-allowed');
 
                 data.forEach(categoria => {
                     const option = document.createElement('option');
@@ -499,6 +687,236 @@
         // Event Listeners
         saveButton.addEventListener('click', saveProduct);
         imagemUrlInput.addEventListener('input', (e) => updateImagePreview(e.target.value));
+
+        // ── Preview de Precificação ──
+        let custoAtualReceita = null;
+        // Thresholds de margem (carregados das configurações)
+        let MARGEM_BAIXA = 20;
+        let MARGEM_RAZOAVEL = 40;
+        let MARGEM_EXCELENTE = 60;
+
+        function atualizarPreview() {
+            const preco = parseFloat(precoInput.value);
+            const preview = document.getElementById('previewPrecificacao');
+
+            if (!custoAtualReceita || custoAtualReceita <= 0) {
+                preview.classList.add('hidden');
+                return;
+            }
+
+            const custo = custoAtualReceita;
+            preview.classList.remove('hidden');
+
+            // Custo unit.
+            document.getElementById('pvCusto').textContent = 'R$ ' + custo.toFixed(2).replace('.', ',');
+            document.getElementById('pvMinDireto').textContent = 'R$ ' + custo.toFixed(2).replace('.', ',');
+
+            // Sem preço: esconde lucro, mostra apenas mínimos
+            if (!preco || preco <= 0) {
+                document.getElementById('pvLucroSection').classList.add('hidden');
+                document.getElementById('pvDica').textContent = '⬆️ Digite o preço acima para ver o lucro.';
+                renderMarketplacesList(null, custo);
+                return;
+            }
+
+            document.getElementById('pvLucroSection').classList.remove('hidden');;
+
+            // Custo
+            document.getElementById('pvCusto').textContent =
+                'R$ ' + custo.toFixed(2).replace('.', ',');
+
+            // Helper de cor por margem
+            function corPorMargem(lucroVal, margemVal) {
+                if (lucroVal < 0) return { cor: 'text-red-400', barra: 'bg-red-500', dica: '⚠️ Prejuízo! O preço está abaixo do custo.' };
+                if (margemVal < MARGEM_BAIXA) return { cor: 'text-red-400', barra: 'bg-red-500', dica: `⚠️ Margem baixa (abaixo de ${MARGEM_BAIXA}%). Considere aumentar o preço.` };
+                if (margemVal < MARGEM_RAZOAVEL) return { cor: 'text-amber-400', barra: 'bg-amber-500', dica: `⚡ Margem razoável (${MARGEM_BAIXA}%–${MARGEM_RAZOAVEL}%). Considere aumentar o preço.` };
+                if (margemVal < MARGEM_EXCELENTE) return { cor: 'text-primary', barra: 'bg-primary', dica: '✅ Margem razoável.' };
+                return { cor: 'text-green-400', barra: 'bg-green-500', dica: `🚀 Margem excelente! Acima de ${MARGEM_EXCELENTE}%.` };
+            }
+
+            // ─ Lucro Bruto ─
+            const lucro = preco - custo;
+            const margem = (lucro / preco) * 100;
+            const { cor, barra, dica } = corPorMargem(lucro, margem);
+
+            const pvLucro = document.getElementById('pvLucro');
+            const pvLucroIcon = document.getElementById('pvLucroIcon');
+            const pvLucroLabel = document.getElementById('pvLucroLabel');
+            const pvMargem = document.getElementById('pvMargem');
+            const pvMargemIcon = document.getElementById('pvMargemIcon');
+            const pvMargemLabel = document.getElementById('pvMargemLabel');
+            const pvBarra = document.getElementById('pvBarraMargem');
+            const pvDica = document.getElementById('pvDica');
+
+            pvLucro.textContent = (lucro >= 0 ? 'R$ ' : '-R$ ') + Math.abs(lucro).toFixed(2).replace('.', ',');
+            pvMargem.textContent = margem.toFixed(1).replace('.', ',') + '%';
+            pvLucro.className = `text-sm font-bold ${cor}`;
+            pvLucroIcon.className = `material-symbols-outlined text-base ${cor}`;
+            pvLucroIcon.textContent = lucro >= 0 ? 'trending_up' : 'trending_down';
+            pvLucroLabel.className = `text-sm ${cor}`;
+            pvMargem.className = `text-sm font-bold ${cor}`;
+            pvMargemIcon.className = `material-symbols-outlined text-base ${cor}`;
+            pvMargemLabel.className = `text-sm ${cor}`;
+            pvBarra.className = `h-full rounded-full transition-all duration-300 ${barra}`;
+            pvBarra.style.width = Math.max(2, Math.min(100, Math.abs(margem))) + '%';
+
+            pvDica.textContent = dica;
+
+            renderMarketplacesList(preco, custo);
+        }
+
+        receitaSelect.addEventListener('change', async () => {
+            const opt = receitaSelect.options[receitaSelect.selectedIndex];
+            if (!opt || !opt.value) { custoAtualReceita = null; return; }
+
+            const rendimento = parseInt(opt.dataset.rendimento) || 1;
+            const tempo = parseFloat(opt.dataset.tempo) || 0;
+
+            // Mostrar indicador de carregando
+            document.getElementById('pvCusto').textContent = 'Calculando...';
+            document.getElementById('previewPrecificacao').classList.remove('hidden');
+
+            custoAtualReceita = await calcularCustoReceita(opt.value, rendimento, tempo);
+            atualizarPreview();
+        });
+
+        precoInput.addEventListener('input', atualizarPreview);
+
+        // Cache de marketplaces
+        let marketplacesData = [];
+
+        // Carregar marketplaces uma vez
+        async function loadMarketplaces() {
+            try {
+                // Carregar thresholds de margem
+                const { data: cfgData } = await supabase
+                    .from('configuracoes')
+                    .select('chave, valor')
+                    .in('chave', ['margem_baixa', 'margem_razoavel', 'margem_excelente']);
+                (cfgData || []).forEach(c => {
+                    if (c.chave === 'margem_baixa') MARGEM_BAIXA = parseFloat(c.valor) || 20;
+                    if (c.chave === 'margem_razoavel') MARGEM_RAZOAVEL = parseFloat(c.valor) || 40;
+                    if (c.chave === 'margem_excelente') MARGEM_EXCELENTE = parseFloat(c.valor) || 60;
+                });
+
+                const { data, error } = await supabase
+                    .from('categorias')
+                    .select('id, nome, taxa_operacional, icone')
+                    .eq('tipo', 'marketplace')
+                    .eq('ativo', true)
+                    .order('nome');
+
+                if (error) throw error;
+                marketplacesData = data || [];
+
+                const aviso = document.getElementById('pvMktAviso');
+                if (marketplacesData.length === 0) {
+                    aviso.classList.remove('hidden');
+                } else {
+                    aviso.classList.add('hidden');
+                }
+
+                // Re-renderizar se já tiver custo calculado
+                if (custoAtualReceita) atualizarPreview();
+
+            } catch (e) {
+                console.warn('Erro ao carregar marketplaces:', e);
+            }
+        }
+
+        // Renderizar todos os marketplaces como cards com preço ajustável
+        function renderMarketplacesList(preco, custo) {
+            const container = document.getElementById('pvMktList');
+            if (!container) return;
+
+            if (marketplacesData.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            function corPorMargemMkt(lucroVal, margemVal) {
+                if (lucroVal < 0) return { cor: 'text-red-400', barra: 'bg-red-500' };
+                if (margemVal < MARGEM_BAIXA) return { cor: 'text-red-400', barra: 'bg-red-500' };
+                if (margemVal < MARGEM_RAZOAVEL) return { cor: 'text-amber-400', barra: 'bg-amber-500' };
+                if (margemVal < MARGEM_EXCELENTE) return { cor: 'text-primary', barra: 'bg-primary' };
+                return { cor: 'text-green-400', barra: 'bg-green-500' };
+            }
+
+            container.innerHTML =
+                '<p class="text-gray-500 text-[10px] uppercase font-bold tracking-wider mt-1">Preço por Marketplace</p>' +
+                '<div class="space-y-2">' +
+                marketplacesData.map(m => {
+                    const taxa = parseFloat(m.taxa_operacional) || 0;
+                    const precoMin = taxa > 0 ? (custo / (1 - taxa / 100)) : custo;
+                    const precoMkt = preco && preco > 0 ? preco : precoMin;
+                    const taxaValor = precoMkt * (taxa / 100);
+                    const lucroLiq = precoMkt - custo - taxaValor;
+                    const margemLiq = preco && preco > 0 ? (lucroLiq / precoMkt) * 100 : 0;
+                    const { cor, barra } = corPorMargemMkt(lucroLiq, margemLiq);
+                    const icone = m.icone || 'storefront';
+                    const sinal = lucroLiq >= 0 ? 'R$ ' : '-R$ ';
+                    const mktId = 'mkt-preco-' + m.id;
+                    const lucroId = 'mkt-lucro-' + m.id;
+                    const margemId = 'mkt-margem-' + m.id;
+                    const barraId = 'mkt-barra-' + m.id;
+                    const showLucro = preco && preco > 0;
+                    return `
+                        <div class="bg-white/5 rounded-xl px-3 py-2.5">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-sm text-gray-400">${icone}</span>
+                                <span class="text-xs font-semibold text-gray-300 flex-1">${m.nome}</span>
+                                <span class="text-[10px] text-red-400 font-semibold">Taxa ${taxa.toFixed(1).replace('.', ',')}%</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-400 text-xs font-bold shrink-0">R$</span>
+                                <input
+                                    id="${mktId}"
+                                    type="number" step="0.01" min="0"
+                                    value="${precoMkt.toFixed(2)}"
+                                    placeholder="${precoMin.toFixed(2)}"
+                                    class="form-input flex-1 rounded-lg text-white text-xs font-bold focus:outline-0 focus:ring-1 focus:ring-primary border border-[#3b3b54] bg-background-dark h-8 px-2 placeholder:text-gray-600"
+                                    oninput="recalcMkt(this, ${m.id}, ${taxa}, ${custo})"
+                                />
+                                <div class="text-right shrink-0 min-w-[70px]">
+                                    <p id="${lucroId}" class="text-xs font-bold ${showLucro ? cor : 'text-gray-500'}">${showLucro ? sinal + Math.abs(lucroLiq).toFixed(2).replace('.', ',') : 'R$ —'}</p>
+                                    <p id="${margemId}" class="text-[10px] ${showLucro ? cor : 'text-gray-600'}">${showLucro ? margemLiq.toFixed(1).replace('.', ',') + '%' : '—%'}</p>
+                                </div>
+                            </div>
+                            <div class="h-1 bg-white/5 rounded-full overflow-hidden mt-2">
+                                <div id="${barraId}" class="h-full rounded-full ${barra} transition-all duration-300" style="width:${showLucro ? Math.max(2, Math.min(100, Math.abs(margemLiq))) : 0}%"></div>
+                            </div>
+                            <p class="text-xs text-white mt-1">Mín. lucro zero: R$ ${precoMin.toFixed(2).replace('.', ',')}</p>
+                        </div>`;
+                }).join('') +
+                '</div>';
+        }
+
+        window.recalcMkt = function (input, mktId, taxa, custo) {
+            const precoMkt = parseFloat(input.value) || 0;
+            const taxaValor = precoMkt * (taxa / 100);
+            const lucroLiq = precoMkt - custo - taxaValor;
+            const margemLiq = precoMkt > 0 ? (lucroLiq / precoMkt) * 100 : 0;
+
+            function cor(l, m) {
+                if (l < 0) return { c: 'text-red-400', b: 'bg-red-500' };
+                if (m < MARGEM_BAIXA) return { c: 'text-red-400', b: 'bg-red-500' };
+                if (m < MARGEM_RAZOAVEL) return { c: 'text-amber-400', b: 'bg-amber-500' };
+                if (m < MARGEM_EXCELENTE) return { c: 'text-primary', b: 'bg-primary' };
+                return { c: 'text-green-400', b: 'bg-green-500' };
+            }
+            const { c, b } = cor(lucroLiq, margemLiq);
+            const sinal = lucroLiq >= 0 ? 'R$ ' : '-R$ ';
+
+            const lucroEl = document.getElementById('mkt-lucro-' + mktId);
+            const margemEl = document.getElementById('mkt-margem-' + mktId);
+            const barraEl = document.getElementById('mkt-barra-' + mktId);
+
+            if (lucroEl) { lucroEl.textContent = sinal + Math.abs(lucroLiq).toFixed(2).replace('.', ','); lucroEl.className = 'text-xs font-bold ' + c; }
+            if (margemEl) { margemEl.textContent = margemLiq.toFixed(1).replace('.', ',') + '%'; margemEl.className = 'text-[10px] ' + c; }
+            if (barraEl) { barraEl.className = 'h-full rounded-full ' + b + ' transition-all duration-300'; barraEl.style.width = Math.max(2, Math.min(100, Math.abs(margemLiq))) + '%'; }
+        };
+
+        loadMarketplaces();
 
         // Adiciona animação de spin
         const style = document.createElement('style');

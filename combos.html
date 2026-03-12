@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Combos - PrecificaX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0df2f2",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1E1E1E",
+                        "input-dark": "#252533"
+                    },
+                    fontFamily: { "display": ["Work Sans", "sans-serif"] },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            min-height: max(884px, 100dvh);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Animação de entrada */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        /* Progresso de margem */
+        #margemBar {
+            transition: width 0.5s ease;
+        }
+
+        /* Scrollbar fina no modal */
+        .thin-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .thin-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .thin-scroll::-webkit-scrollbar-thumb {
+            background: #3b3b54;
+            border-radius: 4px;
+        }
+
+        /* Spin */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        .combo-gradient {
+            background: linear-gradient(135deg, #fb923c 0%, #ec4899 100%);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-28">
+
+    <!-- ============================================================
+         TELA 1: LISTA DE COMBOS
+    ============================================================ -->
+    <div id="telaLista">
+        <!-- Header -->
+        <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4
+                       flex items-center justify-between border-b border-slate-200 dark:border-white/10">
+            <div class="flex items-center gap-3">
+                <button onclick="window.location.href='index.html'"
+                    class="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-full transition-colors">
+                    <span class="material-symbols-outlined align-middle">arrow_back_ios_new</span>
+                </button>
+                <h1 class="text-xl font-bold tracking-tight">Combos</h1>
+            </div>
+        </header>
+
+        <!-- Conteúdo -->
+        <main class="max-w-7xl mx-auto px-4 pt-6 pb-32">
+            <!-- Banner vazio -->
+            <div id="emptyState" class="hidden text-center py-20">
+                <div class="inline-flex items-center justify-center size-20 rounded-2xl bg-primary/10 mb-5">
+                    <span class="material-symbols-outlined text-primary text-4xl">category</span>
+                </div>
+                <p class="text-lg font-bold mb-1">Nenhum combo criado</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Crie combos de produtos para vender juntos com um
+                    preço especial.</p>
+            </div>
+
+            <!-- Lista -->
+            <div id="combosList" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- preenchido dinamicamente -->
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingState" class="text-center py-20">
+                <span class="material-symbols-outlined text-primary text-5xl spin">refresh</span>
+            </div>
+        </main>
+
+        <!-- FAB -->
+        <button onclick="abrirFormulario(null)" class="fixed bottom-8 right-6 size-16 bg-primary text-background-dark rounded-full shadow-2xl shadow-primary/30
+                   flex items-center justify-center z-40 active:scale-95 transition-all
+                   hover:scale-105 hover:shadow-primary/50">
+            <span class="material-symbols-outlined text-3xl font-bold">add</span>
+        </button>
+    </div>
+
+    <!-- ============================================================
+         TELA 2: FORMULÁRIO (NOVO / EDITAR COMBO)
+    ============================================================ -->
+    <div id="telaForm" class="hidden">
+        <!-- Header -->
+        <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4
+                       flex items-center justify-between border-b border-slate-200 dark:border-white/10">
+            <div class="flex items-center gap-3">
+                <button onclick="voltarLista()"
+                    class="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-full transition-colors">
+                    <span class="material-symbols-outlined align-middle">arrow_back_ios_new</span>
+                </button>
+                <h1 id="formTitulo" class="text-xl font-bold tracking-tight">Novo Combo</h1>
+            </div>
+            <button onclick="limparForm()"
+                class="text-primary font-medium px-2 text-sm hover:opacity-80 transition-opacity">Limpar</button>
+        </header>
+
+        <main class="max-w-5xl mx-auto p-4 pb-32 md:pb-8">
+            <div class="md:grid md:grid-cols-2 md:gap-8 md:items-start space-y-8 md:space-y-0">
+
+                <!-- ══ COLUNA ESQUERDA ══ -->
+                <div class="space-y-8">
+
+                    <!-- ── Seção 1: Info Básica ── -->
+                    <section class="space-y-4 animate-slide-up">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">info</span>
+                            <h2 class="text-lg font-semibold">Informações Básicas</h2>
+                        </div>
+
+                        <!-- Imagem -->
+                        <div id="imagemContainer" onclick="document.getElementById('imagemUrl').focus()"
+                            class="w-full h-44 rounded-xl overflow-hidden bg-slate-200 dark:bg-card-dark flex items-center justify-center
+                                   border-2 border-dashed border-slate-300 dark:border-white/10 relative cursor-pointer group">
+                            <div id="imagemPlaceholder" class="flex flex-col items-center gap-2 text-slate-400">
+                                <span
+                                    class="material-symbols-outlined text-4xl group-hover:text-primary transition-colors">add_photo_alternate</span>
+                                <p class="text-sm font-medium">Adicionar imagem do combo</p>
+                            </div>
+                            <img id="imagemPreview" src="" alt=""
+                                class="hidden absolute inset-0 w-full h-full object-cover" />
+                            <div id="imagemOverlay"
+                                class="hidden absolute inset-0 bg-black/40 flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-white text-3xl">photo_camera</span>
+                                <p class="text-white text-sm font-medium">Alterar foto</p>
+                            </div>
+                        </div>
+
+                        <!-- URL da imagem -->
+                        <div class="space-y-1.5">
+                            <label class="text-sm font-medium text-slate-500 dark:text-slate-400 ml-1">URL da Imagem
+                                (Opcional)</label>
+                            <input id="imagemUrl"
+                                class="w-full bg-slate-100 dark:bg-input-dark border-none rounded-xl h-12 px-4 focus:ring-2 focus:ring-primary
+                                       text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 text-sm"
+                                placeholder="https://..." type="url" />
+                        </div>
+
+                        <!-- Nome -->
+                        <div class="space-y-1.5">
+                            <label class="text-sm font-medium text-slate-500 dark:text-slate-400 ml-1">Nome do Combo
+                                *</label>
+                            <input id="nomeCombo" required
+                                class="w-full bg-slate-100 dark:bg-input-dark border-none rounded-xl h-14 px-4 focus:ring-2 focus:ring-primary
+                                       text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium"
+                                placeholder="Ex: Combo Casal Gourmet" type="text" />
+                        </div>
+                    </section>
+
+                    <!-- ── Seção 2: Composição ── -->
+                    <section class="space-y-4 animate-slide-up" style="animation-delay:0.05s">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">layers</span>
+                                <h2 class="text-lg font-semibold">Composição do Combo</h2>
+                            </div>
+                            <button onclick="abrirModalProdutos()" class="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1
+                                       hover:bg-primary/20 transition-colors active:scale-95">
+                                <span class="material-symbols-outlined text-sm">add</span> ADICIONAR
+                            </button>
+                        </div>
+
+                        <!-- Aviso: nenhum produto adicionado -->
+                        <div id="itensvazio"
+                            class="text-center py-8 text-slate-400 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl">
+                            <span class="material-symbols-outlined text-4xl mb-2 opacity-40">shopping_basket</span>
+                            <p class="text-sm">Nenhum produto adicionado ainda</p>
+                        </div>
+
+                        <!-- Lista de itens -->
+                        <div id="itensList" class="space-y-3">
+                            <!-- preenchido dinamicamente -->
+                        </div>
+                    </section>
+
+                </div>
+                <!-- fim coluna esquerda -->
+
+                <!-- ══ COLUNA DIREITA ══ -->
+                <div class="md:sticky md:top-24 space-y-4 animate-slide-up" style="animation-delay:0.1s">
+
+                    <!-- ── Seção 3: Precificação ── -->
+                    <section class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">payments</span>
+                            <h2 class="text-lg font-semibold">Precificação e Métricas</h2>
+                        </div>
+
+                        <div
+                            class="bg-slate-100 dark:bg-card-dark rounded-xl p-5 border border-slate-200 dark:border-white/10 space-y-6 shadow-xl">
+                            <!-- Preço de venda -->
+                            <div>
+                                <label class="text-sm font-medium text-slate-500 dark:text-slate-400 block mb-2">Preço
+                                    de Venda do Combo *</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-primary">R$</span>
+                                    <input id="precoVenda" type="number" step="0.01" min="0" value="0" class="w-full bg-white dark:bg-input-dark border-none rounded-xl h-16 pl-12 pr-4 text-2xl font-bold
+                                               focus:ring-2 focus:ring-primary text-slate-900 dark:text-white" />
+                                </div>
+                            </div>
+
+                            <!-- Métricas -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div
+                                    class="bg-white dark:bg-input-dark/50 p-3 rounded-lg border border-slate-200 dark:border-white/5">
+                                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Custo
+                                        Total</p>
+                                    <p id="mCustoTotal" class="text-lg font-semibold">R$ 0,00</p>
+                                </div>
+                                <div
+                                    class="bg-white dark:bg-input-dark/50 p-3 rounded-lg border border-slate-200 dark:border-white/5">
+                                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Qtd.
+                                        Itens</p>
+                                    <p id="mQtdItens" class="text-lg font-semibold text-slate-400">0 un</p>
+                                </div>
+
+                                <!-- Lucro bruto (destaque) -->
+                                <div id="mLucroCard"
+                                    class="bg-primary/10 p-3 rounded-lg border border-primary/20 col-span-2">
+                                    <div class="flex justify-between items-end mb-3">
+                                        <div>
+                                            <p class="text-[10px] uppercase tracking-wider text-primary font-bold mb-1">
+                                                Lucro Total Bruto</p>
+                                            <p id="mLucroTotal" class="text-3xl font-bold text-primary">R$ 0,00</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-[10px] uppercase tracking-wider text-primary font-bold mb-1">
+                                                Margem</p>
+                                            <p id="mMargem" class="text-xl font-bold text-primary">0%</p>
+                                        </div>
+                                    </div>
+                                    <div class="w-full bg-primary/20 h-2 rounded-full overflow-hidden">
+                                        <div id="margemBar" class="bg-primary h-full rounded-full" style="width:0%">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="bg-white dark:bg-input-dark/50 p-3 rounded-lg border border-slate-200 dark:border-white/5">
+                                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Custo
+                                        Médio/Un</p>
+                                    <p id="mCustoMedio" class="text-lg font-semibold">R$ 0,00</p>
+                                </div>
+                                <div
+                                    class="bg-white dark:bg-input-dark/50 p-3 rounded-lg border border-slate-200 dark:border-white/5">
+                                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Markup
+                                    </p>
+                                    <p id="mMarkup" class="text-lg font-semibold">0x</p>
+                                </div>
+                            </div>
+
+                            <!-- Alerta de margem -->
+                            <div id="margemAlerta"
+                                class="hidden items-center gap-2 p-3 rounded-lg border text-xs font-medium"></div>
+
+                            <!-- Por Marketplace -->
+                            <div id="marketplacesCalculo" class="hidden">
+                                <div class="flex items-center gap-2 mb-3 pt-1">
+                                    <span class="material-symbols-outlined text-primary text-base">storefront</span>
+                                    <p
+                                        class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                        Lucro por Marketplace</p>
+                                </div>
+                                <div id="marketplacesCalculoList" class="space-y-2">
+                                    <!-- preenchido dinamicamente -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Botão Salvar (visível só no desktop) -->
+                    <button id="btnSalvarDesktop" onclick="salvarCombo()" class="hidden md:flex w-full bg-primary hover:bg-primary/90 text-background-dark font-bold text-base py-4 rounded-xl
+                               shadow-[0_0_20px_rgba(13,242,242,0.3)] active:scale-[0.98] transition-all
+                               items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">save</span>
+                        Salvar Combo
+                    </button>
+
+                </div>
+                <!-- fim coluna direita -->
+
+            </div>
+        </main>
+
+        <!-- Footer fixo (mobile only) -->
+        <footer class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background-light/90 dark:bg-background-dark/90
+                       backdrop-blur-lg border-t border-slate-200 dark:border-white/10 z-50">
+            <div class="max-w-md mx-auto">
+                <button id="btnSalvar" onclick="salvarCombo()" class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold text-base py-4 rounded-xl
+                           shadow-[0_0_20px_rgba(13,242,242,0.3)] active:scale-[0.98] transition-all
+                           flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">save</span>
+                    Salvar Combo
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ============================================================
+         MODAL: SELECIONAR PRODUTO
+    ============================================================ -->
+    <div id="modalProdutos"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div
+            class="bg-white dark:bg-[#1C1C2E] w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col">
+            <!-- Modal header -->
+            <div
+                class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/10 shrink-0">
+                <h3 class="text-lg font-bold">Selecionar Produto</h3>
+                <button onclick="fecharModalProdutos()"
+                    class="size-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-slate-400">close</span>
+                </button>
+            </div>
+
+            <!-- Busca -->
+            <div class="px-4 py-3 shrink-0">
+                <div class="relative">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                    <input id="buscaProduto" type="text" placeholder="Buscar produto..."
+                        class="w-full bg-slate-100 dark:bg-white/5 border-none rounded-xl h-11 pl-10 pr-4 text-sm
+                               focus:ring-2 focus:ring-primary text-slate-900 dark:text-white placeholder:text-slate-400" />
+                </div>
+            </div>
+
+            <!-- Lista de produtos -->
+            <div id="modalProdutosList"
+                class="flex-1 overflow-y-auto thin-scroll px-4 pb-4 grid grid-cols-2 gap-3 content-start">
+                <!-- preenchido dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL: CONFIRMAÇÃO DE EXCLUSÃO
+    ============================================================ -->
+    <div id="modalExcluir"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-[#1C1C2E] rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-12 bg-red-500/10 rounded-xl flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-red-500 text-2xl">delete</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg">Excluir Combo</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Esta ação não pode ser desfeita.</p>
+                </div>
+            </div>
+            <p id="excluirNome"
+                class="text-sm text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 rounded-lg px-4 py-3 mb-5 font-medium">
+            </p>
+            <div class="flex gap-3">
+                <button onclick="fecharModalExcluir()"
+                    class="flex-1 bg-slate-100 dark:bg-white/10 font-bold py-3 rounded-xl text-sm hover:bg-slate-200 dark:hover:bg-white/15 transition-colors">
+                    Cancelar
+                </button>
+                <button id="btnConfirmarExcluir" onclick="confirmarExcluir()"
+                    class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl text-sm transition-colors active:scale-95">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-xl shadow-xl
+                            text-sm font-semibold text-white flex items-center gap-2 max-w-[90vw]"></div>
+
+    <script type="module">
+        import { getAllRecords, insertRecord, updateRecord, deleteRecord } from './supabase-utils.js';
+        import { getSupabase as getClient } from './supabase-client.js';
+
+        // ── Estado global ──
+        let todosOsProdutos = [];           // produtos do Supabase
+        let itensSelecionados = [];         // { produto, quantidade }
+        let comboEmEdicao = null;           // null = novo, objeto = editando
+        let comboIdParaExcluir = null;
+        let todosMarketplaces = [];         // marketplaces carregados
+        // Thresholds de margem
+        let MARGEM_BAIXA = 20;
+        let MARGEM_RAZOAVEL = 40;
+        let MARGEM_EXCELENTE = 60;
+
+        // ── Referências DOM ──
+        const telaLista = document.getElementById('telaLista');
+        const telaForm = document.getElementById('telaForm');
+        const precoInput = document.getElementById('precoVenda');
+
+        // =========================================================
+        // UTILITÁRIOS
+        // =========================================================
+        function fmt(n) {
+            return 'R$ ' + Number(n || 0).toFixed(2).replace('.', ',');
+        }
+
+        function showToast(msg, tipo = 'success') {
+            const t = document.getElementById('toast');
+            t.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-xl shadow-xl
+                           text-sm font-semibold text-white flex items-center gap-2 max-w-[90vw]
+                           ${tipo === 'success' ? 'bg-green-500' : tipo === 'error' ? 'bg-red-500' : 'bg-primary text-background-dark'}`;
+            t.innerHTML = `<span class="material-symbols-outlined text-base">${tipo === 'success' ? 'check_circle' : tipo === 'error' ? 'error' : 'info'}</span> ${msg}`;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3500);
+        }
+
+        // =========================================================
+        // TELA LISTA
+        // =========================================================
+        async function loadCombos() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('combosList').innerHTML = '';
+            document.getElementById('emptyState').classList.add('hidden');
+
+            // Carregar thresholds do Supabase
+            try {
+                const { data: cfgData } = await getAllRecords('configuracoes');
+                (cfgData || []).forEach(c => {
+                    if (c.chave === 'margem_baixa') MARGEM_BAIXA = parseFloat(c.valor) || 20;
+                    if (c.chave === 'margem_razoavel') MARGEM_RAZOAVEL = parseFloat(c.valor) || 40;
+                    if (c.chave === 'margem_excelente') MARGEM_EXCELENTE = parseFloat(c.valor) || 60;
+                });
+            } catch (e) { /* usa defaults */ }
+
+            try {
+                const supabase = getClient();
+                const { data: combos, error } = await supabase
+                    .from('combos')
+                    .select('*, combo_itens(*, produtos(nome, imagem_url, preco_base))')
+                    .eq('ativo', true)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                document.getElementById('loadingState').classList.add('hidden');
+
+                if (!combos || combos.length === 0) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                    return;
+                }
+
+                const container = document.getElementById('combosList');
+                container.innerHTML = combos.map(c => {
+                    const itens = c.combo_itens || [];
+                    const totalItens = itens.reduce((s, i) => s + i.quantidade, 0);
+                    const custoTotal = itens.reduce((s, i) => {
+                        const custo = parseFloat(i.preco_unitario_snapshot || i.produtos?.preco_base || 0);
+                        return s + custo * i.quantidade;
+                    }, 0);
+                    const preco = parseFloat(c.preco_venda || 0);
+                    const lucro = preco - custoTotal;
+                    const margem = preco > 0 ? (lucro / preco) * 100 : 0;
+                    const markup = custoTotal > 0 ? preco / custoTotal : 0;
+                    const custoUnit = totalItens > 0 ? custoTotal / totalItens : 0;
+                    const lucroUnit = totalItens > 0 ? lucro / totalItens : 0;
+
+                    const bannerStyle = c.imagem_url
+                        ? `style="background-image:url('${c.imagem_url}'); background-size:cover; background-position:center;"`
+                        : '';
+                    const bannerClass = c.imagem_url
+                        ? 'w-full aspect-video rounded-xl overflow-hidden relative'
+                        : 'w-full aspect-video rounded-xl overflow-hidden relative combo-gradient';
+
+                    return `
+                    <div class="bg-white dark:bg-card-dark rounded-2xl border border-slate-100 dark:border-white/5 shadow-sm overflow-hidden animate-slide-up flex flex-col">
+
+                        <!-- Banner -->
+                        <div class="${bannerClass} shrink-0" ${bannerStyle}>
+                            ${!c.imagem_url ? '<span class="material-symbols-outlined text-white/80 text-4xl absolute inset-0 flex items-center justify-center">restaurant</span>' : ''}
+                            <!-- Ações -->
+                            <div class="absolute top-2 right-2 flex gap-1.5 z-10">
+                                <button onclick="abrirFormulario(${c.id})"
+                                    class="size-8 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors">
+                                    <span class="material-symbols-outlined text-white text-[16px]">edit</span>
+                                </button>
+                                <button onclick="abrirModalExcluir(${c.id}, '${c.nome.replace(/'/g, "\\'")}')" 
+                                    class="size-8 bg-black/40 hover:bg-red-500/70 backdrop-blur-sm rounded-full flex items-center justify-center transition-colors">
+                                    <span class="material-symbols-outlined text-white text-[16px]">delete</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="px-3 pt-3 pb-1">
+                            <h3 class="font-bold text-base leading-tight truncate">${c.nome}</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">${totalItens} un · ${itens.length} produto${itens.length !== 1 ? 's' : ''}</p>
+                        </div>
+
+                        <!-- Métricas -->
+                        <div class="grid grid-cols-2 gap-1.5 px-3 pb-3 mt-2 flex-1">
+
+                            <div class="bg-blue-900/10 border border-blue-500/20 p-2 rounded-lg">
+                                <p class="text-xs font-bold text-blue-500 tracking-wider mb-0.5 uppercase">Preço</p>
+                                <p class="text-sm font-bold text-blue-400 truncate">${fmt(preco)}</p>
+                            </div>
+
+                            <div class="bg-zinc-800/40 border border-zinc-700/50 p-2 rounded-lg">
+                                <p class="text-xs font-bold text-slate-400 tracking-wider mb-0.5 uppercase">Custo</p>
+                                <p class="text-sm font-bold text-slate-200 truncate">${fmt(custoTotal)}</p>
+                            </div>
+
+                            <div class="bg-emerald-900/10 border border-emerald-500/20 p-2 rounded-lg">
+                                <p class="text-xs font-bold text-emerald-400 tracking-wider mb-0.5 uppercase">Lucro</p>
+                                <p class="text-sm font-bold text-emerald-400 truncate">${fmt(lucro)}</p>
+                            </div>
+
+                            <div class="bg-amber-900/10 border border-amber-500/20 p-2 rounded-lg" id="margem-card-${c.id}" style="background: ${margem >= MARGEM_EXCELENTE ? 'rgba(34,197,94,0.1)' : margem >= MARGEM_RAZOAVEL ? 'rgba(234,179,8,0.1)' : 'rgba(239,68,68,0.1)'}; border-color: ${margem >= MARGEM_EXCELENTE ? 'rgba(34,197,94,0.2)' : margem >= MARGEM_RAZOAVEL ? 'rgba(234,179,8,0.2)' : 'rgba(239,68,68,0.2)'}">
+                                <p class="text-xs font-bold tracking-wider mb-0.5 uppercase" style="color: ${margem >= MARGEM_EXCELENTE ? '#4ade80' : margem >= MARGEM_RAZOAVEL ? '#facc15' : '#f87171'}">Margem</p>
+                                <p class="text-sm font-bold" style="color: ${margem >= MARGEM_EXCELENTE ? '#4ade80' : margem >= MARGEM_RAZOAVEL ? '#facc15' : '#f87171'}">${margem.toFixed(0)}%</p>
+                            </div>
+
+                            <div class="bg-cyan-900/10 border border-cyan-500/20 p-2 rounded-lg">
+                                <p class="text-xs font-bold text-primary tracking-wider mb-0.5 uppercase">L. Unit.</p>
+                                <p class="text-sm font-bold text-primary truncate">${fmt(lucroUnit)}</p>
+                            </div>
+
+                            <div class="bg-purple-900/10 border border-purple-500/20 p-2 rounded-lg">
+                                <p class="text-xs font-bold text-purple-400 tracking-wider mb-0.5 uppercase">Markup</p>
+                                <p class="text-sm font-bold text-purple-300">${markup.toFixed(1)}x</p>
+                            </div>
+
+                        </div>
+
+                        <!-- Botão ver detalhes -->
+                        <div class="px-3 pb-3">
+                            <a href="combo-detalhes.html?id=${c.id}"
+                                class="w-full bg-primary/10 hover:bg-primary/20 text-primary font-bold text-sm py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95">
+                                <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                                Ver Detalhes
+                            </a>
+                        </div>
+
+                    </div>`;
+                }).join('');
+
+            } catch (e) {
+                console.error('Erro ao carregar combos:', e);
+                document.getElementById('loadingState').classList.add('hidden');
+                showToast('Erro ao carregar combos: ' + e.message, 'error');
+            }
+        }
+
+        // =========================================================
+        // NAVEGAÇÃO LISTA ↔ FORM
+        // =========================================================
+        async function abrirFormulario(comboId) {
+            comboEmEdicao = null;
+            itensSelecionados = [];
+
+            // Carregar produtos
+            await loadProdutos();
+
+            const btnLabel = comboId
+                ? '<span class="material-symbols-outlined">save</span> Atualizar Combo'
+                : '<span class="material-symbols-outlined">save</span> Salvar Combo';
+
+            if (comboId) {
+                document.getElementById('formTitulo').textContent = 'Editar Combo';
+                document.getElementById('btnSalvar').innerHTML = btnLabel;
+                document.getElementById('btnSalvarDesktop').innerHTML = btnLabel;
+                await carregarComboParaEdicao(comboId);
+            } else {
+                document.getElementById('formTitulo').textContent = 'Novo Combo';
+                document.getElementById('btnSalvar').innerHTML = btnLabel;
+                document.getElementById('btnSalvarDesktop').innerHTML = btnLabel;
+                limparForm();
+            }
+
+            telaLista.classList.add('hidden');
+            telaForm.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        window.abrirFormulario = abrirFormulario;
+
+        function voltarLista() {
+            telaForm.classList.add('hidden');
+            telaLista.classList.remove('hidden');
+            loadCombos();
+        }
+        window.voltarLista = voltarLista;
+
+        async function carregarComboParaEdicao(comboId) {
+            try {
+                const supabase = getClient();
+                const { data, error } = await supabase
+                    .from('combos')
+                    .select('*, combo_itens(*, produtos(*))')
+                    .eq('id', comboId)
+                    .single();
+
+                if (error) throw error;
+
+                comboEmEdicao = data;
+                document.getElementById('nomeCombo').value = data.nome || '';
+                document.getElementById('imagemUrl').value = data.imagem_url || '';
+                document.getElementById('precoVenda').value = data.preco_venda || 0;
+                atualizarPreviewImagem(data.imagem_url);
+
+                itensSelecionados = (data.combo_itens || []).map(i => ({
+                    produto: i.produtos,
+                    quantidade: i.quantidade
+                }));
+
+                renderItens();
+                calcularMetricas();
+            } catch (e) {
+                showToast('Erro ao carregar combo: ' + e.message, 'error');
+            }
+        }
+
+        function limparForm() {
+            comboEmEdicao = null;
+            itensSelecionados = [];
+            document.getElementById('nomeCombo').value = '';
+            document.getElementById('imagemUrl').value = '';
+            document.getElementById('precoVenda').value = '0';
+            atualizarPreviewImagem('');
+            renderItens();
+            calcularMetricas();
+        }
+        window.limparForm = limparForm;
+
+        // =========================================================
+        // PREVIEW IMAGEM
+        // =========================================================
+        function atualizarPreviewImagem(url) {
+            const img = document.getElementById('imagemPreview');
+            const placeholder = document.getElementById('imagemPlaceholder');
+            const overlay = document.getElementById('imagemOverlay');
+
+            if (url && url.trim()) {
+                img.src = url;
+                img.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                placeholder.classList.add('hidden');
+            } else {
+                img.src = '';
+                img.classList.add('hidden');
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('imagemUrl').addEventListener('input', e => {
+            atualizarPreviewImagem(e.target.value);
+        });
+
+        // =========================================================
+        // ITENS DO COMBO
+        // =========================================================
+        function renderItens() {
+            const lista = document.getElementById('itensList');
+            const vazio = document.getElementById('itensvazio');
+
+            if (itensSelecionados.length === 0) {
+                vazio.classList.remove('hidden');
+                lista.innerHTML = '';
+                return;
+            }
+
+            vazio.classList.add('hidden');
+            lista.innerHTML = itensSelecionados.map((item, idx) => {
+                const img = item.produto.imagem_url
+                    ? `<img src="${item.produto.imagem_url}" alt="${item.produto.nome}" class="w-full h-full object-cover rounded-lg">`
+                    : `<span class="material-symbols-outlined text-slate-400">icecream</span>`;
+
+                const custo = parseFloat(item.produto.custo_real ?? item.produto.preco_base ?? 0);
+
+                return `
+                <div class="bg-white dark:bg-card-dark p-4 rounded-xl flex items-center justify-between border border-slate-100 dark:border-white/5 shadow-sm animate-slide-up">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-input-dark flex items-center justify-center overflow-hidden shrink-0">
+                            ${img}
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-medium text-sm truncate max-w-[130px]">${item.produto.nome}</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Custo unit: ${fmt(custo)}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <div class="flex items-center bg-slate-100 dark:bg-input-dark rounded-lg px-2 py-1 gap-1">
+                            <button onclick="alterarQtdItem(${idx}, -1)" class="text-primary active:scale-90 transition-transform">
+                                <span class="material-symbols-outlined text-lg">remove</span>
+                            </button>
+                            <span class="mx-2 font-bold text-sm w-6 text-center">${item.quantidade}</span>
+                            <button onclick="alterarQtdItem(${idx}, 1)" class="text-primary active:scale-90 transition-transform">
+                                <span class="material-symbols-outlined text-lg">add</span>
+                            </button>
+                        </div>
+                        <button onclick="removerItem(${idx})" class="text-slate-400 hover:text-red-500 transition-colors active:scale-90">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.alterarQtdItem = function (idx, delta) {
+            itensSelecionados[idx].quantidade = Math.max(1, itensSelecionados[idx].quantidade + delta);
+            renderItens();
+            calcularMetricas();
+        };
+
+        window.removerItem = function (idx) {
+            itensSelecionados.splice(idx, 1);
+            renderItens();
+            calcularMetricas();
+        };
+
+        // =========================================================
+        // MÉTRICAS EM TEMPO REAL
+        // =========================================================
+        function calcularMetricas() {
+            const preco = parseFloat(precoInput.value) || 0;
+            const qtdTotal = itensSelecionados.reduce((s, i) => s + i.quantidade, 0);
+            const custoTotal = itensSelecionados.reduce((s, i) => {
+                return s + parseFloat(i.produto.custo_real ?? i.produto.preco_base ?? 0) * i.quantidade;
+            }, 0);
+
+            const lucro = preco - custoTotal;
+            const margem = preco > 0 ? (lucro / preco) * 100 : 0;
+            const markup = custoTotal > 0 ? preco / custoTotal : 0;
+            const custoMedio = qtdTotal > 0 ? custoTotal / qtdTotal : 0;
+
+            document.getElementById('mCustoTotal').textContent = fmt(custoTotal);
+            document.getElementById('mQtdItens').textContent = qtdTotal + ' un';
+            document.getElementById('mLucroTotal').textContent = fmt(lucro);
+            document.getElementById('mMargem').textContent = margem.toFixed(1) + '%';
+            document.getElementById('mCustoMedio').textContent = fmt(custoMedio);
+            document.getElementById('mMarkup').textContent = markup.toFixed(2) + 'x';
+            document.getElementById('margemBar').style.width = Math.min(100, Math.max(0, margem)) + '%';
+
+            // Cor do card de lucro
+            const lucroCard = document.getElementById('mLucroCard');
+            if (margem >= MARGEM_EXCELENTE) {
+                lucroCard.className = 'bg-green-500/10 p-3 rounded-lg border border-green-500/20 col-span-2';
+            } else if (margem >= MARGEM_RAZOAVEL) {
+                lucroCard.className = 'bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20 col-span-2';
+            } else {
+                lucroCard.className = 'bg-red-500/10 p-3 rounded-lg border border-red-500/20 col-span-2';
+            }
+
+            // Alerta de margem
+            const alerta = document.getElementById('margemAlerta');
+            if (preco > 0) {
+                alerta.classList.remove('hidden');
+                alerta.classList.add('flex');
+                if (margem >= MARGEM_EXCELENTE) {
+                    alerta.className = 'flex items-center gap-2 bg-green-500/10 p-3 rounded-lg border border-green-500/20 text-xs font-medium text-green-600 dark:text-green-400';
+                    alerta.innerHTML = `<span class="material-symbols-outlined text-green-500 text-base">check_circle</span> Margem excelente! Acima de ${MARGEM_EXCELENTE}%.`;
+                } else if (margem >= MARGEM_RAZOAVEL) {
+                    alerta.className = 'flex items-center gap-2 bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20 text-xs font-medium text-yellow-600 dark:text-yellow-400';
+                    alerta.innerHTML = `<span class="material-symbols-outlined text-yellow-500 text-base">warning</span> Margem razoável (${MARGEM_RAZOAVEL}%–${MARGEM_EXCELENTE}%). Considere aumentar o preço.`;
+                } else {
+                    alerta.className = 'flex items-center gap-2 bg-red-500/10 p-3 rounded-lg border border-red-500/20 text-xs font-medium text-red-600 dark:text-red-400';
+                    alerta.innerHTML = `<span class="material-symbols-outlined text-red-500 text-base">error</span> Margem baixa! Abaixo de ${MARGEM_RAZOAVEL}%. Revise o preço de venda.`;
+                }
+            } else {
+                alerta.classList.add('hidden');
+                alerta.classList.remove('flex');
+            }
+
+            // Renderizar por marketplace
+            renderMarketplacesCalculo(preco, custoTotal);
+        }
+
+        // =========================================================
+        // LUCRO POR MARKETPLACE
+        // =========================================================
+        function renderMarketplacesCalculo(preco, custoTotal) {
+            const container = document.getElementById('marketplacesCalculo');
+            const list = document.getElementById('marketplacesCalculoList');
+
+            if (!todosMarketplaces.length || preco <= 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            list.innerHTML = todosMarketplaces.map(mkt => {
+                const taxa = parseFloat(mkt.taxa_operacional || 0);
+                const custoTaxa = preco * (taxa / 100);
+                const lucroLiq = preco - custoTotal - custoTaxa;
+                const margemLiq = preco > 0 ? (lucroLiq / preco) * 100 : 0;
+
+                const cor = margemLiq >= MARGEM_EXCELENTE
+                    ? { bg: 'bg-green-500/10', border: 'border-green-500/20', text: 'text-green-400', badge: 'bg-green-500/20 text-green-400' }
+                    : margemLiq >= MARGEM_RAZOAVEL
+                        ? { bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400', badge: 'bg-yellow-500/20 text-yellow-400' }
+                        : { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', badge: 'bg-red-500/20 text-red-400' };
+
+                return `
+                    <div class="flex items-center justify-between ${cor.bg} border ${cor.border} rounded-lg px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px] ${cor.text}">${mkt.icone || 'storefront'}</span>
+                            <div>
+                                <p class="text-xs font-bold text-white">${mkt.nome}</p>
+                                <p class="text-[10px] text-slate-400">Taxa: ${taxa.toFixed(1)}% &nbsp;·&nbsp; <span class="text-red-400 font-semibold">-${fmt(custoTaxa)}</span></p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-right">
+                            <div>
+                                <p class="text-[10px] text-slate-400">Lucro Líq.</p>
+                                <p class="text-sm font-bold ${cor.text}">${fmt(lucroLiq)}</p>
+                            </div>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded ${cor.badge}">${margemLiq.toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        precoInput.addEventListener('input', calcularMetricas);
+
+        // =========================================================
+        // MODAL: SELECIONAR PRODUTO
+        // =========================================================
+        async function loadProdutos() {
+            try {
+                const [
+                    { data: prodData, error: prodError },
+                    { data: catData },
+                    { data: cfgData },
+                    { data: riData },
+                    { data: insumosData },
+                    { data: receitasData },
+                ] = await Promise.all([
+                    getAllRecords('produtos'),
+                    getAllRecords('categorias'),
+                    getAllRecords('configuracoes'),
+                    getAllRecords('receitas_insumos'),
+                    getAllRecords('insumos'),
+                    getAllRecords('receitas'),
+                ]);
+
+                if (prodError) throw prodError;
+
+                // Marketplaces
+                todosMarketplaces = (catData || []).filter(c => c.tipo === 'marketplace' && c.ativo);
+
+                // custo mão de obra/hora
+                let custoMaoObraHora = 25;
+                (cfgData || []).forEach(c => {
+                    if (c.chave === 'custo_mao_obra_hora') custoMaoObraHora = parseFloat(c.valor) || 25;
+                });
+
+                // Mapas
+                const insumosMap = {};
+                (insumosData || []).forEach(i => { insumosMap[i.id] = i; });
+                const receitasMap = {};
+                (receitasData || []).forEach(r => { receitasMap[r.id] = r; });
+
+                // Calcular custo real por receita
+                const custoPorReceita = {};
+                const receitaIds = [...new Set((prodData || []).map(p => p.receita_id).filter(Boolean))];
+                receitaIds.forEach(rid => {
+                    const receita = receitasMap[rid];
+                    if (!receita) return;
+                    const itens = (riData || []).filter(ri => ri.receita_id === rid);
+                    let custoIng = 0, custoEmb = 0, custoEqp = 0;
+                    itens.forEach(ri => {
+                        const ins = insumosMap[ri.insumo_id];
+                        if (!ins) return;
+                        const qtd = parseFloat(ri.quantidade || 0);
+                        const cu = parseFloat(ins.custo_unitario || 0);
+                        if (ins.tipo === 'ingrediente') custoIng += qtd * cu;
+                        else if (ins.tipo === 'embalagem') custoEmb += qtd * cu;
+                        else if (ins.tipo === 'equipamento') custoEqp += (qtd / 60) * cu;
+                    });
+                    const moObra = (parseFloat(receita.tempo_preparo || 0) / 60) * custoMaoObraHora;
+                    const total = custoIng + custoEmb + custoEqp + moObra;
+                    const rend = parseInt(receita.rendimento_unidades || 1);
+                    custoPorReceita[rid] = total / rend;
+                });
+
+                // Enriquecer produtos com custo_real
+                todosOsProdutos = (prodData || [])
+                    .filter(p => p.disponivel !== false)
+                    .map(p => ({
+                        ...p,
+                        custo_real: p.receita_id && custoPorReceita[p.receita_id] != null
+                            ? custoPorReceita[p.receita_id]
+                            : parseFloat(p.preco_base || 0)
+                    }));
+
+            } catch (e) {
+                showToast('Erro ao carregar produtos: ' + e.message, 'error');
+            }
+        }
+
+        function renderModalProdutos(filtro = '') {
+            const container = document.getElementById('modalProdutosList');
+            const lista = filtro
+                ? todosOsProdutos.filter(p => p.nome.toLowerCase().includes(filtro.toLowerCase()))
+                : todosOsProdutos;
+
+            if (lista.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <span class="material-symbols-outlined text-4xl mb-2 opacity-40">search_off</span>
+                        <p class="text-sm">${filtro ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado'}</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = lista.map(p => {
+                const jaAdicionado = itensSelecionados.some(i => i.produto.id === p.id);
+                const img = p.imagem_url
+                    ? `<img src="${p.imagem_url}" alt="${p.nome}" class="w-full h-full object-cover">`
+                    : `<span class="material-symbols-outlined text-slate-400 text-2xl">icecream</span>`;
+
+                return `
+                <button onclick="selecionarProduto(${p.id})"
+                    class="flex flex-col rounded-xl transition-colors overflow-hidden
+                           ${jaAdicionado
+                        ? 'bg-primary/10 border border-primary/20 cursor-default ring-2 ring-primary/30'
+                        : 'bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 hover:border-primary/40 active:scale-95'}">
+                    <div class="w-full h-24 bg-slate-100 dark:bg-input-dark flex items-center justify-center overflow-hidden">
+                        ${img}
+                    </div>
+                    <div class="p-2 text-left">
+                        <p class="font-semibold text-xs leading-tight line-clamp-2">${p.nome}</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">${fmt(p.preco_base)}</p>
+                        ${jaAdicionado
+                        ? `<span class="inline-block mt-1 text-[10px] text-primary font-bold bg-primary/10 rounded px-1.5 py-0.5">✓ Adicionado</span>`
+                        : ''}
+                    </div>
+                </button>`;
+            }).join('');
+        }
+
+        window.abrirModalProdutos = function () {
+            document.getElementById('buscaProduto').value = '';
+            renderModalProdutos();
+            document.getElementById('modalProdutos').classList.remove('hidden');
+        };
+
+        window.fecharModalProdutos = function () {
+            document.getElementById('modalProdutos').classList.add('hidden');
+        };
+
+        window.selecionarProduto = function (produtoId) {
+            const jaExiste = itensSelecionados.find(i => i.produto.id === produtoId);
+            if (jaExiste) return; // já adicionado
+
+            const produto = todosOsProdutos.find(p => p.id === produtoId);
+            if (!produto) return;
+
+            itensSelecionados.push({ produto, quantidade: 1 });
+            renderItens();
+            calcularMetricas();
+            fecharModalProdutos();
+            showToast(`"${produto.nome}" adicionado ao combo!`);
+        };
+
+        document.getElementById('buscaProduto').addEventListener('input', e => {
+            renderModalProdutos(e.target.value);
+        });
+
+        // Fechar modal clicando no backdrop
+        document.getElementById('modalProdutos').addEventListener('click', e => {
+            if (e.target === document.getElementById('modalProdutos')) fecharModalProdutos();
+        });
+
+        // =========================================================
+        // SALVAR COMBO
+        // =========================================================
+        async function salvarCombo() {
+            const nome = document.getElementById('nomeCombo').value.trim();
+            const preco = parseFloat(document.getElementById('precoVenda').value) || 0;
+            const imagem = document.getElementById('imagemUrl').value.trim();
+
+            if (!nome) {
+                showToast('Informe o nome do combo!', 'error');
+                document.getElementById('nomeCombo').focus();
+                return;
+            }
+            if (itensSelecionados.length === 0) {
+                showToast('Adicione ao menos um produto ao combo!', 'error');
+                return;
+            }
+            if (preco <= 0) {
+                showToast('Informe o preço de venda!', 'error');
+                precoInput.focus();
+                return;
+            }
+
+            const btn = document.getElementById('btnSalvar');
+            const btnD = document.getElementById('btnSalvarDesktop');
+            const loadingHTML = '<span class="material-symbols-outlined spin">refresh</span> Salvando...';
+            btn.disabled = true;
+            btn.innerHTML = loadingHTML;
+            btnD.disabled = true;
+            btnD.innerHTML = loadingHTML;
+
+            try {
+                const supabase = getClient();
+
+                // Obter sessão ANTES de montar os dados
+                const { data: { session } } = await supabase.auth.getSession();
+                const userId = session?.user?.id;
+                console.log('🔑 user_id para INSERT:', userId);
+
+                if (!userId) {
+                    showToast('Sessão expirada. Faça login novamente.', 'error');
+                    setTimeout(() => window.location.href = 'login.html', 1500);
+                    return;
+                }
+
+                const comboData = {
+                    nome,
+                    imagem_url: imagem || null,
+                    preco_venda: preco,
+                    ativo: true,
+                    user_id: userId   // sempre incluso
+                };
+
+                let comboId;
+
+                if (comboEmEdicao) {
+                    // Atualizar (não precisa mudar user_id)
+                    const { user_id: _, ...updateData } = comboData;
+                    const { error } = await supabase.from('combos').update(updateData).eq('id', comboEmEdicao.id);
+                    if (error) throw error;
+                    comboId = comboEmEdicao.id;
+
+                    // Deletar itens antigos
+                    await supabase.from('combo_itens').delete().eq('combo_id', comboId);
+                } else {
+                    // Inserir novo
+                    const { data, error } = await supabase.from('combos').insert([comboData]).select().single();
+                    if (error) throw error;
+                    comboId = data.id;
+                }
+
+                // Inserir itens
+                const itensData = itensSelecionados.map(i => ({
+                    combo_id: comboId,
+                    produto_id: i.produto.id,
+                    quantidade: i.quantidade,
+                    preco_unitario_snapshot: parseFloat(i.produto.preco_base || 0)
+                }));
+
+                const { error: itensError } = await supabase.from('combo_itens').insert(itensData);
+                if (itensError) throw itensError;
+
+                showToast(comboEmEdicao ? 'Combo atualizado!' : 'Combo salvo com sucesso!');
+                setTimeout(() => {
+                    window.location.href = `combo-detalhes.html?id=${comboId}`;
+                }, 900);
+
+            } catch (e) {
+                // Supabase retorna objeto {message, details, hint, code} — não é um Error nativo
+                const msg = e?.message || e?.details || JSON.stringify(e);
+                console.error('Erro ao salvar combo:', e);
+                showToast('Erro ao salvar: ' + msg, 'error');
+            } finally {
+                const finalLabel = '<span class="material-symbols-outlined">save</span> ' + (comboEmEdicao ? 'Atualizar Combo' : 'Salvar Combo');
+                btn.disabled = false;
+                btn.innerHTML = finalLabel;
+                btnD.disabled = false;
+                btnD.innerHTML = finalLabel;
+            }
+        }
+
+        window.salvarCombo = salvarCombo;
+
+        // =========================================================
+        // EXCLUIR COMBO
+        // =========================================================
+        window.abrirModalExcluir = function (id, nome) {
+            comboIdParaExcluir = id;
+            document.getElementById('excluirNome').textContent = `"${nome}"`;
+            document.getElementById('modalExcluir').classList.remove('hidden');
+        };
+
+        window.fecharModalExcluir = function () {
+            comboIdParaExcluir = null;
+            document.getElementById('modalExcluir').classList.add('hidden');
+        };
+
+        window.confirmarExcluir = async function () {
+            if (!comboIdParaExcluir) return;
+            const btn = document.getElementById('btnConfirmarExcluir');
+            btn.disabled = true;
+            btn.textContent = 'Excluindo...';
+
+            try {
+                const supabase = getClient();
+                await supabase.from('combo_itens').delete().eq('combo_id', comboIdParaExcluir);
+                const { error } = await supabase.from('combos').update({ ativo: false }).eq('id', comboIdParaExcluir);
+                if (error) throw error;
+
+                fecharModalExcluir();
+                showToast('Combo excluído!');
+                loadCombos();
+            } catch (e) {
+                showToast('Erro ao excluir: ' + e.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Excluir';
+            }
+        };
+
+        // Fechar modal excluir no backdrop
+        document.getElementById('modalExcluir').addEventListener('click', e => {
+            if (e.target === document.getElementById('modalExcluir')) fecharModalExcluir();
+        });
+
+        // =========================================================
+        // INICIAR
+        // =========================================================
+        loadCombos();
+
+        // Verificar se deve abrir edição direto (vindo de combo-detalhes.html)
+        const urlParams = new URLSearchParams(window.location.search);
+        const editarId = urlParams.get('editar');
+        if (editarId) {
+            // Espera a lista carregar antes de abrir o formulário
+            setTimeout(() => abrirFormulario(parseInt(editarId)), 400);
+        }
+    </script>
+</body>
+
+</html>

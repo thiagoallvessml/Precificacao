@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Detalhes do Combo - PrecificaX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+
+    <!-- Loading -->
+    <div id="loadingState" class="flex flex-col items-center justify-center min-h-screen gap-4">
+        <span class="material-symbols-outlined text-primary text-5xl spin">refresh</span>
+        <p class="text-slate-400 text-sm font-medium">Carregando combo...</p>
+    </div>
+
+    <!-- Conteúdo principal -->
+    <div id="mainContent" class="hidden">
+
+        <!-- Header -->
+        <header
+            class="sticky top-0 z-10 bg-background-light dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10">
+            <div class="flex items-center p-3 justify-between max-w-6xl mx-auto">
+                <div class="flex items-center gap-2">
+                    <button onclick="window.location.href='combos.html'"
+                        class="cursor-pointer hover:bg-white/10 rounded-full p-1 transition-colors">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <h2 class="text-lg font-bold tracking-tight">Detalhes do Combo</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="editarCombo()"
+                        class="flex items-center justify-center p-1 hover:bg-white/10 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button onclick="excluirCombo()"
+                        class="flex items-center justify-center p-1 hover:bg-red-500/20 rounded-full transition-colors text-red-400">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto pb-24">
+            <!-- Grid Container -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+                <!-- ── Coluna Esquerda: Header + Stats ── -->
+                <div>
+                    <!-- Combo Profile Header -->
+                    <div class="flex p-4 @container">
+                        <div class="flex w-full flex-col gap-4 @[520px]:flex-row @[520px]:justify-between">
+                            <div class="flex gap-4">
+                                <!-- Imagem / Gradiente -->
+                                <div id="comboImagem"
+                                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl min-h-24 w-24 border-2 border-primary/20 shrink-0 flex items-center justify-center"
+                                    style="background: linear-gradient(135deg, #fb923c 0%, #ec4899 100%);">
+                                    <span id="comboImagemIcon"
+                                        class="material-symbols-outlined text-white text-3xl">restaurant</span>
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <p id="comboNome" class="text-[20px] font-bold leading-tight tracking-tight">—</p>
+                                    <p id="comboSubtitulo"
+                                        class="text-slate-500 dark:text-[#9db9b9] text-sm font-normal">Combo Promocional
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Botões -->
+                            <div class="flex w-full gap-3 mt-2">
+                                <button id="btnEditar" onclick="editarCombo()"
+                                    class="flex items-center justify-center rounded-lg h-10 px-4 bg-slate-200 dark:bg-[#283939] text-slate-900 dark:text-white text-sm font-bold flex-1 hover:bg-slate-300 dark:hover:bg-[#3b5454] transition-colors">
+                                    <span class="material-symbols-outlined text-sm mr-2">edit</span>
+                                    <span class="truncate">Editar</span>
+                                </button>
+                                <button id="btnExcluir" onclick="excluirCombo()"
+                                    class="flex items-center justify-center rounded-lg h-10 px-4 bg-red-500 hover:bg-red-600 text-white text-sm font-bold flex-1 transition-colors">
+                                    <span class="material-symbols-outlined text-sm mr-2">delete</span>
+                                    <span class="truncate">Excluir</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats Row -->
+                    <div class="flex flex-wrap gap-3 p-4">
+                        <div
+                            class="flex min-w-[100px] flex-1 flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-transparent shadow-sm">
+                            <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                                <span class="material-symbols-outlined text-lg">sell</span>
+                                <p class="text-[7px] md:text-xs font-medium uppercase tracking-wider">Preço Venda</p>
+                            </div>
+                            <p id="statPreco" class="text-xl font-bold text-primary">R$ —</p>
+                        </div>
+                        <div
+                            class="flex min-w-[100px] flex-1 flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-transparent shadow-sm">
+                            <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                                <span class="material-symbols-outlined text-lg">inventory_2</span>
+                                <p class="text-xs font-medium uppercase tracking-wider">Qtd. Total</p>
+                            </div>
+                            <p id="statQtd" class="text-xl font-bold">— un</p>
+                        </div>
+                        <div
+                            class="flex min-w-[100px] flex-1 flex-col gap-1 rounded-xl p-4 border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-transparent shadow-sm">
+                            <div class="flex items-center gap-2 text-slate-500 dark:text-[#9db9b9]">
+                                <span class="material-symbols-outlined text-lg">layers</span>
+                                <p class="text-xs font-medium uppercase tracking-wider">Produtos</p>
+                            </div>
+                            <p id="statProdutos" class="text-xl font-bold">—</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Coluna Esquerda -->
+
+                <!-- ── Coluna Direita: Accordions ── -->
+                <div>
+                    <div class="px-4">
+                        <h3 class="text-lg font-bold pb-4">Composição do Combo</h3>
+                        <div class="flex flex-col gap-3">
+
+                            <!-- Produtos do Combo -->
+                            <details id="details-produtos"
+                                class="flex flex-col rounded-xl border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-background-dark/50 px-4 py-2 group overflow-hidden"
+                                open>
+                                <summary class="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary">shopping_basket</span>
+                                        <p class="text-sm font-bold uppercase tracking-wide">Produtos</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span id="total-produtos" class="text-sm font-bold text-primary">R$ 0,00</span>
+                                        <span
+                                            class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                                    </div>
+                                </summary>
+                                <div id="list-produtos"
+                                    class="flex flex-col gap-3 pb-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2">
+                                    <p class="text-xs text-slate-500 italic">Carregando...</p>
+                                </div>
+                            </details>
+
+                            <!-- Custo por Unidade -->
+                            <details id="details-unitario"
+                                class="flex flex-col rounded-xl border border-slate-200 dark:border-[#3b5454] bg-white dark:bg-background-dark/50 px-4 py-2 group overflow-hidden">
+                                <summary class="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                                    <div class="flex items-center gap-3">
+                                        <span class="material-symbols-outlined text-primary">calculate</span>
+                                        <p class="text-sm font-bold uppercase tracking-wide">Custo por Unidade</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span id="total-unitario" class="text-sm font-bold text-primary">R$ 0,00</span>
+                                        <span
+                                            class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                                    </div>
+                                </summary>
+                                <div id="list-unitario"
+                                    class="flex flex-col gap-3 pb-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2">
+                                    <p class="text-xs text-slate-500 italic">Carregando...</p>
+                                </div>
+                            </details>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- End Coluna Direita -->
+
+            </div>
+            <!-- End Grid -->
+
+            <!-- ── Resumo Financeiro (largura total) ── -->
+            <div
+                class="mx-4 mt-8 p-6 rounded-2xl bg-slate-900 dark:bg-slate-800 shadow-xl border border-white/10 text-white">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h4 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Resumo Financeiro
+                        </h4>
+                        <p class="text-xl md:text-3xl font-bold tracking-tighter">Custo Total</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="summary-custo-total" class="text-xl md:text-3xl font-bold text-white tracking-tighter">R$
+                            0,00</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+                    <!-- Preço Total -->
+                    <div class="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
+                        <p class="text-blue-400 text-xs font-medium mb-1">Preço Total</p>
+                        <p id="summary-preco-total" class="text-lg font-bold text-blue-400">R$ 0,00</p>
+                    </div>
+
+                    <!-- Custo Unitário -->
+                    <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                        <p class="text-slate-400 text-xs font-medium mb-1">Custo Unitário</p>
+                        <p id="summary-custo-unit" class="text-lg font-bold">R$ 0,00</p>
+                    </div>
+
+                    <!-- Lucro Total -->
+                    <div class="bg-green-500/10 rounded-xl p-3 border border-green-500/20">
+                        <p class="text-green-400 text-xs font-medium mb-1">Lucro Total</p>
+                        <p id="summary-lucro-total" class="text-lg font-bold text-green-400">R$ 0,00</p>
+                    </div>
+
+                    <!-- Lucro Unitário -->
+                    <div class="bg-primary/10 rounded-xl p-3 border border-primary/20">
+                        <p class="text-primary text-xs font-medium mb-1">Lucro Unitário</p>
+                        <p id="summary-lucro-unit" class="text-lg font-bold text-primary">R$ 0,00</p>
+                    </div>
+
+                    <!-- Margem -->
+                    <div class="bg-yellow-500/10 rounded-xl p-3 border border-yellow-500/20">
+                        <p class="text-yellow-400 text-xs font-medium mb-1">Margem (%)</p>
+                        <p id="summary-margem" class="text-lg font-bold text-yellow-400">0%</p>
+                    </div>
+
+                    <!-- Markup -->
+                    <div class="bg-purple-500/10 rounded-xl p-3 border border-purple-500/20">
+                        <p class="text-purple-400 text-xs font-medium mb-1">Markup</p>
+                        <p id="summary-markup" class="text-lg font-bold text-purple-400">0x</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Erro -->
+    <div id="errorState" class="hidden flex-col items-center justify-center min-h-screen gap-4 px-8 text-center">
+        <span class="material-symbols-outlined text-red-400 text-6xl">error</span>
+        <p class="text-white font-bold text-xl">Combo não encontrado</p>
+        <p class="text-slate-400 text-sm">Não foi possível carregar os dados deste combo.</p>
+        <button onclick="window.location.href='combos.html'"
+            class="mt-4 bg-primary text-black font-bold px-6 py-3 rounded-xl active:scale-95 transition-transform">
+            Voltar para Lista
+        </button>
+    </div>
+
+    <script type="module">
+        import { getSupabase } from './supabase-client.js';
+
+        document.documentElement.classList.add('dark');
+
+        const supabase = getSupabase();
+        const urlParams = new URLSearchParams(window.location.search);
+        const comboId = urlParams.get('id');
+
+        let comboGlobal = null;
+
+        function fmt(n) {
+            return 'R$ ' + Number(n || 0).toFixed(2).replace('.', ',');
+        }
+
+        window.editarCombo = function () {
+            if (!comboGlobal) return;
+            window.location.href = `combos.html?editar=${comboGlobal.id}`;
+        };
+
+        window.excluirCombo = async function () {
+            if (!comboGlobal) return;
+            if (!confirm(`Excluir o combo "${comboGlobal.nome}"? Esta ação não pode ser desfeita.`)) return;
+
+            const btn = document.getElementById('btnExcluir');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined spin mr-2 text-sm">refresh</span> Excluindo...';
+
+            try {
+                await supabase.from('combo_itens').delete().eq('combo_id', comboGlobal.id);
+                const { error } = await supabase.from('combos').update({ ativo: false }).eq('id', comboGlobal.id);
+                if (error) throw error;
+                alert('Combo excluído com sucesso!');
+                window.location.href = 'combos.html';
+            } catch (e) {
+                alert('Erro ao excluir: ' + e.message);
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-sm mr-2">delete</span><span class="truncate">Excluir</span>';
+            }
+        };
+
+        async function init() {
+            if (!comboId) {
+                mostrarErro();
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('combos')
+                    .select('*, combo_itens(*, produtos(id, nome, imagem_url, preco_base))')
+                    .eq('id', comboId)
+                    .single();
+
+                if (error || !data) throw error || new Error('Combo não encontrado');
+
+                comboGlobal = data;
+                renderCombo(data);
+
+            } catch (e) {
+                console.error('Erro:', e);
+                mostrarErro();
+            }
+        }
+
+        function renderCombo(combo) {
+            const itens = combo.combo_itens || [];
+            const preco = parseFloat(combo.preco_venda || 0);
+
+            // Métricas
+            const qtdTotal = itens.reduce((s, i) => s + i.quantidade, 0);
+            const custoTotal = itens.reduce((s, i) => {
+                const custo = parseFloat(i.preco_unitario_snapshot || i.produtos?.preco_base || 0);
+                return s + custo * i.quantidade;
+            }, 0);
+            const lucroTotal = preco - custoTotal;
+            const lucroUnit = qtdTotal > 0 ? lucroTotal / qtdTotal : 0;
+            const custoUnit = qtdTotal > 0 ? custoTotal / qtdTotal : 0;
+            const margem = preco > 0 ? (lucroTotal / preco) * 100 : 0;
+            const markup = custoTotal > 0 ? preco / custoTotal : 0;
+
+            // Header imagem
+            if (combo.imagem_url) {
+                const el = document.getElementById('comboImagem');
+                el.style.backgroundImage = `url("${combo.imagem_url}")`;
+                el.style.background = '';
+                document.getElementById('comboImagemIcon').classList.add('hidden');
+            }
+
+            // Textos
+            document.getElementById('comboNome').textContent = combo.nome;
+            document.getElementById('comboSubtitulo').textContent = `Combo · ${itens.length} produto${itens.length !== 1 ? 's' : ''}`;
+
+            // Stats rápidos
+            document.getElementById('statPreco').textContent = fmt(preco);
+            document.getElementById('statQtd').textContent = qtdTotal + ' un';
+            document.getElementById('statProdutos').textContent = itens.length + ' item' + (itens.length !== 1 ? 's' : '');
+
+            // Accordion: Produtos
+            const totalProdEl = document.getElementById('total-produtos');
+            const listProdEl = document.getElementById('list-produtos');
+            totalProdEl.textContent = fmt(custoTotal);
+
+            if (itens.length === 0) {
+                listProdEl.innerHTML = '<p class="text-xs text-slate-500 italic p-2">Nenhum produto no combo.</p>';
+            } else {
+                listProdEl.innerHTML = itens.map(item => {
+                    const prod = item.produtos || {};
+                    const custo = parseFloat(item.preco_unitario_snapshot || prod.preco_base || 0);
+                    const subtotal = custo * item.quantidade;
+                    const imgStyle = prod.imagem_url
+                        ? `style="background-image:url('${prod.imagem_url}'); background-size:cover; background-position:center;"`
+                        : 'style="background: linear-gradient(135deg,#fb923c,#ec4899);"';
+
+                    return `
+                    <div class="flex items-center gap-3 py-2">
+                        <div class="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center" ${imgStyle}>
+                            ${!prod.imagem_url ? '<span class="material-symbols-outlined text-white text-base">icecream</span>' : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium truncate">${prod.nome || '—'}</p>
+                            <p class="text-xs text-slate-500 dark:text-[#9db9b9]">${item.quantidade}x · ${fmt(custo)}/un</p>
+                        </div>
+                        <span class="font-semibold text-sm shrink-0">${fmt(subtotal)}</span>
+                    </div>`;
+                }).join('');
+            }
+
+            // Accordion: Custo por Unidade
+            const totalUnitEl = document.getElementById('total-unitario');
+            const listUnitEl = document.getElementById('list-unitario');
+            totalUnitEl.textContent = fmt(custoUnit);
+
+            listUnitEl.innerHTML = `
+                <div class="flex justify-between items-center text-sm py-1">
+                    <span class="text-slate-600 dark:text-[#9db9b9]">Custo Total <span class="text-xs opacity-70">(${qtdTotal} unidades)</span></span>
+                    <span class="font-semibold">${fmt(custoTotal)}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm py-1 border-t border-slate-100 dark:border-white/5 mt-1 pt-2">
+                    <span class="text-slate-600 dark:text-[#9db9b9]">Custo por Unidade</span>
+                    <span class="font-semibold text-primary">${fmt(custoUnit)}</span>
+                </div>
+            `;
+
+            // Summary Financial
+            document.getElementById('summary-custo-total').textContent = fmt(custoTotal);
+            document.getElementById('summary-preco-total').textContent = fmt(preco);
+            document.getElementById('summary-custo-unit').textContent = fmt(custoUnit);
+
+            const lucroTotalEl = document.getElementById('summary-lucro-total');
+            lucroTotalEl.textContent = fmt(lucroTotal);
+            lucroTotalEl.className = `text-lg font-bold ${lucroTotal >= 0 ? 'text-green-400' : 'text-red-400'}`;
+
+            const lucroUnitEl = document.getElementById('summary-lucro-unit');
+            lucroUnitEl.textContent = fmt(lucroUnit);
+            lucroUnitEl.className = `text-lg font-bold ${lucroUnit >= 0 ? 'text-primary' : 'text-red-400'}`;
+
+            const margemEl = document.getElementById('summary-margem');
+            margemEl.textContent = margem.toFixed(1) + '%';
+            margemEl.className = `text-lg font-bold ${margem >= 30 ? 'text-yellow-400' : 'text-red-400'}`;
+
+            const markupEl = document.getElementById('summary-markup');
+            markupEl.textContent = markup.toFixed(1) + 'x';
+            markupEl.className = `text-lg font-bold ${markup >= 1 ? 'text-purple-400' : 'text-red-400'}`;
+
+            // Mostrar página
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        }
+
+        function mostrarErro() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorState').classList.add('flex');
+        }
+
+        if (supabase) {
+            init();
+        } else {
+            mostrarErro();
+        }
+    </script>
+
+</body>
+
+</html>

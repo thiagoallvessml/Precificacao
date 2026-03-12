@@ -20,7 +20,7 @@
                         "primary": "#13ecec",
                         "background-light": "#f6f8f8",
                         "background-dark": "#0F0F0F",
-                        "card-dark": "#1a2f2f",
+                        "card-dark": "#1E1E1E",
                     },
                     fontFamily: {
                         "display": ["Work Sans", "sans-serif"]
@@ -81,7 +81,7 @@
                 </div>
             </div>
         </div>
-        <h1 id="userName" class="text-2xl font-bold">Carlos Pops</h1>
+        <h1 id="userName" class="text-2xl font-bold"></h1>
         <div class="mt-2 inline-flex items-center px-3 py-1 bg-primary/20 border border-primary/30 rounded-full">
             <span class="text-primary text-xs font-semibold tracking-wider uppercase">Dono do Negócio</span>
         </div>
@@ -198,6 +198,64 @@
             </div>
         </div>
 
+        <!-- Seção: Programa de Indicação -->
+        <div class="bg-card-dark rounded-xl overflow-hidden shadow-sm border border-primary/10">
+            <div class="p-4 flex items-center gap-3 border-b border-slate-800/50">
+                <span class="material-symbols-outlined text-primary/80">share</span>
+                <span class="text-sm font-semibold uppercase tracking-tight text-slate-400">Programa de Indicação</span>
+            </div>
+            <div class="divide-y divide-slate-800/50">
+                <!-- Saldo afiliado -->
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/60 text-base">account_balance_wallet</span>
+                        <span class="text-slate-300 text-sm">Saldo de Comissões</span>
+                    </div>
+                    <span id="afiliadoSaldo" class="text-primary font-bold text-sm">R$ 0,00</span>
+                </div>
+                <!-- Código de indicação -->
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/60 text-base">confirmation_number</span>
+                        <span class="text-slate-300 text-sm">Seu Cupom</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="afiliadoCodigo" class="text-primary font-mono font-bold text-sm">—</span>
+                        <button onclick="copiarCodigo()" class="text-slate-500 hover:text-primary transition-colors"
+                            title="Copiar">
+                            <span class="material-symbols-outlined text-base">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Link de indicação -->
+                <div class="flex flex-col gap-1 p-4">
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="material-symbols-outlined text-primary/60 text-base">link</span>
+                        <span class="text-slate-300 text-sm">Seu Link de Indicação</span>
+                    </div>
+                    <a id="afiliadoLink" href="#"
+                        class="text-primary/70 text-xs break-all hover:text-primary transition-colors font-mono">Carregando...</a>
+                </div>
+                <!-- Indicação Origem -->
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/60 text-base">person_add</span>
+                        <span class="text-slate-300 text-sm">Indicado por (cupom origem)</span>
+                    </div>
+                    <span id="afiliadoOrigem" class="text-slate-400 text-sm font-mono">—</span>
+                </div>
+                <!-- Ir para painel -->
+                <button onclick="window.location.href='painel-afiliado.html'"
+                    class="w-full flex items-center justify-between p-4 hover:bg-primary/5 active:bg-primary/10 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/60 text-base">dashboard</span>
+                        <span class="text-slate-300 text-sm">Ver Painel de Afiliado</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
+                </button>
+            </div>
+        </div>
+
         <!-- Seção: Segurança e Equipe -->
         <div class="bg-card-dark rounded-xl overflow-hidden shadow-sm border border-slate-800/50">
             <div class="divide-y divide-slate-800/50">
@@ -275,6 +333,27 @@
                         Negócio</label>
                     <input id="infoNomeNegocio" type="text" placeholder="Minha Geladaria"
                         class="w-full bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                </div>
+                <!-- Chave Pix -->
+                <div>
+                    <label
+                        class="text-xs text-slate-500 font-bold uppercase tracking-wider ml-1 mb-1 block flex items-center gap-1">
+                        <span class="material-symbols-outlined text-primary text-sm">qr_code_2</span>
+                        Chave Pix
+                    </label>
+                    <div class="flex gap-2">
+                        <select id="infoPixTipo"
+                            class="bg-background-dark border border-white/10 rounded-lg px-3 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shrink-0">
+                            <option value="cpf">CPF</option>
+                            <option value="cnpj">CNPJ</option>
+                            <option value="email">E-mail</option>
+                            <option value="telefone">Telefone</option>
+                            <option value="aleatoria">Aleatória</option>
+                        </select>
+                        <input id="infoChavePix" type="text" placeholder="Sua chave Pix"
+                            class="flex-1 bg-background-dark border border-white/10 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" />
+                    </div>
+                    <p class="text-slate-600 text-xs mt-1 ml-1">Usada para gerar QR Code nas vendas presenciais</p>
                 </div>
             </div>
 
@@ -476,7 +555,6 @@
     </script>
 
     <script type="module">
-        import { getUserPlan } from './plan-limits.js';
         import { getSupabase } from './supabase-client.js';
 
         const supabase = getSupabase();
@@ -485,35 +563,90 @@
         // ========== CARREGAR PLANO ==========
         async function carregarPlano() {
             try {
-                const plano = await getUserPlan();
+                const { getTrialInfo } = await import('./plan-limits.js');
+                const { plano, emTrial, diasRestantes } = await getTrialInfo();
+
                 const planTitle = document.getElementById('planTitle');
                 const planCard = document.getElementById('planCard');
                 const planStarIcon = document.getElementById('planStarIcon');
                 const planSubtext = document.getElementById('planSubtext');
                 const planBgIcon = document.getElementById('planBgIcon');
 
-                if (plano === 'premium') {
-                    planTitle.innerHTML = `Premium <span class="bg-primary text-background-dark text-[10px] px-2 py-0.5 rounded-full font-bold">ATIVO</span>`;
-                    planCard.className = 'bg-gradient-to-br from-card-dark to-[#122424] p-5 rounded-xl border border-primary/20 shadow-xl relative overflow-hidden';
-                    planStarIcon.textContent = 'stars';
-                    planStarIcon.className = 'material-symbols-outlined text-primary';
-                    planBgIcon.textContent = 'verified_user';
-                    planBgIcon.className = 'material-symbols-outlined text-6xl text-primary';
-                    planSubtext.innerHTML = 'Você tem acesso a todos os recursos';
+                // Mapa de planos pagos
+                const PLANOS = {
+                    basic: {
+                        label: 'Básico',
+                        badge: 'bg-blue-500 text-white',
+                        card: 'bg-gradient-to-br from-card-dark to-[#0f2233] p-5 rounded-xl border border-blue-500/30 shadow-xl relative overflow-hidden',
+                        star: 'workspace_premium', starClass: 'material-symbols-outlined text-blue-400',
+                        bg: 'diamond', bgClass: 'material-symbols-outlined text-6xl text-blue-500',
+                        sub: 'Plano Básico ativo — gerencie produtos, receitas e precificação'
+                    },
+                    intermediario: {
+                        label: 'Intermediário',
+                        badge: 'bg-amber-500 text-black',
+                        card: 'bg-gradient-to-br from-card-dark to-[#1f1800] p-5 rounded-xl border border-amber-500/30 shadow-xl relative overflow-hidden',
+                        star: 'workspace_premium', starClass: 'material-symbols-outlined text-amber-400',
+                        bg: 'military_tech', bgClass: 'material-symbols-outlined text-6xl text-amber-500',
+                        sub: 'Plano Intermediário — inclui estoque, pedidos e financeiro'
+                    },
+                    avancado: {
+                        label: 'Avançado',
+                        badge: 'bg-primary text-background-dark',
+                        card: 'bg-gradient-to-br from-card-dark to-[#122424] p-5 rounded-xl border border-primary/20 shadow-xl relative overflow-hidden',
+                        star: 'stars', starClass: 'material-symbols-outlined text-primary',
+                        bg: 'verified_user', bgClass: 'material-symbols-outlined text-6xl text-primary',
+                        sub: 'Plano Avançado — acesso completo incluindo DRE'
+                    },
+                    premium: {
+                        label: 'Premium',
+                        badge: 'bg-primary text-background-dark',
+                        card: 'bg-gradient-to-br from-card-dark to-[#122424] p-5 rounded-xl border border-primary/20 shadow-xl relative overflow-hidden',
+                        star: 'stars', starClass: 'material-symbols-outlined text-primary',
+                        bg: 'verified_user', bgClass: 'material-symbols-outlined text-6xl text-primary',
+                        sub: 'Você tem acesso a todos os recursos'
+                    },
+                };
+
+                // Trial ativo → mostrar badge de trial
+                if (emTrial) {
+                    planTitle.innerHTML = `Trial <span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''}</span>`;
+                    planCard.className = 'bg-gradient-to-br from-card-dark to-[#1f1800] p-5 rounded-xl border border-amber-500/30 shadow-xl relative overflow-hidden';
+                    planStarIcon.textContent = 'hourglass_top';
+                    planStarIcon.className = 'material-symbols-outlined text-amber-400';
+                    planBgIcon.textContent = 'timer';
+                    planBgIcon.className = 'material-symbols-outlined text-6xl text-amber-500';
+                    planSubtext.innerHTML = `🎉 Você está no período de teste gratuito! <a href="planos.html" class="text-primary underline">Assinar um plano</a>`;
+                    return;
+                }
+
+                const cfg = PLANOS[plano];
+
+                if (cfg) {
+                    // Plano pago reconhecido
+                    planTitle.innerHTML = `${cfg.label} <span class="${cfg.badge} text-[10px] px-2 py-0.5 rounded-full font-bold">ATIVO</span>`;
+                    planCard.className = cfg.card;
+                    planStarIcon.textContent = cfg.star;
+                    planStarIcon.className = cfg.starClass;
+                    planBgIcon.textContent = cfg.bg;
+                    planBgIcon.className = cfg.bgClass;
+                    planSubtext.innerHTML = cfg.sub;
                 } else {
-                    planTitle.innerHTML = `Free <span class="bg-slate-600 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">BÁSICO</span>`;
+                    // 'free' — sem assinatura
+                    planTitle.innerHTML = `Sem Plano <span class="bg-slate-600 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">FREE</span>`;
                     planCard.className = 'bg-gradient-to-br from-card-dark to-[#1a1a2e] p-5 rounded-xl border border-slate-700/50 shadow-xl relative overflow-hidden';
                     planStarIcon.textContent = 'lock';
                     planStarIcon.className = 'material-symbols-outlined text-slate-500';
                     planBgIcon.textContent = 'shield';
                     planBgIcon.className = 'material-symbols-outlined text-6xl text-slate-600';
-                    planSubtext.innerHTML = 'Faça upgrade para desbloquear todos os recursos';
+                    planSubtext.innerHTML = 'Assine um plano para desbloquear todos os recursos';
                 }
             } catch (e) {
                 console.warn('Erro ao carregar plano:', e);
-                document.getElementById('planTitle').innerHTML = `Free <span class="bg-slate-600 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">BÁSICO</span>`;
+                document.getElementById('planTitle').innerHTML = `-- <span class="bg-slate-600 text-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold">ERRO</span>`;
             }
         }
+
 
         // ========== CARREGAR PERFIL DO SUPABASE ==========
         async function carregarPerfil() {
@@ -525,7 +658,7 @@
 
                 let { data: perfil, error } = await supabase
                     .from('perfis_usuarios')
-                    .select('nome, email, telefone, nome_negocio, endereco, configuracoes')
+                    .select('nome, email, telefone, nome_negocio, chave_pix, endereco, configuracoes, saldo_afiliado, codigo_indicacao, indicacao_origem')
                     .eq('id', userId)
                     .single();
 
@@ -538,7 +671,7 @@
                             email: session.user.email,
                             nome: session.user.user_metadata?.full_name || '',
                         }, { onConflict: 'id' })
-                        .select('nome, email, telefone, nome_negocio, endereco, configuracoes')
+                        .select('nome, email, telefone, nome_negocio, endereco, configuracoes, saldo_afiliado, codigo_indicacao, indicacao_origem')
                         .single();
 
                     if (insertErr) { console.warn('Erro ao criar perfil:', insertErr); return; }
@@ -556,6 +689,18 @@
                 document.getElementById('infoEmail').value = perfil.email || session.user.email || '';
                 document.getElementById('infoTelefone').value = perfil.telefone || '';
                 document.getElementById('infoNomeNegocio').value = perfil.nome_negocio || '';
+
+                // Preencher Chave Pix
+                if (perfil.chave_pix) {
+                    document.getElementById('infoChavePix').value = perfil.chave_pix;
+                    // Tentar detectar tipo automaticamente
+                    const chave = perfil.chave_pix;
+                    if (/^\d{11}$/.test(chave.replace(/[.-]/g, ''))) document.getElementById('infoPixTipo').value = 'cpf';
+                    else if (/^\d{14}$/.test(chave.replace(/[.\-\/]/g, ''))) document.getElementById('infoPixTipo').value = 'cnpj';
+                    else if (chave.includes('@')) document.getElementById('infoPixTipo').value = 'email';
+                    else if (/^\+?\d{10,13}$/.test(chave.replace(/[\s()-]/g, ''))) document.getElementById('infoPixTipo').value = 'telefone';
+                    else document.getElementById('infoPixTipo').value = 'aleatoria';
+                }
 
                 // Preencher modal Endereço
                 if (perfil.endereco) {
@@ -577,6 +722,31 @@
                     if (cfg.formato_numero) document.getElementById('selectFormato').value = cfg.formato_numero;
                     atualizarSubtitleMoeda(cfg.moeda);
                 }
+
+                // Preencher seção de afiliado
+                const saldo = Number(perfil.saldo_afiliado || 0);
+                const codInd = perfil.codigo_indicacao || '—';
+                const origem = perfil.indicacao_origem || '—';
+                const base = window.location.origin;
+                const linkAfiliado = codInd !== '—' ? `${base}/cadastro.html?ref=${codInd}` : '—';
+
+                const elSaldo = document.getElementById('afiliadoSaldo');
+                const elCodigo = document.getElementById('afiliadoCodigo');
+                const elOrigem = document.getElementById('afiliadoOrigem');
+                const elLink = document.getElementById('afiliadoLink');
+
+                if (elSaldo) elSaldo.textContent = `R$ ${saldo.toFixed(2).replace('.', ',')}`;
+                if (elCodigo) elCodigo.textContent = codInd;
+                if (elOrigem) elOrigem.textContent = origem;
+                if (elLink) {
+                    if (codInd !== '—') {
+                        elLink.textContent = linkAfiliado;
+                        elLink.href = linkAfiliado;
+                    } else {
+                        elLink.textContent = 'Não gerado';
+                        elLink.removeAttribute('href');
+                    }
+                }
             } catch (e) {
                 console.warn('Erro ao carregar perfil:', e);
             }
@@ -594,10 +764,11 @@
                 const nome = document.getElementById('infoNome').value.trim();
                 const telefone = document.getElementById('infoTelefone').value.trim();
                 const nome_negocio = document.getElementById('infoNomeNegocio').value.trim();
+                const chave_pix = document.getElementById('infoChavePix').value.trim();
 
                 const { error } = await supabase
                     .from('perfis_usuarios')
-                    .upsert({ id: userId, nome, telefone, nome_negocio }, { onConflict: 'id' });
+                    .upsert({ id: userId, nome, telefone, nome_negocio, chave_pix }, { onConflict: 'id' });
 
                 if (error) throw error;
 
@@ -727,8 +898,18 @@
                 const pagamentoEl = document.getElementById('pagamentoContent');
                 const pagSubtitle = document.getElementById('pagamentoSubtitle');
 
-                if (plano === 'premium') {
-                    // Faturas - Premium
+                const temPlano = plano !== 'free';
+
+                const nomesPlano = {
+                    basic: 'Básico',
+                    intermediario: 'Intermediário',
+                    avancado: 'Avançado',
+                    premium: 'Premium'
+                };
+                const nomePlano = nomesPlano[plano] || 'Plano';
+
+                if (temPlano) {
+                    // Faturas - Plano Pago
                     const hoje = new Date();
                     const mesAtual = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
                     const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
@@ -737,23 +918,20 @@
                     faturasEl.innerHTML = `
                         <div class="bg-background-dark rounded-lg p-4 border border-white/5">
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-white text-sm font-semibold">Plano Premium</span>
+                                <span class="text-white text-sm font-semibold">Plano ${nomePlano}</span>
                                 <span class="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-bold">PAGO</span>
                             </div>
                             <p class="text-slate-500 text-xs capitalize">${mesAtual}</p>
-                            <p class="text-primary font-bold text-sm mt-1">R$ 29,90</p>
                         </div>
                         <div class="bg-background-dark rounded-lg p-4 border border-white/5">
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-white text-sm font-semibold">Plano Premium</span>
+                                <span class="text-white text-sm font-semibold">Plano ${nomePlano}</span>
                                 <span class="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-bold">PAGO</span>
                             </div>
                             <p class="text-slate-500 text-xs capitalize">${mesAnterior}</p>
-                            <p class="text-primary font-bold text-sm mt-1">R$ 29,90</p>
                         </div>
                     `;
 
-                    // Pagamento - Premium
                     pagSubtitle.textContent = 'Pix configurado';
                     pagamentoEl.innerHTML = `
                         <div class="bg-background-dark rounded-lg p-4 border border-primary/20">
@@ -775,25 +953,24 @@
                         </button>
                     `;
                 } else {
-                    // Faturas - Free
+                    // Without plan
                     faturasEl.innerHTML = `
                         <div class="text-center py-8">
                             <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">receipt_long</span>
                             <p class="text-slate-400 text-sm font-medium mb-1">Nenhuma fatura encontrada</p>
-                            <p class="text-slate-600 text-xs">Você está no plano Free. Assine o Premium para ter acesso completo.</p>
+                            <p class="text-slate-600 text-xs">Você não possui uma assinatura ativa.</p>
                         </div>
                     `;
 
-                    // Pagamento - Free
                     pagSubtitle.textContent = 'Nenhum cadastrado';
                     pagamentoEl.innerHTML = `
                         <div class="text-center py-6">
                             <span class="material-symbols-outlined text-4xl text-slate-600 mb-3 block">credit_card_off</span>
                             <p class="text-slate-400 text-sm font-medium mb-1">Nenhum método de pagamento</p>
-                            <p class="text-slate-600 text-xs mb-4">Cadastre um método de pagamento para assinar o plano Premium.</p>
+                            <p class="text-slate-600 text-xs mb-4">Assine um plano para continuar usando o PrecificaX.</p>
                             <button onclick="window.location.href='planos.html'"
                                 class="bg-primary text-background-dark font-bold py-3 px-6 rounded-xl active:scale-[0.97] transition-transform text-sm">
-                                Assinar Premium
+                                Ver Planos
                             </button>
                         </div>
                     `;
@@ -802,6 +979,20 @@
                 console.warn('Erro ao carregar assinatura:', e);
             }
         }
+
+        // ========== COPIAR CÓDIGO AFILIADO ==========
+        window.copiarCodigo = function () {
+            const codigo = document.getElementById('afiliadoCodigo')?.textContent;
+            if (!codigo || codigo === '—') return;
+            navigator.clipboard.writeText(codigo).then(() => {
+                const btn = document.querySelector('[onclick="copiarCodigo()"] .material-symbols-outlined');
+                if (btn) { btn.textContent = 'check'; setTimeout(() => btn.textContent = 'content_copy', 1500); }
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = codigo; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+            });
+        };
 
         // ========== INICIALIZAR ==========
         carregarPlano();

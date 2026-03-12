@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+<html class="dark" lang="pt-br">
 
-<html class="dark" lang="pt-br"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Lista de Compras - PrecificaX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -17,172 +18,348 @@
                         "background-light": "#f6f8f8",
                         "background-dark": "#102222",
                     },
-                    fontFamily: {
-                        "display": ["Work Sans"]
-                    },
-                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                    fontFamily: { "display": ["Work Sans"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
                 },
             },
         }
     </script>
-<style>
-        body { font-family: 'Work Sans', sans-serif; }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .abc-badge-a { background: rgba(19, 236, 236, 0.1); border: 1px solid #13ecec; color: #13ecec; }
-        .abc-badge-b { background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; color: #ffd700; }
-        .abc-badge-c { background: rgba(169, 169, 169, 0.1); border: 1px solid #a9a9a9; color: #a9a9a9; }
+    <style>
+        body { font-family: 'Work Sans', sans-serif; min-height: max(884px, 100dvh); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .abc-badge-a { background: rgba(19,236,236,0.1); border: 1px solid #13ecec; color: #13ecec; }
+        .abc-badge-b { background: rgba(255,215,0,0.1); border: 1px solid #ffd700; color: #ffd700; }
+        .abc-badge-c { background: rgba(169,169,169,0.1); border: 1px solid #a9a9a9; color: #a9a9a9; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .skeleton { background: linear-gradient(90deg, #1a2e2e 25%, #22403f 50%, #1a2e2e 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.75rem; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .item-card.comprado { opacity: 0.5; }
+        .item-card.comprado h4 { text-decoration: line-through; }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
+</head>
+
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
-<!-- Header -->
-<header class="sticky top-0 z-10 bg-background-light dark:bg-background-dark border-b border-primary/10">
-<div class="flex items-center p-4 gap-4">
-<button onclick="window.history.back()" class="p-2 hover:bg-primary/10 rounded-full transition-colors">
-<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
-</button>
-<h1 class="text-xl font-bold tracking-tight">Lista de Compras Inteligente</h1>
-</div>
-<!-- Top Summary Cards -->
-<div class="flex gap-3 px-4 pb-4">
-<div class="flex-1 bg-primary/10 border border-primary/20 rounded-xl p-4">
-<p class="text-xs font-medium text-primary/70 uppercase tracking-wider">Investimento Total</p>
-<p class="text-xl font-bold text-primary">R$ 12.450,00</p>
-</div>
-<div class="flex-1 bg-slate-800/40 border border-slate-700 rounded-xl p-4">
-<p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Itens Sugeridos</p>
-<p class="text-xl font-bold text-slate-100">24 itens</p>
-</div>
-</div>
-<!-- ABC Tabs -->
-<div class="flex border-b border-slate-800 px-4 overflow-x-auto no-scrollbar">
-<button class="flex-none px-4 py-3 text-sm font-bold border-b-2 border-primary text-primary">Todos</button>
-<button class="flex-none px-4 py-3 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200">Classe A</button>
-<button class="flex-none px-4 py-3 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200">Classe B</button>
-<button class="flex-none px-4 py-3 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200">Classe C</button>
-</div>
-</header>
-<!-- Shopping List Items -->
-<main class="flex-1 p-4 space-y-3 pb-32">
-<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Sugestões Prioritárias (Classe A)</h3>
-<!-- Card Item 1 -->
-<div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex gap-4">
-<div class="flex-none self-start mt-1">
-<input class="w-6 h-6 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark" type="checkbox"/>
-</div>
-<div class="flex-1 flex flex-col gap-2">
-<div class="flex justify-between items-start">
-<div>
-<h4 class="font-bold text-slate-100">Sensor Industrial Pro X1</h4>
-<p class="text-xs text-slate-400">SKU: IND-772-B</p>
-</div>
-<span class="abc-badge-a px-2 py-0.5 rounded text-[10px] font-bold tracking-tighter">CLASSE A</span>
-</div>
-<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
-<div>
-<p class="text-[10px] text-slate-500 uppercase">Estoque Atual</p>
-<p class="text-sm font-semibold text-rose-400">12 unidades (Crítico)</p>
-</div>
-<div>
-<p class="text-[10px] text-slate-500 uppercase">Sugestão Compra</p>
-<p class="text-sm font-semibold text-primary">+40 un.</p>
-</div>
-</div>
-<div class="flex justify-between items-center pt-1">
-<div class="flex gap-3 text-[11px] text-slate-400">
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> Lead: 15d</span>
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">inventory_2</span> MOQ: 10</span>
-</div>
-<p class="text-sm font-bold text-slate-100">R$ 4.200,00</p>
-</div>
-</div>
-</div>
-<!-- Card Item 2 -->
-<div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex gap-4">
-<div class="flex-none self-start mt-1">
-<input checked="" class="w-6 h-6 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark" type="checkbox"/>
-</div>
-<div class="flex-1 flex flex-col gap-2">
-<div class="flex justify-between items-start">
-<div>
-<h4 class="font-bold text-slate-100">Cabo Blindado 10mm</h4>
-<p class="text-xs text-slate-400">SKU: CAB-441-A</p>
-</div>
-<span class="abc-badge-a px-2 py-0.5 rounded text-[10px] font-bold tracking-tighter">CLASSE A</span>
-</div>
-<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
-<div>
-<p class="text-[10px] text-slate-500 uppercase">Estoque Atual</p>
-<p class="text-sm font-semibold text-slate-300">85 metros</p>
-</div>
-<div>
-<p class="text-[10px] text-slate-500 uppercase">Sugestão Compra</p>
-<p class="text-sm font-semibold text-primary">+200 m.</p>
-</div>
-</div>
-<div class="flex justify-between items-center pt-1">
-<div class="flex gap-3 text-[11px] text-slate-400">
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> Lead: 7d</span>
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">inventory_2</span> MOQ: 50</span>
-</div>
-<p class="text-sm font-bold text-slate-100">R$ 1.850,00</p>
-</div>
-</div>
-</div>
-<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 pt-4">Sugestões Complementares (Classe B)</h3>
-<!-- Card Item 3 -->
-<div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex gap-4">
-<div class="flex-none self-start mt-1">
-<input class="w-6 h-6 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary focus:ring-offset-background-dark" type="checkbox"/>
-</div>
-<div class="flex-1 flex flex-col gap-2">
-<div class="flex justify-between items-start">
-<div>
-<h4 class="font-bold text-slate-100">Interruptor Magnético</h4>
-<p class="text-xs text-slate-400">SKU: SWI-102-M</p>
-</div>
-<span class="abc-badge-b px-2 py-0.5 rounded text-[10px] font-bold tracking-tighter">CLASSE B</span>
-</div>
-<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
-<div>
-<p class="text-[10px] text-slate-500 uppercase">Estoque Atual</p>
-<p class="text-sm font-semibold text-slate-300">45 unidades</p>
-</div>
-<div>
-<p class="text-[10px] text-slate-500 uppercase">Sugestão Compra</p>
-<p class="text-sm font-semibold text-primary">+100 un.</p>
-</div>
-</div>
-<div class="flex justify-between items-center pt-1">
-<div class="flex gap-3 text-[11px] text-slate-400">
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> Lead: 3d</span>
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">inventory_2</span> MOQ: 20</span>
-</div>
-<p class="text-sm font-bold text-slate-100">R$ 950,00</p>
-</div>
-</div>
-</div>
-</main>
-<!-- Footer Action Bar -->
-<footer class="fixed bottom-0 w-full bg-slate-900 border-t border-slate-800 p-4 pb-8 space-y-4 shadow-2xl">
-<div class="flex justify-between items-center px-2">
-<div>
-<p class="text-xs text-slate-400">Total Selecionado</p>
-<p class="text-lg font-bold text-primary">R$ 1.850,00 <span class="text-slate-500 text-sm font-normal">(1 item)</span></p>
-</div>
-<div class="flex -space-x-2">
-<div class="w-8 h-8 rounded-full border-2 border-slate-900 overflow-hidden bg-slate-700 flex items-center justify-center text-[10px] font-bold">AB</div>
-</div>
-</div>
-<button class="w-full bg-primary hover:bg-primary/90 text-slate-900 font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95">
-<span class="material-symbols-outlined">shopping_cart_checkout</span>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-background-light dark:bg-background-dark border-b border-primary/10">
+        <div class="flex items-center p-4 gap-4">
+            <button onclick="window.history.back()" class="p-2 hover:bg-primary/10 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+            </button>
+            <h1 class="text-xl font-bold tracking-tight">Lista de Compras Inteligente</h1>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="flex gap-3 px-4 pb-4">
+            <div class="flex-1 bg-primary/10 border border-primary/20 rounded-xl p-4">
+                <p class="text-xs font-medium text-primary/70 uppercase tracking-wider">Investimento Total</p>
+                <p id="totalInvestimento" class="text-xl font-bold text-primary">R$ —</p>
+            </div>
+            <div class="flex-1 bg-slate-800/40 border border-slate-700 rounded-xl p-4">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Itens Sugeridos</p>
+                <p id="totalItens" class="text-xl font-bold text-slate-100">—</p>
+            </div>
+        </div>
+
+        <!-- Tabs ABC -->
+        <div class="flex border-b border-slate-800 px-4 overflow-x-auto no-scrollbar" id="tabsContainer">
+            <button onclick="setTab('todos')" id="tab-todos" class="tab-btn flex-none px-4 py-3 text-sm font-bold border-b-2 border-primary text-primary">Todos</button>
+            <button onclick="setTab('A')" id="tab-A" class="tab-btn flex-none px-4 py-3 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200">Classe A</button>
+            <button onclick="setTab('B')" id="tab-B" class="tab-btn flex-none px-4 py-3 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200">Classe B</button>
+            <button onclick="setTab('C')" id="tab-C" class="tab-btn flex-none px-4 py-3 text-sm font-medium text-slate-400 border-b-2 border-transparent hover:text-slate-200">Classe C</button>
+        </div>
+    </header>
+
+    <!-- Main: lista de itens -->
+    <main class="flex-1 p-4 pb-40 space-y-3" id="mainContent">
+        <!-- Skeletons de carregamento -->
+        <div class="skeleton h-36"></div>
+        <div class="skeleton h-36 opacity-70"></div>
+        <div class="skeleton h-36 opacity-40"></div>
+    </main>
+
+    <!-- Estado vazio -->
+    <div id="emptyState" class="hidden flex-1 flex flex-col items-center justify-center py-24 text-center gap-4 px-8">
+        <span class="material-symbols-outlined text-6xl text-slate-700">check_circle</span>
+        <div>
+            <p class="text-slate-300 font-bold text-lg">Estoque em dia! ✅</p>
+            <p class="text-slate-500 text-sm mt-1">Nenhum insumo abaixo do estoque mínimo no momento.</p>
+        </div>
+    </div>
+
+    <!-- Footer Action Bar -->
+    <footer class="fixed bottom-0 w-full bg-slate-900 border-t border-slate-800 p-4 pb-8 space-y-3 shadow-2xl z-20">
+        <div class="flex justify-between items-center px-1">
+            <div>
+                <p class="text-xs text-slate-400">Total Selecionado</p>
+                <p id="totalSelecionado" class="text-lg font-bold text-primary">R$ 0,00 <span id="countSelecionado" class="text-slate-500 text-sm font-normal">(0 itens)</span></p>
+            </div>
+            <button onclick="marcarTodos()" class="text-xs text-primary border border-primary/30 px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors">
+                Selecionar todos
+            </button>
+        </div>
+        <button onclick="registrarEntradas()" class="w-full bg-primary hover:bg-primary/90 text-slate-900 font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 disabled:opacity-40">
+            <span class="material-symbols-outlined">shopping_cart_checkout</span>
             Finalizar Compra e Registrar Entrada
         </button>
-</footer>
-</body></html>
+    </footer>
+
+    <script type="module">
+        import { getAllRecords, insertRecord } from './supabase-utils.js';
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+        // ── Auth ────────────────────────────────────────────────
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.replace('login.html'); }
+        } catch (e) { window.location.replace('login.html'); }
+
+        // ── Estado ──────────────────────────────────────────────
+        let todosItens = [];       // lista final classificada
+        let selecionados = new Set(); // IDs selecionados
+        let tabAtiva = 'todos';
+
+        const fmt = v => `R$ ${parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const fmtQtd = (v, un) => `${parseFloat(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} ${un || ''}`.trim();
+
+        // ── Tab ─────────────────────────────────────────────────
+        window.setTab = function (t) {
+            tabAtiva = t;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('border-primary', 'text-primary', 'font-bold');
+                b.classList.add('text-slate-400', 'border-transparent', 'font-medium');
+            });
+            const active = document.getElementById('tab-' + t);
+            active.classList.add('border-primary', 'text-primary', 'font-bold');
+            active.classList.remove('text-slate-400', 'border-transparent', 'font-medium');
+            renderLista();
+        };
+
+        // ── Classificar ABC por valor total sugerido ─────────────
+        function classificarABC(itens) {
+            // Ordenar por valor sugerido desc
+            const sorted = [...itens].sort((a, b) => b.valorSugerido - a.valorSugerido);
+            const total = sorted.reduce((s, i) => s + i.valorSugerido, 0);
+            let acumulado = 0;
+            sorted.forEach(i => {
+                acumulado += i.valorSugerido;
+                const pct = total > 0 ? (acumulado / total) * 100 : 0;
+                i.classe = pct <= 80 ? 'A' : pct <= 95 ? 'B' : 'C';
+            });
+            return sorted;
+        }
+
+        // ── Render ───────────────────────────────────────────────
+        function renderLista() {
+            const main = document.getElementById('mainContent');
+            const empty = document.getElementById('emptyState');
+
+            const filtrados = tabAtiva === 'todos'
+                ? todosItens
+                : todosItens.filter(i => i.classe === tabAtiva);
+
+            if (todosItens.length === 0) {
+                main.innerHTML = '';
+                empty.classList.remove('hidden');
+                empty.classList.add('flex');
+                return;
+            }
+            empty.classList.add('hidden');
+            empty.classList.remove('flex');
+
+            if (filtrados.length === 0) {
+                main.innerHTML = `<div class="text-center py-16 text-slate-500"><p class="font-semibold">Nenhum item na Classe ${tabAtiva}</p></div>`;
+                return;
+            }
+
+            const badgeCls = { A: 'abc-badge-a', B: 'abc-badge-b', C: 'abc-badge-c' };
+            const corEstoque = (atual, min) => {
+                const pct = min > 0 ? (atual / min) * 100 : 100;
+                if (pct <= 30) return 'text-rose-400';
+                if (pct <= 70) return 'text-amber-400';
+                return 'text-slate-300';
+            };
+            const labelEstoque = (atual, min) => {
+                const pct = min > 0 ? (atual / min) * 100 : 100;
+                if (pct <= 30) return ' (Crítico)';
+                if (pct <= 70) return ' (Atenção)';
+                return '';
+            };
+
+            // Agrupar por classe
+            const grupos = tabAtiva === 'todos'
+                ? [
+                    { label: 'Sugestões Prioritárias (Classe A)', itens: filtrados.filter(i => i.classe === 'A') },
+                    { label: 'Sugestões Complementares (Classe B)', itens: filtrados.filter(i => i.classe === 'B') },
+                    { label: 'Itens Secundários (Classe C)', itens: filtrados.filter(i => i.classe === 'C') },
+                ]
+                : [{ label: `Classe ${tabAtiva}`, itens: filtrados }];
+
+            let html = '';
+            grupos.filter(g => g.itens.length > 0).forEach(grupo => {
+                html += `<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest pt-2 pb-1">${grupo.label}</h3>`;
+                grupo.itens.forEach(item => {
+                    const checked = selecionados.has(item.id);
+                    const sugestao = Math.max(item.estoque_minimo - item.estoque_atual, item.estoque_minimo);
+                    html += `
+                    <div class="item-card bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex gap-4 transition-opacity ${checked ? 'comprado' : ''}" data-id="${item.id}">
+                        <div class="flex-none self-start mt-1">
+                            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleItem(${item.id})"
+                                class="w-6 h-6 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary cursor-pointer" />
+                        </div>
+                        <div class="flex-1 flex flex-col gap-2">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-100">${item.nome}</h4>
+                                    <p class="text-xs text-slate-400">${item.tipo ? item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1) : 'Insumo'}${item.fornecedor ? ' · ' + item.fornecedor : ''}</p>
+                                </div>
+                                <span class="${badgeCls[item.classe]} px-2 py-0.5 rounded text-[10px] font-bold tracking-tighter">CLASSE ${item.classe}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
+                                <div>
+                                    <p class="text-[10px] text-slate-500 uppercase">Estoque Atual</p>
+                                    <p class="text-sm font-semibold ${corEstoque(item.estoque_atual, item.estoque_minimo)}">
+                                        ${fmtQtd(item.estoque_atual, item.unidade_medida)}${labelEstoque(item.estoque_atual, item.estoque_minimo)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-slate-500 uppercase">Sugestão Compra</p>
+                                    <p class="text-sm font-semibold text-primary">+${fmtQtd(sugestao, item.unidade_medida)}</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center pt-1">
+                                <div class="flex gap-3 text-[11px] text-slate-400">
+                                    <span class="flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">inventory_2</span>
+                                        Min: ${fmtQtd(item.estoque_minimo, item.unidade_medida)}
+                                    </span>
+                                    ${item.estoque_maximo ? `<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">expand</span> Max: ${fmtQtd(item.estoque_maximo, item.unidade_medida)}</span>` : ''}
+                                </div>
+                                <p class="text-sm font-bold text-slate-100">${fmt(item.valorSugerido)}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            });
+
+            main.innerHTML = html;
+            atualizarFooter();
+        }
+
+        // ── Toggle seleção ───────────────────────────────────────
+        window.toggleItem = function (id) {
+            if (selecionados.has(id)) selecionados.delete(id);
+            else selecionados.add(id);
+            // Atualiza visual do card
+            const card = document.querySelector(`.item-card[data-id="${id}"]`);
+            if (card) card.classList.toggle('comprado', selecionados.has(id));
+            atualizarFooter();
+        };
+
+        window.marcarTodos = function () {
+            const visiveis = tabAtiva === 'todos' ? todosItens : todosItens.filter(i => i.classe === tabAtiva);
+            const todosJaMarcados = visiveis.every(i => selecionados.has(i.id));
+            if (todosJaMarcados) {
+                visiveis.forEach(i => selecionados.delete(i.id));
+            } else {
+                visiveis.forEach(i => selecionados.add(i.id));
+            }
+            renderLista();
+        };
+
+        function atualizarFooter() {
+            const itensSel = todosItens.filter(i => selecionados.has(i.id));
+            const totalSel = itensSel.reduce((s, i) => s + i.valorSugerido, 0);
+            document.getElementById('totalSelecionado').innerHTML =
+                `${fmt(totalSel)} <span id="countSelecionado" class="text-slate-500 text-sm font-normal">(${itensSel.length} iten${itensSel.length !== 1 ? 's' : ''})</span>`;
+        }
+
+        // ── Registrar entradas no estoque ────────────────────────
+        window.registrarEntradas = async function () {
+            const itensSel = todosItens.filter(i => selecionados.has(i.id));
+            if (itensSel.length === 0) {
+                alert('Selecione ao menos um item para registrar entrada.');
+                return;
+            }
+            if (!confirm(`Registrar entrada de ${itensSel.length} insumo(s) no estoque?`)) return;
+
+            try {
+                for (const item of itensSel) {
+                    const sugestao = Math.max(item.estoque_minimo - item.estoque_atual, item.estoque_minimo);
+                    const novoEstoque = parseFloat(item.estoque_atual) + parseFloat(sugestao);
+
+                    // Atualiza estoque do insumo
+                    await supabase.from('insumos').update({ estoque_atual: novoEstoque }).eq('id', item.id);
+
+                    // Registra movimentação
+                    await insertRecord('movimentacoes_estoque', {
+                        insumo_id: item.id,
+                        tipo: 'entrada',
+                        quantidade: sugestao,
+                        estoque_anterior: parseFloat(item.estoque_atual),
+                        estoque_atual: novoEstoque,
+                        custo_unitario: item.custo_unitario,
+                        motivo: 'Lista de Compras Inteligente',
+                        referencia_tipo: 'compra',
+                    });
+                }
+
+                alert(`✅ Entrada registrada para ${itensSel.length} insumo(s)!`);
+                selecionados.clear();
+                await loadData(); // Recarrega
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao registrar entradas. Tente novamente.');
+            }
+        };
+
+        // ── Carregar dados ───────────────────────────────────────
+        async function loadData() {
+            try {
+                const { data: insumos, error } = await getAllRecords('insumos');
+                if (error) throw error;
+
+                // Filtra apenas ativo e com estoque abaixo do mínimo
+                const precisa = (insumos || []).filter(i =>
+                    i.ativo !== false &&
+                    parseFloat(i.estoque_atual || 0) <= parseFloat(i.estoque_minimo || 0)
+                );
+
+                // Calcula valor sugerido: sugestão × custo_unitario
+                precisa.forEach(i => {
+                    const sugestao = Math.max(
+                        parseFloat(i.estoque_minimo || 0) - parseFloat(i.estoque_atual || 0),
+                        parseFloat(i.estoque_minimo || 0)
+                    );
+                    i.valorSugerido = sugestao * parseFloat(i.custo_unitario || 0);
+                });
+
+                // Classifica ABC pelo valor sugerido
+                todosItens = classificarABC(precisa);
+
+                // Atualiza summary cards
+                const totalGeral = todosItens.reduce((s, i) => s + i.valorSugerido, 0);
+                document.getElementById('totalInvestimento').textContent = fmt(totalGeral);
+                document.getElementById('totalItens').textContent = `${todosItens.length} iten${todosItens.length !== 1 ? 's' : ''}`;
+
+                renderLista();
+
+            } catch (err) {
+                console.error('Erro ao carregar lista de compras:', err);
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="text-center py-16 text-red-400">
+                        <span class="material-symbols-outlined text-4xl block mb-2">error</span>
+                        <p class="font-semibold">Erro ao carregar dados</p>
+                        <p class="text-xs mt-1 text-slate-500">${err?.message || ''}</p>
+                    </div>`;
+            }
+        }
+
+        loadData();
+    </script>
+
+</body>
+</html>

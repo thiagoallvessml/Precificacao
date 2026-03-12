@@ -56,10 +56,10 @@
         </div>
     </header>
 
-    <main class="max-w-3xl mx-auto p-4 space-y-6 pb-12">
+    <main class="max-w-7xl mx-auto p-4 pb-12">
 
-        <!-- Período Filter -->
-        <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <!-- Período Filter (full width) -->
+        <div class="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
             <button onclick="setPeriodo('mes')" id="chip-mes" class="chip-btn active-chip shrink-0 px-5 py-2 rounded-full bg-card-dark border border-white/10 text-sm font-medium transition-all">Este Mês</button>
             <button onclick="setPeriodo('trimestre')" id="chip-trimestre" class="chip-btn shrink-0 px-5 py-2 rounded-full bg-card-dark border border-white/10 text-slate-400 text-sm font-medium transition-all hover:text-primary hover:border-primary/30">Trimestre</button>
             <button onclick="setPeriodo('semestre')" id="chip-semestre" class="chip-btn shrink-0 px-5 py-2 rounded-full bg-card-dark border border-white/10 text-slate-400 text-sm font-medium transition-all hover:text-primary hover:border-primary/30">Semestre</button>
@@ -67,111 +67,125 @@
             <button onclick="setPeriodo('tudo')" id="chip-tudo" class="chip-btn shrink-0 px-5 py-2 rounded-full bg-card-dark border border-white/10 text-slate-400 text-sm font-medium transition-all hover:text-primary hover:border-primary/30">Tudo</button>
         </div>
 
-        <!-- Summary Cards -->
-        <div class="flex flex-col gap-4">
-            <div class="flex flex-col gap-2 rounded-xl p-5 bg-primary/10 border border-primary/20">
-                <div class="flex justify-between items-start">
-                    <p class="text-primary text-sm font-semibold uppercase tracking-wider">Classe A · 80% da receita</p>
-                    <span class="material-symbols-outlined text-primary fill-icon">trending_up</span>
-                </div>
-                <div class="mt-1">
-                    <p id="sumA" class="text-slate-100 text-2xl font-bold">—</p>
-                    <p class="text-primary/70 text-xs mt-1">Produtos de alto giro e maior faturamento</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="flex flex-col gap-2 rounded-xl p-4 bg-accent-amber/10 border border-accent-amber/20">
-                    <p class="text-accent-amber text-xs font-semibold uppercase">Classe B · 15%</p>
-                    <p id="sumB" class="text-slate-100 text-lg font-bold">—</p>
-                    <p id="valB" class="text-slate-400 text-sm">—</p>
-                </div>
-                <div class="flex flex-col gap-2 rounded-xl p-4 bg-accent-slate/10 border border-accent-slate/20">
-                    <p class="text-accent-slate text-xs font-semibold uppercase">Classe C · 5%</p>
-                    <p id="sumC" class="text-slate-100 text-lg font-bold">—</p>
-                    <p id="valC" class="text-slate-400 text-sm">—</p>
-                </div>
-            </div>
-        </div>
+        <!-- Desktop: 2 colunas | Mobile: 1 coluna -->
+        <div class="flex flex-col lg:flex-row gap-6 items-start">
 
-        <!-- Gráfico Visual -->
-        <section>
-            <div class="bg-card-dark rounded-xl p-6 border border-white/5">
-                <h3 class="text-slate-100 text-base font-bold mb-6">Distribuição de Receita</h3>
-                <div class="flex items-end justify-around h-40 gap-4 px-6">
-                    <div class="flex flex-col items-center gap-2 flex-1">
-                        <span id="pctA" class="text-xs font-bold text-primary/70">—</span>
-                        <div class="w-full relative rounded-t-lg overflow-hidden bg-primary/10" style="height:120px;display:flex;align-items:flex-end;">
-                            <div id="barA" class="w-full bg-primary rounded-t-lg bar-animate" style="height:0%"></div>
-                        </div>
-                        <div class="flex flex-col items-center gap-0.5">
-                            <span class="text-sm font-black text-primary">A</span>
-                            <span id="nA" class="text-[10px] text-slate-500">—</span>
-                        </div>
+            <!-- ── Coluna Esquerda: Resumo + Gráfico (sticky no desktop) ── -->
+            <div class="w-full lg:w-96 lg:sticky lg:top-24 space-y-4 shrink-0">
+
+                <!-- Card Classe A -->
+                <div class="flex flex-col gap-2 rounded-xl p-5 bg-primary/10 border border-primary/20">
+                    <div class="flex justify-between items-start">
+                        <p class="text-primary text-sm font-semibold uppercase tracking-wider">Classe A · 80% da receita</p>
+                        <span class="material-symbols-outlined text-primary fill-icon">trending_up</span>
                     </div>
-                    <div class="flex flex-col items-center gap-2 flex-1">
-                        <span id="pctB" class="text-xs font-bold text-accent-amber/70">—</span>
-                        <div class="w-full relative rounded-t-lg overflow-hidden bg-accent-amber/10" style="height:120px;display:flex;align-items:flex-end;">
-                            <div id="barB" class="w-full bg-accent-amber rounded-t-lg bar-animate" style="height:0%"></div>
-                        </div>
-                        <div class="flex flex-col items-center gap-0.5">
-                            <span class="text-sm font-black text-accent-amber">B</span>
-                            <span id="nB" class="text-[10px] text-slate-500">—</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-center gap-2 flex-1">
-                        <span id="pctC" class="text-xs font-bold text-slate-400/70">—</span>
-                        <div class="w-full relative rounded-t-lg overflow-hidden bg-accent-slate/10" style="height:120px;display:flex;align-items:flex-end;">
-                            <div id="barC" class="w-full bg-accent-slate rounded-t-lg bar-animate" style="height:0%"></div>
-                        </div>
-                        <div class="flex flex-col items-center gap-0.5">
-                            <span class="text-sm font-black text-slate-400">C</span>
-                            <span id="nC" class="text-[10px] text-slate-500">—</span>
-                        </div>
+                    <div class="mt-1">
+                        <p id="sumA" class="text-slate-100 text-2xl font-bold">—</p>
+                        <p class="text-primary/70 text-xs mt-1">Produtos de alto giro e maior faturamento</p>
                     </div>
                 </div>
-                <div class="mt-5 grid grid-cols-3 text-center">
-                    <div><p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Receita A</p><p id="recA" class="text-sm font-bold text-primary mt-0.5">—</p></div>
-                    <div><p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Receita B</p><p id="recB" class="text-sm font-bold text-accent-amber mt-0.5">—</p></div>
-                    <div><p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Receita C</p><p id="recC" class="text-sm font-bold text-slate-400 mt-0.5">—</p></div>
+
+                <!-- Cards B + C lado a lado -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2 rounded-xl p-4 bg-accent-amber/10 border border-accent-amber/20">
+                        <p class="text-accent-amber text-xs font-semibold uppercase">Classe B · 15%</p>
+                        <p id="sumB" class="text-slate-100 text-lg font-bold">—</p>
+                        <p id="valB" class="text-slate-400 text-sm">—</p>
+                    </div>
+                    <div class="flex flex-col gap-2 rounded-xl p-4 bg-accent-slate/10 border border-accent-slate/20">
+                        <p class="text-accent-slate text-xs font-semibold uppercase">Classe C · 5%</p>
+                        <p id="sumC" class="text-slate-100 text-lg font-bold">—</p>
+                        <p id="valC" class="text-slate-400 text-sm">—</p>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Ranking -->
-        <section>
-            <div class="flex items-center justify-between mb-4 px-1">
-                <h3 class="text-slate-100 text-lg font-bold">Ranking de Produtos</h3>
-                <span id="totalProdutos" class="text-primary text-xs font-semibold bg-primary/10 px-3 py-1 rounded-full">—</span>
-            </div>
-            <div id="rankingList" class="space-y-3">
-                <div class="skeleton h-16 rounded-xl"></div>
-                <div class="skeleton h-16 rounded-xl opacity-70"></div>
-                <div class="skeleton h-16 rounded-xl opacity-40"></div>
-            </div>
-        </section>
-
-        <!-- Insight -->
-        <section>
-            <div class="bg-gradient-to-r from-primary/15 to-transparent rounded-xl p-5 border-l-4 border-primary">
-                <div class="flex items-center gap-3 mb-3">
-                    <span class="material-symbols-outlined text-primary fill-icon">lightbulb</span>
-                    <h4 class="text-primary font-bold text-sm uppercase tracking-wider">Insight Estratégico</h4>
+                <!-- Gráfico Visual -->
+                <div class="bg-card-dark rounded-xl p-6 border border-white/5">
+                    <h3 class="text-slate-100 text-base font-bold mb-6">Distribuição de Receita</h3>
+                    <div class="flex items-end justify-around h-40 gap-4 px-6">
+                        <div class="flex flex-col items-center gap-2 flex-1">
+                            <span id="pctA" class="text-xs font-bold text-primary/70">—</span>
+                            <div class="w-full relative rounded-t-lg overflow-hidden bg-primary/10" style="height:120px;display:flex;align-items:flex-end;">
+                                <div id="barA" class="w-full bg-primary rounded-t-lg bar-animate" style="height:0%"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-0.5">
+                                <span class="text-sm font-black text-primary">A</span>
+                                <span id="nA" class="text-[10px] text-slate-500">—</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 flex-1">
+                            <span id="pctB" class="text-xs font-bold text-accent-amber/70">—</span>
+                            <div class="w-full relative rounded-t-lg overflow-hidden bg-accent-amber/10" style="height:120px;display:flex;align-items:flex-end;">
+                                <div id="barB" class="w-full bg-accent-amber rounded-t-lg bar-animate" style="height:0%"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-0.5">
+                                <span class="text-sm font-black text-accent-amber">B</span>
+                                <span id="nB" class="text-[10px] text-slate-500">—</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 flex-1">
+                            <span id="pctC" class="text-xs font-bold text-slate-400/70">—</span>
+                            <div class="w-full relative rounded-t-lg overflow-hidden bg-accent-slate/10" style="height:120px;display:flex;align-items:flex-end;">
+                                <div id="barC" class="w-full bg-accent-slate rounded-t-lg bar-animate" style="height:0%"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-0.5">
+                                <span class="text-sm font-black text-slate-400">C</span>
+                                <span id="nC" class="text-[10px] text-slate-500">—</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-5 grid grid-cols-3 text-center">
+                        <div><p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Receita A</p><p id="recA" class="text-sm font-bold text-primary mt-0.5">—</p></div>
+                        <div><p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Receita B</p><p id="recB" class="text-sm font-bold text-accent-amber mt-0.5">—</p></div>
+                        <div><p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Receita C</p><p id="recC" class="text-sm font-bold text-slate-400 mt-0.5">—</p></div>
+                    </div>
                 </div>
-                <p id="insightText" class="text-slate-300 text-sm leading-relaxed">Carregando análise...</p>
-            </div>
-        </section>
 
-        <!-- Estado vazio -->
-        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center gap-4">
-            <span class="material-symbols-outlined text-6xl text-slate-700">pie_chart</span>
-            <div>
-                <p class="text-slate-400 font-semibold">Nenhum dado de vendas encontrado</p>
-                <p class="text-slate-600 text-sm mt-1">Registre pedidos para visualizar a Curva ABC</p>
             </div>
-            <a href="vendas.html" class="mt-2 px-6 py-3 rounded-xl bg-primary text-background-dark font-bold text-sm hover:brightness-110 transition-all">Registrar Vendas</a>
+
+            <!-- ── Coluna Direita: Ranking + Insight ── -->
+            <div class="flex-1 min-w-0 space-y-6">
+
+                <!-- Ranking -->
+                <section>
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <h3 class="text-slate-100 text-lg font-bold">Ranking de Produtos</h3>
+                        <span id="totalProdutos" class="text-primary text-xs font-semibold bg-primary/10 px-3 py-1 rounded-full">—</span>
+                    </div>
+                    <div id="rankingList" class="space-y-3">
+                        <div class="skeleton h-16 rounded-xl"></div>
+                        <div class="skeleton h-16 rounded-xl opacity-70"></div>
+                        <div class="skeleton h-16 rounded-xl opacity-40"></div>
+                    </div>
+                </section>
+
+                <!-- Insight -->
+                <section>
+                    <div class="bg-gradient-to-r from-primary/15 to-transparent rounded-xl p-5 border-l-4 border-primary">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="material-symbols-outlined text-primary fill-icon">lightbulb</span>
+                            <h4 class="text-primary font-bold text-sm uppercase tracking-wider">Insight Estratégico</h4>
+                        </div>
+                        <p id="insightText" class="text-slate-300 text-sm leading-relaxed">Carregando análise...</p>
+                    </div>
+                </section>
+
+                <!-- Estado vazio -->
+                <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-center gap-4">
+                    <span class="material-symbols-outlined text-6xl text-slate-700">pie_chart</span>
+                    <div>
+                        <p class="text-slate-400 font-semibold">Nenhum dado de vendas encontrado</p>
+                        <p class="text-slate-600 text-sm mt-1">Registre pedidos para visualizar a Curva ABC</p>
+                    </div>
+                    <a href="vendas.html" class="mt-2 px-6 py-3 rounded-xl bg-primary text-background-dark font-bold text-sm hover:brightness-110 transition-all">Registrar Vendas</a>
+                </div>
+
+            </div>
         </div>
 
     </main>
+
+
 
     <script type="module">
         import { getAllRecords } from './supabase-utils.js';

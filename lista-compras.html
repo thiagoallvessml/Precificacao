@@ -34,8 +34,12 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .skeleton { background: linear-gradient(90deg, #1a2e2e 25%, #22403f 50%, #1a2e2e 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.75rem; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .item-card.comprado { opacity: 0.5; }
         .item-card.comprado h4 { text-decoration: line-through; }
+        .compra-inputs { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; opacity: 0; }
+        .compra-inputs.aberto { max-height: 120px; opacity: 1; }
+        .input-compra { background: rgba(19,236,236,0.05); border: 1px solid rgba(19,236,236,0.2); border-radius: 0.5rem; padding: 0.4rem 0.6rem; color: #e2e8f0; font-size: 0.8rem; width: 100%; outline: none; transition: border-color 0.2s; }
+        .input-compra:focus { border-color: #13ecec; background: rgba(19,236,236,0.1); }
+        .input-compra::placeholder { color: #475569; }
     </style>
 </head>
 
@@ -204,8 +208,10 @@
                 grupo.itens.forEach(item => {
                     const checked = selecionados.has(item.id);
                     const sugestao = Math.max(item.estoque_minimo - item.estoque_atual, item.estoque_minimo);
+                    const qtdSalva = item._qtdComprada ?? sugestao;
+                    const precoSalvo = item._precoUnitPago ?? parseFloat(item.custo_unitario || 0);
                     html += `
-                    <div class="item-card bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex gap-4 transition-opacity ${checked ? 'comprado' : ''}" data-id="${item.id}">
+                    <div class="item-card bg-slate-800/50 border border-slate-700 rounded-xl p-4 flex gap-4" data-id="${item.id}">
                         <div class="flex-none self-start mt-1">
                             <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleItem(${item.id})"
                                 class="w-6 h-6 rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary cursor-pointer" />
@@ -213,7 +219,7 @@
                         <div class="flex-1 flex flex-col gap-2">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h4 class="font-bold text-slate-100">${item.nome}</h4>
+                                    <h4 class="font-bold text-slate-100 ${checked ? 'line-through opacity-60' : ''}">${item.nome}</h4>
                                     <p class="text-xs text-slate-400">${item.tipo ? item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1) : 'Insumo'}${item.fornecedor ? ' · ' + item.fornecedor : ''}</p>
                                 </div>
                                 <span class="${badgeCls[item.classe]} px-2 py-0.5 rounded text-[10px] font-bold tracking-tighter">CLASSE ${item.classe}</span>
@@ -230,7 +236,40 @@
                                     <p class="text-sm font-semibold text-primary">+${fmtQtd(sugestao, item.unidade_medida)}</p>
                                 </div>
                             </div>
-                            <div class="flex justify-between items-center pt-1">
+
+                            <!-- Inputs: qtd comprada + preço pago (expand ao selecionar) -->
+                            <div class="compra-inputs ${checked ? 'aberto' : ''}" id="inputs-${item.id}">
+                                <div class="grid grid-cols-2 gap-3 pt-1 pb-0.5">
+                                    <div>
+                                        <label class="text-[10px] text-primary uppercase font-bold tracking-wider block mb-1">
+                                            Qtd Comprada (${item.unidade_medida || 'un'})
+                                        </label>
+                                        <input type="number" min="0" step="0.001"
+                                            id="qtd-${item.id}"
+                                            value="${qtdSalva.toFixed ? qtdSalva.toFixed(3).replace(/\.?0+$/, '') : qtdSalva}"
+                                            oninput="salvarInput(${item.id})"
+                                            placeholder="Ex: ${sugestao}"
+                                            class="input-compra" />
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-primary uppercase font-bold tracking-wider block mb-1">
+                                            Preço Unit. Pago (R$)
+                                        </label>
+                                        <input type="number" min="0" step="0.01"
+                                            id="preco-${item.id}"
+                                            value="${precoSalvo.toFixed(2)}"
+                                            oninput="salvarInput(${item.id})"
+                                            placeholder="Ex: ${parseFloat(item.custo_unitario || 0).toFixed(2)}"
+                                            class="input-compra" />
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-[11px] text-slate-400 pt-1 pb-0.5">
+                                    <span>Total do item:</span>
+                                    <span id="total-item-${item.id}" class="text-primary font-bold text-sm">${fmt(qtdSalva * precoSalvo)}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center ${checked ? 'pt-0' : 'pt-1'}">
                                 <div class="flex gap-3 text-[11px] text-slate-400">
                                     <span class="flex items-center gap-1">
                                         <span class="material-symbols-outlined text-[14px]">inventory_2</span>
@@ -238,7 +277,7 @@
                                     </span>
                                     ${item.estoque_maximo ? `<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">expand</span> Max: ${fmtQtd(item.estoque_maximo, item.unidade_medida)}</span>` : ''}
                                 </div>
-                                <p class="text-sm font-bold text-slate-100">${fmt(item.valorSugerido)}</p>
+                                <p class="text-sm font-bold text-slate-400 line-through">${fmt(item.valorSugerido)}</p>
                             </div>
                         </div>
                     </div>`;
@@ -249,13 +288,35 @@
             atualizarFooter();
         }
 
+        // ── Salva valor dos inputs no objeto em memória ──────────
+        window.salvarInput = function (id) {
+            const item = todosItens.find(i => i.id === id);
+            if (!item) return;
+            const qtdEl = document.getElementById('qtd-' + id);
+            const precoEl = document.getElementById('preco-' + id);
+            const qtd = parseFloat(qtdEl?.value || 0);
+            const preco = parseFloat(precoEl?.value || 0);
+            item._qtdComprada = qtd;
+            item._precoUnitPago = preco;
+            const totalEl = document.getElementById('total-item-' + id);
+            if (totalEl) totalEl.textContent = fmt(qtd * preco);
+            atualizarFooter();
+        };
+
         // ── Toggle seleção ───────────────────────────────────────
         window.toggleItem = function (id) {
             if (selecionados.has(id)) selecionados.delete(id);
             else selecionados.add(id);
-            // Atualiza visual do card
-            const card = document.querySelector(`.item-card[data-id="${id}"]`);
-            if (card) card.classList.toggle('comprado', selecionados.has(id));
+
+            // Expande/recolhe inputs
+            const painel = document.getElementById('inputs-' + id);
+            if (painel) painel.classList.toggle('aberto', selecionados.has(id));
+
+            // Risco no nome
+            const h4 = document.querySelector(`.item-card[data-id="${id}"] h4`);
+            if (h4) h4.classList.toggle('line-through', selecionados.has(id));
+            if (h4) h4.classList.toggle('opacity-60', selecionados.has(id));
+
             atualizarFooter();
         };
 
@@ -270,9 +331,15 @@
             renderLista();
         };
 
+        function getValorReal(item) {
+            const qtd = item._qtdComprada ?? Math.max(item.estoque_minimo - item.estoque_atual, item.estoque_minimo);
+            const preco = item._precoUnitPago ?? parseFloat(item.custo_unitario || 0);
+            return { qtd, preco, total: qtd * preco };
+        }
+
         function atualizarFooter() {
             const itensSel = todosItens.filter(i => selecionados.has(i.id));
-            const totalSel = itensSel.reduce((s, i) => s + i.valorSugerido, 0);
+            const totalSel = itensSel.reduce((s, i) => s + getValorReal(i).total, 0);
             document.getElementById('totalSelecionado').innerHTML =
                 `${fmt(totalSel)} <span id="countSelecionado" class="text-slate-500 text-sm font-normal">(${itensSel.length} iten${itensSel.length !== 1 ? 's' : ''})</span>`;
         }
@@ -284,32 +351,47 @@
                 alert('Selecione ao menos um item para registrar entrada.');
                 return;
             }
-            if (!confirm(`Registrar entrada de ${itensSel.length} insumo(s) no estoque?`)) return;
+
+            // Valida que todos têm qtd > 0
+            for (const item of itensSel) {
+                const { qtd } = getValorReal(item);
+                if (qtd <= 0) {
+                    alert(`Informe a quantidade comprada para "${item.nome}"`);
+                    document.getElementById('qtd-' + item.id)?.focus();
+                    return;
+                }
+            }
+
+            const totalReal = itensSel.reduce((s, i) => s + getValorReal(i).total, 0);
+            if (!confirm(`Registrar entrada de ${itensSel.length} insumo(s)?\nTotal pago: ${fmt(totalReal)}`)) return;
 
             try {
                 for (const item of itensSel) {
-                    const sugestao = Math.max(item.estoque_minimo - item.estoque_atual, item.estoque_minimo);
-                    const novoEstoque = parseFloat(item.estoque_atual) + parseFloat(sugestao);
+                    const { qtd, preco } = getValorReal(item);
+                    const novoEstoque = parseFloat(item.estoque_atual) + qtd;
 
-                    // Atualiza estoque do insumo
-                    await supabase.from('insumos').update({ estoque_atual: novoEstoque }).eq('id', item.id);
+                    // Atualiza estoque e custo unitário com o preço real pago
+                    await supabase.from('insumos').update({
+                        estoque_atual: novoEstoque,
+                        custo_unitario: preco,
+                    }).eq('id', item.id);
 
-                    // Registra movimentação
+                    // Registra movimentação com valores reais
                     await insertRecord('movimentacoes_estoque', {
                         insumo_id: item.id,
                         tipo: 'entrada',
-                        quantidade: sugestao,
+                        quantidade: qtd,
                         estoque_anterior: parseFloat(item.estoque_atual),
                         estoque_atual: novoEstoque,
-                        custo_unitario: item.custo_unitario,
+                        custo_unitario: preco,
                         motivo: 'Lista de Compras Inteligente',
                         referencia_tipo: 'compra',
                     });
                 }
 
-                alert(`✅ Entrada registrada para ${itensSel.length} insumo(s)!`);
+                alert(`✅ Entrada registrada para ${itensSel.length} insumo(s)!\nCusto unitário atualizado.`);
                 selecionados.clear();
-                await loadData(); // Recarrega
+                await loadData();
             } catch (err) {
                 console.error(err);
                 alert('Erro ao registrar entradas. Tente novamente.');

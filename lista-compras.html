@@ -35,8 +35,8 @@
         .skeleton { background: linear-gradient(90deg, #1a2e2e 25%, #22403f 50%, #1a2e2e 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.75rem; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .item-card.comprado h4 { text-decoration: line-through; }
-        .compra-inputs { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; opacity: 0; }
-        .compra-inputs.aberto { max-height: 180px; opacity: 1; }
+        .compra-inputs { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s linear 0.35s; opacity: 0; visibility: hidden; pointer-events: none; }
+        .compra-inputs.aberto { max-height: 180px; opacity: 1; visibility: visible; pointer-events: auto; transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s linear 0s; }
         .input-compra { background: rgba(19,236,236,0.05); border: 1px solid rgba(19,236,236,0.2); border-radius: 0.5rem; padding: 0.4rem 0.6rem; color: #e2e8f0; font-size: 0.8rem; width: 100%; outline: none; transition: border-color 0.2s; }
         .input-compra:focus { border-color: #13ecec; background: rgba(19,236,236,0.1); }
         .input-compra::placeholder { color: #475569; }

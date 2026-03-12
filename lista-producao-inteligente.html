@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Lista de Produção Inteligente - PrecificaX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "border-dark": "#2d4444",
+                    },
+                    fontFamily: { "display": ["Work Sans", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Work Sans', sans-serif; min-height: max(884px, 100dvh); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .skeleton { background: linear-gradient(90deg, #1a2f2f 25%, #243d3d 50%, #1a2f2f 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.75rem; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .item-card { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .tab-btn.active { background: #13ecec; color: #0F0F0F; }
+        .tab-btn { transition: all 0.2s ease; }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen pb-28">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10">
+        <div class="flex items-center p-4 justify-between max-w-7xl mx-auto">
+            <button onclick="window.history.back()" class="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold flex-1 ml-2">
+                Lista de Produção Inteligente
+            </h1>
+            <a href="adicionar-producao.html" class="flex items-center gap-1.5 bg-primary/10 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-lg hover:bg-primary/20 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">add</span>
+                Registrar
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 lg:px-6">
+
+        <!-- Layout Desktop: 2 colunas -->
+        <div class="flex flex-col lg:flex-row lg:items-start gap-6 py-4">
+
+            <!-- ── COLUNA ESQUERDA (sticky) ─────────────────────── -->
+            <div class="w-full lg:w-[340px] lg:shrink-0 space-y-4 lg:sticky lg:top-[73px]">
+
+                <!-- KPI Cards -->
+                <div class="flex lg:flex-col gap-3 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
+                    <!-- Críticos -->
+                    <div class="min-w-[150px] lg:min-w-0 flex flex-col gap-2 rounded-xl p-5 bg-card-dark border border-primary/10 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <p class="text-primary/70 text-xs font-medium uppercase tracking-wider">Reposição Urgente</p>
+                            <span class="material-symbols-outlined text-red-400 text-xl">error</span>
+                        </div>
+                        <p id="kpi-criticos" class="text-slate-100 text-3xl font-bold">—</p>
+                        <p id="kpi-criticos-sub" class="text-red-400 text-xs font-medium">Abaixo do ponto crítico</p>
+                    </div>
+                    <!-- Cobertura média -->
+                    <div class="min-w-[150px] lg:min-w-0 flex flex-col gap-2 rounded-xl p-5 bg-card-dark border border-primary/10 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <p class="text-primary/70 text-xs font-medium uppercase tracking-wider">Cobertura Média</p>
+                            <span class="material-symbols-outlined text-amber-400 text-xl">schedule</span>
+                        </div>
+                        <p id="kpi-cobertura" class="text-slate-100 text-3xl font-bold">— dias</p>
+                        <p class="text-primary/70 text-xs font-medium">Baseado em vendas recentes</p>
+                    </div>
+                    <!-- Potencial -->
+                    <div class="min-w-[150px] lg:min-w-0 flex flex-col gap-2 rounded-xl p-5 bg-card-dark border border-primary/10 shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <p class="text-primary/70 text-xs font-medium uppercase tracking-wider">Potencial Produção</p>
+                            <span class="material-symbols-outlined text-green-400 text-xl">trending_up</span>
+                        </div>
+                        <p id="kpi-potencial" class="text-slate-100 text-3xl font-bold">R$ —</p>
+                        <p class="text-green-400 text-xs font-medium">Se produzir o sugerido</p>
+                    </div>
+                </div>
+
+                <!-- Filtros (desktop: vertical) -->
+                <div class="hidden lg:flex flex-col gap-2 pt-1">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-wider px-1">Filtrar por status</p>
+                    <button id="tab-todos-d" onclick="filtrar('todos')" data-tab="todos" class="tab-btn active flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-left">
+                        <span class="material-symbols-outlined text-[18px]">view_list</span> Todos
+                    </button>
+                    <button id="tab-critico-d" onclick="filtrar('critico')" data-tab="critico" class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-card-dark border border-border-dark text-slate-100 hover:bg-primary/10 text-left">
+                        <span class="material-symbols-outlined text-red-400 text-[18px]">error</span> Urgente / Crítico
+                    </button>
+                    <button id="tab-atencao-d" onclick="filtrar('atencao')" data-tab="atencao" class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-card-dark border border-border-dark text-slate-100 hover:bg-primary/10 text-left">
+                        <span class="material-symbols-outlined text-amber-400 text-[18px]">warning</span> Atenção
+                    </button>
+                    <button id="tab-estavel-d" onclick="filtrar('estavel')" data-tab="estavel" class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-card-dark border border-border-dark text-slate-100 hover:bg-primary/10 text-left">
+                        <span class="material-symbols-outlined text-green-400 text-[18px]">check_circle</span> Estável
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- ── COLUNA DIREITA ────────────────────────────────── -->
+            <div class="flex-1 min-w-0 space-y-4">
+
+                <!-- Filtros (mobile: horizontal) -->
+                <div class="flex gap-2 overflow-x-auto no-scrollbar lg:hidden pb-1">
+                    <button onclick="filtrar('todos')" data-tab="todos" class="tab-btn active flex h-9 shrink-0 items-center gap-1.5 rounded-full px-5 text-sm font-semibold">Todos</button>
+                    <button onclick="filtrar('critico')" data-tab="critico" class="tab-btn flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-card-dark border border-border-dark px-5 text-sm font-semibold hover:bg-primary/10">🔴 Urgente</button>
+                    <button onclick="filtrar('atencao')" data-tab="atencao" class="tab-btn flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-card-dark border border-border-dark px-5 text-sm font-semibold hover:bg-primary/10">⚠️ Atenção</button>
+                    <button onclick="filtrar('estavel')" data-tab="estavel" class="tab-btn flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-card-dark border border-border-dark px-5 text-sm font-semibold hover:bg-primary/10">✅ Estável</button>
+                </div>
+
+                <!-- Lista de produtos -->
+                <div id="listaProdutos" class="flex flex-col gap-4">
+                    <!-- Skeletons -->
+                    <div class="skeleton h-52"></div>
+                    <div class="skeleton h-52 opacity-70"></div>
+                    <div class="skeleton h-52 opacity-40"></div>
+                </div>
+
+                <!-- Empty state -->
+                <div id="emptyState" class="hidden text-center py-16">
+                    <span class="material-symbols-outlined text-5xl text-primary block mb-3">inventory</span>
+                    <p class="text-slate-400 font-medium">Nenhum produto encontrado neste filtro</p>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-card-dark border-t border-primary/20 px-6 pb-6 pt-3">
+        <div class="flex justify-between items-center max-w-7xl mx-auto">
+            <a href="index.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl">home</span>
+                <span class="text-[10px] font-bold uppercase">Início</span>
+            </a>
+            <a href="lista-producao-inteligente.html" class="flex flex-col items-center gap-1 text-primary">
+                <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1">inventory_2</span>
+                <span class="text-[10px] font-bold uppercase">Produção</span>
+            </a>
+            <a href="producao-dashboard.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl">dashboard</span>
+                <span class="text-[10px] font-bold uppercase">Dashboard</span>
+            </a>
+            <a href="vendas.html" class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl">trending_up</span>
+                <span class="text-[10px] font-bold uppercase">Vendas</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { getAllRecords } from './supabase-utils.js';
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+        // ── Auth ─────────────────────────────────────────────────
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.replace('login.html'); }
+        } catch (e) { window.location.replace('login.html'); }
+
+        const fmt = v => `R$ ${parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        // ── Carregar dados ─────────────────────────────────────────
+        const [
+            { data: produtos },
+            { data: producoes },
+            { data: pedidoItens }
+        ] = await Promise.all([
+            getAllRecords('produtos'),
+            supabase.from('producao').select('produto_id, quantidade_produzida, data_producao').gte('data_producao', new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)),
+            supabase.from('pedido_itens').select('produto_id, quantidade, preco_unitario, preco_total').gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+        ]);
+
+        const produtosAtivos = (produtos || []).filter(p => p.disponivel !== false);
+        const prods = producoes?.data || producoes || [];
+        const itens = pedidoItens?.data || pedidoItens || [];
+
+        // ── Calcular estoque atual (produzido - vendido por produto) ─
+        // Estoque = Σ producao (60d) - Σ pedido_itens (30d)
+        // Nota: usamos producao últimos 60d como proxy de estoque circulante
+        const estoqueMap = {};   // produto_id → estoque estimado
+        const vendaMap = {};     // produto_id → qtd vendida (30 dias)
+
+        prods.forEach(p => {
+            if (!p.produto_id) return;
+            estoqueMap[p.produto_id] = (estoqueMap[p.produto_id] || 0) + (p.quantidade_produzida || 0);
+        });
+        itens.forEach(i => {
+            if (!i.produto_id) return;
+            vendaMap[i.produto_id] = (vendaMap[i.produto_id] || 0) + (i.quantidade || 0);
+            // Desconta do estoque
+            estoqueMap[i.produto_id] = Math.max(0, (estoqueMap[i.produto_id] || 0) - (i.quantidade || 0));
+        });
+
+        // Venda diária média (30 dias)
+        const vendaDiariaMap = {};
+        Object.entries(vendaMap).forEach(([id, total]) => {
+            vendaDiariaMap[id] = total / 30;
+        });
+
+        // ── Enriquecer produtos ────────────────────────────────────
+        const DIAS_COBERTURA_MINIMA = 3; // dias de segurança
+        const DIAS_META             = 7; // meta de cobertura
+
+        const produtosEnriquecidos = produtosAtivos.map(p => {
+            const estoque    = estoqueMap[p.id] || 0;
+            const vendaDia   = vendaDiariaMap[p.id] || 0;
+            const cobertura  = vendaDia > 0 ? estoque / vendaDia : 999;
+            const pontoRep   = Math.ceil(vendaDia * DIAS_COBERTURA_MINIMA);
+            const metaEstoque = Math.ceil(vendaDia * DIAS_META);
+            const sugestao   = Math.max(0, metaEstoque - estoque);
+            const pct        = metaEstoque > 0 ? Math.min((estoque / metaEstoque) * 100, 100) : estoque > 0 ? 100 : 0;
+
+            let status;
+            if (pct < 30 || (estoque < pontoRep && vendaDia > 0)) status = 'critico';
+            else if (pct < 70) status = 'atencao';
+            else status = 'estavel';
+
+            return { ...p, estoque, vendaDia, cobertura, pontoRep, metaEstoque, sugestao, pct, status };
+        }).sort((a, b) => {
+            const ord = { critico: 0, atencao: 1, estavel: 2 };
+            return ord[a.status] - ord[b.status];
+        });
+
+        // ── KPIs ──────────────────────────────────────────────────
+        const criticos = produtosEnriquecidos.filter(p => p.status === 'critico');
+        const coberturaMedia = produtosEnriquecidos
+            .filter(p => p.cobertura < 999)
+            .reduce((s, p, _, a) => s + p.cobertura / a.length, 0);
+        const potencial = criticos.reduce((s, p) => s + p.sugestao * parseFloat(p.preco_base || 0), 0);
+
+        document.getElementById('kpi-criticos').textContent = `${criticos.length} ${criticos.length === 1 ? 'Sabor' : 'Sabores'}`;
+        document.getElementById('kpi-cobertura').textContent = `${coberturaMedia < 999 ? coberturaMedia.toFixed(1) : '—'} dias`;
+        document.getElementById('kpi-potencial').textContent = fmt(potencial);
+
+        // ── Renderizar cards ──────────────────────────────────────
+        const statusConfig = {
+            critico: { border: 'border-red-500/40',  badge: 'bg-red-500/20 text-red-400',    label: 'Urgente',  bar: 'bg-red-500',   rodapeBg: 'bg-primary/5' },
+            atencao: { border: 'border-amber-500/30', badge: 'bg-amber-500/20 text-amber-400', label: 'Atenção',  bar: 'bg-amber-500', rodapeBg: 'bg-amber-500/5' },
+            estavel: { border: 'border-primary/10',   badge: 'bg-green-500/20 text-green-400', label: 'Estável',  bar: 'bg-green-500', rodapeBg: 'bg-primary/5' },
+        };
+
+        function renderCard(p) {
+            const cfg = statusConfig[p.status];
+            const pct = Math.max(p.pct, 2);
+            const cobDias = p.cobertura < 999 ? `${p.cobertura.toFixed(1)} dias de cobertura` : `Sem vendas registradas`;
+            const img = p.imagem_url
+                ? `<div class="size-24 rounded-xl bg-cover bg-center shrink-0 border border-primary/10" style="background-image:url('${p.imagem_url}')"></div>`
+                : `<div class="size-24 rounded-xl shrink-0 border border-primary/10 bg-card-dark flex items-center justify-center">
+                     <span class="material-symbols-outlined text-3xl text-primary/30">icecream</span>
+                   </div>`;
+
+            const acaoRodape = p.status === 'estavel'
+                ? `<p class="text-xs text-green-400 font-medium">${cobDias}</p>
+                   <button class="bg-slate-700 text-slate-400 font-bold py-2 px-4 rounded-lg flex items-center gap-2 text-sm cursor-not-allowed">
+                       <span class="material-symbols-outlined text-lg">check_circle</span> Estoque OK
+                   </button>`
+                : `<div class="${p.status === 'critico' ? 'bg-primary' : 'bg-primary/20'} px-3 py-1 rounded-lg">
+                       <p class="text-[10px] font-bold ${p.status === 'critico' ? 'text-background-dark' : 'text-primary'} uppercase leading-tight">Sugestão</p>
+                       <p class="text-sm font-bold ${p.status === 'critico' ? 'text-background-dark' : 'text-primary'}">Produzir +${p.sugestao.toFixed(0)} un</p>
+                   </div>
+                   <a href="adicionar-producao.html?produto_id=${p.id}&nome=${encodeURIComponent(p.nome)}"
+                      class="bg-primary text-background-dark font-bold py-2 px-4 rounded-lg flex items-center gap-2 text-sm hover:brightness-110 transition-all">
+                       <span class="material-symbols-outlined text-lg">add_circle</span>
+                       Adicionar à Fila
+                   </a>`;
+
+            return `
+            <div class="item-card bg-card-dark rounded-xl ${cfg.border} border overflow-hidden shadow-xl" data-status="${p.status}">
+                <div class="p-4 flex gap-4">
+                    ${img}
+                    <div class="flex-1 flex flex-col justify-between min-w-0">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h4 class="text-slate-100 text-base font-bold leading-tight truncate">${p.nome}</h4>
+                                <span class="${cfg.badge} text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter shrink-0">${cfg.label}</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-primary text-xs font-semibold">Est.: ${p.estoque.toFixed(0)} un</span>
+                                <span class="text-slate-400 text-xs">/ Meta: ${p.metaEstoque > 0 ? p.metaEstoque.toFixed(0) : '—'} un</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-0.5">${cobDias}</p>
+                        </div>
+                        <div class="mt-3">
+                            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                <div class="${cfg.bar} h-full rounded-full transition-all duration-700" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 pb-4 grid grid-cols-3 gap-2 border-t border-primary/5 pt-3">
+                    <div class="text-center">
+                        <p class="text-[10px] text-slate-400 uppercase">Venda/dia</p>
+                        <p class="text-xs font-bold text-slate-100">${p.vendaDia > 0 ? p.vendaDia.toFixed(1) + ' un' : '—'}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] text-slate-400 uppercase">Preço Base</p>
+                        <p class="text-xs font-bold text-slate-100">${fmt(p.preco_base)}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] text-slate-400 uppercase">Ponto Rep.</p>
+                        <p class="text-xs font-bold ${p.status === 'critico' ? 'text-red-400' : 'text-slate-100'}">${p.pontoRep > 0 ? p.pontoRep + ' un' : '—'}</p>
+                    </div>
+                </div>
+                <div class="${cfg.rodapeBg} p-4 flex items-center justify-between gap-3 border-t border-primary/10">
+                    ${acaoRodape}
+                </div>
+            </div>`;
+        }
+
+        let tabAtual = 'todos';
+        window.filtrar = function(tab) {
+            tabAtual = tab;
+
+            // Atualiza botões
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const isActive = btn.dataset.tab === tab;
+                btn.classList.toggle('active', isActive);
+                if (!isActive) {
+                    btn.classList.add('bg-card-dark', 'border', 'border-border-dark', 'text-slate-100');
+                    btn.classList.remove('bg-primary', 'text-background-dark');
+                } else {
+                    btn.classList.remove('bg-card-dark', 'border', 'border-border-dark', 'text-slate-100');
+                    btn.classList.add('bg-primary', 'text-background-dark');
+                }
+            });
+
+            const filtrados = tab === 'todos'
+                ? produtosEnriquecidos
+                : produtosEnriquecidos.filter(p => p.status === tab);
+
+            const lista = document.getElementById('listaProdutos');
+            const empty = document.getElementById('emptyState');
+
+            if (filtrados.length === 0) {
+                lista.innerHTML = '';
+                empty.classList.remove('hidden');
+            } else {
+                empty.classList.add('hidden');
+                lista.innerHTML = filtrados.map(renderCard).join('');
+            }
+        };
+
+        // Renderização inicial
+        if (produtosAtivos.length === 0) {
+            document.getElementById('listaProdutos').innerHTML = `
+            <div class="text-center py-16">
+                <span class="material-symbols-outlined text-5xl text-primary block mb-3">inventory</span>
+                <p class="text-slate-400">Nenhum produto cadastrado ainda.</p>
+                <a href="adicionar-receita.html" class="inline-flex items-center gap-2 mt-4 bg-primary text-background-dark font-bold py-2 px-5 rounded-lg text-sm hover:brightness-110">
+                    <span class="material-symbols-outlined text-sm">add</span> Cadastrar Produto
+                </a>
+            </div>`;
+        } else {
+            filtrar('todos');
+        }
+
+    </script>
+
+</body>
+</html>

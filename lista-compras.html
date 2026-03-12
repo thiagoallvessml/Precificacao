@@ -37,9 +37,11 @@
         .item-card.comprado h4 { text-decoration: line-through; }
         .compra-inputs { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s linear 0.35s; opacity: 0; visibility: hidden; pointer-events: none; }
         .compra-inputs.aberto { max-height: 180px; opacity: 1; visibility: visible; pointer-events: auto; transition: max-height 0.35s ease, opacity 0.25s ease, visibility 0s linear 0s; }
-        .input-compra { background: rgba(19,236,236,0.05); border: 1px solid rgba(19,236,236,0.2); border-radius: 0.5rem; padding: 0.4rem 0.6rem; color: #e2e8f0; font-size: 0.8rem; width: 100%; outline: none; transition: border-color 0.2s; }
-        .input-compra:focus { border-color: #13ecec; background: rgba(19,236,236,0.1); }
-        .input-compra::placeholder { color: #475569; }
+        .input-compra { background: #0e2424 !important; border: 1px solid rgba(19,236,236,0.25) !important; border-radius: 0.5rem; padding: 0.4rem 0.6rem; color: #e2e8f0 !important; font-size: 0.8rem; width: 100%; outline: none; transition: border-color 0.2s, background 0.2s; -webkit-appearance: none; appearance: none; }
+        .input-compra:focus { border-color: #13ecec !important; background: #122e2e !important; box-shadow: 0 0 0 2px rgba(19,236,236,0.15); }
+        .input-compra::placeholder { color: #3d5c5c !important; }
+        .input-compra.total-field { border-color: rgba(245,158,11,0.35) !important; }
+        .input-compra.total-field:focus { border-color: #f59e0b !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.15); }
     </style>
 </head>
 
@@ -271,7 +273,7 @@
                                             value="${(qtdSalva * precoSalvo).toFixed(2)}"
                                             oninput="salvarPrecoTotal(${item.id})"
                                             placeholder="0,00"
-                                            class="input-compra" style="border-color: rgba(245,158,11,0.4);" />
+                                            class="input-compra total-field" />
                                     </div>
                                 </div>
                                 <p class="text-[10px] text-slate-500 pt-0.5 pb-1">💡 Preencha qualquer campo — os outros calculam automaticamente</p>

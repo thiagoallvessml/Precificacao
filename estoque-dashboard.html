@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Estoque Produtos Prontos - PrecificaX</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                        "border-dark": "#2d4444",
+                    },
+                    fontFamily: { "display": ["Work Sans", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Work Sans', sans-serif; min-height: max(884px, 100dvh); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .fill-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .skeleton { background: linear-gradient(90deg, #1a2f2f 25%, #243d3d 50%, #1a2f2f 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.75rem; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .bar-col { transition: height 0.8s cubic-bezier(0.4,0,0.2,1); }
+        .progress-bar { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-28">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-border-dark p-4 flex items-center gap-4">
+        <button onclick="window.history.back()" class="flex items-center justify-center p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-card-dark transition-colors">
+            <span class="material-symbols-outlined text-primary">arrow_back</span>
+        </button>
+        <h1 class="text-lg font-bold tracking-tight">Estoque Produtos Prontos</h1>
+        <a href="lista-compras.html" class="ml-auto flex items-center gap-1.5 bg-primary/10 border border-primary/30 text-primary text-xs font-bold px-3 py-2 rounded-lg hover:bg-primary/20 transition-colors">
+            <span class="material-symbols-outlined text-[16px]">shopping_cart</span>
+            Compras
+        </a>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 lg:p-6">
+
+        <!-- Layout: 1 col mobile / 2 cols desktop -->
+        <div class="flex flex-col lg:flex-row lg:items-start gap-6">
+
+            <!-- ── COLUNA ESQUERDA (sticky no desktop) ───────────── -->
+            <div class="w-full lg:w-[380px] lg:shrink-0 space-y-5 lg:sticky lg:top-[73px]">
+
+                <!-- KPIs -->
+                <section class="flex lg:flex-col gap-3 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
+                    <div class="min-w-[150px] lg:min-w-0 flex-1 bg-card-dark border border-border-dark p-5 rounded-xl shadow-lg">
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Valor em Estoque</p>
+                        <p id="kpi-valor" class="text-2xl font-bold text-primary">R$ —</p>
+                        <p class="mt-1 text-[10px] text-primary/70">Capital investido em insumos</p>
+                    </div>
+                    <div class="min-w-[130px] lg:min-w-0 flex-1 flex gap-3">
+                        <div class="flex-1 bg-card-dark border border-border-dark p-4 rounded-xl">
+                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Itens</p>
+                            <p id="kpi-total" class="text-xl font-bold">—</p>
+                            <p class="mt-1 text-[10px] text-slate-500">Ativos</p>
+                        </div>
+                        <div class="flex-1 bg-card-dark border border-border-dark p-4 rounded-xl">
+                            <p class="text-xs font-medium text-amber-500 uppercase tracking-wider mb-1">Baixo</p>
+                            <p id="kpi-baixo" class="text-xl font-bold text-amber-500">—</p>
+                            <p class="mt-1 text-[10px] text-amber-500/70">Abaixo mín.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Entradas/Saídas Hoje -->
+                <section class="grid grid-cols-2 gap-3">
+                    <div class="bg-card-dark border border-border-dark p-4 rounded-xl flex items-center gap-3">
+                        <div class="bg-emerald-500/20 p-2 rounded-lg shrink-0">
+                            <span class="material-symbols-outlined text-emerald-500">add_circle</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-slate-400 uppercase">Entradas Hoje</p>
+                            <p id="mv-entrada" class="text-sm font-bold text-emerald-500">R$ —</p>
+                        </div>
+                    </div>
+                    <div class="bg-card-dark border border-border-dark p-4 rounded-xl flex items-center gap-3">
+                        <div class="bg-rose-500/20 p-2 rounded-lg shrink-0">
+                            <span class="material-symbols-outlined text-rose-500">remove_circle</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[10px] text-slate-400 uppercase">Saídas Hoje</p>
+                            <p id="mv-saida" class="text-sm font-bold text-rose-500">R$ —</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reposição Urgente -->
+                <section id="secaoUrgente" class="hidden bg-rose-500/5 border border-rose-500/20 p-4 rounded-xl space-y-4">
+                    <h3 class="text-sm font-bold text-rose-500 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">priority_high</span>
+                        Reposição Urgente
+                    </h3>
+                    <div id="listaUrgente" class="grid grid-cols-1 gap-3"></div>
+                    <a href="lista-compras.html" class="flex items-center justify-center gap-2 bg-rose-500/20 text-rose-400 text-xs font-bold py-2.5 rounded-lg hover:bg-rose-500/30 transition-colors">
+                        <span class="material-symbols-outlined text-sm">shopping_cart</span>
+                        Ir para lista de compras
+                    </a>
+                </section>
+
+                <!-- Saídas 7 dias (só aparece no desktop na coluna esquerda) -->
+                <section class="hidden lg:block space-y-3">
+                    <h2 class="text-md font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">bar_chart</span>
+                        Saídas – Últimos 7 dias
+                    </h2>
+                    <div class="bg-card-dark border border-border-dark p-5 rounded-xl">
+                        <div id="graficoConsumoDesk" class="flex items-end justify-between gap-2" style="height:90px;"></div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ── COLUNA DIREITA (scrollável) ───────────────────── -->
+            <div class="flex-1 space-y-5 min-w-0">
+
+                <!-- Alertas -->
+                <section id="secaoAlertas" class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-md font-bold flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-500 text-xl">warning</span>
+                            Alertas de Estoque
+                        </h2>
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">Abaixo do mínimo</span>
+                    </div>
+                    <div id="listaAlertas" class="space-y-2">
+                        <div class="skeleton h-16"></div>
+                        <div class="skeleton h-16 opacity-70"></div>
+                    </div>
+                </section>
+
+                <!-- Estoque Atual & Valor -->
+                <section class="space-y-3">
+                    <h2 class="text-md font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">inventory_2</span>
+                        Estoque Atual &amp; Valor
+                    </h2>
+                    <div class="bg-card-dark border border-border-dark rounded-xl overflow-hidden">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-white/5 text-[10px] uppercase font-bold text-slate-400">
+                                <tr>
+                                    <th class="px-4 py-3">Item</th>
+                                    <th class="px-4 py-3 text-center">Qtd</th>
+                                    <th class="px-4 py-3 text-right">R$ Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaEstoque" class="divide-y divide-border-dark">
+                                <tr><td colspan="3" class="px-4 py-6 text-center text-slate-500 text-sm">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Saídas 7 dias (mobile) -->
+                <section class="lg:hidden space-y-3">
+                    <h2 class="text-md font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">bar_chart</span>
+                        Saídas – Últimos 7 dias
+                    </h2>
+                    <div class="bg-card-dark border border-border-dark p-6 rounded-xl">
+                        <div id="graficoConsumo" class="flex items-end justify-between gap-2" style="height:90px;"></div>
+                    </div>
+                </section>
+
+                <!-- Últimas Movimentações -->
+                <section class="space-y-3">
+                    <h2 class="text-md font-bold">Últimas Movimentações</h2>
+                    <div id="listaMovimentacoes" class="space-y-4 relative before:absolute before:left-5 before:top-2 before:bottom-2 before:w-px before:bg-border-dark">
+                        <div class="skeleton h-14 rounded-xl"></div>
+                        <div class="skeleton h-14 rounded-xl opacity-70"></div>
+                        <div class="skeleton h-14 rounded-xl opacity-40"></div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-background-light dark:bg-card-dark border-t border-slate-200 dark:border-border-dark px-6 pb-6 pt-3">
+        <div class="max-w-2xl mx-auto flex justify-between items-center">
+            <a href="estoque-produtos-prontos.html" class="flex flex-col items-center gap-1 text-primary">
+                <span class="material-symbols-outlined text-2xl fill-icon">dashboard</span>
+                <span class="text-[10px] font-bold uppercase">Painel</span>
+            </a>
+            <a href="estoque-produtos-prontos.html" class="flex flex-col items-center gap-1 text-slate-500 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl">warehouse</span>
+                <span class="text-[10px] font-bold uppercase">Estoque</span>
+            </a>
+            <a href="lista-compras.html" class="flex flex-col items-center gap-1 text-slate-500 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl">shopping_cart</span>
+                <span class="text-[10px] font-bold uppercase">Compras</span>
+            </a>
+            <a href="movimentacoes.html" class="flex flex-col items-center gap-1 text-slate-500 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-2xl">swap_vert</span>
+                <span class="text-[10px] font-bold uppercase">Movim.</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { getAllRecords } from './supabase-utils.js';
+        import { getSupabase } from './supabase-client.js';
+
+        const supabase = getSupabase();
+
+        // ── Auth ────────────────────────────────────────────────
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.replace('login.html'); }
+        } catch (e) { window.location.replace('login.html'); }
+
+        const fmt = v => `R$ ${parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const fmtQtd = (v, un) => `${parseFloat(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} ${un || ''}`.trim();
+
+        // ── Carregar dados ───────────────────────────────────────
+        const [{ data: insumos }, { data: movimentacoes }] = await Promise.all([
+            getAllRecords('insumos'),
+            getAllRecords('movimentacoes_estoque'),
+        ]);
+
+        const insumosAtivos = (insumos || []).filter(i => i.ativo !== false);
+        const movs = movimentacoes || [];
+
+        // Mapa de nomes para movimentações
+        const nomeMap = {};
+        insumosAtivos.forEach(i => { nomeMap[i.id] = i; });
+
+        // ── KPIs ─────────────────────────────────────────────────
+        const valorTotal = insumosAtivos.reduce((s, i) => s + parseFloat(i.estoque_atual || 0) * parseFloat(i.custo_unitario || 0), 0);
+        const baixoMin = insumosAtivos.filter(i => parseFloat(i.estoque_atual || 0) <= parseFloat(i.estoque_minimo || 0));
+
+        document.getElementById('kpi-valor').textContent = fmt(valorTotal);
+        document.getElementById('kpi-total').textContent = insumosAtivos.length;
+        document.getElementById('kpi-baixo').textContent = String(baixoMin.length).padStart(2, '0');
+
+        // ── Entradas/Saídas Hoje ─────────────────────────────────
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const movsHoje = movs.filter(m => new Date(m.data_movimentacao) >= hoje);
+        const entradaHoje = movsHoje.filter(m => m.tipo === 'entrada').reduce((s, m) => s + (parseFloat(m.quantidade || 0) * parseFloat(m.custo_unitario || 0)), 0);
+        const saidaHoje = movsHoje.filter(m => ['saida', 'perda'].includes(m.tipo)).reduce((s, m) => s + (parseFloat(m.quantidade || 0) * parseFloat(m.custo_unitario || 0)), 0);
+
+        document.getElementById('mv-entrada').textContent = entradaHoje > 0 ? `+${fmt(entradaHoje)}` : fmt(0);
+        document.getElementById('mv-saida').textContent = saidaHoje > 0 ? `-${fmt(saidaHoje)}` : fmt(0);
+
+        // ── Reposição Urgente (barras de progresso) ──────────────
+        if (baixoMin.length > 0) {
+            document.getElementById('secaoUrgente').classList.remove('hidden');
+            document.getElementById('listaUrgente').innerHTML = baixoMin.slice(0, 6).map(i => {
+                const atual = parseFloat(i.estoque_atual || 0);
+                const min = parseFloat(i.estoque_minimo || 0);
+                const pct = min > 0 ? Math.min((atual / min) * 100, 100) : 0;
+                const cor = pct <= 30 ? 'bg-rose-500' : pct <= 60 ? 'bg-amber-500' : 'bg-emerald-500';
+                return `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[11px] font-medium">
+                        <span class="truncate pr-1">${i.nome}</span>
+                        <span class="text-rose-400 shrink-0">${fmtQtd(atual, i.unidade_medida)} / ${fmtQtd(min, i.unidade_medida)}</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full ${cor} rounded-full progress-bar" style="width: ${Math.max(pct, 3)}%"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Alertas de Estoque ───────────────────────────────────
+        const alertasEl = document.getElementById('listaAlertas');
+        if (baixoMin.length === 0) {
+            alertasEl.innerHTML = `<div class="bg-card-dark border border-border-dark p-4 rounded-xl text-center text-slate-400 text-sm">
+                <span class="material-symbols-outlined text-3xl text-emerald-500 block mb-1">check_circle</span>
+                Todos os insumos estão acima do estoque mínimo!
+            </div>`;
+        } else {
+            const iconMap = { ingrediente: 'water_drop', embalagem: 'inventory_2', equipamento: 'build' };
+            const corMap = i => {
+                const pct = parseFloat(i.estoque_minimo) > 0 ? (parseFloat(i.estoque_atual) / parseFloat(i.estoque_minimo)) * 100 : 0;
+                return pct <= 30 ? { bg: 'bg-rose-500/10', border: 'border-rose-500/20', icon: 'text-rose-500', badge: 'bg-rose-500/20 text-rose-500', label: 'Crítico' }
+                     : { bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: 'text-amber-500', badge: 'bg-amber-500/20 text-amber-500', label: 'Atenção' };
+            };
+            alertasEl.innerHTML = baixoMin.map(i => {
+                const c = corMap(i);
+                return `
+                <div class="bg-card-dark/40 border border-border-dark p-4 rounded-xl flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="size-10 shrink-0 rounded-full ${c.bg} flex items-center justify-center border ${c.border}">
+                            <span class="material-symbols-outlined ${c.icon}">${iconMap[i.tipo] || 'inventory_2'}</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold truncate">${i.nome}</p>
+                            <p class="text-xs text-slate-400">${fmtQtd(i.estoque_atual, i.unidade_medida)} atual · mín ${fmtQtd(i.estoque_minimo, i.unidade_medida)}</p>
+                        </div>
+                    </div>
+                    <span class="shrink-0 px-2 py-1 ${c.badge} text-[10px] font-bold rounded-full uppercase">${c.label}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Tabela Estoque & Valor (Top 8 por valor em estoque) ──
+        const comValor = insumosAtivos
+            .map(i => ({ ...i, valorEstoque: parseFloat(i.estoque_atual || 0) * parseFloat(i.custo_unitario || 0) }))
+            .filter(i => i.valorEstoque > 0 || parseFloat(i.estoque_atual || 0) > 0)
+            .sort((a, b) => b.valorEstoque - a.valorEstoque)
+            .slice(0, 10);
+
+        const tbody = document.getElementById('tabelaEstoque');
+        if (comValor.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-500 text-sm">Nenhum insumo com estoque registrado.</td></tr>`;
+        } else {
+            tbody.innerHTML = comValor.map(i => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-4 py-3 font-medium text-sm">${i.nome}</td>
+                    <td class="px-4 py-3 text-center text-slate-400 text-sm">${fmtQtd(i.estoque_atual, i.unidade_medida)}</td>
+                    <td class="px-4 py-3 text-right font-bold text-primary text-sm">${i.valorEstoque > 0 ? fmt(i.valorEstoque).replace('R$ ', '') : '—'}</td>
+                </tr>`).join('');
+        }
+
+        // ── Gráfico: Saídas por dia (últimos 7 dias) ─────────────
+        const dias = [];
+        const labels = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+        for (let d = 6; d >= 0; d--) {
+            const dt = new Date();
+            dt.setDate(dt.getDate() - d);
+            dt.setHours(0, 0, 0, 0);
+            const fim = new Date(dt); fim.setHours(23, 59, 59, 999);
+            const total = movs
+                .filter(m => ['saida', 'perda'].includes(m.tipo) && new Date(m.data_movimentacao) >= dt && new Date(m.data_movimentacao) <= fim)
+                .reduce((s, m) => s + parseFloat(m.quantidade || 0) * parseFloat(m.custo_unitario || 0), 0);
+            dias.push({ label: labels[dt.getDay()], total, isHoje: d === 0 });
+        }
+
+        const maxVal = Math.max(...dias.map(d => d.total), 1);
+        const graficoHtml = dias.map(d => {
+            const h = Math.max((d.total / maxVal) * 100, d.total > 0 ? 4 : 2);
+            const cor = d.isHoje ? 'bg-primary' : 'bg-primary/30';
+            return `
+            <div class="flex flex-col items-center gap-2 flex-1">
+                <span class="text-[9px] text-slate-500 font-bold">${d.total > 0 ? fmt(d.total).replace('R$ ', 'R$') : ''}</span>
+                <div class="w-full flex items-end" style="height: 64px;">
+                    <div class="w-full ${cor} rounded-t bar-col" style="height: ${h}%"></div>
+                </div>
+                <span class="text-[10px] ${d.isHoje ? 'text-primary font-bold' : 'text-slate-500 font-bold'} uppercase">${d.label}</span>
+            </div>`;
+        }).join('');
+
+        const gcMob = document.getElementById('graficoConsumo');
+        const gcDesk = document.getElementById('graficoConsumoDesk');
+        if (gcMob) gcMob.innerHTML = graficoHtml;
+        if (gcDesk) gcDesk.innerHTML = graficoHtml;
+
+        // ── Últimas Movimentações ────────────────────────────────
+        const ultimas = [...movs]
+            .sort((a, b) => new Date(b.data_movimentacao) - new Date(a.data_movimentacao))
+            .slice(0, 8);
+
+        const tipoConfig = {
+            entrada:  { bg: 'bg-emerald-500', icon: 'download', cor: 'text-emerald-400', label: 'Entrada' },
+            saida:    { bg: 'bg-rose-500',    icon: 'upload',   cor: 'text-rose-400',    label: 'Saída' },
+            ajuste:   { bg: 'bg-amber-500',   icon: 'tune',     cor: 'text-amber-400',   label: 'Ajuste' },
+            perda:    { bg: 'bg-slate-600',   icon: 'delete',   cor: 'text-slate-400',   label: 'Perda' },
+        };
+
+        const movsEl = document.getElementById('listaMovimentacoes');
+        if (ultimas.length === 0) {
+            movsEl.innerHTML = `<p class="text-slate-500 text-sm text-center py-6">Nenhuma movimentação registrada ainda.</p>`;
+        } else {
+            movsEl.innerHTML = ultimas.map(m => {
+                const cfg = tipoConfig[m.tipo] || tipoConfig.ajuste;
+                const ins = nomeMap[m.insumo_id];
+                const nome = ins?.nome || 'Insumo';
+                const unidade = ins?.unidade_medida || '';
+                const valorMov = parseFloat(m.quantidade || 0) * parseFloat(m.custo_unitario || 0);
+                const dt = new Date(m.data_movimentacao);
+                const hora = dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const dataStr = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                return `
+                <div class="relative flex items-start gap-4 pl-1">
+                    <div class="z-10 size-10 shrink-0 rounded-full ${cfg.bg} flex items-center justify-center border-4 border-background-dark">
+                        <span class="material-symbols-outlined text-white text-[18px]">${cfg.icon}</span>
+                    </div>
+                    <div class="flex-1 py-1 min-w-0">
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-sm font-bold ${cfg.cor} truncate">${cfg.label} · ${nome}</p>
+                            <span class="text-[10px] text-slate-500 shrink-0">${dataStr} ${hora}</span>
+                        </div>
+                        <p class="text-xs text-slate-400">
+                            ${fmtQtd(m.quantidade, unidade)} · ${valorMov > 0 ? fmt(valorMov) : '—'}
+                            ${m.motivo ? ` · ${m.motivo}` : ''}
+                        </p>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+    </script>
+
+</body>
+</html>

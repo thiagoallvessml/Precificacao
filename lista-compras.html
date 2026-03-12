@@ -35,8 +35,8 @@
         .skeleton { background: linear-gradient(90deg, #1a2e2e 25%, #22403f 50%, #1a2e2e 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.75rem; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .item-card.comprado h4 { text-decoration: line-through; }
-        .compra-inputs { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; opacity: 0; }
-        .compra-inputs.aberto { max-height: 120px; opacity: 1; }
+        .compra-inputs { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.3s ease; opacity: 0; }
+        .compra-inputs.aberto { max-height: 180px; opacity: 1; }
         .input-compra { background: rgba(19,236,236,0.05); border: 1px solid rgba(19,236,236,0.2); border-radius: 0.5rem; padding: 0.4rem 0.6rem; color: #e2e8f0; font-size: 0.8rem; width: 100%; outline: none; transition: border-color 0.2s; }
         .input-compra:focus { border-color: #13ecec; background: rgba(19,236,236,0.1); }
         .input-compra::placeholder { color: #475569; }
@@ -237,36 +237,44 @@
                                 </div>
                             </div>
 
-                            <!-- Inputs: qtd comprada + preço pago (expand ao selecionar) -->
+                            <!-- Inputs: qtd + preço unit + preço total (bidirecionais) -->
                             <div class="compra-inputs ${checked ? 'aberto' : ''}" id="inputs-${item.id}">
-                                <div class="grid grid-cols-2 gap-3 pt-1 pb-0.5">
+                                <div class="grid grid-cols-3 gap-2 pt-2 pb-1">
                                     <div>
                                         <label class="text-[10px] text-primary uppercase font-bold tracking-wider block mb-1">
-                                            Qtd Comprada (${item.unidade_medida || 'un'})
+                                            Qtd (${item.unidade_medida || 'un'})
                                         </label>
                                         <input type="number" min="0" step="0.001"
                                             id="qtd-${item.id}"
                                             value="${qtdSalva.toFixed ? qtdSalva.toFixed(3).replace(/\.?0+$/, '') : qtdSalva}"
-                                            oninput="salvarInput(${item.id})"
-                                            placeholder="Ex: ${sugestao}"
+                                            oninput="salvarQtd(${item.id})"
+                                            placeholder="${sugestao}"
                                             class="input-compra" />
                                     </div>
                                     <div>
                                         <label class="text-[10px] text-primary uppercase font-bold tracking-wider block mb-1">
-                                            Preço Unit. Pago (R$)
+                                            Preço Unit. (R$)
                                         </label>
                                         <input type="number" min="0" step="0.01"
                                             id="preco-${item.id}"
                                             value="${precoSalvo.toFixed(2)}"
-                                            oninput="salvarInput(${item.id})"
-                                            placeholder="Ex: ${parseFloat(item.custo_unitario || 0).toFixed(2)}"
+                                            oninput="salvarPrecoUnit(${item.id})"
+                                            placeholder="${parseFloat(item.custo_unitario || 0).toFixed(2)}"
                                             class="input-compra" />
                                     </div>
+                                    <div>
+                                        <label class="text-[10px] text-amber-400 uppercase font-bold tracking-wider block mb-1">
+                                            Total Pago (R$)
+                                        </label>
+                                        <input type="number" min="0" step="0.01"
+                                            id="total-${item.id}"
+                                            value="${(qtdSalva * precoSalvo).toFixed(2)}"
+                                            oninput="salvarPrecoTotal(${item.id})"
+                                            placeholder="0,00"
+                                            class="input-compra" style="border-color: rgba(245,158,11,0.4);" />
+                                    </div>
                                 </div>
-                                <div class="flex justify-between items-center text-[11px] text-slate-400 pt-1 pb-0.5">
-                                    <span>Total do item:</span>
-                                    <span id="total-item-${item.id}" class="text-primary font-bold text-sm">${fmt(qtdSalva * precoSalvo)}</span>
-                                </div>
+                                <p class="text-[10px] text-slate-500 pt-0.5 pb-1">💡 Preencha qualquer campo — os outros calculam automaticamente</p>
                             </div>
 
                             <div class="flex justify-between items-center ${checked ? 'pt-0' : 'pt-1'}">
@@ -288,19 +296,48 @@
             atualizarFooter();
         }
 
-        // ── Salva valor dos inputs no objeto em memória ──────────
-        window.salvarInput = function (id) {
+        // ── Helpers de input bidirecional ────────────────────────
+        function _getInputEls(id) {
+            return {
+                qtdEl:   document.getElementById('qtd-'   + id),
+                precoEl: document.getElementById('preco-' + id),
+                totalEl: document.getElementById('total-' + id),
+            };
+        }
+        function _syncItem(id, qtd, preco) {
             const item = todosItens.find(i => i.id === id);
             if (!item) return;
-            const qtdEl = document.getElementById('qtd-' + id);
-            const precoEl = document.getElementById('preco-' + id);
-            const qtd = parseFloat(qtdEl?.value || 0);
-            const preco = parseFloat(precoEl?.value || 0);
-            item._qtdComprada = qtd;
+            item._qtdComprada   = qtd;
             item._precoUnitPago = preco;
-            const totalEl = document.getElementById('total-item-' + id);
-            if (totalEl) totalEl.textContent = fmt(qtd * preco);
             atualizarFooter();
+        }
+
+        // Usuário digitou na qtd → recalcula total (mantém preço unit)
+        window.salvarQtd = function (id) {
+            const { qtdEl, precoEl, totalEl } = _getInputEls(id);
+            const qtd   = parseFloat(qtdEl?.value  || 0);
+            const preco = parseFloat(precoEl?.value || 0);
+            if (totalEl) totalEl.value = (qtd * preco).toFixed(2);
+            _syncItem(id, qtd, preco);
+        };
+
+        // Usuário digitou no preço unit → recalcula total
+        window.salvarPrecoUnit = function (id) {
+            const { qtdEl, precoEl, totalEl } = _getInputEls(id);
+            const qtd   = parseFloat(qtdEl?.value  || 0);
+            const preco = parseFloat(precoEl?.value || 0);
+            if (totalEl) totalEl.value = (qtd * preco).toFixed(2);
+            _syncItem(id, qtd, preco);
+        };
+
+        // Usuário digitou no total → recalcula preço unit (total ÷ qtd)
+        window.salvarPrecoTotal = function (id) {
+            const { qtdEl, precoEl, totalEl } = _getInputEls(id);
+            const qtd   = parseFloat(qtdEl?.value   || 0);
+            const total = parseFloat(totalEl?.value  || 0);
+            const preco = qtd > 0 ? total / qtd : 0;
+            if (precoEl) precoEl.value = preco.toFixed(2);
+            _syncItem(id, qtd, preco);
         };
 
         // ── Toggle seleção ───────────────────────────────────────

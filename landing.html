@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>PrecificaX - Gestão para Gelatarias Gourmet</title>
+    <meta name="description" content="A gestão definitiva para negócios de sorvete gourmet. Organize sua produção, controle insumos e maximize seus resultados com tecnologia de ponta." />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#0F0F0F",
+                        "card-dark": "#1a2f2f",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Work Sans', sans-serif;
+            min-height: max(884px, 100dvh);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .fill-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Animação suave ao entrar na viewport */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased font-display">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-primary/10">
+        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-3xl fill-icon">icecream</span>
+                <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">Precifica<span class="text-primary">X</span></span>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#recursos">Recursos</a>
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#beneficios">Benefícios</a>
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#depoimentos">Depoimentos</a>
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="#precos">Preços</a>
+                <a href="login.html" class="text-sm font-bold text-slate-900 dark:text-white px-4 py-2 hover:text-primary transition-colors">Entrar</a>
+                <a href="cadastro.html" class="bg-primary text-background-dark px-6 py-2.5 rounded-lg font-bold text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20">
+                    Começar agora
+                </a>
+            </div>
+            <!-- Mobile menu button -->
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-card-dark transition-colors">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-slate-200 dark:border-primary/10 bg-background-light dark:bg-background-dark px-4 py-4 space-y-3">
+            <a class="block text-sm font-medium py-2 hover:text-primary transition-colors" href="#recursos">Recursos</a>
+            <a class="block text-sm font-medium py-2 hover:text-primary transition-colors" href="#beneficios">Benefícios</a>
+            <a class="block text-sm font-medium py-2 hover:text-primary transition-colors" href="#depoimentos">Depoimentos</a>
+            <a class="block text-sm font-medium py-2 hover:text-primary transition-colors" href="#precos">Preços</a>
+            <div class="flex gap-3 pt-2">
+                <a href="login.html" class="flex-1 text-center py-2.5 border border-slate-300 dark:border-primary/30 rounded-lg text-sm font-bold hover:bg-white/5 transition-colors">Entrar</a>
+                <a href="cadastro.html" class="flex-1 text-center py-2.5 bg-primary text-background-dark rounded-lg text-sm font-bold hover:brightness-110 transition-all">Começar agora</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent"></div>
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-12 -left-12 w-64 h-64 bg-emerald-400/5 rounded-full blur-3xl"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="text-center max-w-4xl mx-auto space-y-8">
+                <span class="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-widest uppercase mb-4">
+                    A Gestão definitiva para Gelatarias
+                </span>
+                <h1 class="text-5xl md:text-7xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">
+                    Transforme sua Gelataria em uma <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Máquina de Lucro</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    A gestão definitiva para negócios de sorvete gourmet. Organize sua produção, controle insumos e maximize seus resultados com tecnologia de ponta.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                    <a href="cadastro.html" class="w-full sm:w-auto px-8 py-4 bg-primary text-background-dark text-lg font-black rounded-xl hover:scale-105 transition-transform shadow-xl shadow-primary/20">
+                        Começar agora
+                    </a>
+                    <a href="#recursos" class="w-full sm:w-auto px-8 py-4 border border-slate-300 dark:border-primary/30 text-slate-900 dark:text-white text-lg font-bold rounded-xl hover:bg-white/5 transition-colors">
+                        Ver recursos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Preview -->
+        <div class="mt-16 max-w-6xl mx-auto px-4">
+            <div class="rounded-2xl border border-slate-200 dark:border-primary/20 bg-white/5 p-2 backdrop-blur-sm overflow-hidden shadow-2xl shadow-primary/5">
+                <div class="bg-card-dark rounded-xl h-[300px] md:h-[500px] w-full bg-cover bg-center flex items-end p-8"
+                    style="background-image: linear-gradient(0deg, rgba(16,34,34,0.9) 0%, rgba(16,34,34,0) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuCaE0Wu9lZ13_SKQTjhnCghVSfiVhxO5r3yupN8iLAkD0UIa3-zZ3HVTimMgGxwi3lelDAj3fqWld98N581QaaItv_fDDq06F-WfK-KVntpV6oXr-su73_An3KgGn_qp9LzAtsxeM6fVBex_YZcXpbyw-8p-IqVvxhCGS1gXM6o8wdQnIhQql91GjNSEEZXkXGbW4og0KQrU4Q5SFhUayHYQj2ZTkjEnopNhCMTBYE6To_ydFJiBwtG_OMg0wxWdHU09IrSKpaRc9E')">
+                    <div class="flex gap-4 items-center">
+                        <div class="size-12 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                            <span class="material-symbols-outlined text-primary fill-icon">play_arrow</span>
+                        </div>
+                        <p class="text-white font-medium">Assista como funciona em 2 minutos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="mt-12 max-w-4xl mx-auto px-4">
+            <div class="grid grid-cols-3 gap-4 md:gap-8 text-center">
+                <div>
+                    <p class="text-3xl md:text-4xl font-black text-primary">+500</p>
+                    <p class="text-xs md:text-sm text-slate-500 mt-1">Gelatarias ativas</p>
+                </div>
+                <div>
+                    <p class="text-3xl md:text-4xl font-black text-primary">22%</p>
+                    <p class="text-xs md:text-sm text-slate-500 mt-1">Aumento médio de margem</p>
+                </div>
+                <div>
+                    <p class="text-3xl md:text-4xl font-black text-primary">30%</p>
+                    <p class="text-xs md:text-sm text-slate-500 mt-1">Redução de desperdício</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="py-24 bg-slate-50 dark:bg-card-dark/20" id="recursos">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="mb-16 fade-up">
+                <h2 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6">Recursos Inteligentes</h2>
+                <p class="text-slate-600 dark:text-slate-400 max-w-2xl text-lg">Tudo o que você precisa para uma gestão de alta performance sem complicações.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- DRE Automático -->
+                <div class="fade-up group p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all shadow-sm hover:shadow-lg hover:shadow-primary/5">
+                    <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-primary text-3xl">analytics</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 dark:text-white">DRE Automático</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Acompanhe sua lucratividade em tempo real. Saiba exatamente para onde vai cada centavo sem precisar de planilhas complexas.
+                    </p>
+                </div>
+                <!-- Inteligência de Produção -->
+                <div class="fade-up group p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all shadow-sm hover:shadow-lg hover:shadow-primary/5" style="transition-delay: 0.1s;">
+                    <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-primary text-3xl">precision_manufacturing</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Inteligência de Produção</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Otimize sua fabricação com base na demanda histórica e sazonalidade. Evite o excesso de produção e maximize o frescor.
+                    </p>
+                </div>
+                <!-- Gestão de Insumos -->
+                <div class="fade-up group p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all shadow-sm hover:shadow-lg hover:shadow-primary/5" style="transition-delay: 0.2s;">
+                    <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-primary text-3xl">inventory_2</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Gestão de Insumos</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Controle total do seu estoque, do leite fresco ao bico de servir. Alertas de reposição e cálculo automático de CMVs.
+                    </p>
+                </div>
+                <!-- Precificação Inteligente -->
+                <div class="fade-up group p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all shadow-sm hover:shadow-lg hover:shadow-primary/5" style="transition-delay: 0.05s;">
+                    <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-primary text-3xl">sell</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Precificação Inteligente</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Calcule o preço ideal por marketplace automaticamente, considerando taxas, margens e custos de produção.
+                    </p>
+                </div>
+                <!-- Pedidos & Vendas -->
+                <div class="fade-up group p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all shadow-sm hover:shadow-lg hover:shadow-primary/5" style="transition-delay: 0.15s;">
+                    <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-primary text-3xl">point_of_sale</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Pedidos & Vendas</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Gerencie seus pedidos, acompanhe faturamento diário e tenha relatórios completos das suas vendas em tempo real.
+                    </p>
+                </div>
+                <!-- Curva ABC -->
+                <div class="fade-up group p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 hover:border-primary/40 transition-all shadow-sm hover:shadow-lg hover:shadow-primary/5" style="transition-delay: 0.25s;">
+                    <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined text-primary text-3xl">pie_chart</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Curva ABC</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Identifique os produtos que mais geram receita e foque seus esforços onde realmente importa para o negócio.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Banner -->
+    <section class="py-12 md:py-20" id="beneficios">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="relative rounded-3xl bg-primary/10 border border-primary/20 p-8 md:p-16 overflow-hidden fade-up">
+                <div class="absolute top-0 right-0 w-1/2 h-full hidden lg:block"
+                    style="background-image: linear-gradient(90deg, transparent 0%, rgba(15,15,15,0) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuAn95nnys8km7I2HXEeb5v9WJLZGlLo-GWhjgNWOpwqpFtJhaXSlR-qMKlU3kl-F1nz8njSAFF3Rn_9csXJ54q2rwAHagSG6k0ljIw-5DrmFoNts2HDbpkFg7SCOAeTuzNSrrgtbrmMun-ugvcX2eCeAkcpYTvl31_TROnK0xIi-mLzE3xzUKjN8h2vnGBqow0ETkEk-teSCx-2wcGR4tuKjFjI1IYJJc-Ywt5g9rAOxlN3kAP2ahkaKJOF0GIMb_c3cHoVLR-NjnA'); background-size: cover; mix-blend-mode: overlay; opacity: 0.3;">
+                </div>
+                <div class="relative z-10 max-w-2xl">
+                    <h2 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 leading-tight">
+                        Pare de perder dinheiro com estoque parado
+                    </h2>
+                    <p class="text-lg text-slate-700 dark:text-slate-300 mb-8 leading-relaxed">
+                        Tenha clareza total sobre seus custos e garanta que cada bola de sorvete contribua para o seu lucro. Empresas que usam o PrecificaX aumentam suas margens em média 22% nos primeiros 3 meses.
+                    </p>
+                    <a href="cadastro.html" class="inline-flex bg-primary text-background-dark px-10 py-4 rounded-xl font-black text-lg hover:brightness-110 transition-all items-center gap-3">
+                        Começar gratuitamente
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-24" id="depoimentos">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="mb-16 text-center md:text-left fade-up">
+                <h2 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6">Quem usa, recomenda</h2>
+                <p class="text-slate-600 dark:text-slate-400 max-w-2xl text-lg">Donos de gelatarias que transformaram seus negócios com a nossa tecnologia.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="fade-up p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 flex flex-col h-full">
+                    <div class="flex gap-1 text-primary mb-6">
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                    </div>
+                    <p class="text-slate-700 dark:text-slate-300 text-lg italic mb-8 flex-grow">
+                        "O PrecificaX mudou completamente a forma como enxergamos nosso lucro. Finalmente sei o custo real de cada bola de sorvete que vendo."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="size-12 rounded-full overflow-hidden bg-slate-200">
+                            <img alt="Ricardo Silva" class="w-full h-full object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkR422i7XLMOpaRr5-BNd25sVPusCXYucKgZh7xDzsTTJbD4jHSjuQYPo1cGsIsLw5-8Thc-Av8D21TLmI6UnxdkxrWP0TzfBl5IHbWO-rJj9wTuTNTVgMAk4qYWmug8V8hGCDkr8gL0T1qEj71hf6VFMc84HSeFU52HwI1N7oeIOY1j5cUmr66gZvRmXhRDDXFRSRWmJNDqKZ8iZI4zOG7GrtxpsfIttTMZwFwdFGEPTyN-BKGHsE3QZjF5hATQWVoQaDVdA2vZM" />
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white">Ricardo Silva</h4>
+                            <p class="text-sm text-primary">Gelados do Porto</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="fade-up p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 flex flex-col h-full" style="transition-delay: 0.1s;">
+                    <div class="flex gap-1 text-primary mb-6">
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                    </div>
+                    <p class="text-slate-700 dark:text-slate-300 text-lg italic mb-8 flex-grow">
+                        "A inteligência de produção é fantástica. Reduzimos o desperdício em 30% logo no primeiro mês de uso."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="size-12 rounded-full overflow-hidden bg-slate-200">
+                            <img alt="Ana Martins" class="w-full h-full object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7ik7BB7a8HloxXObm4r0c1xsedD7W8qTWb0LIX1UXtYrgDrNhQeEO575krDH2UFzmDQED95SeFpBhA-gbBwuctA8JcPR_IIdQPVMWNQt9bMWs5UH2TbGksqlMLLALcsZu7-fv1lRKRQs52JQym-DgC9_m9HX9Zx7L638UhNWzBg5FSotuQS0Qdk5WQd72MjJ8ZfkdtwbAL8Yd5FYCHwg6_l12v_XPnPKAi2JJ8obq7PBg5kPU1xB3lUklhPC9HgRPD-797B_k5Uk" />
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white">Ana Martins</h4>
+                            <p class="text-sm text-primary">Sorvetes d'Ouro</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="fade-up p-8 rounded-2xl bg-white dark:bg-card-dark border border-slate-200 dark:border-primary/10 flex flex-col h-full" style="transition-delay: 0.2s;">
+                    <div class="flex gap-1 text-primary mb-6">
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                        <span class="material-symbols-outlined fill-icon">star</span>
+                    </div>
+                    <p class="text-slate-700 dark:text-slate-300 text-lg italic mb-8 flex-grow">
+                        "O suporte é excelente e a plataforma é muito intuitiva. Meus gerentes aprenderam a usar em menos de uma semana."
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="size-12 rounded-full overflow-hidden bg-slate-200">
+                            <img alt="Carlos Eduardo" class="w-full h-full object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDW4dXQdQ8zzc3HPPGee_Qhgn8-zkE4ilF2OUxM-pYW1oLNAnjfa-s1PtD3eW0NNFu2pnURH2Hge_DALElFVlzqlECghNU1gULJK10RF-ObX5o_NDETVmPsg_HQRklFfCX_7KutrI_N8LAlFYqjGS_EWpZxXLpAo1K0g2jbxA7HhDFeR7eYQjB7_2NLzdAMobwV9D-QvAc-j5ISG-f6GbIiTJVSqotLqmlEH4odB5Q9Y1a_vw8QHZ74imx0Z6GC4mqiQr3md1LYtAQ" />
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white">Carlos Eduardo</h4>
+                            <p class="text-sm text-primary">Arte Gelata</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="py-24 bg-slate-50 dark:bg-card-dark/20" id="precos">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16 fade-up">
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Investimento que se paga</h2>
+                <p class="text-slate-600 dark:text-slate-400 text-lg">Escolha o plano que melhor se adapta ao momento da sua gelataria.</p>
+            </div>
+            <div class="flex justify-center">
+                <!-- Premium Plan Card -->
+                <div class="w-full max-w-md relative group fade-up">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-primary/50 to-emerald-400/50 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="relative flex flex-col gap-8 rounded-2xl border-2 border-primary bg-white dark:bg-card-dark p-8 md:p-10 shadow-2xl">
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider">Plano Premium</h3>
+                                <span class="text-background-dark text-xs font-black uppercase tracking-widest rounded-full bg-primary px-4 py-1.5">Melhor Valor</span>
+                            </div>
+                            <div class="flex items-baseline gap-2 text-slate-900 dark:text-white">
+                                <span class="text-sm font-bold">R$</span>
+                                <span class="text-6xl font-black tracking-tighter">39,90</span>
+                                <span class="text-slate-500 font-medium">/mês</span>
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-400 text-sm">O controle total para sua operação gourmet escalar.</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+                                <span class="material-symbols-outlined text-primary fill-icon">check_circle</span>
+                                <span class="font-medium">DRE Automático e Detalhado</span>
+                            </div>
+                            <div class="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+                                <span class="material-symbols-outlined text-primary fill-icon">check_circle</span>
+                                <span class="font-medium">Inteligência de Produção</span>
+                            </div>
+                            <div class="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+                                <span class="material-symbols-outlined text-primary fill-icon">check_circle</span>
+                                <span class="font-medium">Gestão de Insumos Completa</span>
+                            </div>
+                            <div class="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+                                <span class="material-symbols-outlined text-primary fill-icon">check_circle</span>
+                                <span class="font-medium">Suporte Prioritário 24/7</span>
+                            </div>
+                            <div class="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+                                <span class="material-symbols-outlined text-primary fill-icon">check_circle</span>
+                                <span class="font-medium">Até 5 usuários simultâneos</span>
+                            </div>
+                            <div class="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+                                <span class="material-symbols-outlined text-primary fill-icon">check_circle</span>
+                                <span class="font-medium">7 dias grátis para testar</span>
+                            </div>
+                        </div>
+                        <a href="cadastro.html" class="w-full text-center bg-primary text-background-dark py-5 rounded-xl font-black text-lg hover:brightness-110 transition-all shadow-xl shadow-primary/30 block">
+                            Assinar Agora
+                        </a>
+                        <p class="text-center text-xs text-slate-500 font-medium">Cancele quando quiser. Sem taxas de adesão.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-primary/5"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10 fade-up">
+            <h2 class="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-8 leading-tight">
+                Pronto para profissionalizar sua gestão?
+            </h2>
+            <p class="text-xl text-slate-600 dark:text-slate-400 mb-12">
+                Junte-se a centenas de gelatarias que já otimizaram seus lucros com o PrecificaX.
+            </p>
+            <a href="cadastro.html" class="inline-block px-12 py-6 bg-primary text-background-dark text-2xl font-black rounded-2xl hover:scale-105 transition-transform shadow-2xl shadow-primary/40">
+                Começar agora — é grátis
+            </a>
+            <p class="mt-4 text-sm text-slate-500">Sem cartão de crédito • 7 dias grátis • Cancele quando quiser</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-primary/10 py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-2xl fill-icon">icecream</span>
+                    <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white uppercase">Precifica<span class="text-primary">X</span></span>
+                </div>
+                <p class="text-slate-500 text-sm">© 2025 PrecificaX. Todos os direitos reservados.</p>
+                <div class="flex gap-6">
+                    <a class="text-slate-500 hover:text-primary transition-colors text-sm" href="#">Termos</a>
+                    <a class="text-slate-500 hover:text-primary transition-colors text-sm" href="#">Privacidade</a>
+                    <a class="text-slate-500 hover:text-primary transition-colors text-sm" href="#">Suporte</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+
+        // Fechar mobile menu ao clicar num link
+        document.querySelectorAll('#mobileMenu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobileMenu').classList.add('hidden');
+            });
+        });
+
+        // Scroll reveal (fade-up)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    </script>
+
+</body>
+
+</html>
